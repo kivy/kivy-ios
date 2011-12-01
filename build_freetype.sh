@@ -1,11 +1,8 @@
 #!/bin/bash
 
-set -x
+. environment.sh
 
 FT_VERSION=2.4.8
-SDKVER=5.0
-DEVROOT=/Developer/Platforms/iPhoneOS.platform/Developer
-SDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
 
 if [ ! -d freetype-$FT_VERSION ]; then
 	curl -L http://download.savannah.gnu.org/releases/freetype/freetype-$FT_VERSION.tar.bz2 > freetype-$FT_VERSION.tar.bz2
@@ -19,8 +16,10 @@ fi
 # lib not found, compile it
 pushd .
 cd freetype-$FT_VERSION
-./configure --prefix=/usr/local/iphone --host=arm-apple-darwin --enable-static=yes --enable-shared=no CC=$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2 AR=$DEVROOT/usr/bin/ar LDFLAGS="-isysroot $SDKROOT -miphoneos-version-min=$SDKVER" CFLAGS="-O2 -miphoneos-version-min=$SDKVER -isysroot $SDKROOT"
+./configure --prefix=/usr/local/iphone --host=arm-apple-darwin --enable-static=yes --enable-shared=no CC=$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2 AR=$DEVROOT/usr/bin/ar LDFLAGS="-isysroot $SDKROOT -miphoneos-version-min=$SDKVER" CFLAGS="-O0 -g -miphoneos-version-min=$SDKVER -isysroot $SDKROOT"
 make clean
 make
-cp objs/.libs/libfreetype.a libfreetype-arm7.a
 
+# copy to buildroot
+cp objs/.libs/libfreetype.a $BUILDROOT/lib/libfreetype.a
+cp -a include $BUILDROOT/include/freetype
