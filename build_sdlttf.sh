@@ -22,7 +22,7 @@ rm libSDL_ttf.la
 ./configure --prefix=/usr/local/iphone --host=arm-apple-darwin \
 	--enable-static=yes --enable-shared=no \
 	--without-x \
-	CC=$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2 AR=$DEVROOT/usr/bin/ar LDFLAGS="-isysroot $SDKROOT -miphoneos-version-min=$SDKVER" CFLAGS="-pipe -mdynamic-no-pic -std=c99 -Wno-trigraphs -fpascal-strings -O2 -Wreturn-type -Wunused-variable -fmessage-length=0 -fvisibility=hidden -miphoneos-version-min=$SDKVER -isysroot $SDKROOT"
+	CC=$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2 AR=$DEVROOT/usr/bin/ar LDFLAGS="-isysroot $SDKROOT -miphoneos-version-min=$SDKVER" CFLAGS="-O2 -miphoneos-version-min=$SDKVER -isysroot $SDKROOT"
 make clean
 make libSDL_ttf.la
 cp .libs/libSDL_ttf.a libSDL_ttf-arm7.a
