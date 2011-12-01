@@ -1,11 +1,8 @@
 #!/bin/bash
 
-set -x
+. environment.sh
 
 SDLTTF_VERSION=2.0.10
-SDKVER=5.0
-DEVROOT=/Developer/Platforms/iPhoneOS.platform/Developer
-SDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
 
 if [ ! -d SDL_ttf-$SDLTTF_VERSION ]; then
 	curl -L http://www.libsdl.org/projects/SDL_ttf/release/SDL_ttf-$SDLTTF_VERSION.tar.gz > SDL_ttf-$SDLTTF_VERSION.tar.gz
@@ -17,12 +14,15 @@ if [ -f SDL_ttf-$SDLTTF_VERSION/libSDL_ttf-arm7.a ]; then
 fi
 
 
-cd SDL_ttf-2.0.10
+cd SDL_ttf-$SDLTTF_VERSION
 rm libSDL_ttf.la
 ./configure --prefix=/usr/local/iphone --host=arm-apple-darwin \
 	--enable-static=yes --enable-shared=no \
 	--without-x \
-	CC=$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2 AR=$DEVROOT/usr/bin/ar LDFLAGS="-isysroot $SDKROOT -miphoneos-version-min=$SDKVER" CFLAGS="-O2 -miphoneos-version-min=$SDKVER -isysroot $SDKROOT"
+	CC=$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2 AR=$DEVROOT/usr/bin/ar LDFLAGS="-isysroot $SDKROOT -miphoneos-version-min=$SDKVER" CFLAGS="-O0 -g -miphoneos-version-min=$SDKVER -isysroot $SDKROOT"
 make clean
 make libSDL_ttf.la
-cp .libs/libSDL_ttf.a libSDL_ttf-arm7.a
+
+# copy to buildroot
+cp .libs/libSDL_ttf.a $BUILDROOT/lib/libSDL_ttf.a
+cp -a SDL_ttf.h $BUILDROOT/include

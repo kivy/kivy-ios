@@ -1,4 +1,7 @@
 #!/bin/zsh
+
+. ./environment.sh
+
 set -o errexit
 set -x
 
@@ -164,4 +167,4 @@ lipo $PATH_DEV/lib/libpython2.7-arm.a $PATH_SIMU/lib/libpython2.7-i386.a -create
 find python2.7 | grep -E '*\.(py|pyc|so\.o|so\.a|so\.libs)$' | xargs rm
 find python2.7 | grep -E '*test*' | xargs rm -rdf
 
-
+cp $PATH_DEV/libpython2.7-arm.a $BUILDROOT/build/lib/
