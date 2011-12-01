@@ -11,7 +11,7 @@ SDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
 
 # where the build will be located
 ROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-BUILDROOT="$ROOT/build"
+export BUILDROOT="$ROOT/build"
 
 # for external project
 export KIVYIOSROOT="$ROOT"
