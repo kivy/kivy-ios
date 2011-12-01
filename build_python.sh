@@ -164,7 +164,7 @@ mkdir $PATH_ALL
 cp -R . $PATH_ALL
 
 lipo $PATH_DEV/lib/libpython2.7-arm.a $PATH_SIMU/lib/libpython2.7-i386.a -create -output $PATH_ALL/lib/libpython2.7-iOS5.a
-find python2.7 | grep -E '*\.(py|pyc|so\.o|so\.a|so\.libs)$' | xargs rm
-find python2.7 | grep -E '*test*' | xargs rm -rdf
+#find python2.7 | grep -E '*\.(py|pyc|so\.o|so\.a|so\.libs)$' | xargs rm
+#find python2.7 | grep -E '*test*' | xargs rm -rdf
 
-cp $PATH_DEV/libpython2.7-arm.a $BUILDROOT/build/lib/
+cp $PATH_DEV/lib/libpython2.7-arm.a $BUILDROOT/lib/
