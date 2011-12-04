@@ -20,6 +20,10 @@ export KIVYIOSROOT="$ROOT"
 set -x
 if [ ! -d $BUILDROOT ]; then
 	try mkdir $BUILDROOT
+fi
+if [ ! -d $BUILDROOT/include ]; then
 	try mkdir $BUILDROOT/include
+fi
+if [ ! -d $BUILDROOT/lib ]; then
 	try mkdir $BUILDROOT/lib
 fi
