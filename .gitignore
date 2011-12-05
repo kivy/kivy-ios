@@ -1,7 +1,6 @@
 *.swo
 *.swp
 Python-*
-python_files/Python-*
 freetype-*
 SDL_*
 build/*

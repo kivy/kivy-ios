@@ -34,6 +34,7 @@ pushd ./Python-2.7.1
 
 # Patch Python for temporary reduce PY_SSIZE_T_MAX otherzise, splitting string doesnet work
 patch -p1 < ../python_files/Python-2.7.1-ssize-t-max.patch
+patch -p1 < ../python_files/Python-2.7.1-dynload.patch
 
 echo "Building for native machine ============================================"
 # Compile some stuff statically; Modules/Setup taken from pgs4a-kivy
@@ -55,7 +56,7 @@ make distclean
 patch -p1 < ../python_files/Python-2.7.1-xcompile.patch
 
 # avoid iphone builddd
-#if [ "X" == "C" ]; then
+if [ "X" == "C" ]; then
 	echo "Building for iPhone Simulator ==========================================="
 	export MACOSX_DEPLOYMENT_TARGET=10.6
 	# set up environment variables for simulator compilation
@@ -98,7 +99,7 @@ patch -p1 < ../python_files/Python-2.7.1-xcompile.patch
 	popd
 
 	make distclean
-#fi
+fi
 
 export MACOSX_DEPLOYMENT_TARGET=
 
@@ -124,8 +125,6 @@ export CPP="/usr/bin/cpp $CPPFLAGS"
 
 export CFLAGS = "$CFLAGS -march=armv7 -mcpu=arm1176jzf-s -mcpu=cortex-a8"
 export LDFLAGS = "$LDFLAGS -march=armv7 -mcpu=arm1176jzf-s -mcpu=cortex-a8"
-#export CFLAGS = "$CFLAGS -march=armv7"
-#export LDFLAGS = "$LDFLAGS -march=armv7"
 
 # make a link to a differently named library for who knows what reason
 mkdir extralibs||echo "foo"
@@ -163,7 +162,7 @@ cp -R . $PATH_DEV
 mkdir $PATH_ALL
 cp -R . $PATH_ALL
 
-lipo $PATH_DEV/lib/libpython2.7-arm.a $PATH_SIMU/lib/libpython2.7-i386.a -create -output $PATH_ALL/lib/libpython2.7-iOS5.a
+#lipo $PATH_DEV/lib/libpython2.7-arm.a $PATH_SIMU/lib/libpython2.7-i386.a -create -output $PATH_ALL/lib/libpython2.7-iOS5.a
 #find python2.7 | grep -E '*\.(py|pyc|so\.o|so\.a|so\.libs)$' | xargs rm
 #find python2.7 | grep -E '*test*' | xargs rm -rdf
 

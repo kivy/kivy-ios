@@ -34,3 +34,6 @@ cStringIO cStringIO.c
 cPickle cPickle.c
 zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz
 xxsubtype xxsubtype.c
+
+# added in case of
+unicodedata unicodedata.c    # static Unicode character database
