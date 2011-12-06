@@ -2,6 +2,7 @@
 
 import sys
 import subprocess
+from os import environ
 
 libs = [ ]
 objects = [ ]
@@ -22,7 +23,7 @@ while i < len(sys.argv):
         libs.append(opt)
         continue
 
-    if opt == "-r":
+    if opt in ("-r", "-pipe", "-no-cpp-precomp"):
         continue
 
     if opt in ("--sysroot", "-isysroot", "-framework", "-undefined",
@@ -68,8 +69,14 @@ f.close()
 
 print 'Liblink redirect linking with', objects
 subprocess.call([
+    '%s/usr/bin/ld' % environ.get('DEVROOT'), '-r',
+    '-o', output + '.o', '-arch', 'armv7'] + objects)
+'''
+subprocess.call([
 "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin10-llvm-gcc-4.2",
-"-r", "-arch=armv7", "-o", output + ".o" ] + objects)
+"-isysroot", environ.get('SDKROOT'),
+"-r", "-march=armv7", "-mcpu=arm176jzf", "-mcpu=cortex-a8", "-o", output + ".o" ] + objects)
+'''
 
 
         
