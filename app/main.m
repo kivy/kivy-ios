@@ -18,21 +18,23 @@ int main(int argc, char *argv[]) {
     // because the process will not have write attribute on the device.
     putenv("PYTHONOPTIMIZE=2");
     putenv("PYTHONDONTWRITEBYTECODE=1");
+    putenv("PYTHONNOUSERSITE=1");
     
     // Kivy environment to prefer some implementation on ios platform
+    putenv("KIVY_BUILD=ios");
     putenv("KIVY_WINDOW=sdl");
     putenv("KIVY_IMAGE=osxcoreimage");
-    
-    NSLog(@"Initializing python");
-    Py_Initialize();
-    
-    // If other modules are using thread, we need to initialize them before.
-    PyEval_InitThreads();
     
     NSString * resourcePath = [[NSBundle mainBundle] resourcePath];
     NSLog(@"PythonHome is: %s", (char *)[resourcePath UTF8String]);
     Py_SetPythonHome((char *)[resourcePath UTF8String]);
+
+    NSLog(@"Initializing python");
+    Py_Initialize();    
     PySys_SetArgv(argc, argv);
+
+    // If other modules are using thread, we need to initialize them before.
+    PyEval_InitThreads();
 
     // Search and start main.py
     const char * prog = [
