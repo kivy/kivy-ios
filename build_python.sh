@@ -47,6 +47,9 @@ export MACOSX_DEPLOYMENT_TARGET=
 mkdir extralibs||echo "foo"
 ln -s "$SDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib || echo "sdf"
 
+# Copy our setup for modules
+try cp ../python_files/ModulesSetup Modules/Setup.local
+
 try ./configure CC="$ARM_CC" LD="$ARM_LD" \
 	CFLAGS="$ARM_CFLAGS" LDFLAGS="$ARM_LDFLAGS -Lextralibs/" \
 	--disable-toolbox-glue \
