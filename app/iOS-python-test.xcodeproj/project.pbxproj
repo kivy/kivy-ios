@@ -24,6 +24,7 @@
 		59994DB0148E558600863906 /* libSDL_ttf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAB148E558600863906 /* libSDL_ttf.a */; };
 		59994DB1148E558600863906 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAC148E558600863906 /* libSDL.a */; };
 		59994DB3148E564400863906 /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 59994DB2148E564400863906 /* lib */; };
+		59994E35148E815300863906 /* include in Resources */ = {isa = PBXBuildFile; fileRef = 59994E34148E815300863906 /* include */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,7 +45,8 @@
 		59994DAA148E558600863906 /* libpython2.7.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpython2.7.a; path = ../build/lib/libpython2.7.a; sourceTree = "<group>"; };
 		59994DAB148E558600863906 /* libSDL_ttf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL_ttf.a; path = ../build/lib/libSDL_ttf.a; sourceTree = "<group>"; };
 		59994DAC148E558600863906 /* libSDL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL.a; path = ../build/lib/libSDL.a; sourceTree = "<group>"; };
-		59994DB2148E564400863906 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = ../build/python/lib; sourceTree = "<group>"; };
+		59994DB2148E564400863906 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = ../build/python/lib; sourceTree = SOURCE_ROOT; };
+		59994E34148E815300863906 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = ../build/python/include; sourceTree = SOURCE_ROOT; };
 		8D1107310486CEB800E47090 /* iOS_python_test-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "iOS_python_test-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -111,6 +113,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				59994E34148E815300863906 /* include */,
 				59994DB2148E564400863906 /* lib */,
 				01532DA9137C099F0076F6BF /* icon.png */,
 				8D1107310486CEB800E47090 /* iOS_python_test-Info.plist */,
@@ -193,6 +196,7 @@
 			files = (
 				01532DAA137C099F0076F6BF /* icon.png in Resources */,
 				59994DB3148E564400863906 /* lib in Resources */,
+				59994E35148E815300863906 /* include in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -214,7 +218,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CODE_SIGN_IDENTITY = "iPhone Developer: Mathieu Virbel (KSW92G7TX8)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
