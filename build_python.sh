@@ -13,30 +13,30 @@ fi
 
 # get rid of old build
 rm -rf Python-$PYTHON_VERSION
-tar -xjf $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2
-pushd ./Python-$PYTHON_VERSION
+try tar -xjf $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2
+try pushd ./Python-$PYTHON_VERSION
 
 # Patch Python for temporary reduce PY_SSIZE_T_MAX otherzise, splitting string doesnet work
 try patch -p1 < ../python_files/Python-$PYTHON_VERSION-ssize-t-max.patch
 try patch -p1 < ../python_files/Python-$PYTHON_VERSION-dynload.patch
 
 # Copy our setup for modules
-cp ../python_files/ModulesSetup Modules/Setup.local
+try cp ../python_files/ModulesSetup Modules/Setup.local
 
 
 echo "Building for native machine ============================================"
 
-./configure CC="$CCACHE clang -Qunused-arguments -fcolor-diagnostics"
-make python.exe Parser/pgen
-mv python.exe hostpython
-mv Parser/pgen Parser/hostpgen
-make distclean
+try ./configure CC="$CCACHE clang -Qunused-arguments -fcolor-diagnostics"
+try make python.exe Parser/pgen
+try mv python.exe hostpython
+try mv Parser/pgen Parser/hostpgen
+try make distclean
 
 
 echo "Building for iOS ======================================================="
 
 # patch python to cross-compile
-patch -p1 < ../python_files/Python-$PYTHON_VERSION-xcompile.patch
+try patch -p1 < ../python_files/Python-$PYTHON_VERSION-xcompile.patch
 
 # set up environment variables for cross compilation
 export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin11/4.2.1/include/ -I$SDKROOT/usr/include/"
@@ -60,3 +60,5 @@ try make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
 try make install HOSTPYTHON=./hostpython CROSS_COMPILE_TARGET=yes prefix="$BUILDROOT/python"
 
 try mv -f $BUILDROOT/python/lib/libpython2.7.a $BUILDROOT/lib/
+
+deduplicate $BUILDROOT/lib/libpython2.7.a
