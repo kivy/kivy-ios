@@ -53,7 +53,9 @@ while i < len(sys.argv):
         print "Unknown option: ", opt
         sys.exit(1)
 
-    print 'append', opt, 'to output'
+    if not opt.endswith('.o'):
+        continue
+
     objects.append(opt)
 
 
@@ -64,8 +66,10 @@ f = file(output + ".libs", "w")
 f.write(" ".join(libs))
 f.close()
 
-print 'objects are', objects
-subprocess.call([ "/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin10-llvm-gcc-4.2", "-r", "-o", output + ".o" ] + objects)
+print 'Liblink redirect linking with', objects
+subprocess.call([
+"/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin10-llvm-gcc-4.2",
+"-r", "-arch=armv7", "-o", output + ".o" ] + objects)
 
 
         

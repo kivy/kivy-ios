@@ -16,5 +16,7 @@ PATH_ALL=${PWD}/python_files/Python-2.7.1-IOS${IOS_VERSION}
 pushd $PATH_DEV/lib/python2.7
 find . -iname '*.pyc' | xargs rm
 find . -iname '*.py' | xargs rm
-rm -rd *test*
-rm -rd lib-* wsgiref bsddb curses idlelib hotshot
+find . -iname 'test_*' | xargs rm -rf
+rm -rf *test* config lib* wsgiref bsddb curses idlelib hotshot || true
+popd
+rm -rf pkgconfig || true

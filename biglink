@@ -6,7 +6,7 @@ import subprocess
 
 sofiles = [ ]
 
-for dir in sys.argv[1:]:
+for dir in sys.argv[2:]:
 
     for fn in os.listdir(dir):
         fn = os.path.join(dir, fn)
@@ -39,12 +39,6 @@ while args:
         unique_args.insert(0, a)
 
 
-#args = os.environ["CC"].split() + \
-#    [ '-shared', "-O3", "-o", "libpymodules.so" ] + \
-#    unique_args
-
-#subprocess.call(args)
-print unique_args
 unique_args = ' '.join([ x for x in unique_args if x.endswith('.so.o') ])
-print unique_args
-subprocess.Popen("ar -q kivy.a " + unique_args, shell=True).communicate()
+print 'Biglink create %s library' % sys.argv[1]
+subprocess.Popen(("ar -q %s" % sys.argv[1]) + unique_args, shell=True).communicate()

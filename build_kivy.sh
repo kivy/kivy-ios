@@ -22,10 +22,9 @@ fi
 export LDSHARED="$KIVYIOSROOT/liblink"
 
 cd kivy
+export CFLAGS="$CFLAGS -march=armv7 -mcpu=arm1176jzf-s -mcpu=cortex-a8 -g -O0"
 make ios
 
-echo "Now create kivy.a archive"
 # FIXME this part is build/cpu dependent :/
-build_dir=build/lib.macosx-*/kivy
-try $KIVYIOSROOT/biglink $build_dir $build_dir/graphics $build_dir/core/window $build_dir/core/text $build_dir/core/image
-try mv kivy.a $BUILDROOT/lib
+bd=build/lib.macosx-*/kivy
+try $KIVYIOSROOT/biglink $BUILDROOT/lib/libkivy.a $bd $bd/graphics $bd/core/window $bd/core/text $bd/core/image

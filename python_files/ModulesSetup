@@ -34,6 +34,10 @@ cStringIO cStringIO.c
 cPickle cPickle.c
 zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz
 xxsubtype xxsubtype.c
-
-# added in case of
 unicodedata unicodedata.c    # static Unicode character database
+
+# Theses modules are used by Kivy inside other module
+# json in Settings, _io by zipfile...
+_json _json.c
+_io _io/bufferedio.c _io/bytesio.c _io/fileio.c _io/iobase.c _io/_iomodule.c _io/stringio.c _io/textio.c
+_heapq _heapqmodule.c

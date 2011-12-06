@@ -16,7 +16,7 @@ fi
 # lib not found, compile it
 pushd .
 cd freetype-$FT_VERSION
-./configure --prefix=/usr/local/iphone --host=arm-apple-darwin --enable-static=yes --enable-shared=no CC=$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2 AR=$DEVROOT/usr/bin/ar LDFLAGS="-isysroot $SDKROOT -miphoneos-version-min=$SDKVER" CFLAGS="-O0 -g -miphoneos-version-min=$SDKVER -isysroot $SDKROOT"
+./configure --prefix=/usr/local/iphone --host=arm-apple-darwin --enable-static=yes --enable-shared=no CC=$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2 AR=$DEVROOT/usr/bin/ar LDFLAGS="-isysroot $SDKROOT -miphoneos-version-min=$SDKVER" CFLAGS="-march=armv7 -mcpu=arm1176jzf -mcpu=cortex-a8 -O0 -g -miphoneos-version-min=$SDKVER -isysroot $SDKROOT"
 make clean
 make
 
