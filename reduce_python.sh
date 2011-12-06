@@ -4,10 +4,11 @@
 
 echo "Starting reducing=========="
 
-try pushd $BUILDROOT/python/lib/python2.7
+try cd $BUILDROOT/python/lib/python2.7
 find . -iname '*.pyc' | xargs rm
 find . -iname '*.py' | xargs rm
-find . -iname 'test_*' | xargs rm -rf
-rm -rf *test* config lib* wsgiref bsddb curses idlelib hotshot || true
-try popd
+find . -iname 'test*' | xargs rm -rf
+rm -rf *test* lib* wsgiref bsddb curses idlelib hotshot || true
+rm -rf 
+try cd ..
 rm -rf pkgconfig || true
