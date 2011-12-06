@@ -17,10 +17,8 @@ pushd freetype-$FT_VERSION
 	--host=arm-apple-darwin \
 	--enable-static=yes \
 	--enable-shared=no \
-	CC="$CCACHE $DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2" \
-	AR="$DEVROOT/usr/bin/ar" \
-	LDFLAGS="-isysroot $SDKROOT -miphoneos-version-min=$SDKVER" \
-	CFLAGS="-march=armv7 -mcpu=arm1176jzf -mcpu=cortex-a8 -O0 -g -miphoneos-version-min=$SDKVER -isysroot $SDKROOT"
+	CC="$ARM_CC" AR="$ARM_AR" \
+	LDFLAGS="$ARM_LDFLAGS" CFLAGS="$ARM_CFLAGS"
 make clean
 make
 

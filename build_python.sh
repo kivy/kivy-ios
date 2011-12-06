@@ -40,23 +40,19 @@ patch -p1 < ../python_files/Python-$PYTHON_VERSION-xcompile.patch
 
 # set up environment variables for cross compilation
 export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin11/4.2.1/include/ -I$SDKROOT/usr/include/"
-export CFLAGS="$CPPFLAGS -pipe -no-cpp-precomp -isysroot $SDKROOT"
-export LDFLAGS="-isysroot $SDKROOT -Lextralibs/"
 export CPP="$CCACHE /usr/bin/cpp $CPPFLAGS"
-export CFLAGS="$CFLAGS -march=armv7 -mcpu=arm1176jzf-s -mcpu=cortex-a8"
-export LDFLAGS="$LDFLAGS -march=armv7 -mcpu=arm1176jzf-s -mcpu=cortex-a8"
 export MACOSX_DEPLOYMENT_TARGET=
 
 # make a link to a differently named library for who knows what reason
 mkdir extralibs||echo "foo"
 ln -s "$SDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib || echo "sdf"
 
-try ./configure CC="$CCACHE $DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2" \
-            LD="$DEVROOT/usr/bin/ld" \
-		--disable-toolbox-glue \
-		--host=armv7-apple-darwin \
-		--prefix=/python \
-	    --without-doc-strings
+try ./configure CC="$ARM_CC" LD="$ARM_LD" \
+	CFLAGS="$ARM_CFLAGS" LDFLAGS="$ARM_LDFLAGS -Lextralibs/" \
+	--disable-toolbox-glue \
+	--host=armv7-apple-darwin \
+	--prefix=/python \
+    --without-doc-strings
 
 try make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
      CROSS_COMPILE_TARGET=yes

@@ -19,10 +19,9 @@ if [ "X$1" == "X-f" ]; then
 	try cd ..
 fi
 
-export LDSHARED="$KIVYIOSROOT/liblink"
-
 cd kivy
-export CFLAGS="$CFLAGS -march=armv7 -mcpu=arm1176jzf-s -mcpu=cortex-a8 -g -O0"
+export LDSHARED="$KIVYIOSROOT/liblink"
+export CFLAGS="$ARM_CFLAGS"
 make ios
 
 # FIXME this part is build/cpu dependent :/
