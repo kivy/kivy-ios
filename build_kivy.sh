@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ./environment.sh
+. environment.sh
 
 if [ ! -d kivy ] ; then
 	try git clone https://github.com/tito/kivy
