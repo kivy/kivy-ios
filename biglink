@@ -41,4 +41,4 @@ while args:
 
 unique_args = ' '.join([ x for x in unique_args if x.endswith('.so.o') ])
 print 'Biglink create %s library' % sys.argv[1]
-subprocess.Popen(("ar -q %s" % sys.argv[1]) + unique_args, shell=True).communicate()
+subprocess.Popen(("ar -q %s " % sys.argv[1]) + unique_args, shell=True).communicate()

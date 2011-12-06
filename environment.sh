@@ -5,23 +5,22 @@ try () {
 }
 
 # iOS SDK Environmnent
-SDKVER=5.0
-DEVROOT=/Developer/Platforms/iPhoneOS.platform/Developer
-SDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
+export SDKVER=5.0
+export DEVROOT=/Developer/Platforms/iPhoneOS.platform/Developer
+export SDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
 
 # version of packages
-PYTHON_VERSION=2.7.1
+export PYTHON_VERSION=2.7.1
+export SDLTTF_VERSION=2.0.10
+export FT_VERSION=2.4.8
 
 # where the build will be located
-ROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export BUILDROOT="$ROOT/build"
-export CACHEROOT="$ROOT/.cache"
-
-# for external project
-export KIVYIOSROOT="$ROOT"
+export KIVYIOSROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export BUILDROOT="$KIVYIOSROOT/build"
+export CACHEROOT="$KIVYIOSROOT/.cache"
 
 # some tools
-CCACHE=$(which ccache)
+export CCACHE=$(which ccache)
 
 # create build directory if not found
 set -x
