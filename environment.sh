@@ -20,10 +20,19 @@ export BUILDROOT="$KIVYIOSROOT/build"
 export CACHEROOT="$KIVYIOSROOT/.cache"
 
 # some tools
-export CCACHE=$(which ccache)
+
+CCACHE=$(which ccache)
+
+if [ "$(which ccache)"  != '' ]; then
+    export CCACHE=$(which ccache)
+    echo "CCACHE detecté in '$CCACHE'"
+else
+    echo "CCACHE not used"
+fi
+
 
 # flags for arm compilation
-export ARM_CC="$CCACHE $DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2"
+export ARM_CC="$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2"
 export ARM_AR="$DEVROOT/usr/bin/ar"
 export ARM_LD="$DEVROOT/usr/bin/ld"
 export ARM_CFLAGS="-march=armv7 -mcpu=arm176jzf -mcpu=cortex-a8"
