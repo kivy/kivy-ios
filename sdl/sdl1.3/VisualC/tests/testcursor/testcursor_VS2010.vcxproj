@@ -107,8 +107,8 @@
       <OutputFile>.\Debug/testcursor.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll $(TargetDir)\SDL.dll
-copy $(SolutionDir)\..\test\icon.bmp $(ProjectDir)\icon.bmp</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL and data files</Message>
@@ -143,8 +143,8 @@ copy $(SolutionDir)\..\test\icon.bmp $(ProjectDir)\icon.bmp</Command>
       <OutputFile>.\Debug/testcursor.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll $(TargetDir)\SDL.dll
-copy $(SolutionDir)\..\test\icon.bmp $(Platform)\$(Configuration)\icon.bmp</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL and data files</Message>
@@ -181,8 +181,8 @@ copy $(SolutionDir)\..\test\icon.bmp $(Platform)\$(Configuration)\icon.bmp</Comm
       <OutputFile>.\Release/testcursor.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll $(TargetDir)\SDL.dll
-copy $(SolutionDir)\..\test\icon.bmp $(ProjectDir)\icon.bmp</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL and data files</Message>
@@ -218,8 +218,8 @@ copy $(SolutionDir)\..\test\icon.bmp $(ProjectDir)\icon.bmp</Command>
       <OutputFile>.\Release/testcursor.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll $(TargetDir)\SDL.dll
-copy $(SolutionDir)\..\test\icon.bmp $(ProjectDir)\icon.bmp</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL and data files</Message>

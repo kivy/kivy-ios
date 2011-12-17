@@ -37,8 +37,7 @@ SDL_SendDropFile(const char *file)
     if (SDL_GetEventState(SDL_DROPFILE) == SDL_ENABLE) {
         SDL_Event event;
         event.type = SDL_DROPFILE;
-	event.drop.file = SDL_strdup(file);
-
+        event.drop.file = SDL_strdup(file);
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);

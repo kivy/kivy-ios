@@ -316,7 +316,7 @@
 {
     SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_RETURN);
     SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_RETURN);
-    [self hideKeyboard];
+    //[self hideKeyboard];
     return YES;
 }
 
