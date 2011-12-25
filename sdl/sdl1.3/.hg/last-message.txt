@@ -1,2 +1,2 @@
-disable auto hide keyboard when use press enter
+get notification from uikit to known is keyboard is hide or not
 

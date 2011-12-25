@@ -248,7 +248,14 @@
     /* add the UITextField (hidden) to our view */
     [self addSubview: textField];
     [textField release];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardDidHide:) name:UIKeyboardDidHideNotification object:nil];
+
 }
+- (void)keyboardDidHide:(NSNotification *)notification 
+{
+    keyboardVisible = NO;
+}
+
 
 /* reveal onscreen virtual keyboard */
 - (void)showKeyboard
