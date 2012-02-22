@@ -3,7 +3,7 @@
 . environment.sh
 
 if [ ! -d kivy ] ; then
-	try git clone https://github.com/tito/kivy
+	try git clone https://github.com/kivy/kivy
 	try cd kivy
 	try git checkout ios-support
 	try cd ..
