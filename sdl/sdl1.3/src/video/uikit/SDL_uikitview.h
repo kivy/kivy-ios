@@ -60,6 +60,7 @@
 - (void)hideKeyboard;
 - (void)initializeKeyboard;
 @property (readonly) BOOL keyboardVisible;
+- (void)keyboardDidHide:(NSNotification *)notification; 
 #endif
 
 @end

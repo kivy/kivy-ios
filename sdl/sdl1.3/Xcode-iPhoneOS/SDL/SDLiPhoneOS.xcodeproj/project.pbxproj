@@ -1298,9 +1298,6 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
-			attributes = {
-				LastUpgradeCheck = 0420;
-			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "SDLiPhoneOS" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -1521,6 +1518,7 @@
 					"-framework",
 					UIKit,
 				);
+				PREBINDING = NO;
 				PRODUCT_NAME = testsdl;
 			};
 			name = Debug;
@@ -1532,6 +1530,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "testsdl-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
@@ -1541,6 +1540,7 @@
 					"-framework",
 					UIKit,
 				);
+				PREBINDING = NO;
 				PRODUCT_NAME = testsdl;
 				ZERO_LINK = NO;
 			};
@@ -1561,6 +1561,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PRODUCT_NAME = BuildUniversalSimulatorDevicelibSDL;
 				ZERO_LINK = NO;
 			};
@@ -1581,6 +1582,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PRODUCT_NAME = PrepareXcodeProjectTemplate;
 				ZERO_LINK = NO;
 			};
@@ -1594,11 +1596,11 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_DEBUGGING_SYMBOLS = full;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
 				ONLY_ACTIVE_ARCH = NO;
+				PREBINDING = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1611,10 +1613,10 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = NO;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
+				PREBINDING = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1628,7 +1630,7 @@
 				DEPLOYMENT_LOCATION = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				PREBINDING = NO;
 				PRODUCT_NAME = SDL;
 				SKIP_INSTALL = YES;
 			};
@@ -1641,7 +1643,8 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = NO;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PREBINDING = NO;
 				PRODUCT_NAME = SDL;
 				SKIP_INSTALL = YES;
 				ZERO_LINK = NO;

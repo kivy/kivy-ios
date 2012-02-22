@@ -105,8 +105,8 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll $(TargetDir)\SDL.dll
-copy $(SolutionDir)\..\test\moose.dat $(ProjectDir)\moose.dat</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+copy "$(SolutionDir)\..\test\moose.dat" "$(TargetDir)\moose.dat"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL and data files</Message>
@@ -140,8 +140,8 @@ copy $(SolutionDir)\..\test\moose.dat $(ProjectDir)\moose.dat</Command>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll $(TargetDir)\SDL.dll
-copy $(SolutionDir)\..\test\moose.dat $(ProjectDir)\moose.dat</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+copy "$(SolutionDir)\..\test\moose.dat" "$(TargetDir)\moose.dat"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL and data files</Message>
@@ -176,8 +176,8 @@ copy $(SolutionDir)\..\test\moose.dat $(ProjectDir)\moose.dat</Command>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll $(TargetDir)\SDL.dll
-copy $(SolutionDir)\..\test\moose.dat $(ProjectDir)\moose.dat</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+copy "$(SolutionDir)\..\test\moose.dat" "$(TargetDir)\moose.dat"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL and data files</Message>
@@ -212,8 +212,8 @@ copy $(SolutionDir)\..\test\moose.dat $(ProjectDir)\moose.dat</Command>
     </Link>
     <PostBuildEvent>
       <Command>
-        copy $(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll $(TargetDir)\SDL.dll
-        copy $(SolutionDir)\..\test\moose.dat $(ProjectDir)\moose.dat</Command>
+        copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+        copy "$(SolutionDir)\..\test\moose.dat" "$(TargetDir)\moose.dat"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL and data files</Message>

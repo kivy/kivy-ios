@@ -82,7 +82,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories);$(DXSDK_DIR)\Include;$(DXSDK_DIR)\Include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -103,6 +103,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <CLRUnmanagedCodeCheck>false</CLRUnmanagedCodeCheck>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,7 +115,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories);$(DXSDK_DIR)\Include;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -133,6 +134,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <CLRUnmanagedCodeCheck>false</CLRUnmanagedCodeCheck>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -146,7 +148,7 @@
     <ClCompile>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <IntrinsicFunctions>false</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories);$(DXSDK_DIR)\Include;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -166,6 +168,7 @@
       <AdditionalDependencies>winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -178,7 +181,7 @@
     <ClCompile>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <IntrinsicFunctions>false</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories);$(DXSDK_DIR)\Include;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -196,6 +199,7 @@
       <AdditionalDependencies>winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -24,6 +24,25 @@
 
 #include "SDL_cocoavideo.h"
 
+/* we need this for ShowMenuBar() and HideMenuBar(). */
+#include <Carbon/Carbon.h>
+
+static inline void Cocoa_ToggleMenuBar(const BOOL show)
+{
+    /* !!! FIXME: keep an eye on this.
+     * ShowMenuBar/HideMenuBar is officially unavailable for 64-bit binaries.
+     *  It happens to work, as of 10.7, but we're going to see if
+     *  we can just simply do without it on newer OSes...
+     */
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1070) && !defined(__LP64__)
+    if (show)
+        ShowMenuBar();
+    else
+        HideMenuBar();
+#endif
+}
+
+
 /* !!! FIXME: clean out the pre-10.6 code when it makes sense to do so. */
 #define FORCE_OLD_API 0 || (MAC_OS_X_VERSION_MAX_ALLOWED < 1060)
 
@@ -381,7 +400,7 @@ Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
         }
 
         if (CGDisplayIsMain(displaydata->display)) {
-            ShowMenuBar();
+            Cocoa_ToggleMenuBar(YES);
         }
     } else {
         /* Put up the blanking window (a window above all other windows) */
@@ -405,7 +424,7 @@ Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 
         /* Hide the menu bar so it doesn't intercept events */
         if (CGDisplayIsMain(displaydata->display)) {
-            HideMenuBar();
+            Cocoa_ToggleMenuBar(NO);
         }
     }
 
@@ -450,7 +469,7 @@ Cocoa_QuitModes(_THIS)
         }
 
     }
-    ShowMenuBar();
+    Cocoa_ToggleMenuBar(YES);
 }
 
 #endif /* SDL_VIDEO_DRIVER_COCOA */

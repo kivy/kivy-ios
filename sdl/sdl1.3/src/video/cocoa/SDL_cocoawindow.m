@@ -69,8 +69,11 @@ static __inline__ void ConvertNSRect(NSRect *r)
     [window setAcceptsMouseMovedEvents:YES];
 
     [view setNextResponder:self];
+
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
-    [view setAcceptsTouchEvents:YES];
+    if ([view respondsToSelector:@selector(setAcceptsTouchEvents:)]) {
+        [view setAcceptsTouchEvents:YES];
+    }
 #endif
 }
 
