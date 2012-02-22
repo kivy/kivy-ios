@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 . ./environment.sh
 
@@ -7,7 +7,7 @@
 # http://latenitesoft.blogspot.com/2008/10/iphone-programming-tips-building-unix.html
 
 # download python and patch if they aren't there
-if [[ ! -a $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2 ]]; then
+if [ ! -a $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2 ]; then
     curl http://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.bz2 > $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2
 fi
 
