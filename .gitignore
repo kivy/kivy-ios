@@ -4,5 +4,6 @@ Python-*
 freetype-*
 SDL_*
 build/*
-sdl/sdl1.3/Xcode-iPhoneOS/SDL/build/
+SDL/Xcode-iPhoneOS/SDL/build/
 kivy/*
+libtremor/*
