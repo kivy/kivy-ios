@@ -1,8 +1,8 @@
 #!/bin/bash
 . ./environment.sh
-pushd sdl/sdl1.3/Xcode-iPhoneOS/SDL
+pushd SDL/Xcode-iPhoneOS/SDL
 xcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration Debug -sdk iphoneos5.0
 popd
 
-cp sdl/sdl1.3/Xcode-iPhoneOS/SDL/build/Debug-iPhoneOS/libSDL.a $BUILDROOT/lib
-cp -a sdl/sdl1.3/include $BUILDROOT/include/SDL 
+cp SDL/Xcode-iPhoneOS/SDL/build/Debug-iPhoneOS/libSDL.a $BUILDROOT/lib
+cp -a SDL/include $BUILDROOT/include/SDL 

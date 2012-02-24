@@ -105,7 +105,9 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     SDL_RegisterHintChangedCb(SDL_HINT_IDLE_TIMER_DISABLED, &SDL_IdleTimerDisabledChanged);
 
     /* run the user's application, passing argc and argv */
+    NSLog(@" >>> SDL_main");
     exit_status = SDL_main(forward_argc, forward_argv);
+    NSLog(@" <<< SDL_main");
 
     /* exit, passing the return status from the user's application */
     // exit(exit_status);
@@ -116,7 +118,10 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     /* Set working directory to resource path */
     [[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
 
+    NSLog(@" >>> Application did finish launching with options");
     [self performSelector:@selector(postFinishLaunch) withObject:nil afterDelay:0.0];
+    [NSThread sleepForTimeInterval:5.0];
+    NSLog(@" <<< Application did finish launching with options");
 
     return YES;
 }
@@ -130,7 +135,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
 - (void) applicationWillResignActive:(UIApplication*)application
 {
-    //NSLog(@"%@", NSStringFromSelector(_cmd));
+    NSLog(@"%@", NSStringFromSelector(_cmd));
 
     // Send every window on every screen a MINIMIZED event.
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
@@ -146,7 +151,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
 - (void) applicationDidBecomeActive:(UIApplication*)application
 {
-    //NSLog(@"%@", NSStringFromSelector(_cmd));
+    NSLog(@"%@", NSStringFromSelector(_cmd));
 
     // Send every window on every screen a RESTORED event.
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
