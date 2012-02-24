@@ -14,6 +14,9 @@ int main(int argc, char *argv[]) {
     
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
+    // Change the executing path to YourApp
+    chdir("YourApp");
+    
     // Special environment to prefer .pyo, and don't write bytecode if .py are found
     // because the process will not have write attribute on the device.
     putenv("PYTHONOPTIMIZE=2");
@@ -23,7 +26,7 @@ int main(int argc, char *argv[]) {
     // Kivy environment to prefer some implementation on ios platform
     putenv("KIVY_BUILD=ios");
     putenv("KIVY_WINDOW=sdl");
-    putenv("KIVY_IMAGE=osxcoreimage");
+    putenv("KIVY_IMAGE=imageio");
     
     NSString * resourcePath = [[NSBundle mainBundle] resourcePath];
     NSLog(@"PythonHome is: %s", (char *)[resourcePath UTF8String]);
@@ -56,5 +59,7 @@ int main(int argc, char *argv[]) {
     
     [pool release];
     
+    // Look like the app still runn even when we leaved here.
+    exit(ret);
     return ret;
 }
