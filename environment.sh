@@ -35,8 +35,9 @@ export ARM_CFLAGS="$ARM_CFLAGS -miphoneos-version-min=$SDKVER"
 export ARM_LDFLAGS="-isysroot $SDKROOT"
 export ARM_LDFLAGS="$ARM_LDFLAGS -miphoneos-version-min=$SDKVER"
 
-# comment this line if you want debugging stuff
-export ARM_CFLAGS="$ARM_CFLAGS -O0 -g"
+# uncomment this line if you want debugging stuff
+export ARM_CFLAGS="$ARM_CFLAGS -O3"
+#export ARM_CFLAGS="$ARM_CFLAGS -O0 -g"
 
 # create build directory if not found
 try mkdir -p $BUILDROOT

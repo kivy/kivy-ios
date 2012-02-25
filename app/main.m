@@ -25,8 +25,12 @@ int main(int argc, char *argv[]) {
     
     // Kivy environment to prefer some implementation on ios platform
     putenv("KIVY_BUILD=ios");
+    putenv("KIVY_NO_CONFIG=1");
+    putenv("KIVY_NO_FILELOG=1");
+    putenv("KIVY_NO_CONSOLELOG=1");
     putenv("KIVY_WINDOW=sdl");
     putenv("KIVY_IMAGE=imageio");
+    putenv("KIVY_AUDIO=sdl");
     
     NSString * resourcePath = [[NSBundle mainBundle] resourcePath];
     NSLog(@"PythonHome is: %s", (char *)[resourcePath UTF8String]);
@@ -41,13 +45,13 @@ int main(int argc, char *argv[]) {
 
     // Search and start main.py
     const char * prog = [
-        [[NSBundle mainBundle] pathForResource:@"YourApp/main" ofType:@"py"] cStringUsingEncoding:
+        [[NSBundle mainBundle] pathForResource:@"YourApp/main" ofType:@"pyo"] cStringUsingEncoding:
         NSUTF8StringEncoding];
-    NSLog(@"Running main.py: %s", prog);
+    NSLog(@"Running main.pyo: %s", prog);
     FILE* fd = fopen(prog, "r");
     if ( fd == NULL ) {
         ret = 1;
-        NSLog(@"Unable to open main.py, abort.");
+        NSLog(@"Unable to open main.pyo, abort.");
     } else {
         ret = PyRun_SimpleFileEx(fd, prog, 1);
         if (ret != 0)

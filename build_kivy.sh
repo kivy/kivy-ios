@@ -24,5 +24,5 @@ make ios
 
 # FIXME this part is build/cpu dependent :/
 bd=build/lib.macosx-*/kivy
-try $KIVYIOSROOT/biglink $BUILDROOT/lib/libkivy.a $bd $bd/graphics $bd/core/window $bd/core/text $bd/core/image
+try $KIVYIOSROOT/biglink $BUILDROOT/lib/libkivy.a $bd $bd/graphics $bd/core/window $bd/core/text $bd/core/image $bd/core/audio
 deduplicate $BUILDROOT/lib/libkivy.a
