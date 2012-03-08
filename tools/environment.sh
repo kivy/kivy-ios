@@ -17,7 +17,7 @@ export SDLTTF_VERSION=2.0.10
 export FT_VERSION=2.4.8
 
 # where the build will be located
-export KIVYIOSROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export KIVYIOSROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
 export BUILDROOT="$KIVYIOSROOT/build"
 export CACHEROOT="$KIVYIOSROOT/.cache"
 
