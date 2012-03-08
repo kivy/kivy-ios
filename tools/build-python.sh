@@ -1,27 +1,28 @@
 #!/bin/bash
 
-. ./environment.sh
+. $(dirname $0)/environment.sh
 
 # credit to:
 # http://randomsplat.com/id5-cross-compiling-python-for-embedded-linux.html
 # http://latenitesoft.blogspot.com/2008/10/iphone-programming-tips-building-unix.html
 
 # download python and patch if they aren't there
-if [ ! -a $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2 ]; then
+if [ ! -f $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2 ]; then
     curl http://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.bz2 > $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2
 fi
 
 # get rid of old build
-rm -rf Python-$PYTHON_VERSION
+rm -rf $TMPROOT/Python-$PYTHON_VERSION
 try tar -xjf $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2
-try pushd ./Python-$PYTHON_VERSION
+try mv Python-$PYTHON_VERSION $TMPROOT
+try pushd $TMPROOT/Python-$PYTHON_VERSION
 
 # Patch Python for temporary reduce PY_SSIZE_T_MAX otherzise, splitting string doesnet work
-try patch -p1 < ../python_files/Python-$PYTHON_VERSION-ssize-t-max.patch
-try patch -p1 < ../python_files/Python-$PYTHON_VERSION-dynload.patch
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-ssize-t-max.patch
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-dynload.patch
 
 # Copy our setup for modules
-try cp ../python_files/ModulesSetup Modules/Setup.local
+try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
 
 
 echo "Building for native machine ============================================"
@@ -36,7 +37,7 @@ try make distclean
 echo "Building for iOS ======================================================="
 
 # patch python to cross-compile
-try patch -p1 < ../python_files/Python-$PYTHON_VERSION-xcompile.patch
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-xcompile.patch
 
 # set up environment variables for cross compilation
 export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin11/4.2.1/include/ -I$SDKROOT/usr/include/"
@@ -48,7 +49,7 @@ mkdir extralibs||echo "foo"
 ln -s "$SDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib || echo "sdf"
 
 # Copy our setup for modules
-try cp ../python_files/ModulesSetup Modules/Setup.local
+try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
 
 try ./configure CC="$ARM_CC" LD="$ARM_LD" \
 	CFLAGS="$ARM_CFLAGS" LDFLAGS="$ARM_LDFLAGS -Lextralibs/" \

@@ -1,13 +1,14 @@
 #!/bin/bash
 
-. environment.sh
+. $(dirname $0)/environment.sh
 
-try ./build_python.sh
-try ./reduce_python.sh
-try ./build_sdl.sh
-try ./build_freetype.sh
-try ./build_sdlttf.sh
-try ./build_kivy.sh
+try $(dirname $0)/build-python.sh
+try $(dirname $0)/reduce-python.sh
+try $(dirname $0)/build-sdl.sh
+try $(dirname $0)/build-freetype.sh
+try $(dirname $0)/build-sdlttf.sh
+try $(dirname $0)/build-sdlmixer.sh
+try $(dirname $0)/build-kivy.sh
 
 echo '== Build done'
 echo "Available libraries in $BUILDROOT/lib"

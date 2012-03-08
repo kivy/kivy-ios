@@ -19,6 +19,7 @@ export FT_VERSION=2.4.8
 # where the build will be located
 export KIVYIOSROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
 export BUILDROOT="$KIVYIOSROOT/build"
+export TMPROOT="$KIVYIOSROOT/tmp"
 export CACHEROOT="$KIVYIOSROOT/.cache"
 
 # some tools
@@ -44,6 +45,7 @@ try mkdir -p $BUILDROOT
 try mkdir -p $BUILDROOT/include
 try mkdir -p $BUILDROOT/lib
 try mkdir -p $CACHEROOT
+try mkdir -p $TMPROOT
 
 # one method to deduplicate some symbol in libraries
 function deduplicate() {

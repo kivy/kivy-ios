@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. environment.sh
+. $(dirname $0)/environment.sh
 
 echo "Starting reducing=========="
 

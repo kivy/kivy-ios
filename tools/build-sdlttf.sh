@@ -1,14 +1,15 @@
 #!/bin/bash
 
-. environment.sh
+. $(dirname $0)/environment.sh
 
 if [ ! -f $CACHEROOT/SDL_ttf-$SDLTTF_VERSION.tar.gz ]; then
-	curl -L http://www.libsdl.org/projects/SDL_ttf/release/SDL_ttf-$SDLTTF_VERSION.tar.gz > $CACHEROOT/SDL_ttf-$SDLTTF_VERSION.tar.gz
-	tar xzf $CACHEROOT/SDL_ttf-$SDLTTF_VERSION.tar.gz
+	try curl -L http://www.libsdl.org/projects/SDL_ttf/release/SDL_ttf-$SDLTTF_VERSION.tar.gz > $CACHEROOT/SDL_ttf-$SDLTTF_VERSION.tar.gz
+	try tar xzf $CACHEROOT/SDL_ttf-$SDLTTF_VERSION.tar.gz
+	try mv SDL_ttf-$SDLTTF_VERSION $TMPROOT
 fi
 
-if [ ! -f SDL_ttf-$SDLTTF_VERSION/.libs/libSDL_ttf.a ]; then
-	pushd SDL_ttf-$SDLTTF_VERSION
+if [ ! -f $TMPROOT/SDL_ttf-$SDLTTF_VERSION/.libs/libSDL_ttf.a ]; then
+	pushd $TMPROOT/SDL_ttf-$SDLTTF_VERSION
 	rm libSDL_ttf.la
 	./configure --prefix=/usr/local/iphone \
 		--host=arm-apple-darwin \
@@ -24,5 +25,5 @@ fi
 
 
 # copy to buildroot
-cp SDL_ttf-$SDLTTF_VERSION/.libs/libSDL_ttf.a $BUILDROOT/lib/libSDL_ttf.a
-cp -a SDL_ttf-$SDLTTF_VERSION/SDL_ttf.h $BUILDROOT/include
+cp $TMPROOT/SDL_ttf-$SDLTTF_VERSION/.libs/libSDL_ttf.a $BUILDROOT/lib/libSDL_ttf.a
+cp -a $TMPROOT/SDL_ttf-$SDLTTF_VERSION/SDL_ttf.h $BUILDROOT/include
