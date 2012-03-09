@@ -4,9 +4,11 @@ try () {
 	"$@" || exit -1
 }
 
+. $(dirname $0)/environment.sh
+
 APPNAME=$1
 APPID=$(echo $APPNAME | tr '[A-Z]' '[a-z]')
-APPDIR=$(dirname $0)/app-$APPID
+APPDIR=$KIVYIOSROOT/app-$APPID
 SRCDIR=$2
 
 if [ "X$APPNAME" == "X" ]; then

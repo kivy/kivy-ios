@@ -21,7 +21,7 @@ fi
 pushd $TMPROOT/kivy
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
 export CFLAGS="$ARM_CFLAGS"
-make ios
+try make ios
 popd
 
 # FIXME this part is build/cpu dependent :/
