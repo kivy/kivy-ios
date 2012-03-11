@@ -4,6 +4,9 @@
 
 if [ ! -f $CACHEROOT/SDL_ttf-$SDLTTF_VERSION.tar.gz ]; then
 	try curl -L http://www.libsdl.org/projects/SDL_ttf/release/SDL_ttf-$SDLTTF_VERSION.tar.gz > $CACHEROOT/SDL_ttf-$SDLTTF_VERSION.tar.gz
+fi
+if [ ! -d $TMPROOT/SDL_ttf-$SDLTTF_VERSION ]; then
+	try rm -rf $TMPROOT/SDL_ttf-$SDLTTF_VERSION
 	try tar xzf $CACHEROOT/SDL_ttf-$SDLTTF_VERSION.tar.gz
 	try mv SDL_ttf-$SDLTTF_VERSION $TMPROOT
 fi
