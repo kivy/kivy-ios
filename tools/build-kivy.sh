@@ -19,9 +19,13 @@ if [ "X$1" = "X-f" ] ; then
 fi
 
 pushd $TMPROOT/kivy
+OLD_CFLAGS="$CFLAGS"
+OLD_LDSHARED="$LDSHARED"
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
 export CFLAGS="$ARM_CFLAGS"
 try make ios
+export LDSHARED="$OLD_LDSHARED"
+export CFLAGS="$OLD_CFLAGS"
 popd
 
 # FIXME this part is build/cpu dependent :/

@@ -14,14 +14,14 @@ fi
 
 # lib not found, compile it
 pushd $TMPROOT/freetype-$FT_VERSION
-./configure --prefix=/usr/local/iphone \
+try ./configure --prefix=/usr/local/iphone \
 	--host=arm-apple-darwin \
 	--enable-static=yes \
 	--enable-shared=no \
 	CC="$ARM_CC" AR="$ARM_AR" \
 	LDFLAGS="$ARM_LDFLAGS" CFLAGS="$ARM_CFLAGS"
-make clean
-make
+try make clean
+try make
 
 # copy to buildroot
 cp objs/.libs/libfreetype.a $BUILDROOT/lib/libfreetype.a
