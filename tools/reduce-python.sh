@@ -9,6 +9,10 @@ fi
 
 echo "Starting reducing python 2.7"
 
+try rm -rf $BUILDROOT/python/embed/include/python2.7
+try mkdir -p $BUILDROOT/python/embed/include/python2.7
+try cp $BUILDROOT/python/include/python2.7/pyconfig.h $BUILDROOT/python/embed/include/python2.7/pyconfig.h
+
 try cd $BUILDROOT/python/lib/python2.7
 find . -iname '*.pyc' | xargs rm
 find . -iname '*.py' | xargs rm

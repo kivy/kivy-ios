@@ -4,8 +4,10 @@ Python-*
 freetype-*
 SDL_*
 build/*
-SDL/Xcode-iPhoneOS/SDL/build/
+src/SDL/Xcode-iPhoneOS/SDL/build/
+tmp/*
 kivy/*
 libtremor/*
 libogg/*
-
+app-*
+.cache

@@ -22,6 +22,8 @@ int main(int argc, char *argv[]) {
     putenv("PYTHONOPTIMIZE=2");
     putenv("PYTHONDONTWRITEBYTECODE=1");
     putenv("PYTHONNOUSERSITE=1");
+    putenv("PYTHONPATH=.");
+    //putenv("PYTHONVERBOSE=1");
     
     // Kivy environment to prefer some implementation on ios platform
     putenv("KIVY_BUILD=ios");
