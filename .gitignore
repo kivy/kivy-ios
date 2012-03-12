@@ -11,3 +11,6 @@ libtremor/*
 libogg/*
 app-*
 .cache
+src/ios/build/
+src/ios/iosbuild/
+src/ios/ios.c
