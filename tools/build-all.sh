@@ -4,6 +4,7 @@
 
 try $(dirname $0)/build-python.sh
 try $(dirname $0)/reduce-python.sh
+try $(dirname $0)/build-ios.sh
 try $(dirname $0)/build-sdl.sh
 try $(dirname $0)/build-freetype.sh
 try $(dirname $0)/build-sdlttf.sh
