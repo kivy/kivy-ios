@@ -29,6 +29,8 @@
 		59994DB3148E564400863906 /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 59994DB2148E564400863906 /* lib */; };
 		596C7514150CFC75003F57D9 /* include in Resources */ = {isa = PBXBuildFile; fileRef = 596C7513150CFC75003F57D9 /* include */; };
 		59994E3B148E85C800863906 /* YourApp in Resources */ = {isa = PBXBuildFile; fileRef = 59994E3A148E85C800863906 /* YourApp */; };
+		59ED7D08150E0C4400A92BEE /* libios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59ED7D07150E0C4400A92BEE /* libios.a */; };
+		59ED7D0B150E325100A92BEE /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59ED7D0A150E325100A92BEE /* MessageUI.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,6 +57,8 @@
 		59994DB2148E564400863906 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = ../build/python/lib; sourceTree = SOURCE_ROOT; };
 		59994E3A148E85C800863906 /* YourApp */ = {isa = PBXFileReference; lastKnownFileType = folder; path = YourApp; sourceTree = "<group>"; };
 		596C7513150CFC75003F57D9 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = ../build/python/embed/include; sourceTree = "<group>"; };
+		59ED7D07150E0C4400A92BEE /* libios.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libios.a; path = ../build/lib/libios.a; sourceTree = "<group>"; };
+		59ED7D0A150E325100A92BEE /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* ##APPID##-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "##APPID##-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -63,6 +67,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				59ED7D0B150E325100A92BEE /* MessageUI.framework in Frameworks */,
+				59ED7D08150E0C4400A92BEE /* libios.a in Frameworks */,
 				598E035A14F8177A000D1362 /* libvorbisidec.a in Frameworks */,
 				598E035414F80578000D1362 /* libogg.a in Frameworks */,
 				598E034D14F80187000D1362 /* libSDL_mixer.a in Frameworks */,
@@ -144,9 +150,11 @@
 				598E035314F80578000D1362 /* libogg.a */,
 				598E034C14F80187000D1362 /* libSDL_mixer.a */,
 				59994DAC148E558600863906 /* libSDL.a */,
+				59ED7D07150E0C4400A92BEE /* libios.a */,
 				59994D9D148E352F00863906 /* libz.dylib */,
 				59994D8F148D686900863906 /* libbz2.dylib */,
 				59994D8C148D48E300863906 /* ImageIO.framework */,
+				59ED7D0A150E325100A92BEE /* MessageUI.framework */,
 				010731C1137F20B800A8D3A0 /* AudioToolbox.framework */,
 				010731C3137F20C300A8D3A0 /* QuartzCore.framework */,
 				01790B7A137E5ED900E037D1 /* OpenGLES.framework */,
