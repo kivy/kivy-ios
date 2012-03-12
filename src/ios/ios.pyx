@@ -95,8 +95,12 @@ def send_email(subject, text, mimetype=None, filename=None, filename_alias=None,
     cdef char *j_filename_alias = NULL
 
     if subject is not None:
+        if type(subject) is unicode:
+            subject = subject.encode('UTF-8')
         j_subject = <bytes>subject
     if text is not None:
+        if type(text) is unicode:
+            text = text.encode('UTF-8')
         j_text = <bytes>text
     if mimetype is not None:
         j_mimetype = <bytes>mimetype
@@ -105,6 +109,8 @@ def send_email(subject, text, mimetype=None, filename=None, filename_alias=None,
 
         if filename_alias is None:
             filename_alias = basename(filename)
+        if type(filename_alias) is unicode:
+            filename_alias = filename_alias.encode('UTF-8')
         j_filename_alias = <bytes>filename_alias
 
 
