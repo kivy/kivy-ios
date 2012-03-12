@@ -4,6 +4,6 @@
 typedef void (*ios_send_email_cb)(char *, void *);
 
 int ios_send_email(char *subject, char *text, char *mimetype, char *filename,
-	ios_send_email_cb callback, void *userdata);
+	char *filename_alias, ios_send_email_cb callback, void *userdata);
 
 #endif

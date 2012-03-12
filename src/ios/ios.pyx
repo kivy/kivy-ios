@@ -7,11 +7,12 @@ IOS module is wrapping some part of the IOS features.
 '''
 
 from python_ref cimport Py_INCREF, Py_DECREF
+from os.path import basename
 
 cdef extern from "ios_wrapper.h":
     ctypedef void (*ios_send_email_cb)(char *, void *)
     int ios_send_email(char *subject, char *text, char *mimetype, char
-            *filename, ios_send_email_cb cb, void *userdata)
+            *filename, char *filename_alias, ios_send_email_cb cb, void *userdata)
 
 cdef void _send_email_done(char *status, void *data):
     cdef object callback = <object>data
@@ -25,7 +26,7 @@ cdef void _send_email_done(char *status, void *data):
 
 __version__ = (1, 0, 0)
 
-def send_email(subject, text, mimetype=None, filename=None, callback=None):
+def send_email(subject, text, mimetype=None, filename=None, filename_alias=None, callback=None):
     '''Send an email using the IOS api.
 
     :Parameters:
@@ -37,6 +38,9 @@ def send_email(subject, text, mimetype=None, filename=None, callback=None):
             Mimetype of the attachment if exist
         `filename`: str
             Full path of the filename to attach, must be used with mimetype.
+        `filename_alias`: str
+            Name of the file that will be shown to the user. If none is set, it
+            will use the basename of filename.
         `callback`: func(status)
             Callback that can be called when the email interface have been
             removed. A status will be passed as the first argument: "cancelled",
@@ -88,6 +92,7 @@ def send_email(subject, text, mimetype=None, filename=None, callback=None):
     cdef char *j_subject = NULL
     cdef char *j_text = NULL
     cdef char *j_title = NULL
+    cdef char *j_filename_alias = NULL
 
     if subject is not None:
         j_subject = <bytes>subject
@@ -98,10 +103,15 @@ def send_email(subject, text, mimetype=None, filename=None, callback=None):
     if filename is not None:
         j_filename = <bytes>filename
 
+        if filename_alias is None:
+            filename_alias = basename(filename)
+        j_filename_alias = <bytes>filename_alias
+
+
     Py_INCREF(callback)
 
     if ios_send_email(j_subject, j_text, j_mimetype, j_filename,
-            _send_email_done, <void *>callback) == 0:
+            j_filename_alias, _send_email_done, <void *>callback) == 0:
         callback('failed')
         return 0
 

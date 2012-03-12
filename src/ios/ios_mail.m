@@ -65,7 +65,7 @@ UIViewController *get_viewcontroller(void) {
 @end
 
 int ios_send_email(char *subject, char *text, char *mimetype, char *filename,
-	ios_send_email_cb callback, void *userdata)
+	char *filename_alias, ios_send_email_cb callback, void *userdata)
 {
 
 	UIViewController* viewController = get_viewcontroller();
@@ -93,8 +93,9 @@ int ios_send_email(char *subject, char *text, char *mimetype, char *filename,
 	if ( mimetype != NULL && filename != NULL ) {
 		NSString *nsmimetype = [NSString stringWithCString:(char *)mimetype encoding:NSUTF8StringEncoding];
 		NSString *nsfilename = [NSString stringWithCString:(char *)filename encoding:NSUTF8StringEncoding];
+		NSString *nsalias = [NSString stringWithCString:(char *)filename_alias encoding:NSUTF8StringEncoding];
 		NSData *myData = [NSData dataWithContentsOfFile:nsfilename];
-		[controller addAttachmentData:myData mimeType:nsmimetype fileName:nsfilename];
+		[controller addAttachmentData:myData mimeType:nsmimetype fileName:nsalias];
 	}
 
 	controller.modalPresentationStyle = UIModalPresentationPageSheet;
