@@ -59,7 +59,7 @@ UIViewController *get_viewcontroller(void) {
 	}
 
 	[viewController becomeFirstResponder];
-	[viewController dismissModalViewControllerAnimated:YES];
+	[viewController dismissModalViewControllerAnimated:NO];
 }
 
 @end
@@ -99,7 +99,7 @@ int ios_send_email(char *subject, char *text, char *mimetype, char *filename,
 	}
 
 	controller.modalPresentationStyle = UIModalPresentationPageSheet;
-	[viewController presentModalViewController:controller animated:YES];
+	[viewController presentModalViewController:controller animated:NO];
 	[controller release];
 
 	return 1;

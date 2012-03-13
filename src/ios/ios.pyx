@@ -6,7 +6,7 @@ IOS module is wrapping some part of the IOS features.
 
 '''
 
-from python_ref cimport Py_INCREF, Py_DECREF
+from cpython cimport Py_INCREF, Py_DECREF
 from os.path import basename
 
 cdef extern from "ios_wrapper.h":
