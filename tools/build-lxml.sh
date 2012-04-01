@@ -90,7 +90,7 @@ export LDSHARED="$KIVYIOSROOT/tools/liblink"
 pushd $TMPROOT/lxml-$LXML_VERSION
 HOSTPYTHON=$TMPROOT/Python-$PYTHON_VERSION/hostpython
 try $HOSTPYTHON setup.py build_ext
-try $HOSTPYTHON setup.py install -O2
+try $HOSTPYTHON setup.py install -O2 --root iosbuild
 popd
 
 export CC="$OLD_CC"
