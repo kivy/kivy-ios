@@ -7,8 +7,8 @@ try () {
 }
 
 # iOS SDK Environmnent
-export SDKVER=5.0
-export DEVROOT=/Developer/Platforms/iPhoneOS.platform/Developer
+export SDKVER=`xcodebuild -showsdks | fgrep "iphoneos" | tail -n 1 | awk '{print $2}'`
+export DEVROOT=`xcode-select -print-path`/Platforms/iPhoneOS.platform/Developer
 export SDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
 
 # version of packages

@@ -27,6 +27,7 @@ try cp -a $TEMPLATESDIR/template.xcodeproj $APPDIR/$APPID.xcodeproj
 echo "-> Customize templates"
 try find $APPDIR -type f -exec sed -i '' "s/##APPID##/$APPID/g" {} \;
 try find $APPDIR -type f -exec sed -i '' "s/##APPNAME##/$APPNAME/g" {} \;
+try find $APPDIR -type f -exec sed -i '' "s/##SDKVER##/$SDKVER/g" {} \;
 
 echo "-> Done !"
 
