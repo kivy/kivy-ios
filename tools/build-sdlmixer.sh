@@ -15,7 +15,9 @@ if [ ! -d libtremor ]; then
 	try mkdir libtremor
 	try cd libtremor
 	try svn co http://svn.xiph.org/trunk/Tremor tremor
-	try cd ..
+	try cd tremor
+	try patch -p0 < $KIVYIOSROOT/src/tremor-configure.patch
+	try cd ../..
 fi
 if [ ! -d libogg ]; then
 	try curl -L http://downloads.xiph.org/releases/ogg/libogg-1.3.0.tar.gz > $CACHEROOT/libogg-1.3.0.tar.gz
@@ -40,12 +42,14 @@ if [ ! -f libtremor/tremor/.libs/libvorbisidec.a ]; then
 	echo > asm_arm.h
 	CC="$ARM_CC" AR="$ARM_AR" \
 	LDFLAGS="$ARM_LDFLAGS" CFLAGS="$ARM_CFLAGS" \
+	OGG_CFLAGS="-I../../libogg/include" \
+	OGG_LDFLAGS="-L../../libogg/src/.libs" \
+	PKG_CONFIG_LIBDIR="../../libogg" \
 	ACLOCAL_FLAGS="-I /usr/local/share/aclocal" ./autogen.sh \
 		--disable-shared \
 		--host=arm-apple-darwin \
 		--enable-static=yes \
-		--enable-shared=no \
-		--with-ogg-includes=../../libogg/include
+		--enable-shared=no
 	try make
 	try cd ../..
 fi
