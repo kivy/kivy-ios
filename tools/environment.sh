@@ -11,6 +11,16 @@ export SDKVER=`xcodebuild -showsdks | fgrep "iphoneos" | tail -n 1 | awk '{print
 export DEVROOT=`xcode-select -print-path`/Platforms/iPhoneOS.platform/Developer
 export SDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
 
+if [ ! -d $DEVROOT ]; then
+	echo "Unable to found the Xcode iPhoneOS.platform"
+	echo
+	echo "The path is automatically set from 'xcode-select -print-path'"
+	echo " + /Platforms/iPhoneOS.platform/Developer"
+	echo
+	echo "Ensure 'xcode-select -print-path' is set."
+	exit 1
+fi
+
 # version of packages
 export PYTHON_VERSION=2.7.1
 export SDLTTF_VERSION=2.0.10
