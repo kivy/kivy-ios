@@ -30,6 +30,11 @@ if [ ! -d $TMPROOT/lxml-$LXML_VERSION ]; then
 	try mv lxml-$LXML_VERSION $TMPROOT
 fi
 
+PREFIX=$TMPROOT/lxmlinstall
+if [ ! -d $PREFIX ]; then
+	try mkdir $PREFIX
+fi
+
 # build libxml2
 pushd $TMPROOT/libxml2-$XML2_VERSION
 if [ ! -f .libs/libxml2.a ]; then
@@ -44,12 +49,14 @@ if [ ! -f .libs/libxml2.a ]; then
 		--without-docbook \
 		--without-python \
 		--without-iconv \
+		--prefix=$PREFIX \
 		CC="$ARM_CC" AR="$ARM_AR" \
 		LDFLAGS="$ARM_LDFLAGS" CFLAGS="$ARM_CFLAGS"
 	try sed -i '' 's/ runtest\$(EXEEXT) \\/ \\/' Makefile
 	try sed -i '' 's/ testrecurse\$(EXEEXT)$//' Makefile
-	try make clean
+	try make clean install
 	try make
+	try make install
 	try cp .libs/libxml2.a $BUILDROOT/lib/libxml2.a
 	try cp -a include $BUILDROOT/include/libxml2
 fi
@@ -66,11 +73,13 @@ if [ ! -f libxslt/.libs/libxslt.a ]; then
 		--without-python \
 		--without-crypto \
 		--with-libxml-src=$TMPROOT/libxml2-$XML2_VERSION \
+		--prefix=$PREFIX \
 		CC="$ARM_CC" AR="$ARM_AR" \
 		LDFLAGS="$ARM_LDFLAGS" CFLAGS="$ARM_CFLAGS"
 
 	try make clean
 	try make
+	try make install
 
 	try cp libxslt/.libs/libxslt.a $BUILDROOT/lib/libxslt.a
 	try cp libexslt/.libs/libexslt.a $BUILDROOT/lib/libexslt.a
@@ -81,21 +90,30 @@ popd
 OLD_CC="$CC"
 OLD_LDFLAGS="$LDFLAGS"
 OLD_LDSHARED="$LDSHARED"
-export CC="$ARM_CC -I$BUILDROOT/include -I$TMPROOT/libxslt-$XSLT_VERSION"
-export LDFLAGS="$ARM_LDFLAGS -L$TMPROOT/libxslt-$XSLT_VERSION/libxslt/.libs"
-export LDFLAGS="$LDFLAGS -L$TMPROOT/libxslt-$XSLT_VERSION/libexslt/.libs"
-export LDFLAGS="$LDFLAGS -L$TMPROOT/libxml2-$XML2_VERSION/.libs"
+OLD_PATH="$PATH"
+export PATH="$PREFIX/bin:$PATH"
+export CC="$ARM_CC -I$PREFIX/include"
+export LDFLAGS="$ARM_LDFLAGS -L$PREFIX/lib"
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
 
 pushd $TMPROOT/lxml-$LXML_VERSION
 HOSTPYTHON=$TMPROOT/Python-$PYTHON_VERSION/hostpython
-try $HOSTPYTHON setup.py build_ext
+XML2_CONFIG=$PREFIX/bin/xml2-config
+XSLT_CONFIG=$PREFIX/bin/xslt-config
+find . -name *.pyx -exec cython -t {} \;
+try $HOSTPYTHON setup.py build_ext 
 try $HOSTPYTHON setup.py install -O2 --root iosbuild
+
+find iosbuild/ | grep -E '*\.(py|pyc|so\.o|so\.a|so\.libs)$$' | xargs rm
+-rm -rdf "$BUILDROOT/python/lib/python2.7/site-packages/lxml"
+try cp -R "iosbuild/usr/local/lib/python2.7/site-packages/lxml" "$BUILDROOT/python/lib/python2.7/site-packages"
+
 popd
 
 export CC="$OLD_CC"
 export LDFLAGS="$OLD_LDFLAGS"
 export LDSHARED="$OLD_LDSHARED"
+export PATH="$OLD_PATH"
 
 bd=$TMPROOT/lxml-$LXML_VERSION/build/lib.macosx-*/lxml
 try $KIVYIOSROOT/tools/biglink $BUILDROOT/lib/liblxml.a $bd
