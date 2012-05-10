@@ -13,6 +13,7 @@ cdef extern from "ios_wrapper.h":
     ctypedef void (*ios_send_email_cb)(char *, void *)
     int ios_send_email(char *subject, char *text, char *mimetype, char
             *filename, char *filename_alias, ios_send_email_cb cb, void *userdata)
+    void ios_open_url(char *url)
 
 cdef void _send_email_done(char *status, void *data):
     cdef object callback = <object>data
@@ -21,10 +22,42 @@ cdef void _send_email_done(char *status, void *data):
 
 
 #
+# Support for webbrowser module
+#
+
+class IosBrowser(object):
+    def open(self, url, new=0, autoraise=True):
+        open_url(url)
+    def open_new(self, url):
+        open_url(url)
+    def open_new_tab(self, url):
+        open_url(url)
+
+import webbrowser
+webbrowser.register('ios', IosBrowser, None, -1)
+
+#
 # API
 #
 
-__version__ = (1, 0, 0)
+__version__ = (1, 1, 0)
+
+def open_url(url):
+    '''Open an URL in Safari
+
+    :Parameters:
+        `url`: str
+            The url string
+    '''
+    cdef char *j_url = NULL
+
+    if url is not None:
+        if type(url) is unicode:
+            url = url.encode('UTF-8')
+        j_url = <bytes>url
+
+    ios_open_url(j_url)
+
 
 def send_email(subject, text, mimetype=None, filename=None, filename_alias=None, callback=None):
     '''Send an email using the IOS api.
