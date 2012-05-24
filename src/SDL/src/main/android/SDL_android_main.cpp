@@ -33,8 +33,8 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass c
     argv[1] = NULL;
     status = SDL_main(1, argv);
 
-    /* We exit here for consistency with other platforms. */
-    exit(status);
+    /* Do not issue an exit or the whole application will terminate instead of just the SDL thread */
+    //exit(status);
 }
 
 #endif /* __ANDROID__ */

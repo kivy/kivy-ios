@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -140,6 +140,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
     SDL_Window *window;
     for (window = _this->windows; window != nil; window = window->next) {
+        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
         SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
     }
 }
@@ -156,6 +157,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
     SDL_Window *window;
     for (window = _this->windows; window != nil; window = window->next) {
+        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_GAINED, 0, 0);
         SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
     }
 }

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -113,11 +113,10 @@
     const UIInterfaceOrientation toInterfaceOrientation = [self interfaceOrientation];
     SDL_WindowData *data = self->window->driverdata;
     UIWindow *uiwindow = data->uiwindow;
-    UIScreen *uiscreen;
-    if (SDL_UIKit_supports_multiple_displays)
-        uiscreen = [uiwindow screen];
-    else
-        uiscreen = [UIScreen mainScreen];
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(self->window);
+    SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
+    SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
+    UIScreen *uiscreen = displaydata->uiscreen;
     const int noborder = (self->window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_BORDERLESS));
     CGRect frame = noborder ? [uiscreen bounds] : [uiscreen applicationFrame];
     const CGSize size = frame.size;
@@ -140,6 +139,9 @@
             SDL_assert(0 && "Unexpected interface orientation!");
             return;
     }
+
+    w = (int)(w * displaymodedata->scale);
+    h = (int)(h * displaymodedata->scale);
 
     [uiwindow setFrame:frame];
     [data->view setFrame:frame];

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -86,12 +86,14 @@ void
 SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
 {
     int i;
+    Sint16 value;
     float values[3];
 
-    Android_JNI_GetAccelerometerValues(values);
-
-    for ( i = 0; i < 3; i++ ) {
-        SDL_PrivateJoystickAxis(joystick, i, values[i]);
+    if (Android_JNI_GetAccelerometerValues(values)) {
+        for ( i = 0; i < 3; i++ ) {
+            value = (Sint16)(values[i] * 32767.0f);
+            SDL_PrivateJoystickAxis(joystick, i, value);
+        }
     }
 }
 

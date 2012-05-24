@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -153,8 +153,11 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)windowDidResize:(NSNotification *)aNotification
 {
     SDL_VideoDevice *device = SDL_GetVideoDevice();
-    int w, h;
+    int x, y, w, h;
     NSRect rect = [_data->nswindow contentRectForFrameRect:[_data->nswindow frame]];
+    ConvertNSRect(&rect);
+    x = (int)rect.origin.x;
+    y = (int)rect.origin.y;
     w = (int)rect.size.width;
     h = (int)rect.size.height;
     if (SDL_IsShapedWindow(_data->window))
@@ -164,6 +167,9 @@ static __inline__ void ConvertNSRect(NSRect *r)
         [((NSOpenGLContext *) device->current_glctx) update];
     }
 
+    /* The window can move during a resize event, such as when maximizing
+       or resizing from a corner */
+    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_MOVED, x, y);
     SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_RESIZED, w, h);
 }
 
@@ -307,9 +313,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
             CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
         } else {
             SDL_SetMouseFocus(NULL);
-
-            [[NSCursor arrowCursor] set];
-            [NSCursor unhide];
+            SDL_SetCursor(NULL);
         }
     }
 }
@@ -526,9 +530,13 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     /* Fill in the SDL window with the window data */
     {
         NSRect rect = [nswindow contentRectForFrameRect:[nswindow frame]];
-        NSView *contentView = [[SDLView alloc] initWithFrame:rect];
-        [nswindow setContentView: contentView];
-        [contentView release];
+        NSView *contentView = [ nswindow contentView ];
+        /* Create view if not already exists */
+        if (!contentView) {
+            contentView = [[SDLView alloc] initWithFrame:rect];
+            [nswindow setContentView: contentView];
+            [contentView release];
+        }
 
         ConvertNSRect(&rect);
         window->x = (int)rect.origin.x;

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -26,13 +26,43 @@
 #include <stdlib.h>
 #include <nds.h>
 
-#include <gl2d.h>
+#include "SDL_libgl2D.h"
 
 #include "SDL_video.h"
 #include "../../video/SDL_sysvideo.h"
 #include "SDL_render.h"
 #include "../SDL_sysrender.h"
 #include "SDL_log.h"
+
+/* Draws a partial sprite. Based on glSprite. */
+static void glSpritePartial(const SDL_Rect * srcrect, int x, int y, int flipmode, const glImage *spr)
+{
+	int x1 = x;
+	int y1 = y;
+	int x2 = x + srcrect->w;
+	int y2 = y + srcrect->h;
+
+	int	u1 = srcrect->x + ((flipmode & GL_FLIP_H) ? spr->width-1  : 0);
+ 	int	u2 = srcrect->x + ((flipmode & GL_FLIP_H) ? 0 : srcrect->h);
+	int v1 = srcrect->y + ((flipmode & GL_FLIP_V) ? spr->height-1 : 0);
+ 	int v2 = srcrect->y + ((flipmode & GL_FLIP_V) ? 0 : srcrect->h);
+
+    if (spr->textureID != gCurrentTexture) {
+        glBindTexture(GL_TEXTURE_2D, spr->textureID);
+        gCurrentTexture = spr->textureID;
+    }
+
+	glBegin(GL_QUADS);
+		
+		gxTexcoord2i(u1, v1); gxVertex3i(x1, y1, g_depth);	
+		gxTexcoord2i(u1, v2); gxVertex2i(x1, y2);
+		gxTexcoord2i(u2, v2); gxVertex2i(x2, y2);
+		gxTexcoord2i(u2, v1); gxVertex2i(x2, y1);
+		
+	glEnd();
+	
+	g_depth++;
+}
 
 /* SDL NDS renderer implementation */
 
@@ -48,7 +78,6 @@ typedef struct
 {
 	glImage image[1];
 } NDS_TextureData;
-
 
 static int NDS_UpdateViewport(SDL_Renderer *renderer)
 {
@@ -70,9 +99,9 @@ NDS_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 		dest_y = dstrect->y-SCREEN_HEIGHT;
 	}
 
-	if (texture->w == dstrect->w && texture->h == dstrect->h) {
+	if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
 		/* No scaling */
-		glSprite(dstrect->x, dest_y, GL_FLIP_NONE, txdat->image);
+		glSpritePartial(srcrect, dstrect->x, dest_y, GL_FLIP_NONE, txdat->image);
 	} else {
 		/* Convert the scaling proportion into a 20.12 value. */
 		s32 scale_w = divf32(dstrect->w << 12, texture->w << 12);
@@ -153,15 +182,42 @@ static int NDS_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 							 const SDL_Rect * rect, const void *pixels, int pitch)
 {
     NDS_TextureData *txdat = (NDS_TextureData *) texture->driverdata;
+	char *new_pixels = NULL;
+	const int gl_w = get_gltexture_size(rect->w);
+	const int gl_h = get_gltexture_size(rect->h);
+	const int w = 1 << (3+gl_w);	/* Texture sizes must be a power of 2. */
+	const int h = 1 << (3+gl_h);	/* Texture sizes must be a power of 2. */
 
-	glLoadTileSet(txdat->image,
-				  rect->w, rect->h,
+	if (w != rect->w || h != rect->h) {
+		/* Allocate a temporary surface and copy pixels into it while
+		 * enlarging the pitch. */
+		const char *src;
+		char *dst;
+		int new_pitch = 2 * w;
+		int i;
+
+		new_pixels = malloc(2 * w * h);
+		if (!new_pixels)
+			return SDL_ENOMEM;
+
+		src = pixels;
+		dst = new_pixels;
+		for (i=0; i<rect->h; i++) {
+			memcpy(dst, src, pitch);
+			src += pitch;
+			dst += new_pitch;
+		}
+	}
+
+	glLoadTile(txdat->image,
+				  gl_w, gl_h,
 				  rect->w, rect->h,
 				  texture->format == SDL_PIXELFORMAT_ABGR1555 ? GL_RGBA : GL_RGB,
-				  get_gltexture_size(rect->w),
-				  get_gltexture_size(rect->h),
 				  TEXGEN_OFF, 0, NULL,
-				  pixels);
+				  new_pixels? new_pixels : pixels);
+
+	if (new_pixels)
+		free(new_pixels);
 
     return 0;
 }
@@ -193,7 +249,6 @@ static int NDS_RenderClear(SDL_Renderer *renderer)
 static void NDS_RenderPresent(SDL_Renderer * renderer)
 {
     NDS_RenderData *data = (NDS_RenderData *) renderer->driverdata;
-	static int frame =0;
 
 	glEnd2D();
 		
@@ -324,18 +379,20 @@ NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->info = NDS_RenderDriver.info;
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
-	renderer->UpdateViewport = NDS_UpdateViewport;
-    renderer->CreateTexture = NDS_CreateTexture;
-	renderer->DestroyTexture = NDS_DestroyTexture;
-	renderer->RenderCopy = NDS_RenderCopy;	
+	renderer->CreateTexture = NDS_CreateTexture;
 	renderer->UpdateTexture = NDS_UpdateTexture;
 	renderer->LockTexture = NDS_LockTexture;
 	renderer->UnlockTexture = NDS_UnlockTexture;
+	renderer->UpdateViewport = NDS_UpdateViewport;
 	renderer->RenderClear = NDS_RenderClear;
-	renderer->RenderPresent = NDS_RenderPresent;
 	renderer->RenderDrawPoints = NDS_RenderDrawPoints;
 	renderer->RenderDrawLines = NDS_RenderDrawLines;
 	renderer->RenderFillRects = NDS_RenderFillRects;
+	renderer->RenderCopy = NDS_RenderCopy;
+	/* renderer->RenderReadPixels = NDS_RenderReadPixels; - todo ? */
+	renderer->RenderPresent = NDS_RenderPresent;
+	renderer->DestroyTexture = NDS_DestroyTexture;
+	/* renderer->DestroyRenderer = NDS_DestroyRenderer; - todo ? */
 
 	renderer->driverdata = data;
 

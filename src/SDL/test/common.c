@@ -359,6 +359,10 @@ CommonArg(CommonState * state, int index)
         /* Print the usage message */
         return -1;
     }
+    if (SDL_strcmp(argv[index], "-NSDocumentRevisionsDebugMode") == 0) {
+	/* Debug flag sent by Xcode */
+        return 2;
+    }
     return 0;
 }
 

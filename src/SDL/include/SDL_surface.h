@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -51,6 +51,7 @@ extern "C" {
  *  Used internally (read-only).
  */
 /*@{*/
+#define SDL_SWSURFACE       0           /**< Just here for compatibility */
 #define SDL_PREALLOC        0x00000001  /**< Surface uses preallocated memory */
 #define SDL_RLEACCEL        0x00000002  /**< Surface is RLE encoded */
 #define SDL_DONTFREE        0x00000004  /**< Surface is referenced internally */
@@ -208,10 +209,12 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceRLE(SDL_Surface * surface,
  *  \brief Sets the color key (transparent pixel) in a blittable surface.
  *  
  *  \param surface The surface to update
- *  \param flag Non-zero to enable colorkey and 0 to disable colorkey 
+ *  \param flag Non-zero to enable colorkey and 0 to disable colorkey
  *  \param key The transparent pixel in the native surface format
  *  
  *  \return 0 on success, or -1 if the surface is not valid
+ *
+ *  You can pass SDL_RLEACCEL to enable RLE accelerated blits.
  */
 extern DECLSPEC int SDLCALL SDL_SetColorKey(SDL_Surface * surface,
                                             int flag, Uint32 key);

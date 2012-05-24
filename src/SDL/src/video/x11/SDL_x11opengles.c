@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,7 +25,10 @@
 #include "SDL_x11video.h"
 #include "SDL_x11opengles.h"
 
-#define DEFAULT_OPENGL	"/usr/lib/libGLES_CM.so"
+#define DEFAULT_EGL "libEGL.so"
+#define DEFAULT_OGL_ES2 "libGLESv2.so"
+#define DEFAULT_OGL_ES_PVR "libGLES_CM.so"
+#define DEFAULT_OGL_ES "libGLESv1_CM.so"
 
 #define LOAD_FUNC(NAME) \
 	*((void**)&_this->gles_data->NAME) = dlsym(handle, #NAME); \
@@ -44,13 +47,15 @@ X11_GLES_GetProcAddress(_THIS, const char *proc)
     void *handle;
     void *retval;
 
-    handle = _this->gl_config.dll_handle;
+    handle = _this->gles_data->egl_dll_handle;
     if (_this->gles_data->eglGetProcAddress) {
         retval = _this->gles_data->eglGetProcAddress(proc);
         if (retval) {
             return retval;
         }
     }
+    
+    handle = _this->gl_config.dll_handle;
 #if defined(__OpenBSD__) && !defined(__ELF__)
 #undef dlsym(x,y);
 #endif
@@ -70,6 +75,7 @@ X11_GLES_UnloadLibrary(_THIS)
         _this->gles_data->eglTerminate(_this->gles_data->egl_display);
 
         dlclose(_this->gl_config.dll_handle);
+        dlclose(_this->gles_data->egl_dll_handle);
 
         _this->gles_data->eglGetProcAddress = NULL;
         _this->gles_data->eglChooseConfig = NULL;
@@ -111,7 +117,7 @@ X11_GLES_LoadLibrary(_THIS, const char *path)
         dlclose(handle);
         path = getenv("SDL_VIDEO_GL_DRIVER");
         if (path == NULL) {
-            path = DEFAULT_OPENGL;
+            path = DEFAULT_EGL;
         }
         handle = dlopen(path, dlopen_flags);
     }
@@ -137,6 +143,7 @@ X11_GLES_LoadLibrary(_THIS, const char *path)
     LOAD_FUNC(eglDestroySurface);
     LOAD_FUNC(eglMakeCurrent);
     LOAD_FUNC(eglSwapBuffers);
+    LOAD_FUNC(eglSwapInterval);
 
     _this->gles_data->egl_display =
         _this->gles_data->eglGetDisplay((NativeDisplayType) data->display);
@@ -150,6 +157,29 @@ X11_GLES_LoadLibrary(_THIS, const char *path)
         eglInitialize(_this->gles_data->egl_display, NULL,
                       NULL) != EGL_TRUE) {
         SDL_SetError("Could not initialize EGL");
+        return -1;
+    }
+
+    _this->gles_data->egl_dll_handle = handle;
+
+    path = getenv("SDL_VIDEO_GL_DRIVER");
+    handle = dlopen(path, dlopen_flags);
+    if ((path == NULL) | (handle == NULL)) {
+        if (_this->gl_config.major_version > 1) {
+            path = DEFAULT_OGL_ES2;
+            handle = dlopen(path, dlopen_flags);
+        } else {
+            path = DEFAULT_OGL_ES;
+            handle = dlopen(path, dlopen_flags);
+            if (handle == NULL) {
+                path = DEFAULT_OGL_ES_PVR;
+                handle = dlopen(path, dlopen_flags);
+            }
+        }
+    }
+
+    if (handle == NULL) {
+        SDL_SetError("Could not initialize OpenGL ES library");
         return -1;
     }
 
@@ -218,6 +248,13 @@ X11_GLES_GetVisual(_THIS, Display * display, int screen)
         attribs[i++] = _this->gl_config.multisamplesamples;
     }
 
+    attribs[i++] = EGL_RENDERABLE_TYPE;
+    if (_this->gl_config.major_version == 2) {
+        attribs[i++] = EGL_OPENGL_ES2_BIT;
+    } else {
+        attribs[i++] = EGL_OPENGL_ES_BIT;
+    }
+
     attribs[i++] = EGL_NONE;
 
     if (_this->gles_data->eglChooseConfig(_this->gles_data->egl_display,
@@ -260,17 +297,26 @@ X11_GLES_GetVisual(_THIS, Display * display, int screen)
 SDL_GLContext
 X11_GLES_CreateContext(_THIS, SDL_Window * window)
 {
-    int retval;
+    EGLint context_attrib_list[] = {
+        EGL_CONTEXT_CLIENT_VERSION,
+        1,
+        EGL_NONE
+    };
+
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
+    SDL_GLContext context = 1;
 
     XSync(display, False);
 
+    if (_this->gl_config.major_version) {
+        context_attrib_list[1] = _this->gl_config.major_version;
+    }
 
     _this->gles_data->egl_context =
         _this->gles_data->eglCreateContext(_this->gles_data->egl_display,
                                            _this->gles_data->egl_config,
-                                           EGL_NO_CONTEXT, NULL);
+                                           EGL_NO_CONTEXT, context_attrib_list);
     XSync(display, False);
 
     if (_this->gles_data->egl_context == EGL_NO_CONTEXT) {
@@ -279,13 +325,14 @@ X11_GLES_CreateContext(_THIS, SDL_Window * window)
     }
 
     _this->gles_data->egl_active = 1;
+    _this->gles_data->egl_swapinterval = 0;
 
-    if (_this->gles_data->egl_active)
-        retval = 1;
-    else
-        retval = 0;
+    if (X11_GLES_MakeCurrent(_this, window, context) < 0) {
+        X11_GLES_DeleteContext(_this, context);
+        return NULL;
+    }
 
-    return (retval);
+    return context;
 }
 
 int
@@ -309,17 +356,34 @@ X11_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     return (retval);
 }
 
-static int swapinterval = -1;
 int
 X11_GLES_SetSwapInterval(_THIS, int interval)
 {
-    return 0;
+    if (_this->gles_data->egl_active != 1) {
+        SDL_SetError("OpenGL ES context not active");
+        return -1;
+    }
+
+    EGLBoolean status;
+    status = _this->gles_data->eglSwapInterval(_this->gles_data->egl_display, interval);
+    if (status == EGL_TRUE) {
+        _this->gles_data->egl_swapinterval = interval;
+        return 0; 
+    }
+
+    SDL_SetError("Unable to set the EGL swap interval");
+    return -1;
 }
 
 int
 X11_GLES_GetSwapInterval(_THIS)
 {
-    return 0;
+    if (_this->gles_data->egl_active != 1) {
+        SDL_SetError("OpenGL ES context not active");
+        return -1;
+    }
+
+    return _this->gles_data->egl_swapinterval;
 }
 
 void

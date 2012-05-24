@@ -41,8 +41,6 @@ extern NativeWindowFactory X11WindowFactory;
    support to the build system, which is a little tricky.  You can uncomment
    it manually though and link testnativecocoa.m into the test application.
 */
-#if 1
 #define TEST_NATIVE_COCOA
 extern NativeWindowFactory CocoaWindowFactory;
-#endif
 #endif

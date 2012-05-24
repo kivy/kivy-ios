@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -39,6 +39,26 @@
 #define WGL_CONTEXT_FLAGS_ARB           0x2093
 #define WGL_CONTEXT_DEBUG_BIT_ARB       0x0001
 #define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB  0x0002
+
+#ifndef WGL_ARB_create_context_profile
+#define WGL_ARB_create_context_profile
+#define WGL_CONTEXT_PROFILE_MASK_ARB              0x9126
+#define WGL_CONTEXT_CORE_PROFILE_BIT_ARB          0x00000001
+#define WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
+#endif
+
+#ifndef WGL_ARB_create_context_robustness
+#define WGL_ARB_create_context_robustness
+#define WGL_CONTEXT_ROBUST_ACCESS_BIT_ARB         0x00000004
+#define WGL_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB     0x8256
+#define WGL_NO_RESET_NOTIFICATION_ARB                   0x8261
+#define WGL_LOSE_CONTEXT_ON_RESET_ARB                   0x8252
+#endif
+#endif
+
+#ifndef WGL_EXT_create_context_es2_profile
+#define WGL_EXT_create_context_es2_profile
+#define WGL_CONTEXT_ES2_PROFILE_BIT_EXT           0x00000004
 #endif
 
 typedef HGLRC(APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC,
@@ -398,7 +418,7 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
 {
     HDC hdc = ((SDL_WindowData *) window->driverdata)->hdc;
     PIXELFORMATDESCRIPTOR pfd;
-    int pixel_format;
+    int pixel_format = 0;
     int iAttribs[64];
     int *iAttr;
     float fAttribs[1] = { 0 };
@@ -468,16 +488,19 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
         *iAttr++ = _this->gl_config.multisamplesamples;
     }
 
-    if (_this->gl_config.accelerated >= 0) {
-        *iAttr++ = WGL_ACCELERATION_ARB;
-        *iAttr++ = (_this->gl_config.accelerated ? WGL_FULL_ACCELERATION_ARB :
-                                                   WGL_NO_ACCELERATION_ARB);
-    }
+    *iAttr++ = WGL_ACCELERATION_ARB;
+    *iAttr++ = WGL_FULL_ACCELERATION_ARB;
 
     *iAttr = 0;
 
     /* Choose and set the closest available pixel format */
-    pixel_format = WIN_GL_ChoosePixelFormatARB(_this, iAttribs, fAttribs);
+    if (_this->gl_config.accelerated != 0) {
+        pixel_format = WIN_GL_ChoosePixelFormatARB(_this, iAttribs, fAttribs);
+    }
+    if (!pixel_format && _this->gl_config.accelerated != 1) {
+        iAttr[-1] = WGL_NO_ACCELERATION_ARB;
+	pixel_format = WIN_GL_ChoosePixelFormatARB(_this, iAttribs, fAttribs);
+    }
     if (!pixel_format) {
         pixel_format = WIN_GL_ChoosePixelFormat(hdc, &pfd);
     }
@@ -521,11 +544,28 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
             SDL_SetError("GL 3.x is not supported");
             context = temp_context;
         } else {
-            int attribs[] = {
+	    /* max 8 attributes plus terminator */
+            int attribs[9] = {
                 WGL_CONTEXT_MAJOR_VERSION_ARB, _this->gl_config.major_version,
                 WGL_CONTEXT_MINOR_VERSION_ARB, _this->gl_config.minor_version,
                 0
             };
+	    int iattr = 4;
+
+	    /* SDL profile bits match WGL profile bits */
+	    if( _this->gl_config.profile_mask != 0 ) {
+	        attribs[iattr++] = WGL_CONTEXT_PROFILE_MASK_ARB;
+		attribs[iattr++] = _this->gl_config.profile_mask;
+	    }
+
+	    /* SDL flags match WGL flags */
+	    if( _this->gl_config.flags != 0 ) {
+	        attribs[iattr++] = WGL_CONTEXT_FLAGS_ARB;
+		attribs[iattr++] = _this->gl_config.flags;
+	    }
+
+	    attribs[iattr++] = 0;
+
             /* Create the GL 3.x context */
             context = wglCreateContextAttribsARB(hdc, 0, attribs);
             /* Delete the GL 2.x context */

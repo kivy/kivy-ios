@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,12 +25,9 @@
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
 
-/* #define DEBUG_CONVERT */
+#include "SDL_assert.h"
 
-/* !!! FIXME */
-#ifndef assert
-#define assert(x)
-#endif
+/* #define DEBUG_CONVERT */
 
 /* Effectively mix right and left channels into a single channel */
 static void SDLCALL
@@ -295,8 +292,9 @@ SDL_ConvertStereo(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     { \
         const type *src = (const type *) (cvt->buf + cvt->len_cvt); \
         type *dst = (type *) (cvt->buf + cvt->len_cvt * 2); \
-        for (i = cvt->len_cvt / 2; i; --i, --src) { \
+        for (i = cvt->len_cvt / sizeof(type); i; --i) { \
             const type val = *src; \
+            src -= 1; \
             dst -= 2; \
             dst[0] = dst[1] = val; \
         } \
@@ -880,9 +878,9 @@ SDL_FindFrequencyMultiple(const int src_rate, const int dst_rate)
     int lo, hi;
     int div;
 
-    assert(src_rate != 0);
-    assert(dst_rate != 0);
-    assert(src_rate != dst_rate);
+    SDL_assert(src_rate != 0);
+    SDL_assert(dst_rate != 0);
+    SDL_assert(src_rate != dst_rate);
 
     if (src_rate < dst_rate) {
         lo = src_rate;

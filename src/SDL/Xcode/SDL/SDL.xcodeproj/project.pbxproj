@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 44;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -62,8 +62,8 @@
 		006E94A8119511A1001DE610 /* sample.wav in Resources */ = {isa = PBXBuildFile; fileRef = 006E94A1119511A1001DE610 /* sample.wav */; };
 		006E94A9119511A1001DE610 /* utf8.txt in Resources */ = {isa = PBXBuildFile; fileRef = 006E94A2119511A1001DE610 /* utf8.txt */; };
 		006E94BC11951217001DE610 /* read in Copy rwops */ = {isa = PBXBuildFile; fileRef = 00D8DA121195093100638393 /* read */; };
-		006E94EF11951255001DE610 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BECDF66C0761BA81005FE872 /* SDL.framework */; };
-		006E94F01195125B001DE610 /* SDL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = BECDF66C0761BA81005FE872 /* SDL.framework */; };
+		006E94EF11951255001DE610 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BECDF66C0761BA81005FE872 /* SDL2.framework */; };
+		006E94F01195125B001DE610 /* SDL2.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = BECDF66C0761BA81005FE872 /* SDL2.framework */; };
 		007317A20858DECD00B2BC32 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179B0858DECD00B2BC32 /* AudioToolbox.framework */; };
 		007317A30858DECD00B2BC32 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179C0858DECD00B2BC32 /* AudioUnit.framework */; };
 		007317A40858DECD00B2BC32 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179D0858DECD00B2BC32 /* Cocoa.framework */; };
@@ -80,7 +80,6 @@
 		00A6EBDA1078D569001EEA06 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 00A6EBD91078D569001EEA06 /* SDL_revision.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00A6EBDB1078D569001EEA06 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 00A6EBD91078D569001EEA06 /* SDL_revision.h */; };
 		00CFA682106B44CE00758660 /* SDL_atomic.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67A106B44CE00758660 /* SDL_atomic.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		00CFA683106B44CE00758660 /* SDL_compat.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67B106B44CE00758660 /* SDL_compat.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00CFA684106B44CE00758660 /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67C106B44CE00758660 /* SDL_haptic.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00CFA685106B44CE00758660 /* SDL_pixels.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67D106B44CE00758660 /* SDL_pixels.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00CFA686106B44CE00758660 /* SDL_power.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67E106B44CE00758660 /* SDL_power.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -88,7 +87,6 @@
 		00CFA688106B44CE00758660 /* SDL_scancode.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA680106B44CE00758660 /* SDL_scancode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00CFA689106B44CE00758660 /* SDL_surface.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA681106B44CE00758660 /* SDL_surface.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00CFA68A106B44CE00758660 /* SDL_atomic.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67A106B44CE00758660 /* SDL_atomic.h */; };
-		00CFA68B106B44CE00758660 /* SDL_compat.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67B106B44CE00758660 /* SDL_compat.h */; };
 		00CFA68C106B44CE00758660 /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67C106B44CE00758660 /* SDL_haptic.h */; };
 		00CFA68D106B44CE00758660 /* SDL_pixels.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67D106B44CE00758660 /* SDL_pixels.h */; };
 		00CFA68E106B44CE00758660 /* SDL_power.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67E106B44CE00758660 /* SDL_power.h */; };
@@ -207,7 +205,6 @@
 		04BD009612E6671800899322 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE4E12E6671700899322 /* SDL_power.c */; };
 		04BD009B12E6671800899322 /* SDL_assert_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5512E6671700899322 /* SDL_assert_c.h */; };
 		04BD009C12E6671800899322 /* SDL_assert.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5612E6671700899322 /* SDL_assert.c */; };
-		04BD009D12E6671800899322 /* SDL_compat.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5712E6671700899322 /* SDL_compat.c */; };
 		04BD009E12E6671800899322 /* SDL_error_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5812E6671700899322 /* SDL_error_c.h */; };
 		04BD009F12E6671800899322 /* SDL_error.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5912E6671700899322 /* SDL_error.c */; };
 		04BD00A012E6671800899322 /* SDL_fatal.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5A12E6671700899322 /* SDL_fatal.c */; };
@@ -364,7 +361,6 @@
 		04BD02B012E6671800899322 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE4E12E6671700899322 /* SDL_power.c */; };
 		04BD02B512E6671800899322 /* SDL_assert_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5512E6671700899322 /* SDL_assert_c.h */; };
 		04BD02B612E6671800899322 /* SDL_assert.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5612E6671700899322 /* SDL_assert.c */; };
-		04BD02B712E6671800899322 /* SDL_compat.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5712E6671700899322 /* SDL_compat.c */; };
 		04BD02B812E6671800899322 /* SDL_error_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5812E6671700899322 /* SDL_error_c.h */; };
 		04BD02B912E6671800899322 /* SDL_error.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5912E6671700899322 /* SDL_error.c */; };
 		04BD02BA12E6671800899322 /* SDL_fatal.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5A12E6671700899322 /* SDL_fatal.c */; };
@@ -500,6 +496,7 @@
 		566CDE90148F0AC200C5A9BB /* SDL_dropevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */; };
 		8CB0A77811F6A87F00CBA2DE /* SDL_gesture.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77611F6A87F00CBA2DE /* SDL_gesture.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8CB0A77911F6A87F00CBA2DE /* SDL_touch.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77711F6A87F00CBA2DE /* SDL_touch.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		AA41F88014B8F1F500993C4F /* SDL_dropevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */; };
 		BECDF6760761BA81005FE872 /* SDL_cpuinfo.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */; };
 		BECDF6770761BA81005FE872 /* SDL_name.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC705C4450500E5DC7F /* SDL_name.h */; };
 /* End PBXBuildFile section */
@@ -535,7 +532,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				006E94F01195125B001DE610 /* SDL.framework in Copy Frameworks */,
+				006E94F01195125B001DE610 /* SDL2.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -577,7 +574,6 @@
 		00A6EBD91078D569001EEA06 /* SDL_revision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_revision.h; path = ../../include/SDL_revision.h; sourceTree = SOURCE_ROOT; };
 		00AE6E1E08B958CC00255E2F /* ReadMeDevLite.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = ReadMeDevLite.txt; sourceTree = "<group>"; };
 		00CFA67A106B44CE00758660 /* SDL_atomic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_atomic.h; path = ../../include/SDL_atomic.h; sourceTree = SOURCE_ROOT; };
-		00CFA67B106B44CE00758660 /* SDL_compat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_compat.h; path = ../../include/SDL_compat.h; sourceTree = SOURCE_ROOT; };
 		00CFA67C106B44CE00758660 /* SDL_haptic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_haptic.h; path = ../../include/SDL_haptic.h; sourceTree = SOURCE_ROOT; };
 		00CFA67D106B44CE00758660 /* SDL_pixels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_pixels.h; path = ../../include/SDL_pixels.h; sourceTree = SOURCE_ROOT; };
 		00CFA67E106B44CE00758660 /* SDL_power.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_power.h; path = ../../include/SDL_power.h; sourceTree = SOURCE_ROOT; };
@@ -694,7 +690,6 @@
 		04BDFE4E12E6671700899322 /* SDL_power.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_power.c; sourceTree = "<group>"; };
 		04BDFE5512E6671700899322 /* SDL_assert_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_assert_c.h; path = ../../src/SDL_assert_c.h; sourceTree = SOURCE_ROOT; };
 		04BDFE5612E6671700899322 /* SDL_assert.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_assert.c; path = ../../src/SDL_assert.c; sourceTree = SOURCE_ROOT; };
-		04BDFE5712E6671700899322 /* SDL_compat.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_compat.c; path = ../../src/SDL_compat.c; sourceTree = SOURCE_ROOT; };
 		04BDFE5812E6671700899322 /* SDL_error_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_error_c.h; path = ../../src/SDL_error_c.h; sourceTree = SOURCE_ROOT; };
 		04BDFE5912E6671700899322 /* SDL_error.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_error.c; path = ../../src/SDL_error.c; sourceTree = SOURCE_ROOT; };
 		04BDFE5A12E6671700899322 /* SDL_fatal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_fatal.c; path = ../../src/SDL_fatal.c; sourceTree = SOURCE_ROOT; };
@@ -839,8 +834,8 @@
 		B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_cpuinfo.h; path = ../../include/SDL_cpuinfo.h; sourceTree = SOURCE_ROOT; };
 		B2CF8DC705C4450500E5DC7F /* SDL_name.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_name.h; path = ../../include/SDL_name.h; sourceTree = SOURCE_ROOT; };
 		BECDF66B0761BA81005FE872 /* Info-Framework.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-Framework.plist"; sourceTree = "<group>"; };
-		BECDF66C0761BA81005FE872 /* SDL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SDL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		BECDF6B30761BA81005FE872 /* libSDL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSDL.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		BECDF66C0761BA81005FE872 /* SDL2.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SDL2.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BECDF6B30761BA81005FE872 /* libSDL2.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSDL2.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BECDF6BE0761BA81005FE872 /* Standard DMG */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Standard DMG"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BECDF6C30761BA81005FE872 /* Developer Extras Package */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Developer Extras Package"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F59C70FF00D5CB5801000001 /* ReadMe.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = ReadMe.txt; sourceTree = "<group>"; };
@@ -859,7 +854,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				006E94EF11951255001DE610 /* SDL.framework in Frameworks */,
+				006E94EF11951255001DE610 /* SDL2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1017,7 +1012,6 @@
 				0C5AF5E801191D2B7F000001 /* SDL_audio.h */,
 				0469A10912EE4BF100B846D6 /* SDL_blendmode.h */,
 				044E5F8411E6051C0076F181 /* SDL_clipboard.h */,
-				00CFA67B106B44CE00758660 /* SDL_compat.h */,
 				00162D3709BD1FA90037C8D0 /* SDL_config.h */,
 				00162D3409BD1FA90037C8D0 /* SDL_config_macosx.h */,
 				0C5AF5EB01191D2B7F000001 /* SDL_copying.h */,
@@ -1066,8 +1060,8 @@
 			isa = PBXGroup;
 			children = (
 				089C1665FE841158C02AAC07 /* Resources */,
-				BECDF66C0761BA81005FE872 /* SDL.framework */,
-				BECDF6B30761BA81005FE872 /* libSDL.a */,
+				BECDF66C0761BA81005FE872 /* SDL2.framework */,
+				BECDF6B30761BA81005FE872 /* libSDL2.a */,
 				BECDF6BE0761BA81005FE872 /* Standard DMG */,
 				BECDF6C30761BA81005FE872 /* Developer Extras Package */,
 				00D8D9EF1195090700638393 /* testsdl.app */,
@@ -1530,7 +1524,6 @@
 				04BDFEA712E6671800899322 /* video */,
 				04BDFE5512E6671700899322 /* SDL_assert_c.h */,
 				04BDFE5612E6671700899322 /* SDL_assert.c */,
-				04BDFE5712E6671700899322 /* SDL_compat.c */,
 				04BDFE5812E6671700899322 /* SDL_error_c.h */,
 				04BDFE5912E6671700899322 /* SDL_error.c */,
 				04BDFE5A12E6671700899322 /* SDL_fatal.c */,
@@ -1628,7 +1621,6 @@
 				00162DC809BD222F0037C8D0 /* SDL_video.h in Headers */,
 				00162DC909BD222F0037C8D0 /* SDL.h in Headers */,
 				00CFA682106B44CE00758660 /* SDL_atomic.h in Headers */,
-				00CFA683106B44CE00758660 /* SDL_compat.h in Headers */,
 				00CFA684106B44CE00758660 /* SDL_haptic.h in Headers */,
 				00CFA685106B44CE00758660 /* SDL_pixels.h in Headers */,
 				00CFA686106B44CE00758660 /* SDL_power.h in Headers */,
@@ -1744,7 +1736,6 @@
 				00162D4A09BD1FA90037C8D0 /* SDL_platform.h in Headers */,
 				00162D4B09BD1FA90037C8D0 /* SDL_stdinc.h in Headers */,
 				00CFA68A106B44CE00758660 /* SDL_atomic.h in Headers */,
-				00CFA68B106B44CE00758660 /* SDL_compat.h in Headers */,
 				00CFA68C106B44CE00758660 /* SDL_haptic.h in Headers */,
 				00CFA68D106B44CE00758660 /* SDL_pixels.h in Headers */,
 				00CFA68E106B44CE00758660 /* SDL_power.h in Headers */,
@@ -1885,7 +1876,7 @@
 			name = Framework;
 			productInstallPath = "@executable_path/../Frameworks";
 			productName = SDL;
-			productReference = BECDF66C0761BA81005FE872 /* SDL.framework */;
+			productReference = BECDF66C0761BA81005FE872 /* SDL2.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		BECDF66D0761BA81005FE872 /* Static Library */ = {
@@ -1905,7 +1896,7 @@
 			name = "Static Library";
 			productInstallPath = /usr/local/lib;
 			productName = "Static Library";
-			productReference = BECDF6B30761BA81005FE872 /* libSDL.a */;
+			productReference = BECDF6B30761BA81005FE872 /* libSDL2.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		BECDF6BB0761BA81005FE872 /* Standard DMG */ = {
@@ -1947,8 +1938,11 @@
 /* Begin PBXProject section */
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = 0073178E0858DB0500B2BC32 /* Build configuration list for PBXProject "SDL" */;
-			compatibilityVersion = "Xcode 3.0";
+			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -2026,7 +2020,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# clean up the framework, remove headers, extra files\nmkdir -p build/dmg-tmp\nmkdir -p build/dmg-tmp/devel-lite\n/Developer/Tools/CpMac -r $TARGET_BUILD_DIR/SDL.framework build/dmg-tmp/\n\n# strip moved to Xcode native mechanism\n# strip -x build/dmg-tmp/SDL.framework/SDL\n\ncp pkg-support/resources/License.rtf build/dmg-tmp\ncp pkg-support/resources/ReadMe.txt build/dmg-tmp\ncp pkg-support/resources/ReadMeDevLite.txt build/dmg-tmp/devel-lite\ncp pkg-support/resources/UniversalBinaryNotes.rtf build/dmg-tmp\n\n# remove the .DS_Store files if any (we may want to provide one in the future for fancy .dmgs)\nfind build/dmg-tmp -name .DS_Store -exec rm -f \"{}\" \\;\nfind -d build/dmg-tmp -type d -name .svn -exec rm -rf \"{}\" \\;\n\n# for fancy .dmg\nmkdir -p build/dmg-tmp/.logo\ncp pkg-support/resources/SDL_DS_Store build/dmg-tmp/.DS_Store\ncp pkg-support/sdl_logo.pdf build/dmg-tmp/.logo\n\n# create the dmg\nhdiutil create -ov -fs HFS+ -volname SDL -srcfolder build/dmg-tmp build/SDL.dmg\n\n# clean up\nrm -rf build/dmg-tmp\n\n# compress it???\n#(cd build; gnutar -zcvf SDL.dmg.tar.gz SDL.dmg)";
+			shellScript = "# clean up the framework, remove headers, extra files\nmkdir -p build/dmg-tmp\nmkdir -p build/dmg-tmp/devel-lite\n/Developer/Tools/CpMac -r $TARGET_BUILD_DIR/SDL2.framework build/dmg-tmp/\n\ncp pkg-support/resources/License.txt build/dmg-tmp\ncp pkg-support/resources/ReadMe.txt build/dmg-tmp\ncp pkg-support/resources/ReadMeDevLite.txt build/dmg-tmp/devel-lite\n\n# remove the .DS_Store files if any (we may want to provide one in the future for fancy .dmgs)\nfind build/dmg-tmp -name .DS_Store -exec rm -f \"{}\" \\;\n\n# for fancy .dmg\nmkdir -p build/dmg-tmp/.logo\ncp pkg-support/resources/SDL_DS_Store build/dmg-tmp/.DS_Store\ncp pkg-support/sdl_logo.pdf build/dmg-tmp/.logo\n\n# create the dmg\nhdiutil create -ov -fs HFS+ -volname SDL2 -srcfolder build/dmg-tmp build/SDL2.dmg\n\n# clean up\nrm -rf build/dmg-tmp";
 		};
 		BECDF6C20761BA81005FE872 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2092,7 +2086,6 @@
 				04BD009412E6671800899322 /* SDL_syspower.c in Sources */,
 				04BD009612E6671800899322 /* SDL_power.c in Sources */,
 				04BD009C12E6671800899322 /* SDL_assert.c in Sources */,
-				04BD009D12E6671800899322 /* SDL_compat.c in Sources */,
 				04BD009F12E6671800899322 /* SDL_error.c in Sources */,
 				04BD00A012E6671800899322 /* SDL_fatal.c in Sources */,
 				04BD00A212E6671800899322 /* SDL.c in Sources */,
@@ -2188,6 +2181,7 @@
 				04BD025C12E6671800899322 /* SDL_cpuinfo.c in Sources */,
 				04BD026312E6671800899322 /* SDL_clipboardevents.c in Sources */,
 				04BD026512E6671800899322 /* SDL_events.c in Sources */,
+				AA41F88014B8F1F500993C4F /* SDL_dropevents.c in Sources */,
 				04BD026712E6671800899322 /* SDL_gesture.c in Sources */,
 				04BD026912E6671800899322 /* SDL_keyboard.c in Sources */,
 				04BD026B12E6671800899322 /* SDL_mouse.c in Sources */,
@@ -2204,7 +2198,6 @@
 				04BD02AE12E6671800899322 /* SDL_syspower.c in Sources */,
 				04BD02B012E6671800899322 /* SDL_power.c in Sources */,
 				04BD02B612E6671800899322 /* SDL_assert.c in Sources */,
-				04BD02B712E6671800899322 /* SDL_compat.c in Sources */,
 				04BD02B912E6671800899322 /* SDL_error.c in Sources */,
 				04BD02BA12E6671800899322 /* SDL_fatal.c in Sources */,
 				04BD02BC12E6671800899322 /* SDL.c in Sources */,
@@ -2302,600 +2295,177 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		0073177B0858DB0500B2BC32 /* Development_using_10.4SDK_and_10.6SDK */ = {
+		008310421072EA5700A531F1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1.3;
-				DYLIB_CURRENT_VERSION = 1.3.0;
-				FRAMEWORK_VERSION = 1.3;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				INFOPLIST_FILE = "Info-Framework.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PRODUCT_NAME = SDL;
-				WRAPPER_EXTENSION = framework;
+				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				PRODUCT_NAME = "Generate Doxygen DocSet";
 			};
-			name = Development_using_10.4SDK_and_10.6SDK;
+			name = Debug;
 		};
-		0073177C0858DB0500B2BC32 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */ = {
+		008310431072EA5700A531F1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1.3;
-				DYLIB_CURRENT_VERSION = 1.3.0;
-				FRAMEWORK_VERSION = 1.3;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				INFOPLIST_FILE = "Info-Framework.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PRODUCT_NAME = SDL;
-				WRAPPER_EXTENSION = framework;
+				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				PRODUCT_NAME = "Generate Doxygen DocSet";
 			};
-			name = Deployment_for_official_releases_using_10.4SDK_and_10.6SDK;
+			name = Release;
 		};
-		0073177D0858DB0500B2BC32 /* Default */ = {
+		00CFA621106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1.3;
-				DYLIB_CURRENT_VERSION = 1.3.0;
-				FRAMEWORK_VERSION = 1.3;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				INFOPLIST_FILE = "Info-Framework.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PRODUCT_NAME = SDL;
-				WRAPPER_EXTENSION = framework;
-			};
-			name = Default;
-		};
-		0073177F0858DB0500B2BC32 /* Development_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
-				PRODUCT_NAME = SDL;
-			};
-			name = Development_using_10.4SDK_and_10.6SDK;
-		};
-		007317800858DB0500B2BC32 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
-				PRODUCT_NAME = SDL;
-			};
-			name = Deployment_for_official_releases_using_10.4SDK_and_10.6SDK;
-		};
-		007317810858DB0500B2BC32 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
-				PRODUCT_NAME = SDL;
-			};
-			name = Default;
-		};
-		007317870858DB0500B2BC32 /* Development_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Standard DMG";
-			};
-			name = Development_using_10.4SDK_and_10.6SDK;
-		};
-		007317880858DB0500B2BC32 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Standard DMG";
-			};
-			name = Deployment_for_official_releases_using_10.4SDK_and_10.6SDK;
-		};
-		007317890858DB0500B2BC32 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Standard DMG";
-			};
-			name = Default;
-		};
-		0073178B0858DB0500B2BC32 /* Development_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Developer Extras Package";
-			};
-			name = Development_using_10.4SDK_and_10.6SDK;
-		};
-		0073178C0858DB0500B2BC32 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Developer Extras Package";
-			};
-			name = Deployment_for_official_releases_using_10.4SDK_and_10.6SDK;
-		};
-		0073178D0858DB0500B2BC32 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Developer Extras Package";
-			};
-			name = Default;
-		};
-		0073178F0858DB0500B2BC32 /* Development_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
-				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = YES;
-				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_ENABLE_SSE3_EXTENSIONS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_VERSION = 4.0;
-				"GCC_VERSION[arch=x86_64]" = 4.2;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.6;
-				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk";
-				"SDKROOT[arch=x86_64]" = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
-				WARNING_CFLAGS = "";
-			};
-			name = Development_using_10.4SDK_and_10.6SDK;
-		};
-		007317900858DB0500B2BC32 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
-				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				DEPLOYMENT_POSTPROCESSING = YES;
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = YES;
-				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_VERSION = 4.0;
-				"GCC_VERSION[arch=x86_64]" = 4.2;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.6;
-				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk";
-				"SDKROOT[arch=x86_64]" = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
-				SEPARATE_STRIP = YES;
-				STRIP_STYLE = "non-global";
-				WARNING_CFLAGS = "";
-			};
-			name = Deployment_for_official_releases_using_10.4SDK_and_10.6SDK;
-		};
-		007317910858DB0500B2BC32 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
-				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = YES;
-				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_ENABLE_SSE3_EXTENSIONS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_VERSION = 4.0;
-				GCC_VERSION_i386 = 4.0;
-				GCC_VERSION_ppc = 4.0;
-				GCC_VERSION_x86_64 = 4.2;
-				MACOSX_DEPLOYMENT_TARGET = "";
-				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
-				PREBINDING = NO;
-				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_x86_64 = /Developer/SDKs/MacOSX10.6.sdk;
-				WARNING_CFLAGS = "";
-				ZERO_LINK = NO;
-			};
-			name = Default;
-		};
-		008310401072EA5700A531F1 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
-				PRODUCT_NAME = "Generate Doxygen DocSet";
-			};
-			name = Deployment_for_official_releases_using_10.4SDK_and_10.6SDK;
-		};
-		008310411072EA5700A531F1 /* Development_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
-				PRODUCT_NAME = "Generate Doxygen DocSet";
-			};
-			name = Development_using_10.4SDK_and_10.6SDK;
-		};
-		008310421072EA5700A531F1 /* Development_native_only */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
-				PRODUCT_NAME = "Generate Doxygen DocSet";
-			};
-			name = Development_native_only;
-		};
-		008310431072EA5700A531F1 /* Deployment_native_only */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
-				PRODUCT_NAME = "Generate Doxygen DocSet";
-			};
-			name = Deployment_native_only;
-		};
-		008310441072EA5700A531F1 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
-				PRODUCT_NAME = "Generate Doxygen DocSet";
-			};
-			name = Default;
-		};
-		00CFA621106A567900758660 /* Deployment_native_only */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEPLOYMENT_POSTPROCESSING = YES;
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = YES;
-				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_ENABLE_SSE3_EXTENSIONS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				MACOSX_DEPLOYMENT_TARGET = "";
-				PREBINDING = NO;
-				SEPARATE_STRIP = YES;
-				STRIP_STYLE = "non-global";
-				WARNING_CFLAGS = "";
-				ZERO_LINK = NO;
-			};
-			name = Deployment_native_only;
-		};
-		00CFA622106A567900758660 /* Deployment_native_only */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1.3;
-				DYLIB_CURRENT_VERSION = 1.3.0;
-				FRAMEWORK_VERSION = 1.3;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
-				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				SDKROOT = macosx;
+				STRIP_STYLE = "non-global";
+			};
+			name = Release;
+		};
+		00CFA622106A567900758660 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				INFOPLIST_FILE = "Info-Framework.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PRODUCT_NAME = SDL;
+				INSTALL_PATH = "@rpath";
+				OTHER_LDFLAGS = "-liconv";
+				PRODUCT_NAME = SDL2;
 				WRAPPER_EXTENSION = framework;
 			};
-			name = Deployment_native_only;
+			name = Release;
 		};
-		00CFA623106A567900758660 /* Deployment_native_only */ = {
+		00CFA623106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
-				PRODUCT_NAME = SDL;
+				PRODUCT_NAME = SDL2;
 			};
-			name = Deployment_native_only;
+			name = Release;
 		};
-		00CFA625106A567900758660 /* Deployment_native_only */ = {
+		00CFA625106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Standard DMG";
 			};
-			name = Deployment_native_only;
+			name = Release;
 		};
-		00CFA626106A567900758660 /* Deployment_native_only */ = {
+		00CFA626106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Developer Extras Package";
 			};
-			name = Deployment_native_only;
+			name = Release;
 		};
-		00CFA627106A568900758660 /* Development_native_only */ = {
+		00CFA627106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = YES;
-				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				MACOSX_DEPLOYMENT_TARGET = "";
-				PREBINDING = NO;
-				WARNING_CFLAGS = "";
-				ZERO_LINK = NO;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				SDKROOT = macosx;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
-			name = Development_native_only;
+			name = Debug;
 		};
-		00CFA628106A568900758660 /* Development_native_only */ = {
+		00CFA628106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1.3;
-				DYLIB_CURRENT_VERSION = 1.3.0;
-				FRAMEWORK_VERSION = 1.3;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				INFOPLIST_FILE = "Info-Framework.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				PRODUCT_NAME = SDL;
+				INSTALL_PATH = "@rpath";
+				OTHER_LDFLAGS = "-liconv";
+				PRODUCT_NAME = SDL2;
 				WRAPPER_EXTENSION = framework;
 			};
-			name = Development_native_only;
+			name = Debug;
 		};
-		00CFA629106A568900758660 /* Development_native_only */ = {
+		00CFA629106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
-				PRODUCT_NAME = SDL;
+				PRODUCT_NAME = SDL2;
 			};
-			name = Development_native_only;
+			name = Debug;
 		};
-		00CFA62B106A568900758660 /* Development_native_only */ = {
+		00CFA62B106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Standard DMG";
 			};
-			name = Development_native_only;
+			name = Debug;
 		};
-		00CFA62C106A568900758660 /* Development_native_only */ = {
+		00CFA62C106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Developer Extras Package";
 			};
-			name = Development_native_only;
+			name = Debug;
 		};
-		00D8D9F21195090800638393 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */ = {
+		00D8D9F41195090800638393 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "testsdl-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
 					"-framework",
 					AppKit,
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = testsdl;
 			};
-			name = Deployment_for_official_releases_using_10.4SDK_and_10.6SDK;
+			name = Debug;
 		};
-		00D8D9F31195090800638393 /* Development_using_10.4SDK_and_10.6SDK */ = {
+		00D8D9F51195090800638393 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = "testsdl-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
 					"-framework",
 					AppKit,
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = testsdl;
 			};
-			name = Development_using_10.4SDK_and_10.6SDK;
-		};
-		00D8D9F41195090800638393 /* Development_native_only */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				INFOPLIST_FILE = "testsdl-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = testsdl;
-			};
-			name = Development_native_only;
-		};
-		00D8D9F51195090800638393 /* Deployment_native_only */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				INFOPLIST_FILE = "testsdl-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = testsdl;
-			};
-			name = Deployment_native_only;
-		};
-		00D8D9F61195090800638393 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				INFOPLIST_FILE = "testsdl-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = testsdl;
-			};
-			name = Default;
+			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
@@ -2903,86 +2473,65 @@
 		0073177A0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Framework" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0073177C0858DB0500B2BC32 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */,
-				0073177B0858DB0500B2BC32 /* Development_using_10.4SDK_and_10.6SDK */,
-				00CFA628106A568900758660 /* Development_native_only */,
-				00CFA622106A567900758660 /* Deployment_native_only */,
-				0073177D0858DB0500B2BC32 /* Default */,
+				00CFA628106A568900758660 /* Debug */,
+				00CFA622106A567900758660 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		0073177E0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Static Library" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				007317800858DB0500B2BC32 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */,
-				0073177F0858DB0500B2BC32 /* Development_using_10.4SDK_and_10.6SDK */,
-				00CFA629106A568900758660 /* Development_native_only */,
-				00CFA623106A567900758660 /* Deployment_native_only */,
-				007317810858DB0500B2BC32 /* Default */,
+				00CFA629106A568900758660 /* Debug */,
+				00CFA623106A567900758660 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		007317860858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Standard DMG" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				007317880858DB0500B2BC32 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */,
-				007317870858DB0500B2BC32 /* Development_using_10.4SDK_and_10.6SDK */,
-				00CFA62B106A568900758660 /* Development_native_only */,
-				00CFA625106A567900758660 /* Deployment_native_only */,
-				007317890858DB0500B2BC32 /* Default */,
+				00CFA62B106A568900758660 /* Debug */,
+				00CFA625106A567900758660 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		0073178A0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Developer Extras Package" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0073178C0858DB0500B2BC32 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */,
-				0073178B0858DB0500B2BC32 /* Development_using_10.4SDK_and_10.6SDK */,
-				00CFA62C106A568900758660 /* Development_native_only */,
-				00CFA626106A567900758660 /* Deployment_native_only */,
-				0073178D0858DB0500B2BC32 /* Default */,
+				00CFA62C106A568900758660 /* Debug */,
+				00CFA626106A567900758660 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		0073178E0858DB0500B2BC32 /* Build configuration list for PBXProject "SDL" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				007317900858DB0500B2BC32 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */,
-				0073178F0858DB0500B2BC32 /* Development_using_10.4SDK_and_10.6SDK */,
-				00CFA627106A568900758660 /* Development_native_only */,
-				00CFA621106A567900758660 /* Deployment_native_only */,
-				007317910858DB0500B2BC32 /* Default */,
+				00CFA627106A568900758660 /* Debug */,
+				00CFA621106A567900758660 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		008310471072EAAE00A531F1 /* Build configuration list for PBXAggregateTarget "Generate Doxygen DocSet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				008310401072EA5700A531F1 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */,
-				008310411072EA5700A531F1 /* Development_using_10.4SDK_and_10.6SDK */,
-				008310421072EA5700A531F1 /* Development_native_only */,
-				008310431072EA5700A531F1 /* Deployment_native_only */,
-				008310441072EA5700A531F1 /* Default */,
+				008310421072EA5700A531F1 /* Debug */,
+				008310431072EA5700A531F1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		00D8D9F71195090900638393 /* Build configuration list for PBXNativeTarget "testsdl" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				00D8D9F21195090800638393 /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */,
-				00D8D9F31195090800638393 /* Development_using_10.4SDK_and_10.6SDK */,
-				00D8D9F41195090800638393 /* Development_native_only */,
-				00D8D9F51195090800638393 /* Deployment_native_only */,
-				00D8D9F61195090800638393 /* Default */,
+				00D8D9F41195090800638393 /* Debug */,
+				00D8D9F51195090800638393 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};

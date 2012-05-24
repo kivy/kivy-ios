@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -55,7 +55,7 @@ static const Uint8 GLES2_FragmentSrc_SolidSrc_[] = " \
     } \
 ";
 
-static const Uint8 GLES2_FragmentSrc_TextureSrc_[] = " \
+static const Uint8 GLES2_FragmentSrc_TextureABGRSrc_[] = " \
     precision mediump float; \
     uniform sampler2D u_texture; \
     uniform vec4 u_modulation; \
@@ -64,6 +64,57 @@ static const Uint8 GLES2_FragmentSrc_TextureSrc_[] = " \
     void main() \
     { \
         gl_FragColor = texture2D(u_texture, v_texCoord); \
+        gl_FragColor *= u_modulation; \
+    } \
+";
+
+// ARGB to ABGR conversion
+static const Uint8 GLES2_FragmentSrc_TextureARGBSrc_[] = " \
+    precision mediump float; \
+    uniform sampler2D u_texture; \
+    uniform vec4 u_modulation; \
+    varying vec2 v_texCoord; \
+    \
+    void main() \
+    { \
+        vec4 abgr = texture2D(u_texture, v_texCoord); \
+        gl_FragColor = abgr; \
+        gl_FragColor.r = abgr.b; \
+        gl_FragColor.b = abgr.r; \
+        gl_FragColor *= u_modulation; \
+    } \
+";
+
+// RGB to ABGR conversion
+static const Uint8 GLES2_FragmentSrc_TextureRGBSrc_[] = " \
+    precision mediump float; \
+    uniform sampler2D u_texture; \
+    uniform vec4 u_modulation; \
+    varying vec2 v_texCoord; \
+    \
+    void main() \
+    { \
+        vec4 abgr = texture2D(u_texture, v_texCoord); \
+        gl_FragColor = abgr; \
+        gl_FragColor.r = abgr.b; \
+        gl_FragColor.b = abgr.r; \
+        gl_FragColor.a = 1.0; \
+        gl_FragColor *= u_modulation; \
+    } \
+";
+
+// BGR to ABGR conversion
+static const Uint8 GLES2_FragmentSrc_TextureBGRSrc_[] = " \
+    precision mediump float; \
+    uniform sampler2D u_texture; \
+    uniform vec4 u_modulation; \
+    varying vec2 v_texCoord; \
+    \
+    void main() \
+    { \
+        vec4 abgr = texture2D(u_texture, v_texCoord); \
+        gl_FragColor = abgr; \
+        gl_FragColor.a = 1.0; \
         gl_FragColor *= u_modulation; \
     } \
 ";
@@ -82,11 +133,32 @@ static const GLES2_ShaderInstance GLES2_FragmentSrc_SolidSrc = {
     GLES2_FragmentSrc_SolidSrc_
 };
 
-static const GLES2_ShaderInstance GLES2_FragmentSrc_TextureSrc = {
+static const GLES2_ShaderInstance GLES2_FragmentSrc_TextureABGRSrc = {
     GL_FRAGMENT_SHADER,
     GLES2_SOURCE_SHADER,
-    sizeof(GLES2_FragmentSrc_TextureSrc_),
-    GLES2_FragmentSrc_TextureSrc_
+    sizeof(GLES2_FragmentSrc_TextureABGRSrc_),
+    GLES2_FragmentSrc_TextureABGRSrc_
+};
+
+static const GLES2_ShaderInstance GLES2_FragmentSrc_TextureARGBSrc = {
+    GL_FRAGMENT_SHADER,
+    GLES2_SOURCE_SHADER,
+    sizeof(GLES2_FragmentSrc_TextureARGBSrc_),
+    GLES2_FragmentSrc_TextureARGBSrc_
+};
+
+static const GLES2_ShaderInstance GLES2_FragmentSrc_TextureRGBSrc = {
+    GL_FRAGMENT_SHADER,
+    GLES2_SOURCE_SHADER,
+    sizeof(GLES2_FragmentSrc_TextureRGBSrc_),
+    GLES2_FragmentSrc_TextureRGBSrc_
+};
+
+static const GLES2_ShaderInstance GLES2_FragmentSrc_TextureBGRSrc = {
+    GL_FRAGMENT_SHADER,
+    GLES2_SOURCE_SHADER,
+    sizeof(GLES2_FragmentSrc_TextureBGRSrc_),
+    GLES2_FragmentSrc_TextureBGRSrc_
 };
 
 /*************************************************************************************************
@@ -404,7 +476,11 @@ static const GLES2_ShaderInstance GLES2_FragmentTegra_Modulated_TextureSrc = {
  *************************************************************************************************/
 
 static GLES2_Shader GLES2_VertexShader_Default = {
+#if GLES2_INCLUDE_NVIDIA_SHADERS
     2,
+#else
+    1,
+#endif
     {
 #if GLES2_INCLUDE_NVIDIA_SHADERS
         &GLES2_VertexTegra_Default,
@@ -414,7 +490,11 @@ static GLES2_Shader GLES2_VertexShader_Default = {
 };
 
 static GLES2_Shader GLES2_FragmentShader_None_SolidSrc = {
+#if GLES2_INCLUDE_NVIDIA_SHADERS
     2,
+#else
+    1,
+#endif
     {
 #if GLES2_INCLUDE_NVIDIA_SHADERS
         &GLES2_FragmentTegra_None_SolidSrc,
@@ -424,7 +504,11 @@ static GLES2_Shader GLES2_FragmentShader_None_SolidSrc = {
 };
 
 static GLES2_Shader GLES2_FragmentShader_Alpha_SolidSrc = {
+#if GLES2_INCLUDE_NVIDIA_SHADERS
     2,
+#else
+    1,
+#endif
     {
 #if GLES2_INCLUDE_NVIDIA_SHADERS
         &GLES2_FragmentTegra_Alpha_SolidSrc,
@@ -434,7 +518,11 @@ static GLES2_Shader GLES2_FragmentShader_Alpha_SolidSrc = {
 };
 
 static GLES2_Shader GLES2_FragmentShader_Additive_SolidSrc = {
+#if GLES2_INCLUDE_NVIDIA_SHADERS
     2,
+#else
+    1,
+#endif
     {
 #if GLES2_INCLUDE_NVIDIA_SHADERS
         &GLES2_FragmentTegra_Additive_SolidSrc,
@@ -444,7 +532,11 @@ static GLES2_Shader GLES2_FragmentShader_Additive_SolidSrc = {
 };
 
 static GLES2_Shader GLES2_FragmentShader_Modulated_SolidSrc = {
+#if GLES2_INCLUDE_NVIDIA_SHADERS
     2,
+#else
+    1,
+#endif
     {
 #if GLES2_INCLUDE_NVIDIA_SHADERS
         &GLES2_FragmentTegra_Modulated_SolidSrc,
@@ -453,43 +545,143 @@ static GLES2_Shader GLES2_FragmentShader_Modulated_SolidSrc = {
     }
 };
 
-static GLES2_Shader GLES2_FragmentShader_None_TextureSrc = {
+static GLES2_Shader GLES2_FragmentShader_None_TextureABGRSrc = {
+#if GLES2_INCLUDE_NVIDIA_SHADERS
     2,
+#else
+    1,
+#endif
     {
 #if GLES2_INCLUDE_NVIDIA_SHADERS
         &GLES2_FragmentTegra_None_TextureSrc,
 #endif
-        &GLES2_FragmentSrc_TextureSrc
+        &GLES2_FragmentSrc_TextureABGRSrc
     }
 };
 
-static GLES2_Shader GLES2_FragmentShader_Alpha_TextureSrc = {
+static GLES2_Shader GLES2_FragmentShader_Alpha_TextureABGRSrc = {
+#if GLES2_INCLUDE_NVIDIA_SHADERS
     2,
+#else
+    1,
+#endif
     {
 #if GLES2_INCLUDE_NVIDIA_SHADERS
         &GLES2_FragmentTegra_Alpha_TextureSrc,
 #endif
-        &GLES2_FragmentSrc_TextureSrc
+        &GLES2_FragmentSrc_TextureABGRSrc
     }
 };
 
-static GLES2_Shader GLES2_FragmentShader_Additive_TextureSrc = {
+static GLES2_Shader GLES2_FragmentShader_Additive_TextureABGRSrc = {
+#if GLES2_INCLUDE_NVIDIA_SHADERS
     2,
+#else
+    1,
+#endif
     {
 #if GLES2_INCLUDE_NVIDIA_SHADERS
         &GLES2_FragmentTegra_Additive_TextureSrc,
 #endif
-        &GLES2_FragmentSrc_TextureSrc
+        &GLES2_FragmentSrc_TextureABGRSrc
     }
 };
 
-static GLES2_Shader GLES2_FragmentShader_Modulated_TextureSrc = {
+static GLES2_Shader GLES2_FragmentShader_Modulated_TextureABGRSrc = {
+#if GLES2_INCLUDE_NVIDIA_SHADERS
     2,
+#else
+    1,
+#endif
     {
 #if GLES2_INCLUDE_NVIDIA_SHADERS
         &GLES2_FragmentTegra_Modulated_TextureSrc,
 #endif
-        &GLES2_FragmentSrc_TextureSrc
+        &GLES2_FragmentSrc_TextureABGRSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_None_TextureARGBSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureARGBSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_Alpha_TextureARGBSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureARGBSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_Additive_TextureARGBSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureARGBSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_Modulated_TextureARGBSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureARGBSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_None_TextureRGBSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureRGBSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_Alpha_TextureRGBSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureRGBSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_Additive_TextureRGBSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureRGBSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_Modulated_TextureRGBSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureRGBSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_None_TextureBGRSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureBGRSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_Alpha_TextureBGRSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureBGRSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_Additive_TextureBGRSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureBGRSrc
+    }
+};
+
+static GLES2_Shader GLES2_FragmentShader_Modulated_TextureBGRSrc = {
+    1,
+    {
+        &GLES2_FragmentSrc_TextureBGRSrc
     }
 };
 
@@ -504,33 +696,78 @@ const GLES2_Shader *GLES2_GetShader(GLES2_ShaderType type, SDL_BlendMode blendMo
     case GLES2_SHADER_VERTEX_DEFAULT:
         return &GLES2_VertexShader_Default;
     case GLES2_SHADER_FRAGMENT_SOLID_SRC:
+    switch (blendMode)
+    {
+    case SDL_BLENDMODE_NONE:
+        return &GLES2_FragmentShader_None_SolidSrc;
+    case SDL_BLENDMODE_BLEND:
+        return &GLES2_FragmentShader_Alpha_SolidSrc;
+    case SDL_BLENDMODE_ADD:
+        return &GLES2_FragmentShader_Additive_SolidSrc;
+    case SDL_BLENDMODE_MOD:
+        return &GLES2_FragmentShader_Modulated_SolidSrc;
+    default:
+        return NULL;
+    }
+    case GLES2_SHADER_FRAGMENT_TEXTURE_ABGR_SRC:
         switch (blendMode)
-        {
+    {
         case SDL_BLENDMODE_NONE:
-            return &GLES2_FragmentShader_None_SolidSrc;
+            return &GLES2_FragmentShader_None_TextureABGRSrc;
         case SDL_BLENDMODE_BLEND:
-            return &GLES2_FragmentShader_Alpha_SolidSrc;
+            return &GLES2_FragmentShader_Alpha_TextureABGRSrc;
         case SDL_BLENDMODE_ADD:
-            return &GLES2_FragmentShader_Additive_SolidSrc;
+            return &GLES2_FragmentShader_Additive_TextureABGRSrc;
         case SDL_BLENDMODE_MOD:
-            return &GLES2_FragmentShader_Modulated_SolidSrc;
+            return &GLES2_FragmentShader_Modulated_TextureABGRSrc;
         default:
             return NULL;
-        }
-    case GLES2_SHADER_FRAGMENT_TEXTURE_SRC:
+    }
+    case GLES2_SHADER_FRAGMENT_TEXTURE_ARGB_SRC:
         switch (blendMode)
-        {
+    {
         case SDL_BLENDMODE_NONE:
-            return &GLES2_FragmentShader_None_TextureSrc;
+            return &GLES2_FragmentShader_None_TextureARGBSrc;
         case SDL_BLENDMODE_BLEND:
-            return &GLES2_FragmentShader_Alpha_TextureSrc;
+            return &GLES2_FragmentShader_Alpha_TextureARGBSrc;
         case SDL_BLENDMODE_ADD:
-            return &GLES2_FragmentShader_Additive_TextureSrc;
+            return &GLES2_FragmentShader_Additive_TextureARGBSrc;
         case SDL_BLENDMODE_MOD:
-            return &GLES2_FragmentShader_Modulated_TextureSrc;
+            return &GLES2_FragmentShader_Modulated_TextureARGBSrc;
         default:
             return NULL;
-        }
+    }
+        
+    case GLES2_SHADER_FRAGMENT_TEXTURE_RGB_SRC:
+        switch (blendMode)
+    {
+        case SDL_BLENDMODE_NONE:
+            return &GLES2_FragmentShader_None_TextureRGBSrc;
+        case SDL_BLENDMODE_BLEND:
+            return &GLES2_FragmentShader_Alpha_TextureRGBSrc;
+        case SDL_BLENDMODE_ADD:
+            return &GLES2_FragmentShader_Additive_TextureRGBSrc;
+        case SDL_BLENDMODE_MOD:
+            return &GLES2_FragmentShader_Modulated_TextureRGBSrc;
+        default:
+            return NULL;
+    }
+        
+    case GLES2_SHADER_FRAGMENT_TEXTURE_BGR_SRC:
+        switch (blendMode)
+    {
+        case SDL_BLENDMODE_NONE:
+            return &GLES2_FragmentShader_None_TextureBGRSrc;
+        case SDL_BLENDMODE_BLEND:
+            return &GLES2_FragmentShader_Alpha_TextureBGRSrc;
+        case SDL_BLENDMODE_ADD:
+            return &GLES2_FragmentShader_Additive_TextureBGRSrc;
+        case SDL_BLENDMODE_MOD:
+            return &GLES2_FragmentShader_Modulated_TextureBGRSrc;
+        default:
+            return NULL;
+    }
+        
     default:
         return NULL;
     }

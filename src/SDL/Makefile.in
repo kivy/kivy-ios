@@ -12,7 +12,7 @@ datarootdir = @datarootdir@
 datadir	= @datadir@
 auxdir	= @ac_aux_dir@
 distpath = $(srcdir)/..
-distdir = SDL-@SDL_VERSION@
+distdir = SDL2-@SDL_VERSION@
 distfile = $(distdir).tar.gz
 
 @SET_MAKE@
@@ -29,15 +29,15 @@ AR	= @AR@
 RANLIB	= @RANLIB@
 WINDRES	= @WINDRES@
 
-TARGET  = libSDL.la
+TARGET  = libSDL2.la
 OBJECTS = @OBJECTS@
 VERSION_OBJECTS = @VERSION_OBJECTS@
 
-SDLMAIN_TARGET = libSDLmain.a
+SDLMAIN_TARGET = libSDL2main.a
 SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
 
-SRC_DIST = acinclude Android.mk autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS include INSTALL Makefile.minimal Makefile.in README* sdl-config.in sdl.m4 sdl.pc.in SDL.spec.in src test TODO VisualC.html VisualC VisualCE Watcom-Win32.zip WhatsNew Xcode Xcode-iPhoneOS
-GEN_DIST = SDL.spec
+SRC_DIST = acinclude Android.mk autogen.sh BUGS build-scripts configure configure.in COPYING CREDITS include INSTALL Makefile.minimal Makefile.in README* sdl2-config.in sdl2.m4 sdl2.pc.in SDL2.spec.in src test TODO VisualC.html VisualC VisualCE WhatsNew Xcode Xcode-iOS
+GEN_DIST = SDL2.spec
 
 HDRS = \
 	SDL.h \
@@ -46,7 +46,6 @@ HDRS = \
 	SDL_audio.h \
 	SDL_blendmode.h \
 	SDL_clipboard.h \
-	SDL_compat.h \
 	SDL_cpuinfo.h \
 	SDL_endian.h \
 	SDL_error.h \
@@ -66,6 +65,7 @@ HDRS = \
 	SDL_name.h \
 	SDL_opengl.h \
 	SDL_opengles.h \
+	SDL_opengles2.h \
 	SDL_pixels.h \
 	SDL_platform.h \
 	SDL_power.h \
@@ -123,17 +123,17 @@ $(objects)/$(SDLMAIN_TARGET): $(SDLMAIN_OBJECTS)
 install: all install-bin install-hdrs install-lib install-data
 install-bin:
 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(bindir)
-	$(INSTALL) -m 755 sdl-config $(DESTDIR)$(bindir)/sdl-config
+	$(INSTALL) -m 755 sdl2-config $(DESTDIR)$(bindir)/sdl2-config
 install-hdrs: update-revision
-	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(includedir)/SDL
+	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(includedir)/SDL2
 	for file in $(HDRS); do \
-	    $(INSTALL) -m 644 $(srcdir)/include/$$file $(DESTDIR)$(includedir)/SDL/$$file; \
+	    $(INSTALL) -m 644 $(srcdir)/include/$$file $(DESTDIR)$(includedir)/SDL2/$$file; \
 	done
-	$(INSTALL) -m 644 include/SDL_config.h $(DESTDIR)$(includedir)/SDL/SDL_config.h
+	$(INSTALL) -m 644 include/SDL_config.h $(DESTDIR)$(includedir)/SDL2/SDL_config.h
 	if test -f include/SDL_revision.h; then \
-	    $(INSTALL) -m 644 include/SDL_revision.h $(DESTDIR)$(includedir)/SDL/SDL_revision.h; \
+	    $(INSTALL) -m 644 include/SDL_revision.h $(DESTDIR)$(includedir)/SDL2/SDL_revision.h; \
 	else \
-	    $(INSTALL) -m 644 $(srcdir)/include/SDL_revision.h $(DESTDIR)$(includedir)/SDL/SDL_revision.h; \
+	    $(INSTALL) -m 644 $(srcdir)/include/SDL_revision.h $(DESTDIR)$(includedir)/SDL2/SDL_revision.h; \
 	fi
 
 install-lib: $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
@@ -143,34 +143,33 @@ install-lib: $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
 	$(RANLIB) $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
 install-data:
 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(datadir)/aclocal
-	$(INSTALL) -m 644 $(srcdir)/sdl.m4 $(DESTDIR)$(datadir)/aclocal/sdl.m4
+	$(INSTALL) -m 644 $(srcdir)/sdl2.m4 $(DESTDIR)$(datadir)/aclocal/sdl2.m4
 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(libdir)/pkgconfig
-	$(INSTALL) -m 644 sdl.pc $(DESTDIR)$(libdir)/pkgconfig
+	$(INSTALL) -m 644 sdl2.pc $(DESTDIR)$(libdir)/pkgconfig
 
 uninstall: uninstall-bin uninstall-hdrs uninstall-lib uninstall-data
 uninstall-bin:
-	rm -f $(DESTDIR)$(bindir)/sdl-config
+	rm -f $(DESTDIR)$(bindir)/sdl2-config
 uninstall-hdrs:
 	for file in $(HDRS); do \
-	    rm -f $(DESTDIR)$(includedir)/SDL/$$file; \
+	    rm -f $(DESTDIR)$(includedir)/SDL2/$$file; \
 	done
-	rm -f $(DESTDIR)$(includedir)/SDL/SDL_config.h
-	rm -f $(DESTDIR)$(includedir)/SDL/SDL_revision.h
-	-rmdir $(DESTDIR)$(includedir)/SDL
+	rm -f $(DESTDIR)$(includedir)/SDL2/SDL_config.h
+	rm -f $(DESTDIR)$(includedir)/SDL2/SDL_revision.h
+	-rmdir $(DESTDIR)$(includedir)/SDL2
 uninstall-lib:
 	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$(TARGET)
 	rm -f $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
 uninstall-data:
-	rm -f $(DESTDIR)$(datadir)/aclocal/sdl.m4
-	rm -f $(DESTDIR)$(libdir)/pkgconfig/sdl.pc
+	rm -f $(DESTDIR)$(datadir)/aclocal/sdl2.m4
+	rm -f $(DESTDIR)$(libdir)/pkgconfig/sdl2.pc
 
 clean:
 	rm -rf $(objects)
 	if test -f test/Makefile; then (cd test; $(MAKE) $@); fi
 
 distclean: clean
-	rm -f Makefile Makefile.rules sdl-config
-	rm -f SDL.qpg
+	rm -f Makefile Makefile.rules sdl2-config
 	rm -f config.status config.cache config.log libtool
 	rm -rf $(srcdir)/autom4te*
 	find $(srcdir) \( \

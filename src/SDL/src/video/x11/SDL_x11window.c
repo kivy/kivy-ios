@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -31,7 +31,7 @@
 #include "SDL_x11mouse.h"
 #include "SDL_x11shape.h"
 
-#ifdef SDL_VIDEO_DRIVER_PANDORA
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
 #include "SDL_x11opengles.h"
 #endif
 
@@ -258,11 +258,12 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     int depth;
     XSetWindowAttributes xattr;
     Window w;
-    XSizeHints *sizehints;
-    XWMHints *wmhints;
-    XClassHint *classhints;
+    XSizeHints sizehints;
+    XWMHints wmhints;
+    XClassHint classhints;
     Atom _NET_WM_WINDOW_TYPE;
     Atom _NET_WM_WINDOW_TYPE_NORMAL;
+    Atom _NET_WM_PID;
     int wmstate_count;
     Atom wmstate_atoms[3];
     Uint32 fevent = 0;
@@ -288,7 +289,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         XFree(vinfo);
     } else
 #endif
-#ifdef SDL_VIDEO_DRIVER_PANDORA
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     if (window->flags & SDL_WINDOW_OPENGL) {
         XVisualInfo *vinfo;
 
@@ -400,33 +401,21 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         SDL_SetError("Couldn't create window");
         return -1;
     }
-#if SDL_VIDEO_DRIVER_PANDORA
-    /* Create the GLES window surface */
-    _this->gles_data->egl_surface =
-        _this->gles_data->eglCreateWindowSurface(_this->gles_data->
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
+    if (window->flags & SDL_WINDOW_OPENGL) {
+        /* Create the GLES window surface */
+        _this->gles_data->egl_surface =
+            _this->gles_data->eglCreateWindowSurface(_this->gles_data->
                                                  egl_display,
                                                  _this->gles_data->egl_config,
                                                  (NativeWindowType) w, NULL);
 
-    if (_this->gles_data->egl_surface == EGL_NO_SURFACE) {
-        SDL_SetError("Could not create GLES window surface");
-        return -1;
+        if (_this->gles_data->egl_surface == EGL_NO_SURFACE) {
+            SDL_SetError("Could not create GLES window surface");
+            return -1;
+        }
     }
 #endif
-
-    sizehints = XAllocSizeHints();
-    if (sizehints) {
-        if (!(window->flags & SDL_WINDOW_RESIZABLE)) {
-            sizehints->min_width = sizehints->max_width = window->w;
-            sizehints->min_height = sizehints->max_height = window->h;
-            sizehints->flags = PMaxSize | PMinSize;
-        }
-        sizehints->x = window->x;
-        sizehints->y = window->y;
-        sizehints->flags |= USPosition;
-        XSetWMNormalHints(display, w, sizehints);
-        XFree(sizehints);
-    }
 
     if (window->flags & SDL_WINDOW_BORDERLESS) {
         SDL_bool set;
@@ -511,22 +500,33 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         }
     }
 
-    /* Set the input hints so we get keyboard input */
-    wmhints = XAllocWMHints();
-    if (wmhints) {
-        wmhints->input = True;
-        wmhints->flags = InputHint;
-        XSetWMHints(display, w, wmhints);
-        XFree(wmhints);
+    /* Setup the normal size hints */
+    sizehints.flags = 0;
+    if (!(window->flags & SDL_WINDOW_RESIZABLE)) {
+        sizehints.min_width = sizehints.max_width = window->w;
+        sizehints.min_height = sizehints.max_height = window->h;
+        sizehints.flags |= (PMaxSize | PMinSize);
     }
+    sizehints.x = window->x;
+    sizehints.y = window->y;
+    sizehints.flags |= USPosition;
 
-    /* Set the class hints so we can get an icon (AfterStep) */
-    classhints = XAllocClassHint();
-    if (classhints != NULL) {
-        classhints->res_name = data->classname;
-        classhints->res_class = data->classname;
-        XSetClassHint(display, w, classhints);
-        XFree(classhints);
+    /* Setup the input hints so we get keyboard input */
+    wmhints.input = True;
+    wmhints.flags = InputHint;
+
+    /* Setup the class hints so we can get an icon (AfterStep) */
+    classhints.res_name = data->classname;
+    classhints.res_class = data->classname;
+
+    /* Set the size, input and class hints, and define WM_CLIENT_MACHINE and WM_LOCALE_NAME */
+    XSetWMProperties(display, w, NULL, NULL, NULL, 0, &sizehints, &wmhints, &classhints);
+
+    /* Set the PID related to the window for the given hostname, if possible */
+    if (data->pid > 0) {
+        _NET_WM_PID = XInternAtom(display, "_NET_WM_PID", False);
+        XChangeProperty(display, w, _NET_WM_PID, XA_CARDINAL, 32, PropModeReplace,
+                        (unsigned char *)&data->pid, 1);
     }
 
     /* Set the window manager state */

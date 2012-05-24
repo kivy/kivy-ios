@@ -11,6 +11,15 @@
 */
 /* This is a simple example of using GLSL shaders with SDL */
 
+#if 1 /* FIXME: Rework this using the 2.0 API */
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    printf("FIXME\n");
+    return 0;
+}
+#else
 #include "SDL.h"
 
 #ifdef HAVE_OPENGL
@@ -494,5 +503,6 @@ main(int argc, char *argv[])
 }
 
 #endif /* HAVE_OPENGL */
+#endif
 
 /* vi: set ts=4 sw=4 expandtab: */

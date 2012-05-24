@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -1119,15 +1119,48 @@ SDL_SW_UpdateYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
     switch (swdata->format) {
     case SDL_PIXELFORMAT_YV12:
     case SDL_PIXELFORMAT_IYUV:
-        if (rect
-            && (rect->x != 0 || rect->y != 0 || rect->w != swdata->w
-                || rect->h != swdata->h)) {
-            SDL_SetError
-                ("YV12 and IYUV textures only support full surface updates");
-            return -1;
+        if (rect->x == 0 && rect->y == 0 &&
+            rect->w == swdata->w && rect->h == swdata->h) {
+                SDL_memcpy(swdata->pixels, pixels,
+                           (swdata->h * swdata->w) + (swdata->h * swdata->w) / 2);
+        } else {
+            Uint8 *src, *dst;
+            int row;
+            size_t length;
+
+            /* Copy the Y plane */
+            src = (Uint8 *) pixels;
+            dst = swdata->pixels + rect->y * swdata->w + rect->x;
+            length = rect->w;
+            for (row = 0; row < rect->h; ++row) {
+                SDL_memcpy(dst, src, length);
+                src += pitch;
+                dst += swdata->w;
+            }
+
+            /* Copy the next plane */
+            src = (Uint8 *) pixels + rect->h * pitch;
+            dst = swdata->pixels + swdata->h * swdata->w;
+            dst += rect->y/2 * swdata->w/2 + rect->x/2;
+            length = rect->w / 2;
+            for (row = 0; row < rect->h/2; ++row) {
+                SDL_memcpy(dst, src, length);
+                src += pitch/2;
+                dst += swdata->w/2;
+            }
+
+            /* Copy the next plane */
+            src = (Uint8 *) pixels + rect->h * pitch + (rect->h * pitch) / 4;
+            dst = swdata->pixels + swdata->h * swdata->w +
+                  (swdata->h * swdata->w) / 4;
+            dst += rect->y/2 * swdata->w/2 + rect->x/2;
+            length = rect->w / 2;
+            for (row = 0; row < rect->h/2; ++row) {
+                SDL_memcpy(dst, src, length);
+                src += pitch/2;
+                dst += swdata->w/2;
+            }
         }
-        SDL_memcpy(swdata->pixels, pixels,
-                   (swdata->h * swdata->w) + (swdata->h * swdata->w) / 2);
         break;
     case SDL_PIXELFORMAT_YUY2:
     case SDL_PIXELFORMAT_UYVY:

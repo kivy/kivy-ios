@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -60,6 +60,8 @@ typedef struct
     int last_x, last_y;         /* the last reported x and y coordinates */
     Uint8 buttonstate;
     SDL_bool relative_mode;
+    /* the x and y coordinates when relative mode was activated */
+    int original_x, original_y;
 
     SDL_Cursor *cursors;
     SDL_Cursor *def_cursor;

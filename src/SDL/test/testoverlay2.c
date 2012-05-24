@@ -16,6 +16,15 @@
  *                                                                              *
  ********************************************************************************/
 
+#if 1 /* FIXME: Rework this using the 2.0 API */
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    printf("FIXME\n");
+    return 0;
+}
+#else
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -591,5 +600,6 @@ main(int argc, char **argv)
     quit(0);
     return 0;
 }
+#endif
 
 /* vi: set ts=4 sw=4 expandtab: */

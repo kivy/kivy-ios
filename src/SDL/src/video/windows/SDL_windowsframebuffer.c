@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -112,6 +112,11 @@ int WIN_UpdateWindowFramebuffer(_THIS, SDL_Window * window, SDL_Rect * rects, in
 void WIN_DestroyWindowFramebuffer(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+
+    if (!data) {
+        /* The window wasn't fully initialized */
+        return;
+    }
 
     if (data->mdc) {
         DeleteDC(data->mdc);

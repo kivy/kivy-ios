@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -65,8 +65,10 @@ typedef enum
     SDL_RENDERER_SOFTWARE = 0x00000001,         /**< The renderer is a software fallback */ 
     SDL_RENDERER_ACCELERATED = 0x00000002,      /**< The renderer uses hardware 
                                                      acceleration */
-    SDL_RENDERER_PRESENTVSYNC = 0x00000004      /**< Present is synchronized 
+    SDL_RENDERER_PRESENTVSYNC = 0x00000004,     /**< Present is synchronized 
                                                      with the refresh rate */
+    SDL_RENDERER_TARGETTEXTURE = 0x00000008     /**< The renderer supports
+                                                     rendering to texture */
 } SDL_RendererFlags;
 
 /**
@@ -88,7 +90,8 @@ typedef struct SDL_RendererInfo
 typedef enum
 {
     SDL_TEXTUREACCESS_STATIC,    /**< Changes rarely, not lockable */
-    SDL_TEXTUREACCESS_STREAMING  /**< Changes frequently, lockable */
+    SDL_TEXTUREACCESS_STREAMING, /**< Changes frequently, lockable */
+    SDL_TEXTUREACCESS_TARGET     /**< Texture can be used as a render target */
 } SDL_TextureAccess;
 
 /**
@@ -143,6 +146,22 @@ extern DECLSPEC int SDLCALL SDL_GetNumRenderDrivers(void);
  */
 extern DECLSPEC int SDLCALL SDL_GetRenderDriverInfo(int index,
                                                     SDL_RendererInfo * info);
+
+/**
+ *  \brief Create a window and default renderer
+ *
+ *  \param width    The width of the window
+ *  \param height   The height of the window
+ *  \param window_flags The flags used to create the window
+ *  \param window   A pointer filled with the window, or NULL on error
+ *  \param renderer A pointer filled with the renderer, or NULL on error
+ *
+ *  \return 0 on success, or -1 on error
+ */
+extern DECLSPEC int SDLCALL SDL_CreateWindowAndRenderer(
+                                int width, int height, Uint32 window_flags,
+                                SDL_Window **window, SDL_Renderer **renderer);
+
 
 /**
  *  \brief Create a 2D rendering context for a window.
@@ -370,6 +389,25 @@ extern DECLSPEC int SDLCALL SDL_LockTexture(SDL_Texture * texture,
 extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_Texture * texture);
 
 /**
+ * \brief Determines whether a window supports the use of render targets
+ *
+ * \param renderer The renderer that will be checked
+ *
+ * \return SDL_TRUE if supported, SDL_FALSE if not.
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_RenderTargetSupported(SDL_Renderer *renderer);
+
+/**
+ * \brief Set a texture as the current rendering target.
+ *
+ * \param texture The targeted texture, which must be created with the SDL_TEXTUREACCESS_TARGET flag, or NULL for the default render target
+ *
+ * \return 0 on success, or -1 on error
+ */
+extern DECLSPEC int SDLCALL SDL_SetRenderTarget(SDL_Renderer *renderer,
+                                                SDL_Texture *texture);
+
+/**
  *  \brief Set the drawing area for rendering on the current target.
  *
  *  \param rect The rectangle representing the drawing area, or NULL to set the viewport to the entire target.
@@ -560,6 +598,7 @@ extern DECLSPEC int SDLCALL SDL_RenderCopy(SDL_Renderer * renderer,
                                            SDL_Texture * texture,
                                            const SDL_Rect * srcrect,
                                            const SDL_Rect * dstrect);
+
 
 /**
  *  \brief Read pixels from the current rendering target.

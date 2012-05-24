@@ -26,10 +26,10 @@ main(int argc, char *argv[])
     SDL_version compiled;
     SDL_version linked;
 
-#if SDL_VERSION_ATLEAST(1, 3, 0)
-    printf("Compiled with SDL 1.3 or newer\n");
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+    printf("Compiled with SDL 2.0 or newer\n");
 #else
-    printf("Compiled with SDL older than 1.3\n");
+    printf("Compiled with SDL older than 2.0\n");
 #endif
     SDL_VERSION(&compiled);
     printf("Compiled version: %d.%d.%d.%d (%s)\n",

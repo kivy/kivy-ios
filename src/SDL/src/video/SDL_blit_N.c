@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,10 +25,14 @@
 #include "SDL_cpuinfo.h"
 #include "SDL_blit.h"
 
+#include "SDL_assert.h"
+
 /* Functions to blit from N-bit surfaces to other surfaces */
 
 #if SDL_ALTIVEC_BLITTERS
-#define assert(X)
+#ifdef HAVE_ALTIVEC_H
+#include <altivec.h>
+#endif
 #ifdef __MACOSX__
 #include <sys/sysctl.h>
 static size_t
@@ -108,9 +112,10 @@ calc_swizzle32(const SDL_PixelFormat * srcfmt, const SDL_PixelFormat * dstfmt)
     /* ARGB */
     const static const struct SDL_PixelFormat default_pixel_format = {
         0, NULL, 0, 0,
+        {0, 0},
+        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
         0, 0, 0, 0,
         16, 8, 0, 24,
-        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
         0, NULL
     };
     if (!srcfmt) {
@@ -239,7 +244,7 @@ Blit_RGB888_RGB565Altivec(SDL_BlitInfo * info)
             vsrc = voverflow;
         }
 
-        assert(width == 0);
+        SDL_assert(width == 0);
 
         /* do scalar until we can align... */
         ONE_PIXEL_BLEND((extrawidth), extrawidth);
@@ -308,9 +313,8 @@ Blit_RGB565_32Altivec(SDL_BlitInfo * info)
          char) (vec_add((vector unsigned int) vgreen1, vec_sl(v8, v8))
         );
 
-
-    assert(srcfmt->BytesPerPixel == 2);
-    assert(dstfmt->BytesPerPixel == 4);
+    SDL_assert(srcfmt->BytesPerPixel == 2);
+    SDL_assert(dstfmt->BytesPerPixel == 4);
 
     vf800 = (vector unsigned short) vec_splat_u8(-7);
     vf800 = vec_sl(vf800, vec_splat_u16(8));
@@ -386,7 +390,7 @@ Blit_RGB565_32Altivec(SDL_BlitInfo * info)
             vsrc = voverflow;
         }
 
-        assert(width == 0);
+        SDL_assert(width == 0);
 
 
         /* do scalar until we can align... */
@@ -456,9 +460,8 @@ Blit_RGB555_32Altivec(SDL_BlitInfo * info)
          char) (vec_add((vector unsigned int) vgreen1, vec_sl(v8, v8))
         );
 
-
-    assert(srcfmt->BytesPerPixel == 2);
-    assert(dstfmt->BytesPerPixel == 4);
+    SDL_assert(srcfmt->BytesPerPixel == 2);
+    SDL_assert(dstfmt->BytesPerPixel == 4);
 
     vf800 = (vector unsigned short) vec_splat_u8(-7);
     vf800 = vec_sl(vf800, vec_splat_u16(8));
@@ -534,7 +537,7 @@ Blit_RGB555_32Altivec(SDL_BlitInfo * info)
             vsrc = voverflow;
         }
 
-        assert(width == 0);
+        SDL_assert(width == 0);
 
 
         /* do scalar until we can align... */
@@ -626,13 +629,13 @@ Blit32to32KeyAltivec(SDL_BlitInfo * info)
         }
         int width = info->dst_w;
         ONE_PIXEL_BLEND((UNALIGNED_PTR(dstp)) && (width), width);
-        assert(width > 0);
+        SDL_assert(width > 0);
         if (width > 0) {
             int extrawidth = (width % 4);
             vector unsigned char valigner = VEC_ALIGNER(srcp);
             vector unsigned int vs = vec_ld(0, srcp);
             width -= extrawidth;
-            assert(width >= 4);
+            SDL_assert(width >= 4);
             while (width) {
                 vector unsigned char vsel;
                 vector unsigned int vd;
@@ -687,8 +690,8 @@ ConvertAltivec32to32_noprefetch(SDL_BlitInfo * info)
         }
     }
 
-    assert(srcfmt->BytesPerPixel == 4);
-    assert(dstfmt->BytesPerPixel == 4);
+    SDL_assert(srcfmt->BytesPerPixel == 4);
+    SDL_assert(dstfmt->BytesPerPixel == 4);
 
     while (height--) {
         vector unsigned char valigner;
@@ -704,6 +707,8 @@ ConvertAltivec32to32_noprefetch(SDL_BlitInfo * info)
         while ((UNALIGNED_PTR(dst)) && (width)) {
             bits = *(src++);
             RGBA_FROM_8888(bits, srcfmt, r, g, b, a);
+            if(!srcfmt->Amask)
+              a = info->a;
             *(dst++) = MAKE8888(dstfmt, r, g, b, a);
             width--;
         }
@@ -725,12 +730,14 @@ ConvertAltivec32to32_noprefetch(SDL_BlitInfo * info)
             vbits = voverflow;
         }
 
-        assert(width == 0);
+        SDL_assert(width == 0);
 
         /* cover pixels at the end of the row that didn't fit in 16 bytes. */
         while (extrawidth) {
             bits = *(src++);    /* max 7 pixels, don't bother with prefetch. */
             RGBA_FROM_8888(bits, srcfmt, r, g, b, a);
+            if(!srcfmt->Amask)
+              a = info->a;
             *(dst++) = MAKE8888(dstfmt, r, g, b, a);
             extrawidth--;
         }
@@ -766,8 +773,8 @@ ConvertAltivec32to32_prefetch(SDL_BlitInfo * info)
         }
     }
 
-    assert(srcfmt->BytesPerPixel == 4);
-    assert(dstfmt->BytesPerPixel == 4);
+    SDL_assert(srcfmt->BytesPerPixel == 4);
+    SDL_assert(dstfmt->BytesPerPixel == 4);
 
     while (height--) {
         vector unsigned char valigner;
@@ -787,6 +794,8 @@ ConvertAltivec32to32_prefetch(SDL_BlitInfo * info)
                       DST_CHAN_DEST);
             bits = *(src++);
             RGBA_FROM_8888(bits, srcfmt, r, g, b, a);
+            if(!srcfmt->Amask)
+              a = info->a;
             *(dst++) = MAKE8888(dstfmt, r, g, b, a);
             width--;
         }
@@ -812,12 +821,14 @@ ConvertAltivec32to32_prefetch(SDL_BlitInfo * info)
             vbits = voverflow;
         }
 
-        assert(width == 0);
+        SDL_assert(width == 0);
 
         /* cover pixels at the end of the row that didn't fit in 16 bytes. */
         while (extrawidth) {
             bits = *(src++);    /* max 7 pixels, don't bother with prefetch. */
             RGBA_FROM_8888(bits, srcfmt, r, g, b, a);
+            if(!srcfmt->Amask)
+              a = info->a;
             *(dst++) = MAKE8888(dstfmt, r, g, b, a);
             extrawidth--;
         }

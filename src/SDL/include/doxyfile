@@ -31,7 +31,7 @@ PROJECT_NAME           = SDL
 # This could be handy for archiving the generated documentation or 
 # if some version control system is used.
 
-PROJECT_NUMBER         = 1.3.0
+PROJECT_NUMBER         = 2.0.0
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) 
 # base path where the generated documentation will be put. 
@@ -635,7 +635,7 @@ EXCLUDE                = ../doxy \
                          ../Xcode \
                          ../VisualC \
                          ../VisualCE \
-                         ../Xcode-iPhoneOS
+                         ../Xcode-iOS
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 

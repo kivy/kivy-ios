@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="SDL"
+	Name="SDL2"
 	ProjectGUID="{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}"
 	RootNamespace="SDL"
 	TargetFrameworkVersion="131072"
@@ -75,8 +75,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib imm32.lib version.lib"
-				OutputFile="$(IntDir)\SDL.dll"
-				SuppressStartupBanner="true"
 				IgnoreAllDefaultLibraries="true"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -159,8 +157,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib imm32.lib version.lib"
-				OutputFile="$(IntDir)\SDL.dll"
-				SuppressStartupBanner="true"
 				IgnoreAllDefaultLibraries="true"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -247,8 +243,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib imm32.lib version.lib"
-				OutputFile="$(IntDir)\SDL.dll"
-				SuppressStartupBanner="true"
 				IgnoreAllDefaultLibraries="true"
 				SubSystem="2"
 			/>
@@ -332,8 +326,6 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="winmm.lib imm32.lib version.lib"
-				OutputFile="$(IntDir)\SDL.dll"
-				SuppressStartupBanner="true"
 				IgnoreAllDefaultLibraries="true"
 				SubSystem="2"
 				TargetMachine="17"
@@ -389,10 +381,6 @@
 			</File>
 			<File
 				RelativePath="..\..\include\SDL_clipboard.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\include\SDL_compat.h"
 				>
 			</File>
 			<File
@@ -777,19 +765,15 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\SDL_compat.c"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\cpuinfo\SDL_cpuinfo.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\winmm\SDL_winmm.c"
+			RelativePath="..\..\src\audio\directsound\SDL_directsound.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\winmm\SDL_winmm.h"
+			RelativePath="..\..\src\audio\directsound\SDL_directsound.h"
 			>
 		</File>
 		<File
@@ -826,18 +810,6 @@
 		</File>
 		<File
 			RelativePath="..\..\src\audio\dummy\SDL_dummyaudio.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\audio\directsound\SDL_directsound.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\audio\directsound\SDL_directsound.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\audio\xaudio2\SDL_xaudio2.c"
 			>
 		</File>
 		<File
@@ -1073,6 +1045,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\thread\generic\SDL_syscond.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\events\SDL_sysevents.h"
 			>
 		</File>
@@ -1269,6 +1245,18 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\audio\winmm\SDL_winmm.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\audio\winmm\SDL_winmm.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\audio\xaudio2\SDL_xaudio2.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\render\SDL_yuv_mmx.c"
 			>
 		</File>
@@ -1281,7 +1269,7 @@
 			>
 		</File>
 		<File
-			RelativePath=".\Version.rc"
+			RelativePath="..\..\src\main\windows\version.rc"
 			>
 		</File>
 		<File

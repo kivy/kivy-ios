@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -23,6 +23,7 @@
 #include "../SDL_audio_c.h"
 #include "../SDL_sysaudio.h"
 #include "SDL_coreaudio.h"
+#include "SDL_assert.h"
 
 #define DEBUG_COREAUDIO 0
 
@@ -268,8 +269,8 @@ outputCallback(void *inRefCon,
        any input format in OpenAudio, and leave the conversion to CoreAudio.
      */
     /*
-       assert(!this->convert.needed);
-       assert(this->spec.channels == ioData->mNumberChannels);
+       SDL_assert(!this->convert.needed);
+       SDL_assert(this->spec.channels == ioData->mNumberChannels);
      */
 
     for (i = 0; i < ioData->mNumberBuffers; i++) {

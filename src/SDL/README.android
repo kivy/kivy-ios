@@ -39,7 +39,8 @@ src/main/android/SDL_android_main.cpp
 
 Instructions:
 1. Copy the android-project directory wherever you want to keep your projects and rename it to the name of your project.
-2. Move this SDL directory into the <project>/jni directory
+2. Move this SDL directory into the <project>/jni directory and then copy
+SDL_config_android.h to SDL_config.h inside the include folder
 3. Place your application source files in the <project>/jni/src directory
 4. Edit <project>/jni/src/Android.mk to include your source files
 5. Run 'ndk-build' (a script provided by the NDK). This compiles the C source

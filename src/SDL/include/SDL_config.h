@@ -26,8 +26,6 @@
 
 /**
  *  \file SDL_config.h
- *
- *  SDL_config.h for any platform that doesn't build using the configure system.
  */
  
 /* Add any platform that doesn't build using the configure system. */
@@ -42,7 +40,12 @@
 #elif defined(__NINTENDODS__)
 #include "SDL_config_nintendods.h"
 #else
+/* This is a minimal configuration just to get SDL running on new platforms */
 #include "SDL_config_minimal.h"
 #endif /* platform config */
+
+#ifdef USING_GENERATED_CONFIG_H
+#error Wrong SDL_config.h, check your include path?
+#endif
 
 #endif /* _SDL_config_h */

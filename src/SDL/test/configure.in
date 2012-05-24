@@ -65,8 +65,8 @@ AC_SUBST(EXE)
 AC_SUBST(MATHLIB)
 
 dnl Check for SDL
-SDL_VERSION=1.3.0
-AM_PATH_SDL($SDL_VERSION,
+SDL_VERSION=2.0.0
+AM_PATH_SDL2($SDL_VERSION,
             :,
 	    AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])
 )
@@ -103,12 +103,10 @@ dnl Check for OpenGL ES
 AC_MSG_CHECKING(for OpenGL ES support)
 have_opengles=no
 AC_TRY_COMPILE([
- #if defined (__QNXNTO__)
-    #include <GLES/gl.h>
- #elif defined (__IPHONEOS__)
+ #if defined (__IPHONEOS__)
     #include <OpenGLES/ES1/gl.h>
  #else
-    #error "No OpenGL ES support"
+    #include <GLES/gl.h>
  #endif /* __QNXNTO__ */
 ],[
 ],[
@@ -116,11 +114,12 @@ have_opengles=yes
 ])
 AC_MSG_RESULT($have_opengles)
 
-if test x$have_opengl = xyes; then
-    CFLAGS="$CFLAGS -DHAVE_OPENGL"
-    GLLIB="$XPATH $SYS_GL_LIBS"
-elif test x$have_opengles = xyes; then
+GLLIB=""
+if test x$have_opengles = xyes; then
     CFLAGS="$CFLAGS -DHAVE_OPENGLES"
+    GLLIB="$XPATH -lGLESv1_CM"
+elif test x$have_opengl = xyes; then
+    CFLAGS="$CFLAGS -DHAVE_OPENGL"
     GLLIB="$XPATH $SYS_GL_LIBS"
 else
     GLLIB=""

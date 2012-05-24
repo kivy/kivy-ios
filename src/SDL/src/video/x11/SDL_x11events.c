@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -83,7 +83,7 @@ static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
             if (event->xbutton.button == Button4) {
                 *ticks = 1;
             }
-            else {
+            else if (event->xbutton.button == Button5) {
                 *ticks = -1;
             }
 

@@ -47,7 +47,7 @@ LoadSprite(char *file, SDL_Renderer *renderer)
     /* Load the sprite image */
     temp = SDL_LoadBMP(file);
     if (temp == NULL) {
-        fprintf(stderr, "Couldn't load %s: %s", file, SDL_GetError());
+        fprintf(stderr, "Couldn't load %s: %s\n", file, SDL_GetError());
         return (-1);
     }
     sprite_w = temp->w;
@@ -131,17 +131,7 @@ main(int argc, char *argv[])
     int i, done;
     SDL_Event event;
 
-    window = SDL_CreateWindow("Happy Smileys",
-                              SDL_WINDOWPOS_UNDEFINED,
-                              SDL_WINDOWPOS_UNDEFINED,
-                              WINDOW_WIDTH, WINDOW_HEIGHT,
-                              SDL_WINDOW_SHOWN);
-    if (!window) {
-        quit(2);
-    }
-
-    renderer = SDL_CreateRenderer(window, -1, 0);
-    if (!renderer) {
+    if (SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer) < 0) {
         quit(2);
     }
 

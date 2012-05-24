@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -100,24 +100,79 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
                 renderer->WindowEvent(renderer, &event->window);
             }
 
-            if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+            if (event->window.event == SDL_WINDOWEVENT_RESIZED) {
                 /* Try to keep the previous viewport centered */
                 int w, h;
                 SDL_Rect viewport;
 
                 SDL_GetWindowSize(window, &w, &h);
-                viewport.x = (w - renderer->viewport.w) / 2;
-                viewport.y = (h - renderer->viewport.h) / 2;
-                viewport.w = renderer->viewport.w;
-                viewport.h = renderer->viewport.h;
-                SDL_RenderSetViewport(renderer, &viewport);
+                if (renderer->target) {
+                    renderer->viewport_backup.x = (w - renderer->viewport_backup.w) / 2;
+                    renderer->viewport_backup.y = (h - renderer->viewport_backup.h) / 2;
+                } else {
+                    viewport.x = (w - renderer->viewport.w) / 2;
+                    viewport.y = (h - renderer->viewport.h) / 2;
+                    viewport.w = renderer->viewport.w;
+                    viewport.h = renderer->viewport.h;
+                    SDL_RenderSetViewport(renderer, &viewport);
+                }
+                renderer->resized = SDL_TRUE;
+            } else if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                int w, h;
+                SDL_Rect viewport;
+
+                if (!renderer->resized) {
+                    /* Window was programmatically resized, reset viewport */
+                    SDL_GetWindowSize(window, &w, &h);
+                    if (renderer->target) {
+                        renderer->viewport_backup.x = 0;
+                        renderer->viewport_backup.y = 0;
+                        renderer->viewport_backup.w = w;
+                        renderer->viewport_backup.h = h;
+                    } else {
+                        viewport.x = 0;
+                        viewport.y = 0;
+                        viewport.w = w;
+                        viewport.h = h;
+                        SDL_RenderSetViewport(renderer, &viewport);
+                    }
+                    renderer->resized = SDL_FALSE;
+                }
+            } else if (event->window.event == SDL_WINDOWEVENT_HIDDEN) {
+                renderer->hidden = SDL_TRUE;
+            } else if (event->window.event == SDL_WINDOWEVENT_SHOWN) {
+                if (!(SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED)) {
+                    renderer->hidden = SDL_FALSE;
+                }
             } else if (event->window.event == SDL_WINDOWEVENT_MINIMIZED) {
-                renderer->minimized = SDL_TRUE;
+                renderer->hidden = SDL_TRUE;
             } else if (event->window.event == SDL_WINDOWEVENT_RESTORED) {
-                renderer->minimized = SDL_FALSE;
+                if (!(SDL_GetWindowFlags(window) & SDL_WINDOW_HIDDEN)) {
+                    renderer->hidden = SDL_FALSE;
+                }
             }
         }
     }
+    return 0;
+}
+
+int
+SDL_CreateWindowAndRenderer(int width, int height, Uint32 window_flags,
+                            SDL_Window **window, SDL_Renderer **renderer)
+{
+    *window = SDL_CreateWindow(NULL, SDL_WINDOWPOS_UNDEFINED,
+                                     SDL_WINDOWPOS_UNDEFINED,
+                                     width, height, window_flags);
+    if (!*window) {
+        *renderer = NULL;
+        return -1;
+    }
+
+    *renderer = SDL_CreateRenderer(*window, -1, 0);
+    if (!*renderer) {
+        return -1;
+    }
+
     return 0;
 }
 
@@ -193,10 +248,10 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
         renderer->magic = &renderer_magic;
         renderer->window = window;
 
-        if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED) {
-            renderer->minimized = SDL_TRUE;
+        if (SDL_GetWindowFlags(window) & (SDL_WINDOW_HIDDEN|SDL_WINDOW_MINIMIZED)) {
+            renderer->hidden = SDL_TRUE;
         } else {
-            renderer->minimized = SDL_FALSE;
+            renderer->hidden = SDL_FALSE;
         }
 
         SDL_SetWindowData(window, SDL_WINDOWRENDERDATA, renderer);
@@ -796,6 +851,72 @@ SDL_UnlockTexture(SDL_Texture * texture)
     }
 }
 
+SDL_bool
+SDL_RenderTargetSupported(SDL_Renderer *renderer)
+{
+    if (!renderer || !renderer->SetRenderTarget) {
+        return SDL_FALSE;
+    }
+    return (renderer->info.flags & SDL_RENDERER_TARGETTEXTURE) != 0;
+}
+
+int
+SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
+{
+    SDL_Rect viewport;
+
+    if (!SDL_RenderTargetSupported(renderer)) {
+        SDL_Unsupported();
+        return -1;
+    }
+    if (texture == renderer->target) {
+        /* Nothing to do! */
+        return 0;
+    }
+
+    /* texture == NULL is valid and means reset the target to the window */
+    if (texture) {
+        CHECK_TEXTURE_MAGIC(texture, -1);
+        if (renderer != texture->renderer) {
+            SDL_SetError("Texture was not created with this renderer");
+            return -1;
+        }
+        if (!(texture->access & SDL_TEXTUREACCESS_TARGET)) {
+            SDL_SetError("Texture not created with SDL_TEXTUREACCESS_TARGET");
+            return -1;
+        }
+        if (texture->native) {
+            /* Always render to the native texture */
+            texture = texture->native;
+        }
+    }
+
+    if (texture && !renderer->target) {
+        /* Make a backup of the viewport */
+        renderer->viewport_backup = renderer->viewport;
+    }
+    renderer->target = texture;
+
+    if (renderer->SetRenderTarget(renderer, texture) < 0) {
+        return -1;
+    }
+
+    if (texture) {
+        viewport.x = 0;
+        viewport.y = 0;
+        viewport.w = texture->w;
+        viewport.h = texture->h;
+    } else {
+        viewport = renderer->viewport_backup;
+    }
+    if (SDL_RenderSetViewport(renderer, &viewport) < 0) {
+        return -1;
+    }
+
+    /* All set! */
+    return 0;
+}
+
 int
 SDL_RenderSetViewport(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
@@ -883,8 +1004,8 @@ SDL_RenderClear(SDL_Renderer * renderer)
 {
     CHECK_RENDERER_MAGIC(renderer, -1);
 
-    /* Don't draw while we're minimized */
-    if (renderer->minimized) {
+    /* Don't draw while we're hidden */
+    if (renderer->hidden) {
         return 0;
     }
     return renderer->RenderClear(renderer);
@@ -913,8 +1034,8 @@ SDL_RenderDrawPoints(SDL_Renderer * renderer,
     if (count < 1) {
         return 0;
     }
-    /* Don't draw while we're minimized */
-    if (renderer->minimized) {
+    /* Don't draw while we're hidden */
+    if (renderer->hidden) {
         return 0;
     }
     return renderer->RenderDrawPoints(renderer, points, count);
@@ -945,8 +1066,8 @@ SDL_RenderDrawLines(SDL_Renderer * renderer,
     if (count < 2) {
         return 0;
     }
-    /* Don't draw while we're minimized */
-    if (renderer->minimized) {
+    /* Don't draw while we're hidden */
+    if (renderer->hidden) {
         return 0;
     }
     return renderer->RenderDrawLines(renderer, points, count);
@@ -998,8 +1119,8 @@ SDL_RenderDrawRects(SDL_Renderer * renderer,
         return 0;
     }
 
-    /* Don't draw while we're minimized */
-    if (renderer->minimized) {
+    /* Don't draw while we're hidden */
+    if (renderer->hidden) {
         return 0;
     }
     for (i = 0; i < count; ++i) {
@@ -1014,9 +1135,9 @@ int
 SDL_RenderFillRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     SDL_Rect full_rect;
-	
+
     CHECK_RENDERER_MAGIC(renderer, -1);
-	
+
     /* If 'rect' == NULL, then outline the whole surface */
     if (!rect) {
         full_rect.x = 0;
@@ -1041,8 +1162,8 @@ SDL_RenderFillRects(SDL_Renderer * renderer,
     if (count < 1) {
         return 0;
     }
-    /* Don't draw while we're minimized */
-    if (renderer->minimized) {
+    /* Don't draw while we're hidden */
+    if (renderer->hidden) {
         return 0;
     }
     return renderer->RenderFillRects(renderer, rects, count);
@@ -1102,8 +1223,8 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         texture = texture->native;
     }
 
-    /* Don't draw while we're minimized */
-    if (renderer->minimized) {
+    /* Don't draw while we're hidden */
+    if (renderer->hidden) {
         return 0;
     }
     return renderer->RenderCopy(renderer, texture, &real_srcrect,
@@ -1155,8 +1276,8 @@ SDL_RenderPresent(SDL_Renderer * renderer)
 {
     CHECK_RENDERER_MAGIC(renderer, );
 
-    /* Don't draw while we're minimized */
-    if (renderer->minimized) {
+    /* Don't draw while we're hidden */
+    if (renderer->hidden) {
         return;
     }
     renderer->RenderPresent(renderer);

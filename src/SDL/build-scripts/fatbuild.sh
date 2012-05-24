@@ -214,12 +214,12 @@ if test x$merge = xyes; then
     cd build
     target=`find . -mindepth 4 -maxdepth 4 -type f -name '*.dylib' | head -1 | sed 's|.*/||'`
     (lipo -create -o $output/$target `find . -mindepth 4 -maxdepth 4 -type f -name "*.dylib"` &&
-     ln -sf $target $output/libSDL.dylib &&
-     lipo -create -o $output/libSDL.a */build/.libs/libSDL.a &&
-     cp $native_path/build/.libs/libSDL.la $output &&
-     cp $native_path/build/.libs/libSDL.lai $output &&
-     cp $native_path/build/libSDL.la . &&
-     lipo -create -o libSDLmain.a */build/libSDLmain.a &&
+     ln -sf $target $output/libSDL2.dylib &&
+     lipo -create -o $output/libSDL2.a */build/.libs/libSDL2.a &&
+     cp $native_path/build/.libs/libSDL2.la $output &&
+     cp $native_path/build/.libs/libSDL2.lai $output &&
+     cp $native_path/build/libSDL2.la . &&
+     lipo -create -o libSDL2main.a */build/libSDL2main.a &&
      echo "Build complete!" &&
      echo "Files can be found in the build directory.") || exit 4
     cd ..
@@ -256,25 +256,25 @@ if test x$mandir = x; then
 fi
 if test x$install_bin = xyes; then
     do_install sh $auxdir/mkinstalldirs $bindir
-    do_install /usr/bin/install -c -m 755 build/$native_path/sdl-config $bindir/sdl-config
+    do_install /usr/bin/install -c -m 755 build/$native_path/sdl2-config $bindir/sdl2-config
 fi
 if test x$install_hdrs = xyes; then
-    do_install sh $auxdir/mkinstalldirs $includedir/SDL
+    do_install sh $auxdir/mkinstalldirs $includedir/SDL2
     for src in $srcdir/include/*.h; do \
         file=`echo $src | sed -e 's|^.*/||'`; \
-        do_install /usr/bin/install -c -m 644 $src $includedir/SDL/$file; \
+        do_install /usr/bin/install -c -m 644 $src $includedir/SDL2/$file; \
     done
-    do_install /usr/bin/install -c -m 644 $srcdir/include/SDL_config_macosx.h $includedir/SDL/SDL_config.h
+    do_install /usr/bin/install -c -m 644 $srcdir/include/SDL_config_macosx.h $includedir/SDL2/SDL_config.h
 fi
 if test x$install_lib = xyes; then
     do_install sh $auxdir/mkinstalldirs $libdir
-    do_install sh build/$native_path/libtool --mode=install /usr/bin/install -c  build/libSDL.la $libdir/libSDL.la
-    do_install /usr/bin/install -c -m 644 build/libSDLmain.a $libdir/libSDLmain.a
-    do_install ranlib $libdir/libSDLmain.a
+    do_install sh build/$native_path/libtool --mode=install /usr/bin/install -c  build/libSDL2.la $libdir/libSDL2.la
+    do_install /usr/bin/install -c -m 644 build/libSDL2main.a $libdir/libSDL2main.a
+    do_install ranlib $libdir/libSDL2main.a
 fi
 if test x$install_data = xyes; then
     do_install sh $auxdir/mkinstalldirs $datadir/aclocal
-    do_install /usr/bin/install -c -m 644 $srcdir/sdl.m4 $datadir/aclocal/sdl.m4
+    do_install /usr/bin/install -c -m 644 $srcdir/sdl2.m4 $datadir/aclocal/sdl2.m4
 fi
 
 #

@@ -9,8 +9,17 @@
   including commercial applications, and to alter it and redistribute it
   freely.
 */
-/* A simple program to test the Input Method support in the SDL library (1.3+) */
+/* A simple program to test the Input Method support in the SDL library (2.0+) */
 
+#if 1 /* FIXME: Rework this using the 2.0 API */
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    printf("FIXME\n");
+    return 0;
+}
+#else
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -383,5 +392,6 @@ int main(int argc, char *argv[])
     CleanupVideo();
     return 0;
 }
+#endif
 
 /* vi: set ts=4 sw=4 expandtab: */

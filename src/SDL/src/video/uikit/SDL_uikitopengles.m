@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -103,10 +103,14 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
 {
     SDL_uikitopenglview *view;
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+    SDL_DisplayData *displaydata = display->driverdata;
+    SDL_DisplayModeData *displaymodedata = display->current_mode.driverdata;
     UIWindow *uiwindow = data->uiwindow;
 
     /* construct our view, passing in SDL's OpenGL configuration data */
     view = [[SDL_uikitopenglview alloc] initWithFrame: [uiwindow bounds]
+                                    scale: displaymodedata->scale
                                     retainBacking: _this->gl_config.retained_backing
                                     rBits: _this->gl_config.red_size
                                     gBits: _this->gl_config.green_size
@@ -115,6 +119,9 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
                                     depthBits: _this->gl_config.depth_size
                                     stencilBits: _this->gl_config.stencil_size
                                     majorVersion: _this->gl_config.major_version];
+    if (!view) {
+        return NULL;
+    }
 
     data->view = view;
     view->viewcontroller = data->viewcontroller;
@@ -132,9 +139,10 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
     }
 
     /* Make this window the current mouse focus for touch input */
-    /* !!! FIXME: only do this if this is the primary screen. */
-    SDL_SetMouseFocus(window);
-    SDL_SetKeyboardFocus(window);
+    if (displaydata->uiscreen == [UIScreen mainScreen]) {
+        SDL_SetMouseFocus(window);
+        SDL_SetKeyboardFocus(window);
+    }
 
     return view;
 }

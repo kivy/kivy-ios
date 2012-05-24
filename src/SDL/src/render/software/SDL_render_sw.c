@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -51,6 +51,7 @@ static int SW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, void **pixels, int *pitch);
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int SW_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int SW_UpdateViewport(SDL_Renderer * renderer);
 static int SW_RenderClear(SDL_Renderer * renderer);
 static int SW_RenderDrawPoints(SDL_Renderer * renderer,
@@ -72,7 +73,7 @@ SDL_RenderDriver SW_RenderDriver = {
     SW_CreateRenderer,
     {
      "software",
-     SDL_RENDERER_SOFTWARE,
+     SDL_RENDERER_SOFTWARE | SDL_RENDERER_TARGETTEXTURE,
      8,
      {
       SDL_PIXELFORMAT_RGB555,
@@ -91,6 +92,7 @@ SDL_RenderDriver SW_RenderDriver = {
 typedef struct
 {
     SDL_Surface *surface;
+    SDL_Surface *window;
 } SW_RenderData;
 
 
@@ -100,7 +102,10 @@ SW_ActivateRenderer(SDL_Renderer * renderer)
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
 
     if (!data->surface) {
-        data->surface = SDL_GetWindowSurface(renderer->window);
+        data->surface = data->window;
+    }
+    if (!data->surface) {
+        data->surface = data->window = SDL_GetWindowSurface(renderer->window);
 
         SW_UpdateViewport(renderer);
     }
@@ -140,8 +145,8 @@ SW_CreateRendererForSurface(SDL_Surface * surface)
     renderer->UpdateTexture = SW_UpdateTexture;
     renderer->LockTexture = SW_LockTexture;
     renderer->UnlockTexture = SW_UnlockTexture;
+    renderer->SetRenderTarget = SW_SetRenderTarget;
     renderer->UpdateViewport = SW_UpdateViewport;
-    renderer->DestroyTexture = SW_DestroyTexture;
     renderer->RenderClear = SW_RenderClear;
     renderer->RenderDrawPoints = SW_RenderDrawPoints;
     renderer->RenderDrawLines = SW_RenderDrawLines;
@@ -149,6 +154,7 @@ SW_CreateRendererForSurface(SDL_Surface * surface)
     renderer->RenderCopy = SW_RenderCopy;
     renderer->RenderReadPixels = SW_RenderReadPixels;
     renderer->RenderPresent = SW_RenderPresent;
+    renderer->DestroyTexture = SW_DestroyTexture;
     renderer->DestroyRenderer = SW_DestroyRenderer;
     renderer->info = SW_RenderDriver.info;
     renderer->driverdata = data;
@@ -177,6 +183,7 @@ SW_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         data->surface = NULL;
+        data->window = NULL;
     }
 }
 
@@ -274,6 +281,19 @@ SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void
 SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+}
+
+static int
+SW_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+
+    if (texture ) {
+        data->surface = (SDL_Surface *) texture->driverdata;
+    } else {
+        data->surface = data->window;
+    }
+    return 0;
 }
 
 static int

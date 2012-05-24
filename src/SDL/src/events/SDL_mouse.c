@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -323,9 +323,13 @@ SDL_SetRelativeMouseMode(SDL_bool enabled)
     /* Set the relative mode */
     mouse->relative_mode = enabled;
 
-    if (!enabled) {
+    if (enabled) {
+        /* Save the expected mouse position */
+        mouse->original_x = mouse->x;
+        mouse->original_y = mouse->y;
+    } else if (mouse->focus) {
         /* Restore the expected mouse position */
-        SDL_WarpMouseInWindow(mouse->focus, mouse->x, mouse->y);
+        SDL_WarpMouseInWindow(mouse->focus, mouse->original_x, mouse->original_y);
     }
 
     /* Flush pending mouse motion */
@@ -465,7 +469,11 @@ SDL_SetCursor(SDL_Cursor * cursor)
         }
         mouse->cur_cursor = cursor;
     } else {
-        cursor = mouse->cur_cursor;
+        if (mouse->focus) {
+            cursor = mouse->cur_cursor;
+        } else {
+            cursor = mouse->def_cursor;
+        }
     }
 
     if (cursor && mouse->cursor_shown && !mouse->relative_mode) {

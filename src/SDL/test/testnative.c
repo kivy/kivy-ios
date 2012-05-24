@@ -48,7 +48,7 @@ quit(int rc)
 }
 
 SDL_Texture *
-LoadSprite(SDL_Window * window, char *file)
+LoadSprite(SDL_Renderer *renderer, char *file)
 {
     SDL_Surface *temp;
     SDL_Texture *sprite;
@@ -62,12 +62,11 @@ LoadSprite(SDL_Window * window, char *file)
 
     /* Set transparent pixel as the pixel at (0,0) */
     if (temp->format->palette) {
-        SDL_SetColorKey(temp, SDL_SRCCOLORKEY, *(Uint8 *) temp->pixels);
+        SDL_SetColorKey(temp, 1, *(Uint8 *) temp->pixels);
     }
 
     /* Create textures from the image */
-    SDL_SelectRenderer(window);
-    sprite = SDL_CreateTextureFromSurface(0, temp);
+    sprite = SDL_CreateTextureFromSurface(renderer, temp);
     if (!sprite) {
         fprintf(stderr, "Couldn't create texture: %s\n", SDL_GetError());
         SDL_FreeSurface(temp);
@@ -80,43 +79,42 @@ LoadSprite(SDL_Window * window, char *file)
 }
 
 void
-MoveSprites(SDL_Window * window, SDL_Texture * sprite)
+MoveSprites(SDL_Renderer * renderer, SDL_Texture * sprite)
 {
-    int i, n;
-    int window_w, window_h;
     int sprite_w, sprite_h;
+    int i;
+    SDL_Rect viewport;
     SDL_Rect *position, *velocity;
 
-    SDL_SelectRenderer(window);
-
     /* Query the sizes */
-    SDL_GetWindowSize(window, &window_w, &window_h);
+    SDL_RenderGetViewport(renderer, &viewport);
     SDL_QueryTexture(sprite, NULL, NULL, &sprite_w, &sprite_h);
 
+    /* Draw a gray background */
+    SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+    SDL_RenderClear(renderer);
+
     /* Move the sprite, bounce at the wall, and draw */
-    n = 0;
-    SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-    SDL_RenderClear();
     for (i = 0; i < NUM_SPRITES; ++i) {
         position = &positions[i];
         velocity = &velocities[i];
         position->x += velocity->x;
-        if ((position->x < 0) || (position->x >= (window_w - sprite_w))) {
+        if ((position->x < 0) || (position->x >= (viewport.w - sprite_w))) {
             velocity->x = -velocity->x;
             position->x += velocity->x;
         }
         position->y += velocity->y;
-        if ((position->y < 0) || (position->y >= (window_h - sprite_h))) {
+        if ((position->y < 0) || (position->y >= (viewport.h - sprite_h))) {
             velocity->y = -velocity->y;
             position->y += velocity->y;
         }
 
         /* Blit the sprite onto the screen */
-        SDL_RenderCopy(sprite, NULL, position);
+        SDL_RenderCopy(renderer, sprite, NULL, position);
     }
 
     /* Update the screen! */
-    SDL_RenderPresent();
+    SDL_RenderPresent(renderer);
 }
 
 int
@@ -125,12 +123,13 @@ main(int argc, char *argv[])
     int i, done;
     const char *driver;
     SDL_Window *window;
+    SDL_Renderer *renderer;
     SDL_Texture *sprite;
     int window_w, window_h;
     int sprite_w, sprite_h;
     SDL_Event event;
 
-    if (SDL_VideoInit(NULL, 0) < 0) {
+    if (SDL_VideoInit(NULL) < 0) {
         fprintf(stderr, "Couldn't initialize SDL video: %s\n",
                 SDL_GetError());
         exit(1);
@@ -163,17 +162,17 @@ main(int argc, char *argv[])
     SDL_SetWindowTitle(window, "SDL Native Window Test");
 
     /* Create the renderer */
-    if (SDL_CreateRenderer(window, -1, 0) < 0) {
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    if (!renderer) {
         fprintf(stderr, "Couldn't create renderer: %s\n", SDL_GetError());
         quit(5);
     }
 
     /* Clear the window, load the sprite and go! */
-    SDL_SelectRenderer(window);
-    SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-    SDL_RenderClear();
+    SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+    SDL_RenderClear(renderer);
 
-    sprite = LoadSprite(window, "icon.bmp");
+    sprite = LoadSprite(renderer, "icon.bmp");
     if (!sprite) {
         quit(6);
     }
@@ -210,9 +209,8 @@ main(int argc, char *argv[])
             case SDL_WINDOWEVENT:
                 switch (event.window.event) {
                 case SDL_WINDOWEVENT_EXPOSED:
-                    SDL_SelectRenderer(event.window.windowID);
-                    SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-                    SDL_RenderClear();
+                    SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+                    SDL_RenderClear(renderer);
                     break;
                 }
                 break;
@@ -223,7 +221,7 @@ main(int argc, char *argv[])
                 break;
             }
         }
-        MoveSprites(window, sprite);
+        MoveSprites(renderer, sprite);
     }
 
     quit(0);

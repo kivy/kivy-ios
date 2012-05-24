@@ -26,9 +26,9 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork \
 		-D__NDS__ -DENABLE_NDS -DNO_SIGNAL_H -DDISABLE_THREADS -DPACKAGE=\"SDL\" \
-		 -DVERSION=\"1.3\" -DHAVE_ALLOCA_H=1 -DHAVE_ALLOCA=1  
+		 -DVERSION=\"2.0\" -DHAVE_ALLOCA_H=1 -DHAVE_ALLOCA=1  
 
-CFLAGS	:=	-g -Wall -O2\
+CFLAGS	:=	-g -Wall -Os\
 		-march=armv5te -mtune=arm946e-s \
 		-fomit-frame-pointer -ffast-math \
 		$(ARCH)
@@ -39,7 +39,7 @@ CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 ASFLAGS	:=	-g $(ARCH) -march=armv5te -mtune=arm946e-s
 LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-# Set to 0 to use a framer buffer, or 1 to use the hardware
+# Set to 0 to use a framer buffer, or 1 to use the GL like hardware
 # renderer. Alas, both cannot be used at the same time for lack of
 # display/texture memory.
 USE_HW_RENDERER := 1
@@ -72,7 +72,6 @@ export DEPSDIR	:=	$(CURDIR)/$(BUILD)
 CFILES		:=	\
 			SDL.c \
 			SDL_assert.c \
-			SDL_compat.c \
 			SDL_error.c \
 			SDL_fatal.c \
 			SDL_hints.c \
@@ -104,6 +103,7 @@ CFILES		:=	\
 			render/SDL_render.c \
 			render/SDL_yuv_sw.c \
 			render/nds/SDL_ndsrender.c \
+			render/nds/SDL_libgl2D.c \
 			render/software/SDL_blendfillrect.c \
 			render/software/SDL_blendline.c \
 			render/software/SDL_blendpoint.c \

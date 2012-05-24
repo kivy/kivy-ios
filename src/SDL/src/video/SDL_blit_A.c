@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -424,7 +424,6 @@ BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo * info)
 #if HAVE_ALTIVEC_H
 #include <altivec.h>
 #endif
-#include <assert.h>
 
 #if (defined(__MACOSX__) && (__GNUC__ < 4))
 #define VECUINT8_LITERAL(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) \
@@ -498,9 +497,10 @@ calc_swizzle32(const SDL_PixelFormat * srcfmt, const SDL_PixelFormat * dstfmt)
     /* ARGB */
     const static struct SDL_PixelFormat default_pixel_format = {
         0, NULL, 0, 0,
+        {0, 0},
+        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
         0, 0, 0, 0,
         16, 8, 0, 24,
-        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
         0, NULL
     };
     if (!srcfmt) {

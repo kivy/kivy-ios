@@ -49,11 +49,12 @@
 #include <string.h>
 */
 #include "SDL_stdinc.h"
+#include "SDL_assert.h"
 
 #ifdef assert
 #undef assert
 #endif
-#define assert(X)
+#define assert(X) SDL_assert(X)
 #ifdef malloc
 #undef malloc
 #endif

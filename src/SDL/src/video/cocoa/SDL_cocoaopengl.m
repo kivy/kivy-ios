@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -200,14 +200,16 @@ Cocoa_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
         NSOpenGLContext *nscontext = (NSOpenGLContext *)context;
 
+        if (window->flags & SDL_WINDOW_SHOWN) {
 #ifndef FULLSCREEN_TOGGLEABLE
-        if (window->flags & SDL_WINDOW_FULLSCREEN) {
-            [nscontext setFullScreen];
-        } else
+            if (window->flags & SDL_WINDOW_FULLSCREEN) {
+                [nscontext setFullScreen];
+            } else
 #endif
-        {
-            [nscontext setView:[windowdata->nswindow contentView]];
-            [nscontext update];
+            {
+                [nscontext setView:[windowdata->nswindow contentView]];
+                [nscontext update];
+            }
         }
         [nscontext makeCurrentContext];
     } else {

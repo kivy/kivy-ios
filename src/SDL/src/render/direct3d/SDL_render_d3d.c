@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -99,6 +99,7 @@ static int D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, void **pixels, int *pitch);
 static void D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int D3D_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D_UpdateViewport(SDL_Renderer * renderer);
 static int D3D_RenderClear(SDL_Renderer * renderer);
 static int D3D_RenderDrawPoints(SDL_Renderer * renderer,
@@ -121,7 +122,7 @@ SDL_RenderDriver D3D_RenderDriver = {
     D3D_CreateRenderer,
     {
      "direct3d",
-     (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),
+     (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE),
      1,
      {SDL_PIXELFORMAT_ARGB8888},
      0,
@@ -138,6 +139,8 @@ typedef struct
     SDL_bool updateSize;
     SDL_bool beginScene;
     D3DTEXTUREFILTERTYPE scaleMode;
+    IDirect3DSurface9 *defaultRenderTarget;
+    IDirect3DSurface9 *currentRenderTarget;
 } D3D_RenderData;
 
 typedef struct
@@ -385,6 +388,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = D3D_UpdateTexture;
     renderer->LockTexture = D3D_LockTexture;
     renderer->UnlockTexture = D3D_UnlockTexture;
+    renderer->SetRenderTarget = D3D_SetRenderTarget;
     renderer->UpdateViewport = D3D_UpdateViewport;
     renderer->RenderClear = D3D_RenderClear;
     renderer->RenderDrawPoints = D3D_RenderDrawPoints;
@@ -441,11 +445,11 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     result = IDirect3D9_CreateDevice(data->d3d, data->adapter,
                                      D3DDEVTYPE_HAL,
                                      pparams.hDeviceWindow,
-                                     (caps.
+                                     D3DCREATE_FPU_PRESERVE | ((caps.
                                       DevCaps &
                                       D3DDEVCAPS_HWTRANSFORMANDLIGHT) ?
                                      D3DCREATE_HARDWARE_VERTEXPROCESSING :
-                                     D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+                                     D3DCREATE_SOFTWARE_VERTEXPROCESSING),
                                      &pparams, &data->device);
     if (FAILED(result)) {
         D3D_DestroyRenderer(renderer);
@@ -478,6 +482,9 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     IDirect3DDevice9_GetDeviceCaps(data->device, &caps);
     renderer->info.max_texture_width = caps.MaxTextureWidth;
     renderer->info.max_texture_height = caps.MaxTextureHeight;
+    if (caps.NumSimultaneousRTs >= 2) {
+        renderer->info.flags |= SDL_RENDERER_TARGETTEXTURE;
+    }
 
     /* Set up parameters for rendering */
     IDirect3DDevice9_SetVertexShader(data->device, NULL);
@@ -506,6 +513,10 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
                                           D3DTOP_DISABLE);
     IDirect3DDevice9_SetTextureStageState(data->device, 1, D3DTSS_ALPHAOP,
                                           D3DTOP_DISABLE);
+
+    /* Store the default render target */
+    IDirect3DDevice9_GetRenderTarget(data->device, 0, &data->defaultRenderTarget );
+    data->currentRenderTarget = NULL;
 
     /* Set an identity world and view matrix */
     matrix.m[0][0] = 1.0f;
@@ -580,7 +591,11 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         usage = D3DUSAGE_DYNAMIC;
     } else
 #endif
-    {
+    if (texture->access == SDL_TEXTUREACCESS_TARGET) {
+        /* D3DPOOL_MANAGED does not work with D3DUSAGE_RENDERTARGET */
+        pool = D3DPOOL_DEFAULT;
+        usage = D3DUSAGE_RENDERTARGET;
+    } else {
         pool = D3DPOOL_MANAGED;
         usage = 0;
     }
@@ -714,6 +729,41 @@ D3D_UpdateViewport(SDL_Renderer * renderer)
     matrix.m[3][2] = 0.0f;
     matrix.m[3][3] = 1.0f;
     IDirect3DDevice9_SetTransform(data->device, D3DTS_PROJECTION, &matrix);
+
+    return 0;
+}
+
+static int
+D3D_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    D3D_TextureData *texturedata;
+    HRESULT result;
+
+    D3D_ActivateRenderer(renderer);
+
+    /* Release the previous render target if it wasn't the default one */
+    if (data->currentRenderTarget != NULL) {
+        IDirect3DSurface9_Release(data->currentRenderTarget);
+        data->currentRenderTarget = NULL;
+    }
+
+    if (texture == NULL) {
+        IDirect3DDevice9_SetRenderTarget(data->device, 0, data->defaultRenderTarget);
+        return 0;
+    }
+
+    texturedata = (D3D_TextureData *) texture->driverdata;
+    result = IDirect3DTexture9_GetSurfaceLevel(texturedata->texture, 0, &data->currentRenderTarget);
+    if(FAILED(result)) {
+        D3D_SetError("GetSurfaceLevel()", result);
+        return -1;
+    }
+    result = IDirect3DDevice9_SetRenderTarget(data->device, 0, data->currentRenderTarget);
+    if(FAILED(result)) {
+        D3D_SetError("SetRenderTarget()", result);
+        return -1;
+    }
 
     return 0;
 }
@@ -1187,6 +1237,13 @@ D3D_DestroyRenderer(SDL_Renderer * renderer)
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
 
     if (data) {
+        // Release the render target
+        IDirect3DSurface9_Release(data->defaultRenderTarget);
+        if (data->currentRenderTarget != NULL) {
+            IDirect3DSurface9_Release(data->currentRenderTarget);
+            data->currentRenderTarget = NULL;
+        }
+        
         if (data->device) {
             IDirect3DDevice9_Release(data->device);
         }

@@ -12,7 +12,6 @@
 
 /* A simple test program framework */
 
-#define SDL_NO_COMPAT
 #include "SDL.h"
 
 #ifdef __NDS__

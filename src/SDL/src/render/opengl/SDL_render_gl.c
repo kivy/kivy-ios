@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -54,6 +54,7 @@ static int GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, void **pixels, int *pitch);
 static void GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int GL_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GL_UpdateViewport(SDL_Renderer * renderer);
 static int GL_RenderClear(SDL_Renderer * renderer);
 static int GL_RenderDrawPoints(SDL_Renderer * renderer,
@@ -75,11 +76,20 @@ SDL_RenderDriver GL_RenderDriver = {
     GL_CreateRenderer,
     {
      "opengl",
-     (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),
+     (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE),
      1,
      {SDL_PIXELFORMAT_ARGB8888},
      0,
      0}
+};
+
+typedef struct GL_FBOList GL_FBOList;
+
+struct GL_FBOList
+{
+    Uint32 w, h;
+    GLuint FBO;
+    GL_FBOList *next;
 };
 
 typedef struct
@@ -91,6 +101,9 @@ typedef struct
         Uint32 color;
         int blendMode;
     } current;
+    
+    SDL_bool GL_EXT_framebuffer_object_supported;
+    GL_FBOList *framebuffers;
 
     /* OpenGL functions */
 #define SDL_PROC(ret,func,params) ret (APIENTRY *func) params;
@@ -101,6 +114,12 @@ typedef struct
     SDL_bool GL_ARB_multitexture_supported;
     PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
     GLint num_texture_units;
+    
+    PFNGLGENFRAMEBUFFERSEXTPROC glGenFramebuffersEXT;
+    PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffersEXT;
+    PFNGLFRAMEBUFFERTEXTURE2DEXTPROC glFramebufferTexture2DEXT;
+    PFNGLBINDFRAMEBUFFEREXTPROC glBindFramebufferEXT;
+    PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC glCheckFramebufferStatusEXT;
 
     /* Shader support */
     GL_ShaderContext *shaders;
@@ -123,6 +142,8 @@ typedef struct
     SDL_bool yuv;
     GLuint utexture;
     GLuint vtexture;
+    
+    GL_FBOList *fbo;
 } GL_TextureData;
 
 
@@ -227,6 +248,29 @@ GL_ResetState(SDL_Renderer *renderer)
     data->glLoadIdentity();
 }
 
+
+GL_FBOList *
+GL_GetFBO(GL_RenderData *data, Uint32 w, Uint32 h)
+{
+    GL_FBOList *result = data->framebuffers;
+
+    while (result && ((result->w != w) || (result->h != h))) {
+        result = result->next;
+    }
+
+    if (!result) {
+        result = SDL_malloc(sizeof(GL_FBOList));
+        if (result) {
+            result->w = w;
+            result->h = h;
+            data->glGenFramebuffersEXT(1, &result->FBO);
+            result->next = data->framebuffers;
+            data->framebuffers = result;
+        }
+    }
+    return result;
+}
+
 SDL_Renderer *
 GL_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
@@ -239,6 +283,8 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     window_flags = SDL_GetWindowFlags(window);
     if (!(window_flags & SDL_WINDOW_OPENGL)) {
         if (SDL_RecreateWindow(window, window_flags | SDL_WINDOW_OPENGL) < 0) {
+            /* Uh oh, better try to put it back... */
+            SDL_RecreateWindow(window, window_flags);
             return NULL;
         }
     }
@@ -261,6 +307,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = GL_UpdateTexture;
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
+    renderer->SetRenderTarget = GL_SetRenderTarget;
     renderer->UpdateViewport = GL_UpdateViewport;
     renderer->RenderClear = GL_RenderClear;
     renderer->RenderDrawPoints = GL_RenderDrawPoints;
@@ -274,6 +321,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->info = GL_RenderDriver.info;
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
     renderer->driverdata = data;
+    renderer->window = window;
 
     data->context = SDL_GL_CreateContext(window);
     if (!data->context) {
@@ -338,6 +386,22 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.texture_formats[renderer->info.num_texture_formats++] = SDL_PIXELFORMAT_YV12;
         renderer->info.texture_formats[renderer->info.num_texture_formats++] = SDL_PIXELFORMAT_IYUV;
     }
+    
+    if (SDL_GL_ExtensionSupported("GL_EXT_framebuffer_object")) {
+        data->GL_EXT_framebuffer_object_supported = SDL_TRUE;
+        data->glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC)
+            SDL_GL_GetProcAddress("glGenFramebuffersEXT");
+        data->glDeleteFramebuffersEXT = (PFNGLDELETEFRAMEBUFFERSEXTPROC)
+            SDL_GL_GetProcAddress("glDeleteFramebuffersEXT");
+        data->glFramebufferTexture2DEXT = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)
+            SDL_GL_GetProcAddress("glFramebufferTexture2DEXT");
+        data->glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC)
+            SDL_GL_GetProcAddress("glBindFramebufferEXT");
+        data->glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)
+            SDL_GL_GetProcAddress("glCheckFramebufferStatusEXT");
+        renderer->info.flags |= SDL_RENDERER_TARGETTEXTURE;
+    }
+    data->framebuffers = NULL;
 
     /* Set up parameters for rendering */
     GL_ResetState(renderer);
@@ -348,7 +412,9 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
 static void
 GL_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
-    if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+    if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED ||
+        event->event == SDL_WINDOWEVENT_SHOWN ||
+        event->event == SDL_WINDOWEVENT_HIDDEN) {
         /* Rebind the context to the window area and update matrices */
         SDL_CurrentContext = NULL;
     }
@@ -443,10 +509,17 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     }
 
     texture->driverdata = data;
+    
+    if (texture->access == SDL_TEXTUREACCESS_TARGET) {
+        data->fbo = GL_GetFBO(renderdata, texture->w, texture->h);
+    } else {
+        data->fbo = NULL;
+    }
 
     renderdata->glGetError();
     renderdata->glGenTextures(1, &data->texture);
-    if (renderdata->GL_ARB_texture_rectangle_supported) {
+    if ((renderdata->GL_ARB_texture_rectangle_supported)
+        /*&& texture->access != SDL_TEXTUREACCESS_TARGET*/){
         data->type = GL_TEXTURE_RECTANGLE_ARB;
         texture_w = texture->w;
         texture_h = texture->h;
@@ -467,10 +540,15 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER, scaleMode);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER, scaleMode);
-    renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
-                                GL_CLAMP_TO_EDGE);
-    renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
-                                GL_CLAMP_TO_EDGE);
+    /* According to the spec, CLAMP_TO_EDGE is the default for TEXTURE_RECTANGLE
+       and setting it causes an INVALID_ENUM error in the latest NVidia drivers.
+    */
+    if (data->type != GL_TEXTURE_RECTANGLE_ARB) {
+        renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
+                                    GL_CLAMP_TO_EDGE);
+        renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
+                                    GL_CLAMP_TO_EDGE);
+    }
 #ifdef __MACOSX__
 #ifndef GL_TEXTURE_STORAGE_HINT_APPLE
 #define GL_TEXTURE_STORAGE_HINT_APPLE       0x85BC
@@ -569,15 +647,10 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                                 rect->h, data->format, data->formattype,
                                 pixels);
     if (data->yuv) {
-        const void *top;
-
         renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH, (pitch / 2));
 
-        /* Skip to the top of the next texture */
-        top = (const void*)((const Uint8*)pixels + (texture->h-rect->y) * pitch - rect->x);
-
         /* Skip to the correct offset into the next texture */
-        pixels = (const void*)((const Uint8*)top + (rect->y / 2) * pitch + rect->x / 2);
+        pixels = (const void*)((const Uint8*)pixels + rect->h * pitch);
         if (texture->format == SDL_PIXELFORMAT_YV12) {
             renderdata->glBindTexture(data->type, data->vtexture);
         } else {
@@ -587,11 +660,8 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                                     rect->w/2, rect->h/2,
                                     data->format, data->formattype, pixels);
 
-        /* Skip to the top of the next texture */
-        top = (const void*)((const Uint8*)top + (texture->h * pitch)/4);
-
         /* Skip to the correct offset into the next texture */
-        pixels = (const void*)((const Uint8*)top + (rect->y / 2) * pitch + rect->x / 2);
+        pixels = (const void*)((const Uint8*)pixels + (rect->h * pitch)/4);
         if (texture->format == SDL_PIXELFORMAT_YV12) {
             renderdata->glBindTexture(data->type, data->utexture);
         } else {
@@ -639,6 +709,33 @@ GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
+GL_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;    
+    GL_TextureData *texturedata;
+    GLenum status;
+
+    GL_ActivateRenderer(renderer);
+    
+    if (texture == NULL) {
+        data->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+        return 0;
+    }
+
+    texturedata = (GL_TextureData *) texture->driverdata;
+    data->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, texturedata->fbo->FBO);
+    /* TODO: check if texture pixel format allows this operation */
+    data->glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texturedata->type, texturedata->texture, 0);
+    /* Check FBO status */
+    status = data->glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    if (status != GL_FRAMEBUFFER_COMPLETE_EXT) {
+        SDL_SetError("glFramebufferTexture2DEXT() failed");
+        return -1;
+    }
+    return 0;
+}
+
+static int
 GL_UpdateViewport(SDL_Renderer * renderer)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
@@ -653,10 +750,19 @@ GL_UpdateViewport(SDL_Renderer * renderer)
 
     data->glMatrixMode(GL_PROJECTION);
     data->glLoadIdentity();
-    data->glOrtho((GLdouble) 0,
-                  (GLdouble) renderer->viewport.w,
-                  (GLdouble) renderer->viewport.h,
-                  (GLdouble) 0, 0.0, 1.0);
+    if (renderer->target) {
+        data->glOrtho((GLdouble) 0,
+                      (GLdouble) renderer->viewport.w,
+                      (GLdouble) 0,
+                      (GLdouble) renderer->viewport.h,
+                       0.0, 1.0);
+    } else {
+        data->glOrtho((GLdouble) 0,
+                      (GLdouble) renderer->viewport.w,
+                      (GLdouble) renderer->viewport.h,
+                      (GLdouble) 0,
+                       0.0, 1.0);
+    }
     return 0;
 }
 
@@ -1013,6 +1119,13 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
             GL_DestroyShaderContext(data->shaders);
         }
         if (data->context) {
+            while (data->framebuffers) {
+                GL_FBOList *nextnode = data->framebuffers->next;
+                /* delete the framebuffer object */
+                data->glDeleteFramebuffersEXT(1, &data->framebuffers->FBO);
+                SDL_free(data->framebuffers);
+                data->framebuffers = nextnode;
+            }            
             /* SDL_GL_MakeCurrent(0, NULL); *//* doesn't do anything */
             SDL_GL_DeleteContext(data->context);
         }

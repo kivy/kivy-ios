@@ -11,7 +11,7 @@ orig_CFLAGS="$CFLAGS"
 dnl Set various version strings - taken gratefully from the GTk sources
 #
 # Making releases:
-# Edit include/SDL/SDL_version.h and change the version, then:
+# Edit include/SDL_version.h and change the version, then:
 #   SDL_MICRO_VERSION += 1;
 #   SDL_INTERFACE_AGE += 1;
 #   SDL_BINARY_AGE += 1;
@@ -19,8 +19,8 @@ dnl Set various version strings - taken gratefully from the GTk sources
 # if backwards compatibility has been broken,
 # set SDL_BINARY_AGE and SDL_INTERFACE_AGE to 0.
 #
-SDL_MAJOR_VERSION=1
-SDL_MINOR_VERSION=3
+SDL_MAJOR_VERSION=2
+SDL_MINOR_VERSION=0
 SDL_MICRO_VERSION=0
 SDL_INTERFACE_AGE=0
 SDL_BINARY_AGE=0
@@ -61,12 +61,12 @@ AC_CHECK_TOOL(WINDRES, [windres], [:])
 dnl Set up the compiler and linker flags
 INCLUDE="-I$srcdir/include"
 if test x$srcdir != x.; then
-    # Remove SDL_config.h from the source directory, since it's the
-    # default one, and we want to include the one that we generate.
-    if test -f $srcdir/include/SDL_config.h; then
-        rm $srcdir/include/SDL_config.h
-    fi
     INCLUDE="-Iinclude $INCLUDE"
+elif test -d .hg; then
+    AC_MSG_ERROR([
+*** When building from Mercurial you should configure and build in a
+    separate directory so you don't clobber SDL_config.h, SDL_revision.h
+])
 fi
 case "$host" in
     *-*-cygwin*)
@@ -82,8 +82,8 @@ esac
 # Uncomment the following line if you want to force SDL and applications
 # built with it to be compiled for a particular architecture.
 #AX_GCC_ARCHFLAG([no], [BASE_CFLAGS="$BASE_CFLAGS $ax_cv_gcc_archflag]")
-BUILD_CFLAGS="$CFLAGS $CPPFLAGS"
-# The default optimization for SDL 1.3 is -O3 (Bug #31)
+BUILD_CFLAGS="$CFLAGS $CPPFLAGS -DUSING_GENERATED_CONFIG_H"
+# The default optimization for SDL is -O3 (Bug #31)
 if test x$orig_CFLAGS = x; then
     BUILD_CFLAGS=`echo $BUILD_CFLAGS | sed 's/-O2/-O3/'`
 fi
@@ -100,7 +100,7 @@ EXTRA_LDFLAGS="$BASE_LDFLAGS"
 #    fi
 #done
 SDL_CFLAGS="$BASE_CFLAGS"
-SDL_LIBS="-lSDL $BASE_LDFLAGS"
+SDL_LIBS="-lSDL2 $BASE_LDFLAGS"
 CPPFLAGS="$CPPFLAGS $EXTRA_CFLAGS"
 CFLAGS="$CFLAGS $EXTRA_CFLAGS"
 LDFLAGS="$LDFLAGS $EXTRA_LDFLAGS"
@@ -939,6 +939,30 @@ CheckVisibilityHidden()
     fi
 }
 
+dnl See if GCC's -mpreferred-stack-boundary is supported.
+dnl  Reference: http://bugzilla.libsdl.org/show_bug.cgi?id=1296
+CheckStackBoundary()
+{
+    AC_MSG_CHECKING(for GCC -mpreferred-stack-boundary option)
+    have_gcc_preferred_stack_boundary=no
+
+    save_CFLAGS="$CFLAGS"
+    CFLAGS="$save_CFLAGS -mpreferred-stack-boundary=2"
+    AC_TRY_COMPILE([
+    int x = 0;
+    ],[
+    ],[
+    have_gcc_preferred_stack_boundary=yes
+    ])
+    AC_MSG_RESULT($have_gcc_preferred_stack_boundary)
+    CFLAGS="$save_CFLAGS"
+
+    if test x$have_gcc_preferred_stack_boundary = xyes; then
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -mpreferred-stack-boundary=2"
+    fi
+}
+
+
 dnl See if GCC's -Wall is supported.
 CheckWarnAll()
 {
@@ -1450,6 +1474,57 @@ CheckOpenGLX11()
     fi
 }
 
+dnl Check to see if OpenGL ES support is desired
+AC_ARG_ENABLE(video-opengles,
+AC_HELP_STRING([--enable-video-opengles], [include OpenGL ES support [[default=yes]]]),
+              , enable_video_opengles=yes)
+
+dnl Find OpenGL ES
+CheckOpenGLESX11()
+{
+    if test x$enable_video = xyes -a x$enable_video_opengles = xyes; then
+        AC_MSG_CHECKING(for OpenGL ES (EGL) support)
+        video_opengles=no
+        AC_TRY_COMPILE([
+         #include <EGL/egl.h>
+        ],[
+        ],[
+        video_opengles=yes
+        ])
+        AC_MSG_RESULT($video_opengles)
+        if test x$video_opengles = xyes; then
+            AC_MSG_CHECKING(for OpenGL ES v1 headers)
+            video_opengles_v1=no
+            AC_TRY_COMPILE([
+             #include <GLES/gl.h>
+             #include <GLES/glext.h>
+            ],[
+            ],[
+            video_opengles_v1=yes
+            ])
+            AC_MSG_RESULT($video_opengles_v1)
+            if test x$video_opengles_v1 = xyes; then
+                AC_DEFINE(SDL_VIDEO_OPENGL_ES, 1, [ ])
+                AC_DEFINE(SDL_VIDEO_RENDER_OGL_ES, 1, [ ])
+            fi
+            AC_MSG_CHECKING(for OpenGL ES v2 headers)
+            video_opengles_v2=no
+            AC_TRY_COMPILE([
+             #include <GLES2/gl2.h>
+             #include <GLES2/gl2ext.h>
+            ],[
+            ],[
+            video_opengles_v2=yes
+            ])
+            AC_MSG_RESULT($video_opengles_v2)
+            if test x$video_opengles_v2 = xyes; then
+                AC_DEFINE(SDL_VIDEO_OPENGL_ES2, 1, [ ])
+                AC_DEFINE(SDL_VIDEO_RENDER_OGL_ES2, 1, [ ])
+            fi
+        fi
+    fi
+}
+
 dnl Check for Windows OpenGL
 CheckWINDOWSGL()
 {
@@ -1667,6 +1742,20 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
                 ])
                 AC_MSG_RESULT($have_pthread_sem)
             fi
+            if test x$have_pthread_sem = xyes; then
+                AC_MSG_CHECKING(for sem_timedwait)
+                have_sem_timedwait=no
+                AC_TRY_LINK([
+                  #include <pthread.h>
+                  #include <semaphore.h>
+                ],[
+                  sem_timedwait(NULL, NULL);
+                ],[
+                have_sem_timedwait=yes
+                AC_DEFINE(HAVE_SEM_TIMEDWAIT)
+                ])
+                AC_MSG_RESULT($have_sem_timedwait)
+            fi
 
             AC_MSG_CHECKING(for pthread_spin_trylock)
             AC_TRY_LINK_FUNC(pthread_spin_trylock, [
@@ -1757,6 +1846,9 @@ CheckWINDOWS()
     have_wince=yes
     ])
     AC_MSG_RESULT($have_wince)
+
+    # This fixes Windows stack alignment with newer GCC
+    CheckStackBoundary
 }
 
 dnl Find the DirectX includes and libraries
@@ -2016,6 +2108,7 @@ case "$host" in
         CheckDirectFB
         CheckFusionSound
         CheckOpenGLX11
+        CheckOpenGLESX11
         CheckInputEvents
         CheckTslib
         CheckUSBHID
@@ -2156,7 +2249,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # The Windows platform requires special setup
         SDLMAIN_SOURCES="$srcdir/src/main/windows/*.c"
         EXTRA_CFLAGS="$EXTRA_CFLAGS -Dmain=SDL_main -D_WIN32_WCE=0x420"
-        EXTRA_LDFLAGS="-lSDLmain $EXTRA_LDFLAGS"
+        EXTRA_LDFLAGS="-lSDL2main $EXTRA_LDFLAGS"
         ;;
     *-*-cygwin* | *-*-mingw32*)
         ARCH=win32
@@ -2251,7 +2344,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             have_loadso=yes
         fi
         # Set up the system libraries we need
-        # SDL 1.3 is unicode, and unicows emulates this on Windows 98/ME
+        # SDL is unicode, and unicows emulates this on Windows 98/ME
         # You can get this here: http://libunicows.sourceforge.net/
         #EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lunicows"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lversion -luuid"
@@ -2259,7 +2352,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         VERSION_SOURCES="$srcdir/src/main/windows/*.rc"
         SDLMAIN_SOURCES="$srcdir/src/main/windows/*.c"
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
-        SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
+        SDL_LIBS="-lmingw32 -lSDL2main $SDL_LIBS -mwindows"
         ;;
     *-*-beos* | *-*-haiku*)
         ARCH=beos
@@ -2466,15 +2559,7 @@ else
   SDL_RLD_FLAGS=""
 fi
 
-case "$ARCH" in
-  macosx)
-    # Evil hack to allow static linking on Mac OS X
-    SDL_STATIC_LIBS="\${libdir}/libSDL.a $EXTRA_LDFLAGS"
-    ;;
-  *)
-    SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
-    ;;
-esac
+SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
 
 dnl Expand the cflags and libraries needed by apps using SDL
 AC_SUBST(SDL_CFLAGS)
@@ -2525,6 +2610,6 @@ $SDLMAIN_DEPENDS
 __EOF__
 
 AC_CONFIG_FILES([
-    Makefile:Makefile.in:Makefile.rules sdl-config SDL.spec sdl.pc
+    Makefile:Makefile.in:Makefile.rules sdl2-config SDL2.spec sdl2.pc
 ])
 AC_OUTPUT

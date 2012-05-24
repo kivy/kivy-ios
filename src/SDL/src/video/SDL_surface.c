@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,7 +21,6 @@
 #include "SDL_config.h"
 
 #include "SDL_video.h"
-#include "SDL_compat.h"
 #include "SDL_sysvideo.h"
 #include "SDL_blit.h"
 #include "SDL_RLEaccel_c.h"
@@ -193,13 +192,6 @@ SDL_SetColorKey(SDL_Surface * surface, int flag, Uint32 key)
     }
     if (surface->map->info.flags != flags) {
         SDL_InvalidateMap(surface->map);
-    }
-
-    /* Compatibility mode */
-    if (surface->map->info.flags & SDL_COPY_COLORKEY) {
-        surface->flags |= SDL_SRCCOLORKEY;
-    } else {
-        surface->flags &= ~SDL_SRCCOLORKEY;
     }
 
     return 0;
@@ -405,13 +397,6 @@ SDL_SetSurfaceBlendMode(SDL_Surface * surface, SDL_BlendMode blendMode)
         SDL_InvalidateMap(surface->map);
     }
 
-    /* Compatibility mode */
-    if (surface->map->info.flags & SDL_COPY_BLEND) {
-        surface->flags |= SDL_SRCALPHA;
-    } else {
-        surface->flags &= ~SDL_SRCALPHA;
-    }
-
     return status;
 }
 
@@ -494,7 +479,9 @@ SDL_LowerBlit(SDL_Surface * src, SDL_Rect * srcrect,
     /* Check to make sure the blit mapping is valid */
     if ((src->map->dst != dst) ||
         (dst->format->palette &&
-         src->map->palette_version != dst->format->palette->version)) {
+         src->map->dst_palette_version != dst->format->palette->version) ||
+        (src->format->palette &&
+         src->map->src_palette_version != src->format->palette->version)) {
         if (SDL_MapSurface(src, dst) < 0) {
             return (-1);
         }

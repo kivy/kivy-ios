@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -32,17 +32,19 @@ typedef struct SDL_PrivateGLESData
 {
     int egl_active;             /* to stop switching drivers while we have a valid context */
     XVisualInfo *egl_visualinfo;
+    void *egl_dll_handle;
     EGLDisplay egl_display;
     EGLContext egl_context;     /* Current GLES context */
     EGLSurface egl_surface;
     EGLConfig egl_config;
+    int egl_swapinterval;
 
       EGLDisplay(*eglGetDisplay) (NativeDisplayType display);
       EGLBoolean(*eglInitialize) (EGLDisplay dpy, EGLint * major,
                                   EGLint * minor);
       EGLBoolean(*eglTerminate) (EGLDisplay dpy);
 
-    void *(*eglGetProcAddress) (const GLubyte * procName);
+    void *(*eglGetProcAddress) (const char * procName);
 
       EGLBoolean(*eglChooseConfig) (EGLDisplay dpy,
                                     const EGLint * attrib_list,
@@ -66,6 +68,8 @@ typedef struct SDL_PrivateGLESData
                                    EGLSurface read, EGLContext ctx);
 
       EGLBoolean(*eglSwapBuffers) (EGLDisplay dpy, EGLSurface draw);
+
+      EGLBoolean(*eglSwapInterval) (EGLDisplay dpy, EGLint interval);
 
     const char *(*eglQueryString) (EGLDisplay dpy, EGLint name);
 

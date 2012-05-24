@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -27,6 +27,7 @@
 #include "SDL_shape.h"
 #include "SDL_cocoashape.h"
 #include "../SDL_sysvideo.h"
+#include "SDL_assert.h"
 
 SDL_WindowShaper*
 Cocoa_CreateShaper(SDL_Window* window) {
@@ -49,7 +50,7 @@ Cocoa_CreateShaper(SDL_Window* window) {
     data->shape = NULL;
     
     int resized_properly = Cocoa_ResizeWindowShape(window);
-    assert(resized_properly == 0);
+    SDL_assert(resized_properly == 0);
     return result;
 }
 
@@ -100,7 +101,7 @@ Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShape
 int
 Cocoa_ResizeWindowShape(SDL_Window *window) {
     SDL_ShapeData* data = window->shaper->driverdata;
-    assert(data != NULL);
+    SDL_assert(data != NULL);
     return 0;
 }
 

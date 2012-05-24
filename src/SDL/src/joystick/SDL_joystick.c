@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -427,6 +427,11 @@ SDL_PrivateJoystickAxis(SDL_Joystick * joystick, Uint8 axis, Sint16 value)
 {
     int posted;
 
+    /* Make sure we're not getting garbage events */
+    if (axis >= joystick->naxes) {
+        return 0;
+    }
+
     /* Update internal joystick state */
     joystick->axes[axis] = value;
 
@@ -453,6 +458,11 @@ int
 SDL_PrivateJoystickHat(SDL_Joystick * joystick, Uint8 hat, Uint8 value)
 {
     int posted;
+
+    /* Make sure we're not getting garbage events */
+    if (hat >= joystick->nhats) {
+        return 0;
+    }
 
     /* Update internal joystick state */
     joystick->hats[hat] = value;
@@ -481,6 +491,11 @@ SDL_PrivateJoystickBall(SDL_Joystick * joystick, Uint8 ball,
                         Sint16 xrel, Sint16 yrel)
 {
     int posted;
+
+    /* Make sure we're not getting garbage events */
+    if (ball >= joystick->nballs) {
+        return 0;
+    }
 
     /* Update internal mouse state */
     joystick->balls[ball].dx += xrel;
@@ -525,6 +540,11 @@ SDL_PrivateJoystickButton(SDL_Joystick * joystick, Uint8 button, Uint8 state)
         return (0);
     }
 #endif /* !SDL_EVENTS_DISABLED */
+
+    /* Make sure we're not getting garbage events */
+    if (button >= joystick->nbuttons) {
+        return 0;
+    }
 
     /* Update internal joystick state */
     joystick->buttons[button] = state;

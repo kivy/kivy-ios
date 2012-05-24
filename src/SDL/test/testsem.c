@@ -56,12 +56,13 @@ TestWaitTimeout(void)
     Uint32 start_ticks;
     Uint32 end_ticks;
     Uint32 duration;
+    int retval;
 
     sem = SDL_CreateSemaphore(0);
     printf("Waiting 2 seconds on semaphore\n");
 
     start_ticks = SDL_GetTicks();
-    SDL_SemWaitTimeout(sem, 2000);
+    retval = SDL_SemWaitTimeout(sem, 2000);
     end_ticks = SDL_GetTicks();
 
     duration = end_ticks - start_ticks;
@@ -71,6 +72,10 @@ TestWaitTimeout(void)
         printf("Wait done.\n");
     else
         fprintf(stderr, "Wait took %d milliseconds\n", duration);
+
+    /* Check to make sure the return value indicates timed out */
+    if (retval != SDL_MUTEX_TIMEDOUT) 
+        fprintf(stderr, "SDL_SemWaitTimeout returned: %d; expected: %d\n", retval, SDL_MUTEX_TIMEDOUT);
 }
 
 int

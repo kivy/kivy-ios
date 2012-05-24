@@ -12,6 +12,15 @@
 
 /* Simple program to test the SDL joystick routines */
 
+#if 1 /* FIXME: Rework this using the 2.0 API */
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    printf("FIXME\n");
+    return 0;
+}
+#else
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -202,3 +211,4 @@ main(int argc, char *argv[])
 
     return (0);
 }
+#endif

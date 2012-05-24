@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -968,8 +968,15 @@ SDL_InvalidateMap(SDL_BlitMap * map)
     if (!map) {
         return;
     }
+    if (map->dst) {
+        /* Release our reference to the surface - see the note below */
+        if (--map->dst->refcount <= 0) {
+            SDL_FreeSurface(map->dst);
+        }
+    }
     map->dst = NULL;
-    map->palette_version = 0;
+    map->src_palette_version = 0;
+    map->dst_palette_version = 0;
     if (map->info.table) {
         SDL_free(map->info.table);
         map->info.table = NULL;
@@ -1035,10 +1042,27 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
 
     map->dst = dst;
 
+    if (map->dst) {
+        /* Keep a reference to this surface so it doesn't get deleted
+           while we're still pointing at it.
+
+           A better method would be for the destination surface to keep
+           track of surfaces that are mapped to it and automatically 
+           invalidate them when it is freed, but this will do for now.
+        */
+        ++map->dst->refcount;
+    }
+
     if (dstfmt->palette) {
-        map->palette_version = dstfmt->palette->version;
+        map->dst_palette_version = dstfmt->palette->version;
     } else {
-        map->palette_version = 0;
+        map->dst_palette_version = 0;
+    }
+
+    if (srcfmt->palette) {
+        map->src_palette_version = srcfmt->palette->version;
+    } else {
+        map->src_palette_version = 0;
     }
 
     /* Choose your blitters wisely */

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -55,7 +55,7 @@ extern DECLSPEC int SDLCALL SDL_SetClipboardText(const char *text);
 extern DECLSPEC char * SDLCALL SDL_GetClipboardText(void);
 
 /**
- * \brief Returns a flag indicating whether the clipboard exists and contains a text string that it non-empty
+ * \brief Returns a flag indicating whether the clipboard exists and contains a text string that is non-empty
  *
  * \sa SDL_GetClipboardText()
  */

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -74,6 +74,7 @@ static BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE *
                                            pdidInstance, VOID * pContext);
 static BOOL CALLBACK EnumDevObjectsCallback(LPCDIDEVICEOBJECTINSTANCE dev,
                                             LPVOID pvRef);
+static void SortDevObjects(SDL_Joystick *joystick);
 static Uint8 TranslatePOV(DWORD value);
 static int SDL_PrivateJoystickAxis_Int(SDL_Joystick * joystick, Uint8 axis,
                                        Sint16 value);
@@ -483,6 +484,10 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
                                     EnumDevObjectsCallback, joystick,
                                     DIDFT_BUTTON | DIDFT_AXIS | DIDFT_POV);
 
+	/* Reorder the input objects. Some devices do not report the X axis as
+	 * the first axis, for example. */
+	SortDevObjects(joystick);
+
     dipdw.diph.dwObj = 0;
     dipdw.diph.dwHow = DIPH_DEVICE;
     dipdw.dwData = INPUT_QSIZE;
@@ -502,6 +507,55 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
     }
 
     return (0);
+}
+
+/* Sort using the data offset into the DInput struct.
+ * This gives a reasonable ordering for the inputs. */
+static int
+SortDevFunc(const void *a, const void *b)
+{
+	const input_t *inputA = (const input_t*)a;
+	const input_t *inputB = (const input_t*)b;
+
+	if (inputA->ofs < inputB->ofs)
+		return -1;
+	if (inputA->ofs > inputB->ofs)
+		return 1;
+	return 0;
+}
+
+/* Sort the input objects and recalculate the indices for each input. */
+static void
+SortDevObjects(SDL_Joystick *joystick)
+{
+	input_t *inputs = joystick->hwdata->Inputs;
+	int nButtons = 0;
+	int nHats = 0;
+	int nAxis = 0;
+	int n;
+
+	SDL_qsort(inputs, joystick->hwdata->NumInputs, sizeof(input_t), SortDevFunc);
+
+	for (n = 0; n < joystick->hwdata->NumInputs; n++)
+	{
+		switch (inputs[n].type)
+		{
+		case BUTTON:
+			inputs[n].num = nButtons;
+			nButtons++;
+			break;
+
+		case HAT:
+			inputs[n].num = nHats;
+			nHats++;
+			break;
+
+		case AXIS:
+			inputs[n].num = nAxis;
+			nAxis++;
+			break;
+		}
+	}
 }
 
 static BOOL CALLBACK
