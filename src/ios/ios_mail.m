@@ -67,11 +67,15 @@ UIViewController *get_viewcontroller(void) {
 int ios_send_email(char *subject, char *text, char *mimetype, char *filename,
 	char *filename_alias, ios_send_email_cb callback, void *userdata)
 {
-
 	UIViewController* viewController = get_viewcontroller();
 	if ( viewController == NULL ) {
-		printf("ios_send_email: unable to get view controller");
+		printf("ios_send_email: unable to get view controller.\n");
 		return 0;
+	}
+
+	if (! [MFMailComposeViewController canSendMail]) {
+		printf("ios_send_email: no available mail provider configured.\n");
+		return -1;
 	}
 
 	MFMailComposeViewController *controller = [[MFMailComposeViewController alloc] init];

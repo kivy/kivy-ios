@@ -77,7 +77,7 @@ def send_email(subject, text, mimetype=None, filename=None, filename_alias=None,
         `callback`: func(status)
             Callback that can be called when the email interface have been
             removed. A status will be passed as the first argument: "cancelled",
-            "saved", "sent", "failed", "unknown".
+            "saved", "sent", "failed", "unknown", "cannotsend".
 
     .. note::
 
@@ -149,9 +149,13 @@ def send_email(subject, text, mimetype=None, filename=None, filename_alias=None,
 
     Py_INCREF(callback)
 
-    if ios_send_email(j_subject, j_text, j_mimetype, j_filename,
-            j_filename_alias, _send_email_done, <void *>callback) == 0:
+    ret = ios_send_email(j_subject, j_text, j_mimetype, j_filename,
+            j_filename_alias, _send_email_done, <void *>callback)
+    if ret == 0:
         callback('failed')
+        return 0
+    elif ret == -1:
+        callback('cannotsend')
         return 0
 
     return 1
