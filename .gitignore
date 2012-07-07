@@ -2,7 +2,6 @@
 *.swp
 Python-*
 freetype-*
-SDL_*
 build/*
 src/SDL/Xcode-iPhoneOS/SDL/build/
 tmp/*
