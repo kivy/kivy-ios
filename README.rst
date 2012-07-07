@@ -3,7 +3,12 @@ Kivy for IOS
 
 (This is a work in progress.)
 
-#. Using brew, you can install dependencies: brew install cython autoconf automake libtool
+#. Using brew, you can install dependencies::
+
+    brew install cython autoconf automake libtool pkg-config mercurial
+    brew link libtool
+    brew link mercurial
+
 #. Build the whole toolchain with `tools/build_all.sh`
 #. Create an Xcode project for your application with `tools/create-xcode-project.sh test /path/to/app`
 #. Open your newly created Xcode project
