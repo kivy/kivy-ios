@@ -31,7 +31,7 @@ echo "-> Copy the new source"
 try cp -a $SRCDIR $YOURAPPDIR
 
 echo "-> Compile to pyo"
-python -OO -m compileall $YOURAPPDIR
+$TMPROOT/Python-$PYTHON_VERSION/hostpython -OO -m compileall $YOURAPPDIR
 
 echo "-> Remove unused files (pyc, py)"
 find $YOURAPPDIR -iname '*.py' -exec rm {} \;
