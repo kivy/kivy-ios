@@ -35,6 +35,10 @@ export BUILDROOT="$KIVYIOSROOT/build"
 export TMPROOT="$KIVYIOSROOT/tmp"
 export CACHEROOT="$KIVYIOSROOT/.cache"
 
+# pkg-config for SDL and futures
+try mkdir -p $BUILDROOT/pkgconfig
+export PKG_CONFIG_PATH="$BUILDROOT/pkgconfig:$PKG_CONFIG_PATH"
+
 # some tools
 export CCACHE=$(which ccache)
 
