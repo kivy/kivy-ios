@@ -25,7 +25,9 @@ echo "-> Copy $SRCDIR to $APPDIR/YourApp"
 YOURAPPDIR=$APPDIR/YourApp
 
 echo "-> Remove any previous YourApp version"
-rm -r $YOURAPPDIR
+if [ -e $YOURAPPDIR ]; then
+	rm -r $YOURAPPDIR
+fi
 
 echo "-> Copy the new source"
 try cp -a $SRCDIR $YOURAPPDIR
