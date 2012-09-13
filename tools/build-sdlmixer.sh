@@ -9,7 +9,7 @@ if [ ! -f SDL ]; then
 fi
 
 if [ ! -d SDL_mixer ]; then
-	try hg clone http://hg.libsdl.org/SDL_mixer/
+	try hg clone http://hg.libsdl.org/SDL_mixer/#SDL-1.2
 fi
 if [ ! -d libtremor ]; then
 	try mkdir libtremor
