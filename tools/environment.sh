@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "X$VERBOSE" -eq "X1" ]; then
+if [ "X$VERBOSE" == "X1" ]; then
 	set -x
 fi
 
