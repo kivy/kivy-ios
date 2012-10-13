@@ -1,6 +1,8 @@
 #!/bin/bash
 
-set -x
+if [ "X$VERBOSE" -eq "X1" ]; then
+	set -x
+fi
 
 try () {
 	"$@" || exit -1
