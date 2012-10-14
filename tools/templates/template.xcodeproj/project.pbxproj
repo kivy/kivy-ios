@@ -25,7 +25,7 @@
 		59994DAE148E558600863906 /* libkivy.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DA9148E558600863906 /* libkivy.a */; };
 		59994DAF148E558600863906 /* libpython2.7.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAA148E558600863906 /* libpython2.7.a */; };
 		59994DB0148E558600863906 /* libSDL_ttf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAB148E558600863906 /* libSDL_ttf.a */; };
-		59994DB1148E558600863906 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAC148E558600863906 /* libSDL.a */; };
+		59994DB1148E558600863906 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAC148E558600863906 /* libSDL2.a */; };
 		59994DB3148E564400863906 /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 59994DB2148E564400863906 /* lib */; };
 		596C7514150CFC75003F57D9 /* include in Resources */ = {isa = PBXBuildFile; fileRef = 596C7513150CFC75003F57D9 /* include */; };
 		59994E3B148E85C800863906 /* YourApp in Resources */ = {isa = PBXBuildFile; fileRef = 59994E3A148E85C800863906 /* YourApp */; };
@@ -53,7 +53,7 @@
 		59994DA9148E558600863906 /* libkivy.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libkivy.a; path = ../build/lib/libkivy.a; sourceTree = "<group>"; };
 		59994DAA148E558600863906 /* libpython2.7.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpython2.7.a; path = ../build/lib/libpython2.7.a; sourceTree = "<group>"; };
 		59994DAB148E558600863906 /* libSDL_ttf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL_ttf.a; path = ../build/lib/libSDL_ttf.a; sourceTree = "<group>"; };
-		59994DAC148E558600863906 /* libSDL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL.a; path = ../build/lib/libSDL.a; sourceTree = "<group>"; };
+		59994DAC148E558600863906 /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = ../build/lib/libSDL2.a; sourceTree = "<group>"; };
 		59994DB2148E564400863906 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = ../build/python/lib; sourceTree = SOURCE_ROOT; };
 		59994E3A148E85C800863906 /* YourApp */ = {isa = PBXFileReference; lastKnownFileType = folder; path = YourApp; sourceTree = "<group>"; };
 		596C7513150CFC75003F57D9 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = ../build/python/embed/include; sourceTree = "<group>"; };
@@ -76,7 +76,7 @@
 				59994DAE148E558600863906 /* libkivy.a in Frameworks */,
 				59994DAF148E558600863906 /* libpython2.7.a in Frameworks */,
 				59994DB0148E558600863906 /* libSDL_ttf.a in Frameworks */,
-				59994DB1148E558600863906 /* libSDL.a in Frameworks */,
+				59994DB1148E558600863906 /* libSDL2.a in Frameworks */,
 				59994D90148D686900863906 /* libbz2.dylib in Frameworks */,
 				59994D9E148E353000863906 /* libz.dylib in Frameworks */,
 				59994D8D148D48E300863906 /* ImageIO.framework in Frameworks */,
@@ -149,7 +149,7 @@
 				598E035914F8177A000D1362 /* libvorbisidec.a */,
 				598E035314F80578000D1362 /* libogg.a */,
 				598E034C14F80187000D1362 /* libSDL_mixer.a */,
-				59994DAC148E558600863906 /* libSDL.a */,
+				59994DAC148E558600863906 /* libSDL2.a */,
 				59ED7D07150E0C4400A92BEE /* libios.a */,
 				59994D9D148E352F00863906 /* libz.dylib */,
 				59994D8F148D686900863906 /* libbz2.dylib */,
