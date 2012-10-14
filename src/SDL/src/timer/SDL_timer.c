@@ -223,7 +223,7 @@ SDL_TimerInit(void)
 
         data->active = SDL_TRUE;
         /* !!! FIXME: this is nasty. */
-#if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
+#if defined(__WIN32__) && !defined(HAVE_LIBC)
 #undef SDL_CreateThread
         data->thread = SDL_CreateThread(SDL_TimerThread, name, data, NULL, NULL);
 #else

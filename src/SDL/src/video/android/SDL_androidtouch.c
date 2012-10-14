@@ -55,10 +55,10 @@ void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int actio
         memset( &touch, 0, sizeof(touch) );
         touch.id = touchDeviceId;
         touch.x_min = 0.0f;
-        touch.x_max = (float)Android_ScreenWidth;
+        touch.x_max = 1.0f;
         touch.native_xres = touch.x_max - touch.x_min;
         touch.y_min = 0.0f;
-        touch.y_max = (float)Android_ScreenHeight;
+        touch.y_max = 1.0f;
         touch.native_yres = touch.y_max - touch.y_min;
         touch.pressure_min = 0.0f;
         touch.pressure_max = 1.0f;

@@ -1,7 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(README)
 AC_CONFIG_HEADER(include/SDL_config.h)
-AC_GNU_SOURCE
 AC_CONFIG_AUX_DIR(build-scripts)
 AC_CONFIG_MACRO_DIR([acinclude])
 
@@ -84,7 +83,7 @@ esac
 #AX_GCC_ARCHFLAG([no], [BASE_CFLAGS="$BASE_CFLAGS $ax_cv_gcc_archflag]")
 BUILD_CFLAGS="$CFLAGS $CPPFLAGS -DUSING_GENERATED_CONFIG_H"
 # The default optimization for SDL is -O3 (Bug #31)
-if test x$orig_CFLAGS = x; then
+if test "x$orig_CFLAGS" = x; then
     BUILD_CFLAGS=`echo $BUILD_CFLAGS | sed 's/-O2/-O3/'`
 fi
 EXTRA_CFLAGS="$INCLUDE $BASE_CFLAGS"
@@ -180,6 +179,20 @@ if test x$enable_dependency_tracking = xyes; then
         DEPENDENCY_TRACKING_OPTIONS="-MMD -MT \$@"
     fi
 fi
+
+# Actually this doesn't work on OpenBSD and BeOS
+#AC_MSG_CHECKING(for linker option --no-undefined)
+#have_no_undefined=no
+#save_LDFLAGS="$LDFLAGS"
+#LDFLAGS="$LDFLAGS -Wl,--no-undefined"
+#AC_TRY_LINK([
+#],[
+#],[
+#have_no_undefined=yes
+#EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,--no-undefined"
+#])
+#LDFLAGS="$save_LDFLAGS"
+#AC_MSG_RESULT($have_no_undefined)
 
 dnl See whether we are allowed to use the system C library
 AC_ARG_ENABLE(libc,
@@ -451,7 +464,7 @@ AC_HELP_STRING([--enable-mmx], [use MMX assembly routines [[default=yes]]]),
     fi
 
     AC_ARG_ENABLE(3dnow,
-AC_HELP_STRING([--enable-3dnow], [use MMX assembly routines [[default=yes]]]),
+AC_HELP_STRING([--enable-3dnow], [use 3DNow! assembly routines [[default=yes]]]),
                   , enable_3dnow=yes)
     if test x$enable_3dnow = xyes; then
         save_CFLAGS="$CFLAGS"
@@ -460,12 +473,14 @@ AC_HELP_STRING([--enable-3dnow], [use MMX assembly routines [[default=yes]]]),
         amd3dnow_CFLAGS="-m3dnow"
         CFLAGS="$save_CFLAGS $amd3dnow_CFLAGS"
 
-        AC_TRY_COMPILE([
+        AC_TRY_LINK([
         #include <mm3dnow.h>
         #ifndef __3dNOW__
         #error Assembler CPP flag not enabled
         #endif
         ],[
+        void *p = 0;
+        _m_prefetch(p);
         ],[
         have_gcc_3dnow=yes
         ])
@@ -1011,7 +1026,10 @@ AC_HELP_STRING([--enable-video-x11], [use X11 video driver [[default=yes]]]),
         case "$host" in
             *-*-darwin*)
                 # This isn't necessary for X11, but fixes GLX detection
-                if test "x$x_includes" = xNONE && test "x$x_libraries" = xNONE; then
+                if test "x$x_includes" = xNONE && \
+                   test "x$x_libraries" = xNONE && \
+                   test -d /usr/X11R6/include && \
+                   test -d /usr/X11R6/lib; then
                     x_includes="/usr/X11R6/include"
                     x_libraries="/usr/X11R6/lib"
                 fi
@@ -1041,6 +1059,17 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                     xrender_lib='/usr/X11R6/lib/libXrender.1.dylib'
                     xss_lib='/usr/X11R6/lib/libXss.1.dylib'
                     xvidmode_lib='/usr/X11R6/lib/libXxf86vm.1.dylib'
+                    ;;
+                *-*-openbsd*)
+                    x11_lib='libX11.so'
+                    x11ext_lib='libXext.so'
+                    xcursor_lib='libXcursor.so'
+                    xinerama_lib='libXinerama.so'
+                    xinput_lib='libXi.so'
+                    xrandr_lib='libXrandr.so'
+                    xrender_lib='libXrender.so'
+                    xss_lib='libXss.so'
+                    xvidmode_lib='libXxf86vm.so'
                     ;;
                 *)
                     x11_lib=[`find_lib "libX11.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
@@ -1090,6 +1119,41 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $X_LIBS -lX11 -lXext"
             fi
             have_video=yes
+
+            AC_MSG_CHECKING(for const parameter to XextAddDisplay)
+            have_const_param_XextAddDisplay=no
+            AC_TRY_COMPILE([
+              #include <X11/Xlib.h>
+              #include <X11/Xproto.h>
+              #include <X11/extensions/Xext.h>
+              #include <X11/extensions/extutil.h>
+              extern XExtDisplayInfo* XextAddDisplay(XExtensionInfo* a,Display* b,_Xconst char* c,XExtensionHooks* d,int e,XPointer f);
+            ],[
+            ],[
+            have_const_param_XextAddDisplay=yes
+            AC_DEFINE(SDL_VIDEO_DRIVER_X11_CONST_PARAM_XEXTADDDISPLAY)
+            ])
+            AC_MSG_RESULT($have_const_param_XextAddDisplay)
+
+            dnl AC_CHECK_LIB(X11, XGetEventData, AC_DEFINE(SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS, 1, [Have XGenericEvent]))
+            AC_MSG_CHECKING([for XGenericEvent])
+            have_XGenericEvent=no
+            AC_TRY_COMPILE([
+              	#include <X11/Xlib.h>
+            ],[
+Display *display;
+XEvent event;
+XGenericEventCookie *cookie = &event.xcookie;
+XNextEvent(display, &event);
+XGetEventData(display, cookie);
+XFreeEventData(display, cookie);
+            ],[
+                have_XGenericEvent=yes
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS)
+            ])
+            AC_MSG_RESULT($have_XGenericEvent)
+
+            AC_CHECK_LIB(X11, XkbKeycodeToKeysym, AC_DEFINE(SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM, 1, [Have XkbKeycodeToKeysym]))
 
             AC_ARG_ENABLE(video-x11-xcursor,
 AC_HELP_STRING([--enable-video-x11-xcursor], [enable X11 Xcursor support [[default=yes]]]),
@@ -1150,7 +1214,7 @@ AC_HELP_STRING([--enable-video-x11-xinput], [enable X11 XInput extension for man
                             , enable_video_x11_xinput=yes)
             if test x$enable_video_x11_xinput = xyes; then
                 definitely_enable_video_x11_xinput=no
-                AC_CHECK_HEADER(X11/extensions/XInput.h,
+                AC_CHECK_HEADER(X11/extensions/XInput2.h,
                                 have_xinput_h_hdr=yes,
                                 have_xinput_h_hdr=no,
                                 [#include <X11/Xlib.h>
@@ -1158,7 +1222,7 @@ AC_HELP_STRING([--enable-video-x11-xinput], [enable X11 XInput extension for man
                 if test x$have_xinput_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xinput_lib != x ; then
                         echo "-- dynamic libXi -> $xinput_lib"
-                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT, "$xinput_lib", [ ])
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT2, "$xinput_lib", [ ])
                         definitely_enable_video_x11_xinput=yes
                     else
                         AC_CHECK_LIB(Xi, XOpenDevice, have_xinput_lib=yes)
@@ -1170,7 +1234,26 @@ AC_HELP_STRING([--enable-video-x11-xinput], [enable X11 XInput extension for man
                 fi
             fi
             if test x$definitely_enable_video_x11_xinput = xyes; then
-                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XINPUT, 1, [ ])
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XINPUT2, 1, [ ])
+                AC_MSG_CHECKING(for xinput2 multitouch)
+            	have_xinput2_multitouch=no
+            	AC_TRY_COMPILE([
+              		#include <X11/Xlib.h>
+             		#include <X11/Xproto.h>
+			#include <X11/extensions/XInput2.h>
+            	],[
+int event_type = XI_TouchBegin;
+XITouchClassInfo *t;
+Status 
+XIAllowTouchEvents(Display *a,int b,unsigned int c,Window d,int f)
+{
+    return (Status)0;
+}
+            	],[
+            	have_xinput2_multitouch=yes
+            	AC_DEFINE(SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH)
+            	])
+            	AC_MSG_RESULT($have_xinput2_multitouch)
             fi
             AC_ARG_ENABLE(video-x11-xrandr,
 AC_HELP_STRING([--enable-video-x11-xrandr], [enable X11 Xrandr extension for fullscreen [[default=yes]]]),
@@ -1766,7 +1849,7 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
             ])
             AC_MSG_RESULT($has_pthread_spin_trylock)
 
-            AC_CHECK_HEADER(pthread_np.h, have_pthread_np_h=yes)
+            AC_CHECK_HEADER(pthread_np.h, have_pthread_np_h=yes, have_pthread_np_h=no, [ #include <pthread.h> ])
             if test x$have_pthread_np_h = xyes; then
                 AC_DEFINE(HAVE_PTHREAD_NP_H, 1, [ ])
             fi
@@ -1844,6 +1927,9 @@ CheckWINDOWS()
     ],[
     ],[
     have_wince=yes
+       AC_MSG_ERROR([
+*** Sorry, Windows CE is no longer supported.
+       ])
     ])
     AC_MSG_RESULT($have_wince)
 
@@ -2175,82 +2261,6 @@ case "$host" in
             have_timers=yes
         fi
         ;;
-    *-wince* | *-mingw32ce)
-        ARCH=win32
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDummyAudio
-        CheckWINDOWS
-        if test x$enable_video = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_WINDOWS, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/video/windows/*.c"
-            have_video=yes
-            AC_ARG_ENABLE(render-d3d,
-AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[default=yes]]]),
-                                , enable_render_d3d=yes)
-            enable_render_d3d=no
-            if test x$enable_render_d3d = xyes -a x$have_d3d = xyes; then
-                AC_DEFINE(SDL_VIDEO_RENDER_D3D, 1, [ ])
-            fi
-        fi
-        # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_WINMM, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/audio/winmm/*.c"
-            if test x$have_dsound = xyes; then
-                AC_DEFINE(SDL_AUDIO_DRIVER_DSOUND, 1, [ ])
-                SOURCES="$SOURCES $srcdir/src/audio/directsound/*.c"
-            fi
-            if test x$have_xaudio2 = xyes; then
-                AC_DEFINE(SDL_AUDIO_DRIVER_XAUDIO2, 1, [ ])
-                SOURCES="$SOURCES $srcdir/src/audio/xaudio2/*.c"
-            fi
-            have_audio=yes
-        fi
-        # Set up dummy files for the joystick for now
-        if test x$enable_joystick = xyes; then
-            AC_DEFINE(SDL_JOYSTICK_DUMMY, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/joystick/dummy/*.c"
-            have_joystick=yes
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            AC_DEFINE(SDL_THREAD_WINDOWS, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_sysmutex.c"
-            SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_syssem.c"
-            SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_systhread.c"
-            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syscond.c"
-            have_threads=yes
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            AC_DEFINE(SDL_TIMER_WINCE, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/timer/wince/*.c"
-            have_timers=yes
-        fi
-        # Set up files for the shared object loading library
-        if test x$enable_loadso = xyes; then
-            AC_DEFINE(SDL_LOADSO_WINDOWS, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/loadso/windows/*.c"
-            have_loadso=yes
-        fi
-        # Set up the system libraries we need
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lcoredll -lcommctrl -lmmtimer"
-
-	# mingw32ce library
-	case "$host" in
-    	    *-mingw32ce)
-    		EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lmingwex"
-    		;;
-    	    *)
-        	;;
-	esac
-
-        # The Windows platform requires special setup
-        SDLMAIN_SOURCES="$srcdir/src/main/windows/*.c"
-        EXTRA_CFLAGS="$EXTRA_CFLAGS -Dmain=SDL_main -D_WIN32_WCE=0x420"
-        EXTRA_LDFLAGS="-lSDL2main $EXTRA_LDFLAGS"
-        ;;
     *-*-cygwin* | *-*-mingw32*)
         ARCH=win32
         if test "$build" != "$host"; then # cross-compiling
@@ -2403,6 +2413,54 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # The BeOS platform requires special setup.
         SOURCES="$srcdir/src/main/beos/*.cc $SOURCES"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lroot -lbe -lmedia -lgame -ldevice -ltextencoding"
+        ;;
+    arm*-apple-darwin*)
+        # iOS - We are not writing anything to confdefs.h because you have to replace
+        # SDL_config.h for SDL_config_iphoneos.h anyway
+        ARCH=ios
+
+        CheckVisibilityHidden
+        CheckDummyVideo
+        CheckDiskAudio
+        CheckDummyAudio
+        CheckDLOPEN
+        CheckCOCOA
+        CheckPTHREAD
+
+
+        # Set up files for the audio library
+        if test x$enable_audio = xyes; then
+            SOURCES="$SOURCES $srcdir/src/audio/coreaudio/*.c"
+            have_audio=yes
+        fi
+        # Set up files for the joystick library
+        if test x$enable_joystick = xyes; then
+            SOURCES="$SOURCES $srcdir/src/joystick/iphoneos/*.m"
+            have_joystick=yes
+        fi
+        # Set up files for the haptic library
+        #if test x$enable_haptic = xyes; then
+        #    SOURCES="$SOURCES $srcdir/src/haptic/darwin/*.c"
+        #    have_haptic=yes
+        #    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,ForceFeedback"
+        #fi
+        # Set up files for the power library
+        if test x$enable_power = xyes; then
+            SOURCES="$SOURCES $srcdir/src/power/uikit/*.m"
+            have_power=yes
+        fi
+        # Set up files for the timer library
+        if test x$enable_timers = xyes; then
+            SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
+            have_timers=yes
+        fi
+        # Set up additional files for the file library
+        if test x$enable_file = xyes; then
+            SOURCES="$SOURCES $srcdir/src/file/cocoa/*.m"
+        fi
+        # The iOS platform requires special setup.
+        SOURCES="$SOURCES $srcdir/src/video/uikit/*.m"
+        SOURCES="$SOURCES $srcdir/src/video/uikit/*.c"
         ;;
     *-*-darwin* )
         # This could be either full "Mac OS X", or plain "Darwin" which is

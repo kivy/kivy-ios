@@ -31,9 +31,6 @@
 #include "SDL_audio.h"
 #include "../SDL_audio_c.h"
 #include "SDL_winmm.h"
-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
-#include "win_ce_semaphore.h"
-#endif
 
 #define DETECT_DEV_IMPL(typ, capstyp) \
 static void DetectWave##typ##Devs(SDL_AddAudioDevice addfn) { \
@@ -75,11 +72,7 @@ CaptureSound(HWAVEIN hwi, UINT uMsg, DWORD_PTR dwInstance,
         return;
 
     /* Signal that we have a new buffer of data */
-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
-    ReleaseSemaphoreCE(this->hidden->audio_sem, 1, NULL);
-#else
     ReleaseSemaphore(this->hidden->audio_sem, 1, NULL);
-#endif
 }
 
 
@@ -95,11 +88,7 @@ FillSound(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance,
         return;
 
     /* Signal that we are done playing a buffer */
-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
-    ReleaseSemaphoreCE(this->hidden->audio_sem, 1, NULL);
-#else
     ReleaseSemaphore(this->hidden->audio_sem, 1, NULL);
-#endif
 }
 
 static void
@@ -123,11 +112,7 @@ static void
 WINMM_WaitDevice(_THIS)
 {
     /* Wait for an audio chunk to finish */
-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
-    WaitForSemaphoreCE(this->hidden->audio_sem, INFINITE);
-#else
     WaitForSingleObject(this->hidden->audio_sem, INFINITE);
-#endif
 }
 
 static Uint8 *
@@ -173,11 +158,7 @@ WINMM_CloseDevice(_THIS)
         int i;
 
         if (this->hidden->audio_sem) {
-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
-            CloseSynchHandle(this->hidden->audio_sem);
-#else
             CloseHandle(this->hidden->audio_sem);
-#endif
             this->hidden->audio_sem = 0;
         }
 
@@ -349,11 +330,7 @@ WINMM_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Create the audio buffer semaphore */
     this->hidden->audio_sem =
-#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
-        CreateSemaphoreCE(NULL, NUM_BUFFERS - 1, NUM_BUFFERS, NULL);
-#else
         CreateSemaphore(NULL, NUM_BUFFERS - 1, NUM_BUFFERS, NULL);
-#endif
     if (this->hidden->audio_sem == NULL) {
         WINMM_CloseDevice(this);
         SDL_SetError("Couldn't create semaphore");
@@ -369,7 +346,7 @@ WINMM_OpenDevice(_THIS, const char *devname, int iscapture)
         return 0;
     }
     for (i = 0; i < NUM_BUFFERS; ++i) {
-        SDL_memset(&this->hidden->wavebuf[i], '\0',
+        SDL_memset(&this->hidden->wavebuf[i], 0,
                    sizeof(this->hidden->wavebuf[i]));
         this->hidden->wavebuf[i].dwBufferLength = this->spec.size;
         this->hidden->wavebuf[i].dwFlags = WHDR_DONE;

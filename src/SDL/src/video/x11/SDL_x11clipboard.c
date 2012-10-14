@@ -54,6 +54,7 @@ X11_SetClipboardText(_THIS, const char *text)
     Display *display = ((SDL_VideoData *) _this->driverdata)->display;
     Atom format;
     Window window;
+    Atom XA_CLIPBOARD = XInternAtom(display, "CLIPBOARD", 0);
 
     /* Get the SDL window that will own the selection */
     window = GetWindow(_this);
@@ -67,6 +68,11 @@ X11_SetClipboardText(_THIS, const char *text)
     XChangeProperty(display, DefaultRootWindow(display),
         XA_CUT_BUFFER0, format, 8, PropModeReplace,
         (const unsigned char *)text, SDL_strlen(text));
+
+    if (XA_CLIPBOARD != None &&
+        XGetSelectionOwner(display, XA_CLIPBOARD) != window) {
+        XSetSelectionOwner(display, XA_CLIPBOARD, window, CurrentTime);
+    }
 
     if (XGetSelectionOwner(display, XA_PRIMARY) != window) {
         XSetSelectionOwner(display, XA_PRIMARY, window, CurrentTime);
@@ -89,13 +95,18 @@ X11_GetClipboardText(_THIS)
     unsigned long overflow;
     unsigned char *src;
     char *text;
+    Atom XA_CLIPBOARD = XInternAtom(display, "CLIPBOARD", 0);
+    if (XA_CLIPBOARD == None) {
+        SDL_SetError("Couldn't access X clipboard");
+        return NULL;
+    }
 
     text = NULL;
 
     /* Get the window that holds the selection */
     window = GetWindow(_this);
     format = TEXT_FORMAT;
-    owner = XGetSelectionOwner(display, XA_PRIMARY);
+    owner = XGetSelectionOwner(display, XA_CLIPBOARD);
     if ((owner == None) || (owner == window)) {
         owner = DefaultRootWindow(display);
         selection = XA_CUT_BUFFER0;
@@ -103,7 +114,7 @@ X11_GetClipboardText(_THIS)
         /* Request that the selection owner copy the data to our window */
         owner = window;
         selection = XInternAtom(display, "SDL_SELECTION", False);
-        XConvertSelection(display, XA_PRIMARY, format, selection, owner,
+        XConvertSelection(display, XA_CLIPBOARD, format, selection, owner,
             CurrentTime);
 
         /* FIXME: Should we have a timeout here? */

@@ -31,6 +31,20 @@
 
 typedef struct SDL_RenderDriver SDL_RenderDriver;
 
+typedef struct
+{
+    float x;
+    float y;
+} SDL_FPoint;
+
+typedef struct
+{
+    float x;
+    float y;
+    float w;
+    float h;
+} SDL_FRect;
+
 /* Define the SDL texture structure */
 struct SDL_Texture
 {
@@ -80,20 +94,26 @@ struct SDL_Renderer
     int (*SetRenderTarget) (SDL_Renderer * renderer, SDL_Texture * texture);
     int (*UpdateViewport) (SDL_Renderer * renderer);
     int (*RenderClear) (SDL_Renderer * renderer);
-    int (*RenderDrawPoints) (SDL_Renderer * renderer, const SDL_Point * points,
+    int (*RenderDrawPoints) (SDL_Renderer * renderer, const SDL_FPoint * points,
                              int count);
-    int (*RenderDrawLines) (SDL_Renderer * renderer, const SDL_Point * points,
+    int (*RenderDrawLines) (SDL_Renderer * renderer, const SDL_FPoint * points,
                             int count);
-    int (*RenderFillRects) (SDL_Renderer * renderer, const SDL_Rect * rects,
+    int (*RenderFillRects) (SDL_Renderer * renderer, const SDL_FRect * rects,
                             int count);
     int (*RenderCopy) (SDL_Renderer * renderer, SDL_Texture * texture,
-                       const SDL_Rect * srcrect, const SDL_Rect * dstrect);
+                       const SDL_Rect * srcrect, const SDL_FRect * dstrect);
+    int (*RenderCopyEx) (SDL_Renderer * renderer, SDL_Texture * texture,
+                       const SDL_Rect * srcquad, const SDL_FRect * dstrect,
+                       const double angle, const SDL_FPoint *center, const SDL_RendererFlip flip);
     int (*RenderReadPixels) (SDL_Renderer * renderer, const SDL_Rect * rect,
                              Uint32 format, void * pixels, int pitch);
     void (*RenderPresent) (SDL_Renderer * renderer);
     void (*DestroyTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
 
     void (*DestroyRenderer) (SDL_Renderer * renderer);
+
+    int (*GL_BindTexture) (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh);
+    int (*GL_UnbindTexture) (SDL_Renderer * renderer, SDL_Texture *texture);
 
     /* The current renderer info */
     SDL_RendererInfo info;
@@ -103,9 +123,19 @@ struct SDL_Renderer
     SDL_bool hidden;
     SDL_bool resized;
 
+    /* The logical resolution for rendering */
+    int logical_w;
+    int logical_h;
+    int logical_w_backup;
+    int logical_h_backup;
+
     /* The drawable area within the window */
     SDL_Rect viewport;
     SDL_Rect viewport_backup;
+
+    /* The render output coordinate scale */
+    SDL_FPoint scale;
+    SDL_FPoint scale_backup;
 
     /* The list of textures */
     SDL_Texture *textures;

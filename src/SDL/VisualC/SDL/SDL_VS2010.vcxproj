@@ -243,6 +243,7 @@
     <ClInclude Include="..\..\include\SDL_shape.h" />
     <ClInclude Include="..\..\include\SDL_stdinc.h" />
     <ClInclude Include="..\..\include\SDL_surface.h" />
+    <ClInclude Include="..\..\include\SDL_system.h" />
     <ClInclude Include="..\..\include\SDL_syswm.h" />
     <ClInclude Include="..\..\include\SDL_thread.h" />
     <ClInclude Include="..\..\include\SDL_timer.h" />
@@ -272,7 +273,9 @@
     <ClInclude Include="..\..\src\render\software\SDL_draw.h" />
     <ClInclude Include="..\..\src\render\software\SDL_drawline.h" />
     <ClInclude Include="..\..\src\render\software\SDL_drawpoint.h" />
+    <ClInclude Include="..\..\src\events\SDL_dropevents_c.h" />
     <ClInclude Include="..\..\src\render\software\SDL_render_sw_c.h" />
+    <ClInclude Include="..\..\src\render\software\SDL_rotate.h" />
     <ClInclude Include="..\..\src\video\dummy\SDL_nullframebuffer_c.h" />
     <ClInclude Include="..\..\src\video\SDL_blit.h" />
     <ClInclude Include="..\..\src\video\SDL_blit_auto.h" />
@@ -356,6 +359,7 @@
     <ClCompile Include="..\..\src\render\software\SDL_drawline.c" />
     <ClCompile Include="..\..\src\render\software\SDL_drawpoint.c" />
     <ClCompile Include="..\..\src\render\software\SDL_render_sw.c" />
+    <ClCompile Include="..\..\src\render\software\SDL_rotate.c" />
     <ClCompile Include="..\..\src\SDL.c" />
     <ClCompile Include="..\..\src\SDL_assert.c" />
     <ClCompile Include="..\..\src\atomic\SDL_atomic.c" />
@@ -383,6 +387,7 @@
     <ClCompile Include="..\..\src\audio\disk\SDL_diskaudio.c" />
     <ClCompile Include="..\..\src\audio\dummy\SDL_dummyaudio.c" />
     <ClCompile Include="..\..\src\audio\directsound\SDL_directsound.c" />
+    <ClCompile Include="..\..\src\events\SDL_dropevents.c" />
     <ClCompile Include="..\..\src\audio\xaudio2\SDL_xaudio2.c" />
     <ClCompile Include="..\..\src\joystick\windows\SDL_dxjoystick.c" />
     <ClCompile Include="..\..\src\SDL_error.c" />

@@ -23,10 +23,14 @@
 
 SDL_X11_MODULE(BASEXLIB)
 SDL_X11_SYM(XSizeHints*,XAllocSizeHints,(void),(),return)
+SDL_X11_SYM(XWMHints*,XAllocWMHints,(void),(),return)
+SDL_X11_SYM(XClassHint*,XAllocClassHint,(void),(),return)
 SDL_X11_SYM(int,XAutoRepeatOn,(Display* a),(a),return)
 SDL_X11_SYM(int,XAutoRepeatOff,(Display* a),(a),return)
 SDL_X11_SYM(int,XChangePointerControl,(Display* a,Bool b,Bool c,int d,int e,int f),(a,b,c,d,e,f),return)
 SDL_X11_SYM(int,XChangeProperty,(Display* a,Window b,Atom c,Atom d,int e,int f,_Xconst unsigned char* g,int h),(a,b,c,d,e,f,g,h),return)
+SDL_X11_SYM(Bool,XCheckIfEvent,(Display* a,XEvent *b,Bool (*c)(Display*,XEvent*,XPointer),XPointer d),(a,b,c,d),return)
+SDL_X11_SYM(int,XClearWindow,(Display* a,Window b),(a,b),return)
 SDL_X11_SYM(int,XCloseDisplay,(Display* a),(a),return)
 SDL_X11_SYM(int,XConvertSelection,(Display* a,Atom b,Atom c,Atom d,Window e,Time f),(a,b,c,d,e,f),return)
 SDL_X11_SYM(Pixmap,XCreateBitmapFromData,(Display *dpy,Drawable d,_Xconst char *data,unsigned int width,unsigned int height),(dpy,d,data,width,height),return)
@@ -59,12 +63,14 @@ SDL_X11_SYM(Status,XGetWindowAttributes,(Display* a,Window b,XWindowAttributes* 
 SDL_X11_SYM(int,XGetWindowProperty,(Display* a,Window b,Atom c,long d,long e,Bool f,Atom g,Atom* h,int* i,unsigned long* j,unsigned long *k,unsigned char **l),(a,b,c,d,e,f,g,h,i,j,k,l),return)
 SDL_X11_SYM(XWMHints*,XGetWMHints,(Display* a,Window b),(a,b),return)
 SDL_X11_SYM(Status,XGetWMNormalHints,(Display *a,Window b, XSizeHints *c, long *d),(a,b,c,d),return)
+SDL_X11_SYM(int,XIfEvent,(Display* a,XEvent *b,Bool (*c)(Display*,XEvent*,XPointer),XPointer d),(a,b,c,d),return)
 SDL_X11_SYM(int,XGrabKeyboard,(Display* a,Window b,Bool c,int d,int e,Time f),(a,b,c,d,e,f),return)
 SDL_X11_SYM(int,XGrabPointer,(Display* a,Window b,Bool c,unsigned int d,int e,int f,Window g,Cursor h,Time i),(a,b,c,d,e,f,g,h,i),return)
 SDL_X11_SYM(int,XGrabServer,(Display* a),(a),return)
 SDL_X11_SYM(Status,XIconifyWindow,(Display* a,Window b,int c),(a,b,c),return)
 SDL_X11_SYM(KeyCode,XKeysymToKeycode,(Display* a,KeySym b),(a,b),return)
 SDL_X11_SYM(char*,XKeysymToString,(KeySym a),(a),return)
+SDL_X11_SYM(int,XInstallColormap,(Display* a,Colormap b),(a,b),return)
 SDL_X11_SYM(Atom,XInternAtom,(Display* a,_Xconst char* b,Bool c),(a,b,c),return)
 SDL_X11_SYM(XPixmapFormatValues*,XListPixmapFormats,(Display* a,int* b),(a,b),return)
 SDL_X11_SYM(KeySym,XLookupKeysym,(XKeyEvent* a,int b),(a,b),return)
@@ -75,21 +81,25 @@ SDL_X11_SYM(int,XMissingExtension,(Display* a,_Xconst char* b),(a,b),return)
 SDL_X11_SYM(int,XMoveWindow,(Display* a,Window b,int c,int d),(a,b,c,d),return)
 SDL_X11_SYM(int,XNextEvent,(Display* a,XEvent* b),(a,b),return)
 SDL_X11_SYM(Display*,XOpenDisplay,(_Xconst char* a),(a),return)
+SDL_X11_SYM(Status,XInitThreads,(void),(),return)
 SDL_X11_SYM(int,XPeekEvent,(Display* a,XEvent* b),(a,b),return)
 SDL_X11_SYM(int,XPending,(Display* a),(a),return)
 SDL_X11_SYM(int,XPutImage,(Display* a,Drawable b,GC c,XImage* d,int e,int f,int g,int h,unsigned int i,unsigned int j),(a,b,c,d,e,f,g,h,i,j),return)
 SDL_X11_SYM(int,XQueryKeymap,(Display* a,char *b),(a,b),return)
 SDL_X11_SYM(Bool,XQueryPointer,(Display* a,Window b,Window* c,Window* d,int* e,int* f,int* g,int* h,unsigned int* i),(a,b,c,d,e,f,g,h,i),return)
 SDL_X11_SYM(int,XRaiseWindow,(Display* a,Window b),(a,b),return)
+SDL_X11_SYM(int,XReparentWindow,(Display* a,Window b,Window c,int d,int e),(a,b,c,d,e),return)
 SDL_X11_SYM(int,XResetScreenSaver,(Display* a),(a),return)
 SDL_X11_SYM(int,XResizeWindow,(Display* a,Window b,unsigned int c,unsigned int d),(a,b,c,d),return)
 SDL_X11_SYM(int,XSelectInput,(Display* a,Window b,long c),(a,b,c),return)
 SDL_X11_SYM(Status,XSendEvent,(Display* a,Window b,Bool c,long d,XEvent* e),(a,b,c,d,e),return)
 SDL_X11_SYM(XErrorHandler,XSetErrorHandler,(XErrorHandler a),(a),return)
 SDL_X11_SYM(XIOErrorHandler,XSetIOErrorHandler,(XIOErrorHandler a),(a),return)
+SDL_X11_SYM(int,XSetInputFocus,(Display *a,Window b,int c,Time d),(a,b,c,d),return)
 SDL_X11_SYM(int,XSetSelectionOwner,(Display* a,Atom b,Window c,Time d),(a,b,c,d),return)
 SDL_X11_SYM(int,XSetTransientForHint,(Display* a,Window b,Window c),(a,b,c),return)
 SDL_X11_SYM(void,XSetTextProperty,(Display* a,Window b,XTextProperty* c,Atom d),(a,b,c,d),)
+SDL_X11_SYM(int,XSetWindowBackground,(Display* a,Window b,unsigned long c),(a,b,c),return)
 SDL_X11_SYM(void,XSetWMProperties,(Display* a,Window b,XTextProperty* c,XTextProperty* d,char** e,int f,XSizeHints* g,XWMHints* h,XClassHint* i),(a,b,c,d,e,f,g,h,i),)
 SDL_X11_SYM(void,XSetWMNormalHints,(Display* a,Window b,XSizeHints* c),(a,b,c),)
 SDL_X11_SYM(Status,XSetWMProtocols,(Display* a,Window b,Atom* c,int d),(a,b,c,d),return)
@@ -100,10 +110,15 @@ SDL_X11_SYM(int,XUndefineCursor,(Display* a,Window b),(a,b),return)
 SDL_X11_SYM(int,XUngrabKeyboard,(Display* a,Time b),(a,b),return)
 SDL_X11_SYM(int,XUngrabPointer,(Display* a,Time b),(a,b),return)
 SDL_X11_SYM(int,XUngrabServer,(Display* a),(a),return)
+SDL_X11_SYM(int,XUninstallColormap,(Display* a,Colormap b),(a,b),return)
 SDL_X11_SYM(int,XUnmapWindow,(Display* a,Window b),(a,b),return)
 SDL_X11_SYM(int,XWarpPointer,(Display* a,Window b,Window c,int d,int e,unsigned int f,unsigned int g,int h,int i),(a,b,c,d,e,f,g,h,i),return)
 SDL_X11_SYM(VisualID,XVisualIDFromVisual,(Visual* a),(a),return)
+#if SDL_VIDEO_DRIVER_X11_CONST_PARAM_XEXTADDDISPLAY
+SDL_X11_SYM(XExtDisplayInfo*,XextAddDisplay,(XExtensionInfo* a,Display* b,_Xconst char* c,XExtensionHooks* d,int e,XPointer f),(a,b,c,d,e,f),return)
+#else
 SDL_X11_SYM(XExtDisplayInfo*,XextAddDisplay,(XExtensionInfo* a,Display* b,char* c,XExtensionHooks* d,int e,XPointer f),(a,b,c,d,e,f),return)
+#endif
 SDL_X11_SYM(XExtensionInfo*,XextCreateExtension,(void),(),return)
 SDL_X11_SYM(void,XextDestroyExtension,(XExtensionInfo* a),(a),)
 SDL_X11_SYM(XExtDisplayInfo*,XextFindDisplay,(XExtensionInfo* a,Display* b),(a,b),return)
@@ -122,6 +137,19 @@ SDL_X11_SYM(unsigned long,_XSetLastRequestRead,(Display* a,xGenericReply* b),(a,
 SDL_X11_SYM(SDL_X11_XSynchronizeRetType,XSynchronize,(Display* a,Bool b),(a,b),return)
 SDL_X11_SYM(SDL_X11_XESetWireToEventRetType,XESetWireToEvent,(Display* a,int b,SDL_X11_XESetWireToEventRetType c),(a,b,c),return)
 SDL_X11_SYM(SDL_X11_XESetEventToWireRetType,XESetEventToWire,(Display* a,int b,SDL_X11_XESetEventToWireRetType c),(a,b,c),return)
+
+#if SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS
+SDL_X11_SYM(Bool,XGetEventData,(Display* a,XGenericEventCookie* b),(a,b),return)
+SDL_X11_SYM(void,XFreeEventData,(Display* a,XGenericEventCookie* b),(a,b),)    
+#endif
+
+#if SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM
+#if NeedWidePrototypes
+SDL_X11_SYM(KeySym,XkbKeycodeToKeysym,(Display* a,unsigned int b,int c,int d),(a,b,c,d),return)
+#else
+SDL_X11_SYM(KeySym,XkbKeycodeToKeysym,(Display* a,KeyCode b,int c,int d),(a,b,c,d),return)
+#endif
+#endif
 
 #if NeedWidePrototypes
 SDL_X11_SYM(KeySym,XKeycodeToKeysym,(Display* a,unsigned int b,int c),(a,b,c),return)
@@ -190,14 +218,14 @@ SDL_X11_SYM(Status,XineramaQueryVersion,(Display *a,int *b,int *c),(a,b,c),retur
 SDL_X11_SYM(XineramaScreenInfo*,XineramaQueryScreens,(Display *a, int *b),(a,b),return)
 #endif
 
-/* XInput support for multiple mice, tablets, etc. */
-#if SDL_VIDEO_DRIVER_X11_XINPUT
-SDL_X11_MODULE(XINPUT)
-SDL_X11_SYM(XDeviceInfo*,XListInputDevices,(Display *a,int *b),(a,b),return)
-SDL_X11_SYM(void,XFreeDeviceList,(XDeviceInfo *a),(a),)
-SDL_X11_SYM(int,XSelectExtensionEvent,(Display *a,Window b,XEventClass *c,int d),(a,b,c,d),return)
-SDL_X11_SYM(XDevice*,XOpenDevice,(Display *a,XID b),(a,b),return)
-SDL_X11_SYM(int,XCloseDevice,(Display* a,XDevice* b),(a,b),return)
+/* XInput2 support for multiple mice, tablets, etc. */
+#if SDL_VIDEO_DRIVER_X11_XINPUT2
+SDL_X11_MODULE(XINPUT2)
+SDL_X11_SYM(XIDeviceInfo*,XIQueryDevice,(Display *a,int b,int *c),(a,b,c),return)
+SDL_X11_SYM(void,XIFreeDeviceInfo,(XIDeviceInfo *a),(a),)
+SDL_X11_SYM(int,XISelectEvents,(Display *a,Window b,XIEventMask *c,int d),(a,b,c,d),return)
+SDL_X11_SYM(Status,XIQueryVersion,(Display *a,int *b,int *c),(a,b,c),return)
+SDL_X11_SYM(XIEventMask*,XIGetSelectedEvents,(Display *a,Window b,int *c),(a,b,c),return)
 #endif
 
 /* XRandR support */
@@ -211,6 +239,15 @@ SDL_X11_SYM(short *,XRRConfigRates,(XRRScreenConfiguration *config,int sizeID,in
 SDL_X11_SYM(XRRScreenSize *,XRRConfigSizes,(XRRScreenConfiguration *config,int *nsizes),(config,nsizes),return)
 SDL_X11_SYM(Status,XRRSetScreenConfigAndRate,(Display *dpy,XRRScreenConfiguration *config,Drawable draw,int size_index,Rotation rotation,short rate,Time timestamp),(dpy,config,draw,size_index,rotation,rate,timestamp),return)
 SDL_X11_SYM(void,XRRFreeScreenConfigInfo,(XRRScreenConfiguration *config),(config),)
+SDL_X11_SYM(void,XRRSetScreenSize,(Display *dpy, Window window,int width, int height,int mmWidth, int mmHeight),(dpy,window,width,height,mmWidth,mmHeight),)
+SDL_X11_SYM(Status,XRRGetScreenSizeRange,(Display *dpy, Window window,int *minWidth, int *minHeight, int *maxWidth, int *maxHeight),(dpy,window,minWidth,minHeight,maxWidth,maxHeight),return)
+SDL_X11_SYM(XRRScreenResources *,XRRGetScreenResources,(Display *dpy, Window window),(dpy, window),return)
+SDL_X11_SYM(void,XRRFreeScreenResources,(XRRScreenResources *resources),(resources),)
+SDL_X11_SYM(XRROutputInfo *,XRRGetOutputInfo,(Display *dpy, XRRScreenResources *resources, RROutput output),(dpy,resources,output),return)
+SDL_X11_SYM(void,XRRFreeOutputInfo,(XRROutputInfo *outputInfo),(outputInfo),)
+SDL_X11_SYM(XRRCrtcInfo *,XRRGetCrtcInfo,(Display *dpy, XRRScreenResources *resources, RRCrtc crtc),(dpy,resources,crtc),return)
+SDL_X11_SYM(void,XRRFreeCrtcInfo,(XRRCrtcInfo *crtcInfo),(crtcInfo),)
+SDL_X11_SYM(Status,XRRSetCrtcConfig,(Display *dpy, XRRScreenResources *resources, RRCrtc crtc, Time timestamp, int x, int y, RRMode mode, Rotation rotation, RROutput *outputs, int noutputs),(dpy,resources,crtc,timestamp,x,y,mode,rotation,outputs,noutputs),return)
 #endif
 
 /* MIT-SCREEN-SAVER support */
@@ -234,6 +271,7 @@ SDL_X11_SYM(Bool,XF86VidModeGetViewPort,(Display *a,int b,int *c,int *d),(a,b,c,
 SDL_X11_SYM(Bool,XF86VidModeQueryExtension,(Display *a,int *b,int *c),(a,b,c),return)
 SDL_X11_SYM(Bool,XF86VidModeQueryVersion,(Display *a,int *b,int *c),(a,b,c),return)
 SDL_X11_SYM(Bool,XF86VidModeSwitchToMode,(Display *a,int b,XF86VidModeModeInfo *c),(a,b,c),return)
+SDL_X11_SYM(Bool,XF86VidModeLockModeSwitch,(Display *a,int b,int c),(a,b,c),return)
 #endif
 
 /* *INDENT-ON* */

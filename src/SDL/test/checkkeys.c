@@ -138,10 +138,6 @@ PrintText(char *text)
     SDL_Log("Text: %s", text);
 }
 
-#if __IPHONEOS__
-extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardShow(SDL_Window * window);
-#endif
-
 int
 main(int argc, char *argv[])
 {
@@ -168,9 +164,11 @@ main(int argc, char *argv[])
 #if __IPHONEOS__
     /* Creating the context creates the view, which we need to show keyboard */
     SDL_GL_CreateContext(window);
-    SDL_iPhoneKeyboardShow(window);
 #endif
-    
+
+    if (SDL_HasScreenKeyboardSupport(window)) {
+        SDL_ShowScreenKeyboard(window);
+    }
 
     /* Watch keystrokes */
     done = 0;

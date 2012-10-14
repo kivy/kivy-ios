@@ -11,15 +11,6 @@
 */
 /* A simple program to test the Input Method support in the SDL library (2.0+) */
 
-#if 1 /* FIXME: Rework this using the 2.0 API */
-#include <stdio.h>
-
-int main(int argc, char *argv[])
-{
-    printf("FIXME\n");
-    return 0;
-}
-#else
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,20 +20,22 @@ int main(int argc, char *argv[])
 #include "SDL_ttf.h"
 #endif
 
+#include "common.h"
+
 #define DEFAULT_PTSIZE  30
 #define DEFAULT_FONT    "/System/Library/Fonts/华文细黑.ttf"
 #define MAX_TEXT_LENGTH 256
 
-SDL_Surface *screen;
-
+static CommonState *state;
+static SDL_Rect textRect, markedRect;
+static SDL_Color lineColor = {0,0,0,0};
+static SDL_Color backColor = {255,255,255,0};
+static SDL_Color textColor = {0,0,0,0};
+static char text[MAX_TEXT_LENGTH], markedText[SDL_TEXTEDITINGEVENT_TEXT_SIZE];
+static int cursor = 0;
 #ifdef HAVE_SDL_TTF
-TTF_Font *font;
+static TTF_Font *font;
 #endif
-SDL_Rect textRect, markedRect;
-Uint32 lineColor, backColor;
-SDL_Color textColor = { 0, 0, 0 };
-char text[MAX_TEXT_LENGTH], markedText[SDL_TEXTEDITINGEVENT_TEXT_SIZE];
-int cursor = 0;
 
 size_t utf8_length(unsigned char c)
 {
@@ -87,75 +80,23 @@ char *utf8_advance(char *p, size_t distance)
 
 void usage()
 {
-    printf("usage: testime [--font fontfile] [--fullscreen]\n");
+    printf("usage: testime [--font fontfile]\n");
     exit(0);
 }
 
-void InitVideo(int argc, char *argv[])
+void InitInput()
 {
-    int width = 640, height = 480;
-    int flags = SDL_HWSURFACE;
-    const char *fontname = DEFAULT_FONT;
-    int fullscreen = 0;
 
-    for (argc--, argv++; argc > 0; argc--, argv++)
-    {
-        if (strcmp(argv[0], "--help") == 0)
-            usage();
+    /* Prepare a rect for text input */
+    textRect.x = textRect.y = 100;
+    textRect.w = DEFAULT_WINDOW_WIDTH - 2 * textRect.x;
+    textRect.h = 50;
 
-        else if (strcmp(argv[0], "--fullscreen") == 0)
-            fullscreen = 1;
+    text[0] = 0;
+    markedRect = textRect;
+    markedText[0] = 0;
 
-        else if (strcmp(argv[0], "--font") == 0)
-        {
-            argc--;
-            argv++;
-
-            if (argc > 0)
-                fontname = argv[0];
-            else
-                usage();
-        }
-    }
-
-    SDL_setenv("SDL_VIDEO_WINDOW_POS", "center", 1);
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
-        exit(-1);
-    }
-
-#ifdef HAVE_SDL_TTF
-    /* Initialize fonts */
-    TTF_Init();
-
-    font = TTF_OpenFont(fontname, DEFAULT_PTSIZE);
-    if (! font)
-    {
-        fprintf(stderr, "Failed to find font: %s\n", TTF_GetError());
-        exit(-1);
-    }
-#endif
-
-    printf("Using font: %s\n", fontname);
-    atexit(SDL_Quit);
-
-    if (fullscreen)
-    {
-        /* Use the desktop mode */
-        width = 0;
-        height = 0;
-        flags |= SDL_FULLSCREEN;
-    }
-
-    /* Create window */
-    screen = SDL_SetVideoMode(width, height, 32, flags);
-    if (screen == NULL)
-    {
-        fprintf(stderr, "Unable to set %dx%d video: %s\n",
-                width, height, SDL_GetError());
-        exit(-1);
-    }
+    SDL_StartTextInput();
 }
 
 void CleanupVideo()
@@ -167,51 +108,25 @@ void CleanupVideo()
 #endif
 }
 
-void InitInput()
-{
-    backColor = SDL_MapRGB(screen->format, 0xFF, 0xFF, 0xFF);
-    lineColor = SDL_MapRGB(screen->format, 0x0, 0x0, 0x0);
 
-    /* Prepare a rect for text input */
-    textRect.x = textRect.y = 100;
-    textRect.w = screen->w - 2 * textRect.x;
-    textRect.h = 50;
-
-    text[0] = 0;
-    markedRect = textRect;
-    markedText[0] = 0;
-
-    SDL_StartTextInput();
-}
-
-#ifdef HAVE_SDL_TTF
-static void RenderText(SDL_Surface *sur,
-                        TTF_Font *font,
-                        const char *text,
-                        int x, int y,
-                        SDL_Color color)
-{
-    if (text && *text) {
-        SDL_Surface *textSur = TTF_RenderUTF8_Blended(font, text, color);
-        SDL_Rect dest = { x, y, textSur->w, textSur->h };
-
-        SDL_BlitSurface(textSur, NULL, sur, &dest);
-        SDL_FreeSurface(textSur);
-    }
-}
-#endif
-
-void Redraw()
-{
+void _Redraw(SDL_Renderer * renderer) {
     int w = 0, h = textRect.h;
     SDL_Rect cursorRect, underlineRect;
 
-    SDL_FillRect(screen, &textRect, backColor);
+    SDL_SetRenderDrawColor(renderer, 255,255,255,255);
+    SDL_RenderFillRect(renderer,&textRect);
 
 #ifdef HAVE_SDL_TTF
     if (*text)
     {
-        RenderText(screen, font, text, textRect.x, textRect.y, textColor);
+        SDL_Surface *textSur = TTF_RenderUTF8_Blended(font, text, textColor);
+        SDL_Rect dest = {textRect.x, textRect.y, textSur->w, textSur->h };
+
+        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer,textSur);
+        SDL_FreeSurface(textSur);
+
+        SDL_RenderCopy(renderer,texture,NULL,&dest);
+        SDL_DestroyTexture(texture);
         TTF_SizeUTF8(font, text, &w, &h);
     }
 #endif
@@ -220,7 +135,6 @@ void Redraw()
     markedRect.w = textRect.w - w;
     if (markedRect.w < 0)
     {
-        SDL_Flip(screen);
         // Stop text input because we cannot hold any more characters
         SDL_StopTextInput();
         return;
@@ -234,7 +148,9 @@ void Redraw()
     cursorRect.w = 2;
     cursorRect.h = h;
 
-    SDL_FillRect(screen, &markedRect, backColor);
+    SDL_SetRenderDrawColor(renderer, 255,255,255,255);
+    SDL_RenderFillRect(renderer,&markedRect);
+
     if (markedText[0])
     {
 #ifdef HAVE_SDL_TTF
@@ -251,8 +167,14 @@ void Redraw()
             cursorRect.x += w;
             *p = c;
         }
-        RenderText(screen, font, markedText, markedRect.x, markedRect.y, textColor);
+        SDL_Surface *textSur = TTF_RenderUTF8_Blended(font, markedText, textColor);
+        SDL_Rect dest = {markedRect.x, markedRect.y, textSur->w, textSur->h };
         TTF_SizeUTF8(font, markedText, &w, &h);
+        SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer,textSur);
+        SDL_FreeSurface(textSur);
+
+        SDL_RenderCopy(renderer,texture,NULL,&dest);
+        SDL_DestroyTexture(texture);
 #endif
 
         underlineRect = markedRect;
@@ -260,138 +182,188 @@ void Redraw()
         underlineRect.h = 2;
         underlineRect.w = w;
 
-        SDL_FillRect(screen, &underlineRect, lineColor);
+        SDL_SetRenderDrawColor(renderer, 0,0,0,0);
+        SDL_RenderFillRect(renderer,&markedRect);
     }
 
-    SDL_FillRect(screen, &cursorRect, lineColor);
-
-    SDL_Flip(screen);
+    SDL_SetRenderDrawColor(renderer, 0,0,0,0);
+    SDL_RenderFillRect(renderer,&cursorRect);
 
     SDL_SetTextInputRect(&markedRect);
 }
 
-void
-HotKey_ToggleFullScreen(void)
-{
-    SDL_Surface *screen;
+void Redraw() {
+    int i;
+    for (i = 0; i < state->num_windows; ++i) {
+        SDL_Renderer *renderer = state->renderers[i];
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+        SDL_RenderClear(renderer);
 
-    screen = SDL_GetVideoSurface();
-    if (SDL_WM_ToggleFullScreen(screen)) {
-        printf("Toggled fullscreen mode - now %s\n",
-               (screen->flags & SDL_FULLSCREEN) ? "fullscreen" : "windowed");
-    } else {
-        printf("Unable to toggle fullscreen mode\n");
+        _Redraw(renderer);
+
+        SDL_RenderPresent(renderer);
     }
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
+    int i, done;
     SDL_Event event;
-    int done = 0;
+    const char *fontname = DEFAULT_FONT;
 
-    InitVideo(argc, argv);
-    InitInput();
-    Redraw();
-
-    while (! done && SDL_WaitEvent(&event))
+    /* Initialize test framework */
+    state = CommonCreateState(argv, SDL_INIT_VIDEO);
+    if (!state) {
+        return 1;
+    }
+    for (i = 1; i < argc;i++) {
+        CommonArg(state, i);
+    }
+    for (argc--, argv++; argc > 0; argc--, argv++)
     {
-        switch (event.type)
+        if (strcmp(argv[0], "--help") == 0) {
+            usage();
+            return 0;
+        }
+
+        else if (strcmp(argv[0], "--font") == 0)
         {
-        case SDL_KEYDOWN:
-            switch (event.key.keysym.sym)
-            {
-                case SDLK_ESCAPE:
-                     done = 1;
-                     break;
-                case SDLK_RETURN:
-                     text[0]=0x00;
-                     Redraw();
-                     break;
-                case SDLK_BACKSPACE:
-                     {
-                         int textlen=SDL_strlen(text);
+            argc--;
+            argv++;
 
-                         do {
-                             if (textlen==0)
-                             {
-                                 break;
-                             }
-                             if ((text[textlen-1] & 0x80) == 0x00)
-                             {
-                                 /* One byte */
-                                 text[textlen-1]=0x00;
-                                 break;
-                             }
-                             if ((text[textlen-1] & 0xC0) == 0x80)
-                             {
-                                 /* Byte from the multibyte sequence */
-                                 text[textlen-1]=0x00;
-                                 textlen--;
-                             }
-                             if ((text[textlen-1] & 0xC0) == 0xC0)
-                             {
-                                 /* First byte of multibyte sequence */
-                                 text[textlen-1]=0x00;
-                                 break;
-                             }
-                         } while(1);
-
-                         Redraw();
-                     }
-                     break;
+            if (argc > 0)
+                fontname = argv[0];
+            else {
+                usage();
+                return 0;
             }
-
-            if (done)
-            {
-                break;
-            }
-
-            fprintf(stderr,
-                    "Keyboard: scancode 0x%08X = %s, keycode 0x%08X = %s\n",
-                    event.key.keysym.scancode,
-                    SDL_GetScancodeName(event.key.keysym.scancode),
-                    event.key.keysym.sym, SDL_GetKeyName(event.key.keysym.sym));
-            break;
-
-        case SDL_TEXTINPUT:
-            if (SDL_strlen(event.text.text) == 0 || event.text.text[0] == '\n' ||
-                markedRect.w < 0)
-                break;
-
-            fprintf(stderr, "Keyboard: text input \"%s\"\n", event.text.text);
-
-            if (SDL_strlen(text) + SDL_strlen(event.text.text) < sizeof(text))
-                SDL_strlcat(text, event.text.text, sizeof(text));
-
-            fprintf(stderr, "text inputed: %s\n", text);
-
-            // After text inputed, we can clear up markedText because it
-            // is committed
-            markedText[0] = 0;
-            Redraw();
-            break;
-
-        case SDL_TEXTEDITING:
-            fprintf(stderr, "text editing \"%s\", selected range (%d, %d)\n",
-                    event.edit.text, event.edit.start, event.edit.length);
-
-            strcpy(markedText, event.edit.text);
-            cursor = event.edit.start;
-            Redraw();
-            break;
-
-        case SDL_QUIT:
-            done = 1;
-            break;
-
-        default:
-            break;
         }
     }
+    
+    if (!CommonInit(state)) {
+        return 2;
+    }
 
+
+#ifdef HAVE_SDL_TTF
+    /* Initialize fonts */
+    TTF_Init();
+
+    font = TTF_OpenFont(fontname, DEFAULT_PTSIZE);
+    if (! font)
+    {
+        fprintf(stderr, "Failed to find font: %s\n", TTF_GetError());
+        exit(-1);
+    }
+#endif
+
+    printf("Using font: %s\n", fontname);
+    atexit(SDL_Quit);
+
+    InitInput();
+    /* Create the windows and initialize the renderers */
+    for (i = 0; i < state->num_windows; ++i) {
+        SDL_Renderer *renderer = state->renderers[i];
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+        SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+        SDL_RenderClear(renderer);
+    }
+    Redraw();    
+    /* Main render loop */
+    done = 0;
+    while (!done) {
+        /* Check for events */
+        while (SDL_PollEvent(&event)) {
+            CommonEvent(state, &event, &done);
+            switch(event.type) {
+                case SDL_KEYDOWN: {
+                    switch (event.key.keysym.sym)
+                    {
+                        case SDLK_RETURN:
+                             text[0]=0x00;
+                             Redraw();
+                             break;
+                        case SDLK_BACKSPACE:
+                             {
+                                 int textlen=SDL_strlen(text);
+
+                                 do {
+                                     if (textlen==0)
+                                     {
+                                         break;
+                                     }
+                                     if ((text[textlen-1] & 0x80) == 0x00)
+                                     {
+                                         /* One byte */
+                                         text[textlen-1]=0x00;
+                                         break;
+                                     }
+                                     if ((text[textlen-1] & 0xC0) == 0x80)
+                                     {
+                                         /* Byte from the multibyte sequence */
+                                         text[textlen-1]=0x00;
+                                         textlen--;
+                                     }
+                                     if ((text[textlen-1] & 0xC0) == 0xC0)
+                                     {
+                                         /* First byte of multibyte sequence */
+                                         text[textlen-1]=0x00;
+                                         break;
+                                     }
+                                 } while(1);
+
+                                 Redraw();
+                             }
+                             break;
+                    }
+
+                    if (done)
+                    {
+                        break;
+                    }
+
+                    fprintf(stderr,
+                            "Keyboard: scancode 0x%08X = %s, keycode 0x%08X = %s\n",
+                            event.key.keysym.scancode,
+                            SDL_GetScancodeName(event.key.keysym.scancode),
+                            event.key.keysym.sym, SDL_GetKeyName(event.key.keysym.sym));
+                    break;
+
+                case SDL_TEXTINPUT:
+                    if (SDL_strlen(event.text.text) == 0 || event.text.text[0] == '\n' ||
+                        markedRect.w < 0)
+                        break;
+
+                    fprintf(stderr, "Keyboard: text input \"%s\"\n", event.text.text);
+
+                    if (SDL_strlen(text) + SDL_strlen(event.text.text) < sizeof(text))
+                        SDL_strlcat(text, event.text.text, sizeof(text));
+
+                    fprintf(stderr, "text inputed: %s\n", text);
+
+                    // After text inputed, we can clear up markedText because it
+                    // is committed
+                    markedText[0] = 0;
+                    Redraw();
+                    break;
+
+                case SDL_TEXTEDITING:
+                    fprintf(stderr, "text editing \"%s\", selected range (%d, %d)\n",
+                            event.edit.text, event.edit.start, event.edit.length);
+
+                    strcpy(markedText, event.edit.text);
+                    cursor = event.edit.start;
+                    Redraw();
+                    break;
+                }
+                break;
+                    
+            }
+        }
+    }
     CleanupVideo();
+    CommonQuit(state);
     return 0;
 }
-#endif
+
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -24,7 +24,7 @@
 
 #ifndef HAVE_GETENV
 
-#if defined(__WIN32__) && !defined(_WIN32_WCE)
+#if defined(__WIN32__)
 
 #include "../core/windows/SDL_windows.h"
 

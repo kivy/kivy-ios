@@ -65,7 +65,6 @@ extern HRESULT(WINAPI * DInputCreate) (HINSTANCE hinst, DWORD dwVersion,
 static DIDEVICEINSTANCE SYS_Joystick[MAX_JOYSTICKS];    /* array to hold joystick ID values */
 static char *SYS_JoystickNames[MAX_JOYSTICKS];
 static int SYS_NumJoysticks;
-static HINSTANCE DInputDLL = NULL;
 
 
 /* local prototypes */

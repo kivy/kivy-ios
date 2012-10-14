@@ -22,6 +22,12 @@
 
 #if SDL_VIDEO_DRIVER_COCOA
 
+#if defined(__APPLE__) && defined(__POWERPC__)
+#include <altivec.h>
+#undef bool
+#undef vector
+#endif
+
 #include "SDL.h"
 #include "SDL_endian.h"
 #include "SDL_cocoavideo.h"
@@ -94,6 +100,7 @@ Cocoa_CreateDevice(int devindex)
     device->MaximizeWindow = Cocoa_MaximizeWindow;
     device->MinimizeWindow = Cocoa_MinimizeWindow;
     device->RestoreWindow = Cocoa_RestoreWindow;
+    device->SetWindowBordered = Cocoa_SetWindowBordered;
     device->SetWindowFullscreen = Cocoa_SetWindowFullscreen;
     device->SetWindowGammaRamp = Cocoa_SetWindowGammaRamp;
     device->GetWindowGammaRamp = Cocoa_GetWindowGammaRamp;

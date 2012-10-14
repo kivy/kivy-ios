@@ -570,7 +570,7 @@ QSA_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     /* Make sure channel is setup right one last time */
-    SDL_memset(&csetup, '\0', sizeof(csetup));
+    SDL_memset(&csetup, 0, sizeof(csetup));
     if (!this->hidden->iscapture) {
         csetup.channel = SND_PCM_CHANNEL_PLAYBACK;
     } else {

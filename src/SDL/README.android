@@ -58,7 +58,7 @@ android-project/
 	AndroidManifest.xml	- package manifest, do not modify
 	build.properties	- empty
 	build.xml		- build description file, used by ant
-	default.properties	- holds the ABI for the application, currently android-4 which corresponds to the Android 1.6 system image
+	default.properties	- holds the ABI for the application, currently android-5 which corresponds to the Android 2.0 system image
 	local.properties	- holds the SDK path, you should change this to the path to your SDK
 	jni/			- directory holding native code
 	jni/Android.mk		- Android makefile that includes all subdirectories
@@ -72,6 +72,38 @@ android-project/
 	res/values/strings.xml	- strings used in your application, including the application name shown on the phone.
 	src/org/libsdl/app/SDLActivity.java	- the Java class handling the initialization and binding to SDL.  Be very careful changing this, as the SDL library relies on this implementation.
 
+
+================================================================================
+ Pause / Resume behaviour
+================================================================================
+
+If SDL is compiled with SDL_ANDROID_BLOCK_ON_PAUSE defined, the event loop will
+block itself when the app is paused (ie, when the user returns to the main
+Android dashboard). Blocking is better in terms of battery use, and it allows your
+app to spring back to life instantaneously after resume (versus polling for
+a resume message).
+Upon resume, SDL will attempt to restore the GL context automatically.
+In modern devices (Android 3.0 and up) this will most likely succeed and your
+app can continue to operate as it was.
+However, there's a chance (on older hardware, or on systems under heavy load),
+where the GL context can not be restored. In that case you have to listen for
+a specific message, (which is not yet implemented!) and restore your textures
+manually or quit the app (which is actually the kind of behaviour you'll see
+under iOS, if the OS can not restore your GL context it will just kill your app)
+
+================================================================================
+ Threads and the JAVA VM
+================================================================================
+
+For a quick tour on how Linux native threads interoperate with the JAVA VM, take
+a look here: http://developer.android.com/guide/practices/jni.html
+If you want to use threads in your SDL app, it's strongly recommended that you
+do so by creating them using SDL functions. This way, the required attach/detach
+handling is managed by SDL automagically. If you have threads created by other
+means and they make calls to SDL functions, make sure that you call
+Android_JNI_SetupThread before doing anything else otherwise SDL will attach
+your thread automatically anyway (when you make an SDL call), but it'll never
+detach it.
 
 ================================================================================
  Additional documentation
@@ -94,7 +126,7 @@ Once you've copied the SDL android project and customized it, you can create an 
  * Select the Android -> Android Project wizard and click Next
  * Enter the name you'd like your project to have
  * Select "Create project from existing source" and browse for your project directory
- * Make sure the Build Target is set to Android 1.6
+ * Make sure the Build Target is set to Android 2.0
  * Click Finish
 
 

@@ -24,18 +24,12 @@
 
 #include "SDL_windowsvideo.h"
 
-#ifndef _WIN32_WCE
-#define HAVE_GETDIBITS
-#endif
-
 int WIN_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     size_t size;
     LPBITMAPINFO info;
-#ifdef HAVE_GETDIBITS
     HBITMAP hbm;
-#endif
 
     /* Free the old framebuffer surface */
     if (data->mdc) {
@@ -49,7 +43,6 @@ int WIN_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, voi
     size = sizeof(BITMAPINFOHEADER) + 256 * sizeof (RGBQUAD);
     info = (LPBITMAPINFO)SDL_stack_alloc(Uint8, size);
 
-#ifdef HAVE_GETDIBITS
     SDL_memset(info, 0, size);
     info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 
@@ -69,7 +62,6 @@ int WIN_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, voi
         *format = SDL_MasksToPixelFormatEnum(bpp, masks[0], masks[1], masks[2], 0);
     }
     if (*format == SDL_PIXELFORMAT_UNKNOWN)
-#endif
     {
         /* We'll use RGB format for now */
         *format = SDL_PIXELFORMAT_RGB888;

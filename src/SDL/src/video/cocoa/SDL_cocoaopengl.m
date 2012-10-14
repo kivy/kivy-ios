@@ -32,8 +32,15 @@
 #include "SDL_loadso.h"
 #include "SDL_opengl.h"
 
-
 #define DEFAULT_OPENGL  "/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib"
+
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 1070
+#define kCGLPFAOpenGLProfile 99
+#define kCGLOGLPVersion_Legacy 0x1000
+#define kCGLOGLPVersion_3_2_Core 0x3200
+#endif
+
 
 int
 Cocoa_GL_LoadLibrary(_THIS, const char *path)
@@ -70,6 +77,9 @@ Cocoa_GL_UnloadLibrary(_THIS)
 SDL_GLContext
 Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
 {
+    const int wantver = (_this->gl_config.major_version << 8) |
+                        (_this->gl_config.minor_version);
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     NSAutoreleasePool *pool;
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DisplayData *displaydata = (SDL_DisplayData *)display->driverdata;
@@ -78,7 +88,31 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
     NSOpenGLContext *context;
     int i = 0;
 
+    if (_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES) {
+        SDL_SetError ("OpenGL ES not supported on this platform");
+        return NULL;
+    }
+
+    /* Sadly, we'll have to update this as life progresses, since we need to
+       set an enum for context profiles, not a context version number */
+    if (wantver > 0x0302) {
+        SDL_SetError ("OpenGL > 3.2 is not supported on this platform");
+        return NULL;
+    }
+
     pool = [[NSAutoreleasePool alloc] init];
+
+    /* specify a profile if we're on Lion (10.7) or later. */
+    if (data->osversion >= 0x1070) {
+        NSOpenGLPixelFormatAttribute profile = kCGLOGLPVersion_Legacy;
+        if (_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_CORE) {
+            if (wantver == 0x0302) {
+                profile = kCGLOGLPVersion_3_2_Core;
+            }
+        }
+        attr[i++] = kCGLPFAOpenGLProfile;
+        attr[i++] = profile;
+    }
 
 #ifndef FULLSCREEN_TOGGLEABLE
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
@@ -250,7 +284,7 @@ Cocoa_GL_GetSwapInterval(_THIS)
     NSAutoreleasePool *pool;
     NSOpenGLContext *nscontext;
     GLint value;
-    int status;
+    int status = 0;
 
     pool = [[NSAutoreleasePool alloc] init];
 
@@ -258,9 +292,6 @@ Cocoa_GL_GetSwapInterval(_THIS)
     if (nscontext != nil) {
         [nscontext getValues:&value forParameter:NSOpenGLCPSwapInterval];
         status = (int)value;
-    } else {
-        SDL_SetError("No current OpenGL context");
-        status = -1;
     }
 
     [pool release];

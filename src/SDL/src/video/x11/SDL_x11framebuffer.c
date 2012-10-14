@@ -154,33 +154,68 @@ X11_UpdateWindowFramebuffer(_THIS, SDL_Window * window, SDL_Rect * rects,
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
     int i;
-    SDL_Rect *rect;
-
+    int x, y, w ,h;
 #ifndef NO_SHARED_MEMORY
     if (data->use_mitshm) {
         for (i = 0; i < numrects; ++i) {
-            rect = &rects[i];
+            x = rects[i].x;
+            y = rects[i].y;
+            w = rects[i].w;
+            h = rects[i].h;
 
-            if (rect->w == 0 || rect->h == 0) { /* Clipped? */
+            if (w <= 0 || h <= 0 || (x + w) <= 0 || (y + h) <= 0) {
+                /* Clipped? */
                 continue;
             }
+            if (x < 0)
+            {
+                x += w;
+                w += rects[i].x;
+            }
+            if (y < 0)
+            {
+                y += h;
+                h += rects[i].y;
+            }
+            if (x + w > window->w)
+                w = window->w - x;
+            if (y + h > window->h)
+                h = window->h - y;
+
             XShmPutImage(display, data->xwindow, data->gc, data->ximage,
-                    rect->x, rect->y,
-                    rect->x, rect->y, rect->w, rect->h, False);
+                x, y, x, y, w, h, False);
         }
     }
     else
 #endif /* !NO_SHARED_MEMORY */
     {
         for (i = 0; i < numrects; ++i) {
-            rect = &rects[i];
+            x = rects[i].x;
+            y = rects[i].y;
+            w = rects[i].w;
+            h = rects[i].h;
 
-            if (rect->w == 0 || rect->h == 0) { /* Clipped? */
+            if (w <= 0 || h <= 0 || (x + w) <= 0 || (y + h) <= 0) {
+                /* Clipped? */
                 continue;
             }
+            if (x < 0)
+            {
+                x += w;
+                w += rects[i].x;
+            }
+            if (y < 0)
+            {
+                y += h;
+                h += rects[i].y;
+            }
+            if (x + w > window->w)
+                w = window->w - x;
+            if (y + h > window->h)
+                h = window->h - y;
+
             XPutImage(display, data->xwindow, data->gc, data->ximage,
-                  rect->x, rect->y,
-                  rect->x, rect->y, rect->w, rect->h);
+                x, y, x, y, w, h);
         }
     }
 

@@ -27,6 +27,10 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
+#if SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM
+#include <X11/XKBlib.h>
+#endif
+
 /* Apparently some X11 systems can't include this multiple times... */
 #ifndef SDL_INCLUDED_XLIBINT_H
 #define SDL_INCLUDED_XLIBINT_H 1
@@ -49,8 +53,8 @@
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
-#if SDL_VIDEO_DRIVER_X11_XINPUT
-#include <X11/extensions/XInput.h>
+#if SDL_VIDEO_DRIVER_X11_XINPUT2
+#include <X11/extensions/XInput2.h>
 #endif
 #if SDL_VIDEO_DRIVER_X11_XRANDR
 #include <X11/extensions/Xrandr.h>

@@ -1044,6 +1044,7 @@ SDL_SW_CreateYUVTexture(Uint32 format, int w, int h)
     case SDL_PIXELFORMAT_YVYU:
         break;
     default:
+        SDL_SW_DestroyYUVTexture(swdata);
         SDL_SetError("Unsupported YUV format");
         return NULL;
     }

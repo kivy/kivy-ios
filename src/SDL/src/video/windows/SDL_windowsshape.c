@@ -65,11 +65,14 @@ Win32_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShape
     SDL_ShapeData *data;
     HRGN mask_region = NULL;
 
-    if (shaper == NULL || shape == NULL)
+    if( (shaper == NULL) ||
+        (shape == NULL) ||
+        ((shape->format->Amask == 0) && (shape_mode->mode != ShapeModeColorKey)) ||
+        (shape->w != shaper->window->w) ||
+        (shape->h != shaper->window->h) ) {
         return SDL_INVALID_SHAPE_ARGUMENT;
-    if(shape->format->Amask == 0 && shape_mode->mode != ShapeModeColorKey || shape->w != shaper->window->w || shape->h != shaper->window->h)
-        return SDL_INVALID_SHAPE_ARGUMENT;
-    
+    }
+
     data = (SDL_ShapeData*)shaper->driverdata;
     if(data->mask_tree != NULL)
         SDL_FreeShapeTree(&data->mask_tree);

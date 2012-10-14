@@ -132,6 +132,8 @@ DirectFB_CreateDevice(int devindex)
     device->DestroyWindow = DirectFB_DestroyWindow;
     device->GetWindowWMInfo = DirectFB_GetWindowWMInfo;
 
+    /* !!! FIXME: implement SetWindowBordered */
+
 #if SDL_DIRECTFB_OPENGL
     device->GL_LoadLibrary = DirectFB_GL_LoadLibrary;
     device->GL_GetProcAddress = DirectFB_GL_GetProcAddress;

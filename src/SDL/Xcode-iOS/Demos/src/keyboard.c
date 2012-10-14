@@ -12,13 +12,6 @@
 
 static SDL_Texture *texture; /* texture where we'll hold our font */
 
-/* iPhone SDL addition keyboard related function definitions */
-extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardShow(SDL_Window * window);
-extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardHide(SDL_Window * window);
-extern DECLSPEC SDL_bool SDLCALL SDL_iPhoneKeyboardIsShown(SDL_Window *
-                                                           window);
-extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardToggle(SDL_Window * window);
-
 /* function declarations */
 void cleanup(void);
 void drawBlank(int x, int y);
@@ -35,9 +28,9 @@ static SDL_Color bg_color = { 50, 50, 100, 255 };       /* color of background *
 */
 typedef struct
 {
-    SDL_ScanCode scancode;      /* scancode of the key we want to map */
+    SDL_Scancode scancode;      /* scancode of the key we want to map */
     int allow_no_mod;           /* is the map valid if the key has no modifiers? */
-    SDLMod mod;                 /* what modifiers are allowed for the mapping */
+    SDL_Keymod mod;             /* what modifiers are allowed for the mapping */
     int index;                  /* what index in the font does the scancode map to */
 } fontMapping;
 
@@ -114,7 +107,7 @@ fontMapping map[TABLE_SIZE] = {
 	If there is no entry for the key, -1 is returned
 */
 int
-keyToIndex(SDL_KeySym key)
+keyToIndex(SDL_Keysym key)
 {
     int i, index = -1;
     for (i = 0; i < TABLE_SIZE; i++) {
@@ -240,8 +233,8 @@ main(int argc, char *argv[])
     int index;                  /* index of last key we pushed in the bitmap font */
     SDL_Window *window;
     SDL_Event event;            /* last event received */
-    SDLMod mod;                 /* key modifiers of last key we pushed */
-    SDL_ScanCode scancode;      /* scancode of last key we pushed */
+    SDL_Keymod mod;             /* key modifiers of last key we pushed */
+    SDL_Scancode scancode;      /* scancode of last key we pushed */
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("Error initializing SDL: %s", SDL_GetError());
@@ -296,14 +289,10 @@ main(int argc, char *argv[])
             /* draw our updates to the screen */
             SDL_RenderPresent(renderer);
             break;
-#ifdef __IPHONEOS__
         case SDL_MOUSEBUTTONUP:
-            /*      mouse up toggles onscreen keyboard visibility
-               this function is available ONLY on iPhone OS
-             */
-            SDL_iPhoneKeyboardToggle(window);
+            /*      mouse up toggles onscreen keyboard visibility */
+            SDL_ToggleScreenKeyboard(window);
             break;
-#endif
         }
     }
     cleanup();

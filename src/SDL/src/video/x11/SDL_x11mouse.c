@@ -25,6 +25,7 @@
 #include "SDL_assert.h"
 #include "SDL_x11video.h"
 #include "SDL_x11mouse.h"
+#include "SDL_x11xinput2.h"
 #include "../../events/SDL_mouse_c.h"
 
 
@@ -272,7 +273,12 @@ X11_WarpMouse(SDL_Window * window, int x, int y)
 static int
 X11_SetRelativeMouseMode(SDL_bool enabled)
 {
+#if SDL_VIDEO_DRIVER_X11_XINPUT2
+    if(X11_Xinput2IsInitialized())
+        return 0;
+#else
     SDL_Unsupported();
+#endif
     return -1;
 }
 

@@ -248,6 +248,8 @@ SDL_GetPlatform()
 {
 #if __AIX__
     return "AIX";
+#elif __ANDROID__
+    return "Android";
 #elif __HAIKU__
 /* Haiku must appear here before BeOS, since it also defines __BEOS__ */
     return "Haiku";
@@ -288,11 +290,7 @@ SDL_GetPlatform()
 #elif __SOLARIS__
     return "Solaris";
 #elif __WIN32__
-#ifdef _WIN32_WCE
-    return "Windows CE";
-#else
     return "Windows";
-#endif
 #elif __IPHONEOS__
     return "iPhone OS";
 #else

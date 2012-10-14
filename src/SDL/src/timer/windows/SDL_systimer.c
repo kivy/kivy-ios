@@ -27,10 +27,6 @@
 
 #include "SDL_timer.h"
 
-#ifdef _WIN32_WCE
-#error This is WinCE. Please use src/timer/wince/SDL_systimer.c instead.
-#endif
-
 #define TIME_WRAP_VALUE	(~(DWORD)0)
 
 /* The first (low-resolution) ticks value of the application */

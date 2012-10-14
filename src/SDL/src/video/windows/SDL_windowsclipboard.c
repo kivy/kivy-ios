@@ -92,11 +92,7 @@ WIN_SetClipboardText(_THIS, const char *text)
                 WIN_SetError("Couldn't set clipboard data");
                 result = -1;
             }
-#ifdef _WIN32_WCE
-            data->clipboard_count = 0;
-#else
             data->clipboard_count = GetClipboardSequenceNumber();
-#endif
         }
         SDL_free(tstr);
 
@@ -150,13 +146,7 @@ WIN_HasClipboardText(_THIS)
 void
 WIN_CheckClipboardUpdate(struct SDL_VideoData * data)
 {
-    DWORD count;
-
-#ifdef _WIN32_WCE
-    count = 0;
-#else
-    count = GetClipboardSequenceNumber();
-#endif
+    const DWORD count = GetClipboardSequenceNumber();
     if (count != data->clipboard_count) {
         if (data->clipboard_count) {
             SDL_SendClipboardUpdate();

@@ -131,6 +131,8 @@ PND_create()
     device->GL_DeleteContext = PND_gl_deletecontext;
     device->PumpEvents = PND_PumpEvents;
 
+    /* !!! FIXME: implement SetWindowBordered */
+
     return device;
 }
 
@@ -796,15 +798,7 @@ PND_gl_setswapinterval(_THIS, int interval)
 int
 PND_gl_getswapinterval(_THIS)
 {
-    SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
-
-    if (phdata->egl_initialized != SDL_TRUE) {
-        SDL_SetError("PND: GLES initialization failed, no OpenGL ES support");
-        return -1;
-    }
-
-    /* Return default swap interval value */
-    return phdata->swapinterval;
+    return ((SDL_VideoData *) _this->driverdata)->swapinterval;
 }
 
 void

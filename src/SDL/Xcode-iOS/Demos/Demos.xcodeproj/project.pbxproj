@@ -15,12 +15,12 @@
 		FD15FD6B0E086911003BDF25 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D3623EB0D0F72F000981E51 /* CoreGraphics.framework */; };
 		FD15FD6C0E086911003BDF25 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDB96ED30DEFC9C700FAF19F /* OpenGLES.framework */; };
 		FD15FD6D0E086911003BDF25 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDB96EDF0DEFC9DC00FAF19F /* QuartzCore.framework */; };
-		FD1B48DD0E313255007AB34E /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL.a */; };
-		FD1B49980E313261007AB34E /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL.a */; };
-		FD1B499C0E313269007AB34E /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL.a */; };
-		FD1B499E0E31326C007AB34E /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL.a */; };
-		FD1B49A00E313270007AB34E /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL.a */; };
-		FD1B49A20E313273007AB34E /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL.a */; };
+		FD1B48DD0E313255007AB34E /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL2.a */; };
+		FD1B49980E313261007AB34E /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL2.a */; };
+		FD1B499C0E313269007AB34E /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL2.a */; };
+		FD1B499E0E31326C007AB34E /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL2.a */; };
+		FD1B49A00E313270007AB34E /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL2.a */; };
+		FD1B49A20E313273007AB34E /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL2.a */; };
 		FD5F9CE80E0E0741008E885B /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		FD5F9CE90E0E0741008E885B /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		FD5F9CEA0E0E0741008E885B /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D3623EB0D0F72F000981E51 /* CoreGraphics.framework */; };
@@ -56,7 +56,7 @@
 		FDB651FA0E43D1F300F688B5 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = FD925B180E0F276600E92347 /* Icon.png */; };
 		FDB651FB0E43D1F300F688B5 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = FD787AA00E22A5CC003E8E36 /* Default.png */; };
 		FDB651FD0E43D1F300F688B5 /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = FD77A0060E26BC0500F39101 /* common.c */; };
-		FDB652000E43D1F300F688B5 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL.a */; };
+		FDB652000E43D1F300F688B5 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B489E0E313154007AB34E /* libSDL2.a */; };
 		FDB652020E43D1F300F688B5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		FDB652030E43D1F300F688B5 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		FDB652040E43D1F300F688B5 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D3623EB0D0F72F000981E51 /* CoreGraphics.framework */; };
@@ -215,7 +215,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FD1B48DD0E313255007AB34E /* libSDL.a in Frameworks */,
+				FD1B48DD0E313255007AB34E /* libSDL2.a in Frameworks */,
 				FDF0D7AB0E12D53800247964 /* CoreAudio.framework in Frameworks */,
 				FDF0D7AC0E12D53800247964 /* AudioToolbox.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
@@ -230,7 +230,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FD1B49980E313261007AB34E /* libSDL.a in Frameworks */,
+				FD1B49980E313261007AB34E /* libSDL2.a in Frameworks */,
 				FDF0D7A90E12D53500247964 /* CoreAudio.framework in Frameworks */,
 				FDF0D7AA0E12D53500247964 /* AudioToolbox.framework in Frameworks */,
 				FD15FD690E086911003BDF25 /* Foundation.framework in Frameworks */,
@@ -245,7 +245,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FD1B499C0E313269007AB34E /* libSDL.a in Frameworks */,
+				FD1B499C0E313269007AB34E /* libSDL2.a in Frameworks */,
 				FDF0D7A70E12D53200247964 /* CoreAudio.framework in Frameworks */,
 				FDF0D7A80E12D53200247964 /* AudioToolbox.framework in Frameworks */,
 				FD5F9CEB0E0E0741008E885B /* OpenGLES.framework in Frameworks */,
@@ -260,7 +260,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDB652000E43D1F300F688B5 /* libSDL.a in Frameworks */,
+				FDB652000E43D1F300F688B5 /* libSDL2.a in Frameworks */,
 				FDB652020E43D1F300F688B5 /* Foundation.framework in Frameworks */,
 				FDB652030E43D1F300F688B5 /* UIKit.framework in Frameworks */,
 				FDB652040E43D1F300F688B5 /* CoreGraphics.framework in Frameworks */,
@@ -275,7 +275,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FD1B499E0E31326C007AB34E /* libSDL.a in Frameworks */,
+				FD1B499E0E31326C007AB34E /* libSDL2.a in Frameworks */,
 				FDF0D7950E12D52900247964 /* CoreAudio.framework in Frameworks */,
 				FDF0D7960E12D52900247964 /* AudioToolbox.framework in Frameworks */,
 				FDC202E60E107B1200ABAC90 /* Foundation.framework in Frameworks */,
@@ -290,7 +290,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FD1B49A20E313273007AB34E /* libSDL.a in Frameworks */,
+				FD1B49A20E313273007AB34E /* libSDL2.a in Frameworks */,
 				FDC52ED40E2843D6008D768C /* Foundation.framework in Frameworks */,
 				FDC52ED50E2843D6008D768C /* UIKit.framework in Frameworks */,
 				FDC52ED60E2843D6008D768C /* CoreGraphics.framework in Frameworks */,
@@ -305,7 +305,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FD1B49A00E313270007AB34E /* libSDL.a in Frameworks */,
+				FD1B49A00E313270007AB34E /* libSDL2.a in Frameworks */,
 				FDF0D69C0E12D05400247964 /* Foundation.framework in Frameworks */,
 				FDF0D69D0E12D05400247964 /* UIKit.framework in Frameworks */,
 				FDF0D69E0E12D05400247964 /* CoreGraphics.framework in Frameworks */,
@@ -373,7 +373,7 @@
 		FD1B48930E313154007AB34E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FD1B489E0E313154007AB34E /* libSDL.a */,
+				FD1B489E0E313154007AB34E /* libSDL2.a */,
 				04AB757111E563D200BE9753 /* testsdl.app */,
 			);
 			name = Products;
@@ -604,10 +604,10 @@
 			remoteRef = 04AB757011E563D200BE9753 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		FD1B489E0E313154007AB34E /* libSDL.a */ = {
+		FD1B489E0E313154007AB34E /* libSDL2.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libSDL.a;
+			path = libSDL2.a;
 			remoteRef = FD1B489D0E313154007AB34E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};

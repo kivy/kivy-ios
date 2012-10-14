@@ -17,6 +17,26 @@ There are three build targets:
 	Package a project template together with the SDL for iPhone static libraries and copies of the SDL headers.  The template includes proper references to the SDL library and headers, skeleton code for a basic SDL program, and placeholder graphics for the application icon and startup screen.
 
 ==============================================================================
+Build SDL for iOS from the command line
+==============================================================================
+
+1. cd (PATH WHERE THE SDL CODE IS)/build-scripts
+2. ./iosbuild.sh
+
+If everything goes fine, you should see a build/ios directory, inside there's
+two directories "lib" and "include". 
+"include" contains a copy of the SDL headers that you'll need for your project,
+make sure to configure XCode to look for headers there.
+"lib" contains find two files, libSDL2.a and libSDL2main.a, you have to add both 
+to your XCode project. These libraries contain three architectures in them,
+armv6 for legacy devices, armv7, and i386 (for the simulator).
+By default, iosbuild.sh will autodetect the SDK version you have installed using 
+xcodebuild -showsdks, and build for iOS >= 3.0, you can override this behaviour 
+by setting the MIN_OS_VERSION variable, ie:
+
+MIN_OS_VERSION=4.2 ./iosbuild.sh
+
+==============================================================================
 Using the Simple DirectMedia Layer for iOS
 ==============================================================================
 
@@ -58,15 +78,15 @@ Finally, if your application completely redraws the screen each frame, you may f
 Notes -- Keyboard
 ==============================================================================
 
-SDL for iPhone contains several additional functions related to keyboard visibility.  These functions are not part of the SDL standard API, but are necessary for revealing and hiding the iPhone's virtual onscreen keyboard.  You can use them in your own applications by including a copy of the SDL_uikitkeyboard.h header (located in src/video/uikit) in your project.
+The SDL keyboard API has been extended to support on-screen keyboards:
 
-int SDL_iPhoneKeyboardShow(SDL_Window * window) 
+int SDL_ShowScreenKeyboard(SDL_Window * window) 
 	-- reveals the onscreen keyboard.  Returns 0 on success and -1 on error.
-int SDL_iPhoneKeyboardHide(SDL_Window * window) 
+int SDL_HideScreenKeyboard(SDL_Window * window) 
 	-- hides the onscreen keyboard.  Returns 0 on success and -1 on error.
-SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window) 
+SDL_bool SDL_IsScreenKeyboardShown(SDL_Window * window) 
 	-- returns whether or not the onscreen keyboard is currently visible.
-int SDL_iPhoneKeyboardToggle(SDL_Window * window) 	
+int SDL_ToggleScreenKeyboard(SDL_Window * window) 	
 	-- toggles the visibility of the onscreen keyboard.  Returns 0 on success and -1 on error.
 
 ==============================================================================
@@ -94,17 +114,48 @@ Notes -- iPhone SDL limitations
 ==============================================================================
 
 Windows:
-	Full-size, single window applications only.  You cannot create multi-window SDL applications for iPhone OS.  The application window will fill the display, though you have the option of turning on or off the menu-bar (pass SDL_CreateWindow the flag SDL_WINDOW_BORDERLESS).  Presently, landscape mode is not supported.
-
-Video:
-	For real time frame-rates, you are advised to use strictly SDL 2.0 video calls.  Using compatibility video calls uploads an OpenGL texture for each frame drawn, and this operation is excruciatingly slow.
+	Full-size, single window applications only.  You cannot create multi-window SDL applications for iPhone OS.  The application window will fill the display, though you have the option of turning on or off the menu-bar (pass SDL_CreateWindow the flag SDL_WINDOW_BORDERLESS).
 
 Textures:
-	SDL for iPhone Textures supports only SDL_PIXELFORMAT_ABGR8888 and SDL_PIXELFORMAT_RGB24 pixel formats.  This is because texture support in SDL for iPhone is done through OpenGL ES, which supports fewer pixel formats than OpenGL, will not re-order pixel data for you, and has no support for color-paletted formats (without extensions).
-
-Audio:
-	SDL for iPhone does not yet support audio input.
+	The optimal texture formats on iOS are SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_BGR888, and SDL_PIXELFORMAT_RGB24 pixel formats.
 
 Loading Shared Objects:
 	This is disabled by default since it seems to break the terms of the iPhone SDK agreement.  It can be re-enabled in SDL_config_iphoneos.h.
 
+==============================================================================
+Game Center 
+==============================================================================
+
+Game Center integration requires that you break up your main loop in order to yield control back to the system. In other words, instead of running an endless main loop, you run each frame in a callback function, using:
+    
+int SDL_iPhoneSetAnimationCallback(SDL_Window * window, int interval, void (*callback)(void*), void *callbackParam);
+
+This will set up the given function to be called back on the animation callback, and then you have to return from main() to let the Cocoa event loop run.
+
+e.g.
+
+extern "C"
+void ShowFrame(void*)
+{
+    ... do event handling, frame logic and rendering
+}
+
+int main(int argc, char *argv[])
+{
+   ... initialize game ...
+
+#if __IPHONEOS__
+        // Initialize the Game Center for scoring and matchmaking
+        InitGameCenter();
+
+        // Set up the game to run in the window animation callback on iOS
+        // so that Game Center and so forth works correctly.
+        SDL_iPhoneSetAnimationCallback(window, 1, ShowFrame, NULL);
+#else
+        while ( running ) {
+                ShowFrame(0);
+                DelayFrame();
+        }
+#endif
+        return 0;
+}

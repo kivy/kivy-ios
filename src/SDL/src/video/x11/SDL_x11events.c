@@ -29,7 +29,9 @@
 #include <limits.h> /* For INT_MAX */
 
 #include "SDL_x11video.h"
+#include "SDL_x11video.h"
 #include "SDL_x11touch.h"
+#include "SDL_x11xinput2.h"
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_touch_c.h"
@@ -44,6 +46,7 @@
 #include <linux/input.h>
 #include <fcntl.h>
 #endif
+
 /*#define DEBUG_XEVENTS*/
 
 /* Check to see if this is a repeated key.
@@ -95,6 +98,60 @@ static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
     return SDL_FALSE;
 }
 
+
+#if SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS
+static void X11_HandleGenericEvent(SDL_VideoData *videodata,XEvent event)
+{
+    XGenericEventCookie *cookie = &event.xcookie;
+    XGetEventData(videodata->display, cookie);
+    X11_HandleXinput2Event(videodata,cookie);
+    XFreeEventData(videodata->display,cookie);
+}
+#endif /* SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS */
+
+
+static void
+X11_DispatchFocusIn(SDL_WindowData *data)
+{
+#ifdef DEBUG_XEVENTS
+    printf("window %p: Dispatching FocusIn\n", data);
+#endif
+    SDL_SetKeyboardFocus(data->window);
+#ifdef X_HAVE_UTF8_STRING
+    if (data->ic) {
+        XSetICFocus(data->ic);
+    }
+#endif
+}
+
+static void
+X11_DispatchFocusOut(SDL_WindowData *data)
+{
+#ifdef DEBUG_XEVENTS
+    printf("window %p: Dispatching FocusOut\n", data);
+#endif
+    SDL_SetKeyboardFocus(NULL);
+#ifdef X_HAVE_UTF8_STRING
+    if (data->ic) {
+        XUnsetICFocus(data->ic);
+    }
+#endif
+}
+
+static void
+X11_DispatchMapNotify(SDL_WindowData *data)
+{
+    SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
+    SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+}
+
+static void
+X11_DispatchUnmapNotify(SDL_WindowData *data)
+{
+    SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
+    SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+}
+
 static void
 X11_DispatchEvent(_THIS)
 {
@@ -127,6 +184,18 @@ X11_DispatchEvent(_THIS)
         SDL_SendSysWMEvent(&wmmsg);
     }
 
+#if SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS
+    if(xevent.type == GenericEvent) {
+        X11_HandleGenericEvent(videodata,xevent);
+        return;
+    }
+#endif
+
+#if 0
+    printf("type = %d display = %d window = %d\n",
+           xevent.type, xevent.xany.display, xevent.xany.window);
+#endif
+
     data = NULL;
     if (videodata && videodata->windowlist) {
         for (i = 0; i < videodata->numwindows; ++i) {
@@ -141,16 +210,12 @@ X11_DispatchEvent(_THIS)
         return;
     }
 
-#if 0
-    printf("type = %d display = %d window = %d\n",
-           xevent.type, xevent.xany.display, xevent.xany.window);
-#endif
     switch (xevent.type) {
 
         /* Gaining mouse coverage? */
     case EnterNotify:{
 #ifdef DEBUG_XEVENTS
-            printf("EnterNotify! (%d,%d,%d)\n", 
+            printf("window %p: EnterNotify! (%d,%d,%d)\n", data,
                    xevent.xcrossing.x,
                    xevent.xcrossing.y,
                    xevent.xcrossing.mode);
@@ -165,7 +230,7 @@ X11_DispatchEvent(_THIS)
         /* Losing mouse coverage? */
     case LeaveNotify:{
 #ifdef DEBUG_XEVENTS
-            printf("LeaveNotify! (%d,%d,%d)\n", 
+            printf("window %p: LeaveNotify! (%d,%d,%d)\n", data,
                    xevent.xcrossing.x,
                    xevent.xcrossing.y,
                    xevent.xcrossing.mode);
@@ -185,35 +250,27 @@ X11_DispatchEvent(_THIS)
         /* Gaining input focus? */
     case FocusIn:{
 #ifdef DEBUG_XEVENTS
-            printf("FocusIn!\n");
+            printf("window %p: FocusIn!\n", data);
 #endif
-            SDL_SetKeyboardFocus(data->window);
-#ifdef X_HAVE_UTF8_STRING
-            if (data->ic) {
-                XSetICFocus(data->ic);
-            }
-#endif
+            data->pending_focus = PENDING_FOCUS_IN;
+            data->pending_focus_time = SDL_GetTicks() + PENDING_FOCUS_IN_TIME;
         }
         break;
 
         /* Losing input focus? */
     case FocusOut:{
 #ifdef DEBUG_XEVENTS
-            printf("FocusOut!\n");
+            printf("window %p: FocusOut!\n", data);
 #endif
-            SDL_SetKeyboardFocus(NULL);
-#ifdef X_HAVE_UTF8_STRING
-            if (data->ic) {
-                XUnsetICFocus(data->ic);
-            }
-#endif
+            data->pending_focus = PENDING_FOCUS_OUT;
+            data->pending_focus_time = SDL_GetTicks() + PENDING_FOCUS_OUT_TIME;
         }
         break;
 
         /* Generated upon EnterWindow and FocusIn */
     case KeymapNotify:{
 #ifdef DEBUG_XEVENTS
-            printf("KeymapNotify!\n");
+            printf("window %p: KeymapNotify!\n", data);
 #endif
             /* FIXME:
                X11_SetKeyboardState(SDL_Display, xevent.xkeymap.key_vector);
@@ -224,7 +281,7 @@ X11_DispatchEvent(_THIS)
         /* Has the keyboard layout changed? */
     case MappingNotify:{
 #ifdef DEBUG_XEVENTS
-            printf("MappingNotify!\n");
+            printf("window %p: MappingNotify!\n", data);
 #endif
             X11_UpdateKeymap(_this);
         }
@@ -238,14 +295,18 @@ X11_DispatchEvent(_THIS)
             Status status = 0;
 
 #ifdef DEBUG_XEVENTS
-            printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
+            printf("window %p: KeyPress (X11 keycode = 0x%X)\n", data, xevent.xkey.keycode);
 #endif
             SDL_SendKeyboardKey(SDL_PRESSED, videodata->key_layout[keycode]);
 #if 1
             if (videodata->key_layout[keycode] == SDL_SCANCODE_UNKNOWN) {
                 int min_keycode, max_keycode;
                 XDisplayKeycodes(display, &min_keycode, &max_keycode);
+#if SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM
+                keysym = XkbKeycodeToKeysym(display, keycode, 0, 0);
+#else
                 keysym = XKeycodeToKeysym(display, keycode, 0);
+#endif
                 fprintf(stderr,
                         "The key you just pressed is not recognized by SDL. To help get this fixed, please report this to the SDL mailing list <sdl@libsdl.org> X11 KeyCode %d (%d), X11 KeySym 0x%lX (%s).\n",
                         keycode, keycode - min_keycode, keysym,
@@ -273,7 +334,7 @@ X11_DispatchEvent(_THIS)
             KeyCode keycode = xevent.xkey.keycode;
 
 #ifdef DEBUG_XEVENTS
-            printf("KeyRelease (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
+            printf("window %p: KeyRelease (X11 keycode = 0x%X)\n", data, xevent.xkey.keycode);
 #endif
             if (X11_KeyRepeat(display, &xevent)) {
                 /* We're about to get a repeated key down, ignore the key up */
@@ -286,34 +347,40 @@ X11_DispatchEvent(_THIS)
         /* Have we been iconified? */
     case UnmapNotify:{
 #ifdef DEBUG_XEVENTS
-            printf("UnmapNotify!\n");
+            printf("window %p: UnmapNotify!\n", data);
 #endif
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+            X11_DispatchUnmapNotify(data);
         }
         break;
 
         /* Have we been restored? */
     case MapNotify:{
 #ifdef DEBUG_XEVENTS
-            printf("MapNotify!\n");
+            printf("window %p: MapNotify!\n", data);
 #endif
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+            X11_DispatchMapNotify(data);
         }
         break;
 
         /* Have we been resized or moved? */
     case ConfigureNotify:{
 #ifdef DEBUG_XEVENTS
-            printf("ConfigureNotify! (resize: %dx%d)\n",
+            printf("window %p: ConfigureNotify! (position: %d,%d, size: %dx%d)\n", data,
+                   xevent.xconfigure.x, xevent.xconfigure.y,
                    xevent.xconfigure.width, xevent.xconfigure.height);
 #endif
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MOVED,
-                                xevent.xconfigure.x, xevent.xconfigure.y);
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESIZED,
-                                xevent.xconfigure.width,
-                                xevent.xconfigure.height);
+            if (xevent.xconfigure.x != data->last_xconfigure.x ||
+                xevent.xconfigure.y != data->last_xconfigure.y) {
+                SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MOVED,
+                                    xevent.xconfigure.x, xevent.xconfigure.y);
+            }
+            if (xevent.xconfigure.width != data->last_xconfigure.width ||
+                xevent.xconfigure.height != data->last_xconfigure.height) {
+                SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESIZED,
+                                    xevent.xconfigure.width,
+                                    xevent.xconfigure.height);
+            }
+            data->last_xconfigure = xevent.xconfigure;
         }
         break;
 
@@ -330,17 +397,21 @@ X11_DispatchEvent(_THIS)
         /* Do we need to refresh ourselves? */
     case Expose:{
 #ifdef DEBUG_XEVENTS
-            printf("Expose (count = %d)\n", xevent.xexpose.count);
+            printf("window %p: Expose (count = %d)\n", data, xevent.xexpose.count);
 #endif
             SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_EXPOSED, 0, 0);
         }
         break;
 
     case MotionNotify:{
+            SDL_Mouse *mouse = SDL_GetMouse();  
+            if(!mouse->relative_mode) {
 #ifdef DEBUG_MOTION
-            printf("X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
+                printf("window %p: X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
 #endif
-            SDL_SendMouseMotion(data->window, 0, xevent.xmotion.x, xevent.xmotion.y);
+
+                SDL_SendMouseMotion(data->window, 0, xevent.xmotion.x, xevent.xmotion.y);
+            }
         }
         break;
 
@@ -369,7 +440,7 @@ X11_DispatchEvent(_THIS)
 
             char *name = XGetAtomName(display, xevent.xproperty.atom);
             if (name) {
-                printf("PropertyNotify: %s %s\n", name, (xevent.xproperty.state == PropertyDelete) ? "deleted" : "changed");
+                printf("window %p: PropertyNotify: %s %s\n", data, name, (xevent.xproperty.state == PropertyDelete) ? "deleted" : "changed");
                 XFree(name);
             }
 
@@ -432,7 +503,26 @@ X11_DispatchEvent(_THIS)
                     }
                 }
             }
-#endif
+            if (status == Success) {
+                XFree(propdata);
+            }
+#endif /* DEBUG_XEVENTS */
+
+            if (xevent.xproperty.atom == data->videodata->_NET_WM_STATE) {
+                /* Get the new state from the window manager.
+                   Compositing window managers can alter visibility of windows
+                   without ever mapping / unmapping them, so we handle that here,
+                   because they use the NETWM protocol to notify us of changes.
+                 */
+                Uint32 flags = X11_GetNetWMState(_this, xevent.xproperty.window);
+                if ((flags^data->window->flags) & SDL_WINDOW_HIDDEN) {
+                    if (flags & SDL_WINDOW_HIDDEN) {
+                        X11_DispatchUnmapNotify(data);
+                    } else {
+                        X11_DispatchMapNotify(data);
+                    }
+                }
+            }
         }
         break;
 
@@ -447,7 +537,7 @@ X11_DispatchEvent(_THIS)
 
             req = &xevent.xselectionrequest;
 #ifdef DEBUG_XEVENTS
-            printf("SelectionRequest (requestor = %ld, target = %ld)\n",
+            printf("window %p: SelectionRequest (requestor = %ld, target = %ld)\n", data,
                 req->requestor, req->target);
 #endif
 
@@ -477,7 +567,7 @@ X11_DispatchEvent(_THIS)
 
     case SelectionNotify: {
 #ifdef DEBUG_XEVENTS
-            printf("SelectionNotify (requestor = %ld, target = %ld)\n",
+            printf("window %p: SelectionNotify (requestor = %ld, target = %ld)\n", data,
                 xevent.xselection.requestor, xevent.xselection.target);
 #endif
             videodata->selection_waiting = SDL_FALSE;
@@ -486,13 +576,36 @@ X11_DispatchEvent(_THIS)
 
     default:{
 #ifdef DEBUG_XEVENTS
-            printf("Unhandled event %d\n", xevent.type);
+            printf("window %p: Unhandled event %d\n", data, xevent.type);
 #endif
         }
         break;
     }
 }
 
+static void
+X11_HandleFocusChanges(_THIS)
+{
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+    int i;
+
+    if (videodata && videodata->windowlist) {
+        for (i = 0; i < videodata->numwindows; ++i) {
+            SDL_WindowData *data = videodata->windowlist[i];
+            if (data && data->pending_focus != PENDING_FOCUS_NONE) {
+                Uint32 now = SDL_GetTicks();
+                if ( (int)(data->pending_focus_time-now) <= 0 ) {
+                    if ( data->pending_focus == PENDING_FOCUS_IN ) {
+                        X11_DispatchFocusIn(data);
+                    } else {
+                        X11_DispatchFocusOut(data);
+                    }
+                    data->pending_focus = PENDING_FOCUS_NONE;
+                }
+            }
+        }
+    }
+}
 /* Ack!  XPending() actually performs a blocking read if no events available */
 static int
 X11_Pending(Display * display)
@@ -539,15 +652,23 @@ X11_PumpEvents(_THIS)
             XResetScreenSaver(data->display);
             data->screensaver_activity = now;
         }
-    }
+    }   
 
     /* Keep processing pending events */
     while (X11_Pending(data->display)) {
         X11_DispatchEvent(_this);
     }
 
+    /* FIXME: Only need to do this when there are pending focus changes */
+    X11_HandleFocusChanges(_this);
+
+    /*Dont process evtouch events if XInput2 multitouch is supported*/
+    if(X11_Xinput2IsMultitouchSupported()) {
+        return;
+    }
+
 #ifdef SDL_INPUT_LINUXEV
-    /* Process Touch events - TODO When X gets touch support, use that instead*/
+    /* Process Touch events*/
     int i = 0,rd;
     struct input_event ev[64];
     int size = sizeof (struct input_event);

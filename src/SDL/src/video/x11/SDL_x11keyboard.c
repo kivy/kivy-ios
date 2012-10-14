@@ -151,7 +151,11 @@ X11_KeyCodeToSDLKey(Display *display, KeyCode keycode)
     unsigned int ucs4;
     int i;
 
+#if SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM
+    keysym = XkbKeycodeToKeysym(display, keycode, 0, 0);
+#else
     keysym = XKeycodeToKeysym(display, keycode, 0);
+#endif
     if (keysym == NoSymbol) {
         return SDLK_UNKNOWN;
     }
@@ -232,7 +236,11 @@ X11_InitKeyboard(_THIS)
         SDL_GetDefaultKeymap(keymap);
         for (i = min_keycode; i <= max_keycode; ++i) {
             KeySym sym;
+#if SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM
+            sym = XkbKeycodeToKeysym(data->display, i, 0, 0);
+#else
             sym = XKeycodeToKeysym(data->display, i, 0);
+#endif
             if (sym != NoSymbol) {
                 SDL_Keycode key;
                 printf("code = %d, sym = 0x%X (%s) ", i - min_keycode,

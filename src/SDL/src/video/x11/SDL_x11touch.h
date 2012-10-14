@@ -23,12 +23,6 @@
 #ifndef _SDL_x11touch_h
 #define _SDL_x11touch_h
 
-/*
-!!! FIXME: remove the evdev code;
-!!! FIXME: this should be using XInput 2.1's new multitouch API.
-*/
-
-/* What should this be? */
 #ifdef SDL_INPUT_LINUXEV
 typedef struct EventTouchData
 {

@@ -546,14 +546,10 @@ LoadIcon(const char *file)
         return (NULL);
     }
 
-    if (icon->format->palette == NULL) {
-        fprintf(stderr, "Icon must have a palette!\n");
-        SDL_FreeSurface(icon);
-        return (NULL);
+    if (icon->format->palette) {
+        /* Set the colorkey */
+        SDL_SetColorKey(icon, 1, *((Uint8 *) icon->pixels));
     }
-
-    /* Set the colorkey */
-    SDL_SetColorKey(icon, 1, *((Uint8 *) icon->pixels));
 
     return (icon);
 }
@@ -561,7 +557,7 @@ LoadIcon(const char *file)
 SDL_bool
 CommonInit(CommonState * state)
 {
-    int i, j, m, n;
+    int i, j, m, n, w, h;
     SDL_DisplayMode fullscreen_mode;
 
     if (state->flags & SDL_INIT_VIDEO) {
@@ -617,6 +613,7 @@ CommonInit(CommonState * state)
         }
 
         if (state->verbose & VERBOSE_MODES) {
+            SDL_Rect bounds;
             SDL_DisplayMode mode;
             int bpp;
             Uint32 Rmask, Gmask, Bmask, Amask;
@@ -625,6 +622,10 @@ CommonInit(CommonState * state)
             fprintf(stderr, "Number of displays: %d\n", n);
             for (i = 0; i < n; ++i) {
                 fprintf(stderr, "Display %d:\n", i);
+
+                SDL_zero(bounds);
+                SDL_GetDisplayBounds(i, &bounds);
+                fprintf(stderr, "Bounds: %dx%d at %d,%d\n", bounds.w, bounds.h, bounds.x, bounds.y);
 
                 SDL_GetDesktopDisplayMode(i, &mode);
                 SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask,
@@ -735,8 +736,13 @@ CommonInit(CommonState * state)
                         SDL_GetError());
                 return SDL_FALSE;
             }
-            SDL_GetWindowSize(state->windows[i], &state->window_w, &state->window_h);
-
+            SDL_GetWindowSize(state->windows[i], &w, &h);
+            if (!(state->window_flags & SDL_WINDOW_RESIZABLE) &&
+                (w != state->window_w || h != state->window_h)) {
+                printf("Window requested size %dx%d, got %dx%d\n", state->window_w, state->window_h, w, h);
+                state->window_w = w;
+                state->window_h = h;
+            }
             if (SDL_SetWindowDisplayMode(state->windows[i], &fullscreen_mode) < 0) {
                 fprintf(stderr, "Can't set up fullscreen display mode: %s\n",
                         SDL_GetError());
@@ -858,6 +864,11 @@ PrintEvent(SDL_Event * event)
             break;
         case SDL_WINDOWEVENT_RESIZED:
             fprintf(stderr, "Window %d resized to %dx%d",
+                    event->window.windowID, event->window.data1,
+                    event->window.data2);
+            break;
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+            fprintf(stderr, "Window %d changed size to %dx%d",
                     event->window.windowID, event->window.data1,
                     event->window.data2);
             break;
@@ -1047,6 +1058,24 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
     switch (event->type) {
     case SDL_WINDOWEVENT:
         switch (event->window.event) {
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+            {
+                SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
+                if (window) {
+                    for (i = 0; i < state->num_windows; ++i) {
+                        if (window == state->windows[i] &&
+                            (state->window_flags & SDL_WINDOW_RESIZABLE)) {
+                            SDL_Rect viewport;
+
+                            viewport.x = 0;
+                            viewport.y = 0;
+                            SDL_GetWindowSize(window, &viewport.w, &viewport.h);
+                            SDL_RenderSetViewport(state->renderers[i], &viewport);
+                        }
+                    }
+                }
+            }
+            break;
         case SDL_WINDOWEVENT_CLOSE:
 			{
                 SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
@@ -1068,6 +1097,28 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
                             ScreenShot(state->renderers[i]);
                         }
                     }
+                }
+            }
+            break;
+        case SDLK_EQUALS:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrt-+ double the size of the window */
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    int w, h;
+                    SDL_GetWindowSize(window, &w, &h);
+                    SDL_SetWindowSize(window, w*2, h*2);
+                }
+            }
+            break;
+        case SDLK_MINUS:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrt-- double the size of the window */
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    int w, h;
+                    SDL_GetWindowSize(window, &w, &h);
+                    SDL_SetWindowSize(window, w/2, h/2);
                 }
             }
             break;
@@ -1139,6 +1190,17 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
                     } else {
                         SDL_SetWindowFullscreen(window, SDL_TRUE);
                     }
+                }
+            }
+            break;
+        case SDLK_b:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-B toggle window border */
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    const Uint32 flags = SDL_GetWindowFlags(window);
+                    const SDL_bool b = ((flags & SDL_WINDOW_BORDERLESS) != 0);
+                    SDL_SetWindowBordered(window, b);
                 }
             }
             break;

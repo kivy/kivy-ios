@@ -250,8 +250,7 @@ DirectFB_GL_SetSwapInterval(_THIS, int interval)
 int
 DirectFB_GL_GetSwapInterval(_THIS)
 {
-    SDL_Unsupported();
-    return -1;
+    return 0;
 }
 
 void

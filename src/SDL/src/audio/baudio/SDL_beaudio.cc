@@ -48,9 +48,6 @@ FillSound(void *device, void *stream, size_t len,
 {
     SDL_AudioDevice *audio = (SDL_AudioDevice *) device;
 
-    /* Silence the buffer, since it's ours */
-    SDL_memset(stream, audio->spec.silence, len);
-
     /* Only do soemthing if audio is enabled */
     if (!audio->enabled)
         return;

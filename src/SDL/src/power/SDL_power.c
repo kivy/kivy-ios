@@ -36,6 +36,7 @@ SDL_bool SDL_GetPowerInfo_MacOSX(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_BeOS(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_NintendoDS(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_UIKit(SDL_PowerState *, int *, int *);
+SDL_bool SDL_GetPowerInfo_Android(SDL_PowerState *, int *, int *);
 
 #ifndef SDL_POWER_DISABLED
 #ifdef SDL_POWER_HARDWIRED
@@ -72,6 +73,9 @@ static SDL_GetPowerInfo_Impl implementations[] = {
 #endif
 #ifdef SDL_POWER_BEOS           /* handles BeOS, Zeta, with euc.jp apm driver. */
     SDL_GetPowerInfo_BeOS,
+#endif
+#ifdef SDL_POWER_ANDROID        /* handles Android. */
+    SDL_GetPowerInfo_Android,
 #endif
 #ifdef SDL_POWER_HARDWIRED
     SDL_GetPowerInfo_Hardwired,

@@ -36,7 +36,7 @@
 #define WGL_CONTEXT_MAJOR_VERSION_ARB   0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB   0x2092
 #define WGL_CONTEXT_LAYER_PLANE_ARB     0x2093
-#define WGL_CONTEXT_FLAGS_ARB           0x2093
+#define WGL_CONTEXT_FLAGS_ARB           0x2094
 #define WGL_CONTEXT_DEBUG_BIT_ARB       0x0001
 #define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB  0x0002
 
@@ -59,6 +59,11 @@
 #ifndef WGL_EXT_create_context_es2_profile
 #define WGL_EXT_create_context_es2_profile
 #define WGL_CONTEXT_ES2_PROFILE_BIT_EXT           0x00000004
+#endif
+
+#ifndef WGL_EXT_create_context_es_profile
+#define WGL_EXT_create_context_es_profile
+#define WGL_CONTEXT_ES_PROFILE_BIT_EXT            0x00000004
 #endif
 
 typedef HGLRC(APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC,
@@ -112,10 +117,8 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
         GetProcAddress(handle, "wglDeleteContext");
     _this->gl_data->wglMakeCurrent = (BOOL(WINAPI *) (HDC, HGLRC))
         GetProcAddress(handle, "wglMakeCurrent");
-    _this->gl_data->wglSwapIntervalEXT = (void (WINAPI *) (int))
-        GetProcAddress(handle, "wglSwapIntervalEXT");
-    _this->gl_data->wglGetSwapIntervalEXT = (int (WINAPI *) (void))
-        GetProcAddress(handle, "wglGetSwapIntervalEXT");
+    _this->gl_data->wglShareLists = (BOOL(WINAPI *) (HGLRC, HGLRC))
+        GetProcAddress(handle, "wglShareLists");
 
     if (!_this->gl_data->wglGetProcAddress ||
         !_this->gl_data->wglCreateContext ||
@@ -341,7 +344,7 @@ WIN_GL_InitExtensions(_THIS, HDC hdc)
     }
 
     /* Check for WGL_ARB_pixel_format */
-    _this->gl_data->WGL_ARB_pixel_format = 0;
+    _this->gl_data->HAS_WGL_ARB_pixel_format = SDL_FALSE;
     if (HasExtension("WGL_ARB_pixel_format", extensions)) {
         _this->gl_data->wglChoosePixelFormatARB = (BOOL(WINAPI *)
                                                    (HDC, const int *,
@@ -354,16 +357,20 @@ WIN_GL_InitExtensions(_THIS, HDC hdc)
 
         if ((_this->gl_data->wglChoosePixelFormatARB != NULL) &&
             (_this->gl_data->wglGetPixelFormatAttribivARB != NULL)) {
-            _this->gl_data->WGL_ARB_pixel_format = 1;
+            _this->gl_data->HAS_WGL_ARB_pixel_format = SDL_TRUE;
         }
     }
 
     /* Check for WGL_EXT_swap_control */
+    _this->gl_data->HAS_WGL_EXT_swap_control_tear = SDL_FALSE;
     if (HasExtension("WGL_EXT_swap_control", extensions)) {
         _this->gl_data->wglSwapIntervalEXT =
             WIN_GL_GetProcAddress(_this, "wglSwapIntervalEXT");
         _this->gl_data->wglGetSwapIntervalEXT =
             WIN_GL_GetProcAddress(_this, "wglGetSwapIntervalEXT");
+        if (HasExtension("WGL_EXT_swap_control_tear", extensions)) {
+            _this->gl_data->HAS_WGL_EXT_swap_control_tear = SDL_TRUE;
+        }
     } else {
         _this->gl_data->wglSwapIntervalEXT = NULL;
         _this->gl_data->wglGetSwapIntervalEXT = NULL;
@@ -397,7 +404,7 @@ WIN_GL_ChoosePixelFormatARB(_THIS, int *iAttribs, float *fAttribs)
 
         WIN_GL_InitExtensions(_this, hdc);
 
-        if (_this->gl_data->WGL_ARB_pixel_format) {
+        if (_this->gl_data->HAS_WGL_ARB_pixel_format) {
             _this->gl_data->wglChoosePixelFormatARB(hdc, iAttribs, fAttribs,
                                                     1, &pixel_format,
                                                     &matching);
@@ -519,10 +526,22 @@ SDL_GLContext
 WIN_GL_CreateContext(_THIS, SDL_Window * window)
 {
     HDC hdc = ((SDL_WindowData *) window->driverdata)->hdc;
-    HGLRC context;
+    HGLRC context, share_context;
 
-    if (_this->gl_config.major_version < 3) {
+    if (_this->gl_config.share_with_current_context) {
+        share_context = (HGLRC)(_this->current_glctx);
+    } else {
+        share_context = 0;
+    }
+
+    if (_this->gl_config.major_version < 3 &&
+	_this->gl_config.profile_mask == 0 &&
+	_this->gl_config.flags == 0) {
+        /* Create legacy context */
         context = _this->gl_data->wglCreateContext(hdc);
+	if( share_context != 0 ) {
+            _this->gl_data->wglShareLists(share_context, context);
+	}
     } else {
         PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
         HGLRC temp_context = _this->gl_data->wglCreateContext(hdc);
@@ -567,7 +586,7 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
 	    attribs[iattr++] = 0;
 
             /* Create the GL 3.x context */
-            context = wglCreateContextAttribsARB(hdc, 0, attribs);
+            context = wglCreateContextAttribsARB(hdc, share_context, attribs);
             /* Delete the GL 2.x context */
             _this->gl_data->wglDeleteContext(temp_context);
         }
@@ -594,6 +613,11 @@ WIN_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     HDC hdc;
     int status;
 
+    if (!_this->gl_data) {
+        SDL_SetError("OpenGL not initialized");
+        return -1;
+    }
+
     if (window) {
         hdc = ((SDL_WindowData *) window->driverdata)->hdc;
     } else {
@@ -611,24 +635,29 @@ WIN_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 int
 WIN_GL_SetSwapInterval(_THIS, int interval)
 {
-    if (_this->gl_data->wglSwapIntervalEXT) {
-        _this->gl_data->wglSwapIntervalEXT(interval);
-        return 0;
+    int retval = -1;
+    if ((interval < 0) && (!_this->gl_data->HAS_WGL_EXT_swap_control_tear)) {
+        SDL_SetError("Negative swap interval unsupported in this GL");
+    } else if (_this->gl_data->wglSwapIntervalEXT) {
+        if (_this->gl_data->wglSwapIntervalEXT(interval) == TRUE) {
+            retval = 0;
+        } else {
+            WIN_SetError("wglSwapIntervalEXT()");
+        }
     } else {
         SDL_Unsupported();
-        return -1;
     }
+    return retval;
 }
 
 int
 WIN_GL_GetSwapInterval(_THIS)
 {
+    int retval = 0;
     if (_this->gl_data->wglGetSwapIntervalEXT) {
-        return _this->gl_data->wglGetSwapIntervalEXT();
-    } else {
-        SDL_Unsupported();
-        return -1;
+        retval = _this->gl_data->wglGetSwapIntervalEXT();
     }
+    return retval;
 }
 
 void
@@ -642,6 +671,9 @@ WIN_GL_SwapWindow(_THIS, SDL_Window * window)
 void
 WIN_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
+    if (!_this->gl_data) {
+        return;
+    }
     _this->gl_data->wglDeleteContext((HGLRC) context);
 }
 

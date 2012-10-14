@@ -49,14 +49,7 @@ SDL_LoadObject(const char *sofile)
 void *
 SDL_LoadFunction(void *handle, const char *name)
 {
-#ifdef _WIN32_WCE
-    LPTSTR tstr = WIN_UTF8ToString(name);
-    void *symbol = (void *) GetProcAddress((HMODULE) handle, tstr);
-    SDL_free(tstr);
-#else
     void *symbol = (void *) GetProcAddress((HMODULE) handle, name);
-#endif
-
     if (symbol == NULL) {
         char errbuf[512];
         SDL_strlcpy(errbuf, "Failed loading ", SDL_arraysize(errbuf));

@@ -37,8 +37,8 @@
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
-#if SDL_VIDEO_DRIVER_X11_XINPUT
-#include <X11/extensions/XInput.h>
+#if SDL_VIDEO_DRIVER_X11_XINPUT2
+#include <X11/extensions/XInput2.h>
 #endif
 #if SDL_VIDEO_DRIVER_X11_XRANDR
 #include <X11/extensions/Xrandr.h>
@@ -83,16 +83,19 @@ typedef struct SDL_VideoData
     Atom WM_DELETE_WINDOW;
     Atom _NET_WM_STATE;
     Atom _NET_WM_STATE_HIDDEN;
+    Atom _NET_WM_STATE_FOCUSED;
     Atom _NET_WM_STATE_MAXIMIZED_VERT;
     Atom _NET_WM_STATE_MAXIMIZED_HORZ;
     Atom _NET_WM_STATE_FULLSCREEN;
+    Atom _NET_WM_ALLOWED_ACTIONS;
+    Atom _NET_WM_ACTION_FULLSCREEN;
     Atom _NET_WM_NAME;
     Atom _NET_WM_ICON_NAME;
     Atom _NET_WM_ICON;
     Atom UTF8_STRING;
 
     SDL_Scancode key_layout[256];
-    SDL_bool selection_waiting;
+    SDL_bool selection_waiting;    
 } SDL_VideoData;
 
 extern SDL_bool X11_UseDirectColorVisuals(void);

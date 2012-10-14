@@ -50,7 +50,7 @@
 @public
     SDL_uikitviewcontroller *viewcontroller;
 }
-- (CGPoint)touchLocation:(UITouch *)touch;
+- (CGPoint)touchLocation:(UITouch *)touch shouldNormalize:(BOOL)normalize;
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
@@ -61,6 +61,13 @@
 - (void)initializeKeyboard;
 @property (readonly) BOOL keyboardVisible;
 - (void)keyboardDidHide:(NSNotification *)notification; 
+
+SDL_bool UIKit_HasScreenKeyboardSupport(_THIS, SDL_Window *window);
+int UIKit_ShowScreenKeyboard(_THIS, SDL_Window *window);
+int UIKit_HideScreenKeyboard(_THIS, SDL_Window *window);
+int UIKit_ToggleScreenKeyboard(_THIS, SDL_Window *window);
+SDL_bool UIKit_IsScreenKeyboardShown(_THIS, SDL_Window *window);
+
 #endif
 
 @end

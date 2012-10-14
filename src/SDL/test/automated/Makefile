@@ -1,10 +1,10 @@
 
 
-CFLAGS  := -W -Wall -Wextra -g `sdl-config --prefix=/usr/local --cflags` -DSDL_NO_COMPAT
-LDFLAGS := `sdl-config --prefix=/usr/local --libs`
+CFLAGS  := -W -Wall -Wextra -g `sdl2-config --prefix=/usr/local --cflags` -DSDL_NO_COMPAT
+LDFLAGS := `sdl2-config --prefix=/usr/local --libs`
 
 # If it doesn't pick up defaults
-#CFLAGS  := -D_GNU_SOURCE=1 -D_REENTRANT -I/usr/local/include/SDL
+#CFLAGS  := -D_GNU_SOURCE=1 -D_REENTRANT -I/usr/local/include/SDL2
 #LDFLAGS := -lm -ldl -lesd -lpthread
 
 SRC         	:= testsdl.c \
@@ -36,25 +36,25 @@ test: all
 	@./testsdl
 
 testsdl: $(SRC) $(RWOPS_SRC) $(COMMON_SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SRC) $(RWOPS_SRC) $(COMMON_SRC)
+	$(CC) $(CFLAGS) -o $@ $(SRC) $(RWOPS_SRC) $(COMMON_SRC) $(LDFLAGS)
 
 platform/platform: platform/platform.c $(COMMON_INCLUDE) $(COMMON_SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ platform/platform.c $(COMMON_SRC) -DTEST_STANDALONE
+	$(CC) $(CFLAGS) -o $@ platform/platform.c $(COMMON_SRC) -DTEST_STANDALONE $(LDFLAGS)
 
 rwops/rwops: $(RWOPS_SRC) $(COMMON_INCLUDE) $(COMMON_SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(RWOPS_SRC) $(COMMON_SRC) -DTEST_STANDALONE
+	$(CC) $(CFLAGS) -o $@ $(RWOPS_SRC) $(COMMON_SRC) -DTEST_STANDALONE $(LDFLAGS)
 
 rect/rect: rect/rect.c $(COMMON_INCLUDE) $(COMMON_SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ rect/rect.c $(COMMON_SRC) -DTEST_STANDALONE
+	$(CC) $(CFLAGS) -o $@ rect/rect.c $(COMMON_SRC) -DTEST_STANDALONE $(LDFLAGS)
 
 surface/surface: surface/surface.c $(COMMON_INCLUDE) $(COMMON_SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ surface/surface.c $(COMMON_SRC) -DTEST_STANDALONE
+	$(CC) $(CFLAGS) -o $@ surface/surface.c $(COMMON_SRC) -DTEST_STANDALONE $(LDFLAGS)
 
 render/render: render/render.c $(COMMON_INCLUDE) $(COMMON_SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ render/render.c $(COMMON_SRC) -DTEST_STANDALONE
+	$(CC) $(CFLAGS) -o $@ render/render.c $(COMMON_SRC) -DTEST_STANDALONE $(LDFLAGS)
 
 audio/audio: audio/audio.c $(COMMON_INCLUDE) $(COMMON_SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ audio/audio.c $(COMMON_SRC) -DTEST_STANDALONE
+	$(CC) $(CFLAGS) -o $@ audio/audio.c $(COMMON_SRC) -DTEST_STANDALONE $(LDFLAGS)
 
 clean:
 	$(RM) $(TESTS_ALL)

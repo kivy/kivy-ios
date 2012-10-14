@@ -8,11 +8,6 @@ if test x$NJOB = x; then
     NJOB=$NCPU
 fi
 
-# SDK path
-if test x$SDK_PATH = x; then
-    SDK_PATH=/Developer/SDKs
-fi
-
 # Generic, cross-platform CFLAGS you always want go here.
 CFLAGS="-O3 -g -pipe"
 

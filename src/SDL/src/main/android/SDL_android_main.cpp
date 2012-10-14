@@ -14,12 +14,6 @@
 // Called before SDL_main() to initialize JNI bindings in SDL library
 extern "C" void SDL_Android_Init(JNIEnv* env, jclass cls);
 
-// Library init
-extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
-{
-    return JNI_VERSION_1_4;
-}
-
 // Start up the SDL app
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls, jobject obj)
 {

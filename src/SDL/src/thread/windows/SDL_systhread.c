@@ -30,10 +30,8 @@
 #include "SDL_systhread_c.h"
 
 #ifndef SDL_PASSED_BEGINTHREAD_ENDTHREAD
-#ifndef _WIN32_WCE
 /* We'll use the C library from this DLL */
 #include <process.h>
-#endif
 
 /* Cygwin gcc-3 ... MingW64 (even with a i386 host) does this like MSVC. */
 #if (defined(__MINGW32__) && (__GNUC__ < 4))
@@ -112,13 +110,8 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args,
 int
 SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 {
-#ifdef _WIN32_WCE
-    pfnSDL_CurrentBeginThread pfnBeginThread = NULL;
-    pfnSDL_CurrentEndThread pfnEndThread = NULL;
-#else
     pfnSDL_CurrentBeginThread pfnBeginThread = _beginthreadex;
     pfnSDL_CurrentEndThread pfnEndThread = _endthreadex;
-#endif
 #endif /* SDL_PASSED_BEGINTHREAD_ENDTHREAD */
     pThreadStartParms pThreadParms =
         (pThreadStartParms) SDL_malloc(sizeof(tThreadStartParms));

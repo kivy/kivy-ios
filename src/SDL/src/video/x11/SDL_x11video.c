@@ -33,6 +33,7 @@
 #include "SDL_x11framebuffer.h"
 #include "SDL_x11shape.h"
 #include "SDL_x11touch.h" 
+#include "SDL_x11xinput2.h"
 
 #if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
 #include "SDL_x11opengles.h"
@@ -110,12 +111,38 @@ X11_DeleteDevice(SDL_VideoDevice * device)
     }
     SDL_free(data->windowlist);
     SDL_free(device->driverdata);
-#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-    SDL_free(device->gles_data);
-#endif
     SDL_free(device);
 
     SDL_X11_UnloadSymbols();
+}
+
+/* An error handler to reset the vidmode and then call the default handler. */
+static SDL_bool safety_net_triggered = SDL_FALSE;
+static int (*orig_x11_errhandler) (Display *, XErrorEvent *) = NULL;
+static int
+X11_SafetyNetErrHandler(Display * d, XErrorEvent * e)
+{
+    /* if we trigger an error in our error handler, don't try again. */
+    if (!safety_net_triggered) {
+        safety_net_triggered = SDL_TRUE;
+        SDL_VideoDevice *device = SDL_GetVideoDevice();
+        if (device != NULL) {
+            int i;
+            for (i = 0; i < device->num_displays; i++) {
+                SDL_VideoDisplay *display = &device->displays[i];
+                if (SDL_memcmp(&display->current_mode, &display->desktop_mode,
+                               sizeof (SDL_DisplayMode)) != 0) {
+                    X11_SetDisplayMode(device, display, &display->desktop_mode);
+                }
+            }
+        }
+    }
+
+    if (orig_x11_errhandler != NULL) {
+        return orig_x11_errhandler(d, e);  /* probably terminate. */
+    }
+
+    return 0;
 }
 
 static SDL_VideoDevice *
@@ -128,6 +155,10 @@ X11_CreateDevice(int devindex)
     if (!SDL_X11_LoadSymbols()) {
         return NULL;
     }
+
+    // Need for threading gl calls. This is also required for the proprietary nVidia
+	//  driver to be threaded.
+    XInitThreads();
 
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
@@ -142,14 +173,6 @@ X11_CreateDevice(int devindex)
         return NULL;
     }
     device->driverdata = data;
-
-#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-    device->gles_data = (struct SDL_PrivateGLESData *) SDL_calloc(1, sizeof(SDL_PrivateGLESData));
-    if (!device->gles_data) {
-        SDL_OutOfMemory();
-        return NULL;
-    }
-#endif
 
     /* FIXME: Do we need this?
        if ( (SDL_strncmp(XDisplayName(display), ":", 1) == 0) ||
@@ -174,6 +197,7 @@ X11_CreateDevice(int devindex)
     }
 #endif
     if (data->display == NULL) {
+        SDL_free(device->driverdata);
         SDL_free(device);
         SDL_SetError("Couldn't open X11 display");
         return NULL;
@@ -182,10 +206,15 @@ X11_CreateDevice(int devindex)
     XSynchronize(data->display, True);
 #endif
 
+    /* Hook up an X11 error handler to recover the desktop resolution. */
+    safety_net_triggered = SDL_FALSE;
+    orig_x11_errhandler = XSetErrorHandler(X11_SafetyNetErrHandler);
+
     /* Set the function pointers */
     device->VideoInit = X11_VideoInit;
     device->VideoQuit = X11_VideoQuit;
     device->GetDisplayModes = X11_GetDisplayModes;
+    device->GetDisplayBounds = X11_GetDisplayBounds;
     device->SetDisplayMode = X11_SetDisplayMode;
     device->SuspendScreenSaver = X11_SuspendScreenSaver;
     device->PumpEvents = X11_PumpEvents;
@@ -202,6 +231,7 @@ X11_CreateDevice(int devindex)
     device->MaximizeWindow = X11_MaximizeWindow;
     device->MinimizeWindow = X11_MinimizeWindow;
     device->RestoreWindow = X11_RestoreWindow;
+    device->SetWindowBordered = X11_SetWindowBordered;
     device->SetWindowFullscreen = X11_SetWindowFullscreen;
     device->SetWindowGammaRamp = X11_SetWindowGammaRamp;
     device->SetWindowGrab = X11_SetWindowGrab;
@@ -225,8 +255,7 @@ X11_CreateDevice(int devindex)
     device->GL_GetSwapInterval = X11_GL_GetSwapInterval;
     device->GL_SwapWindow = X11_GL_SwapWindow;
     device->GL_DeleteContext = X11_GL_DeleteContext;
-#endif
-#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
+#elif SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     device->GL_LoadLibrary = X11_GLES_LoadLibrary;
     device->GL_GetProcAddress = X11_GLES_GetProcAddress;
     device->GL_UnloadLibrary = X11_GLES_UnloadLibrary;
@@ -344,9 +373,12 @@ X11_VideoInit(_THIS)
     GET_ATOM(WM_DELETE_WINDOW);
     GET_ATOM(_NET_WM_STATE);
     GET_ATOM(_NET_WM_STATE_HIDDEN);
+    GET_ATOM(_NET_WM_STATE_FOCUSED);
     GET_ATOM(_NET_WM_STATE_MAXIMIZED_VERT);
     GET_ATOM(_NET_WM_STATE_MAXIMIZED_HORZ);
     GET_ATOM(_NET_WM_STATE_FULLSCREEN);
+    GET_ATOM(_NET_WM_ALLOWED_ACTIONS);
+    GET_ATOM(_NET_WM_ACTION_FULLSCREEN);
     GET_ATOM(_NET_WM_NAME);
     GET_ATOM(_NET_WM_ICON_NAME);
     GET_ATOM(_NET_WM_ICON);
@@ -358,6 +390,8 @@ X11_VideoInit(_THIS)
     if (X11_InitModes(_this) < 0) {
         return -1;
     }
+
+    X11_InitXinput2(_this);
 
     if (X11_InitKeyboard(_this) != 0) {
         return -1;

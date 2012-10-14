@@ -6,6 +6,7 @@
  * Write automated test case for multi-draw APIs
  * Implement assertion code on iPhone
  * Add __WINDOWS__ in addition to __WIN32__
+ * Write test for fullscreen gamma to check X11 colormap handling
 
  * Check 1.2 revisions:
 	3554 - Need to resolve semantics for locking keys on different platforms
@@ -14,3 +15,4 @@
 	4484, 4485 - Verify that SDL's Windows keyboard handling works correctly
 	4865 - See if this is still needed (mouse coordinate clamping)
 	4866 - See if this is still needed (blocking window repositioning)
+

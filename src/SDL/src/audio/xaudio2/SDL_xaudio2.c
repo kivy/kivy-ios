@@ -332,7 +332,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
         return 0;
     }
     this->hidden->nextbuf = this->hidden->mixbuf;
-    SDL_memset(this->hidden->mixbuf, '\0', 2 * this->hidden->mixlen);
+    SDL_memset(this->hidden->mixbuf, 0, 2 * this->hidden->mixlen);
 
     /* We use XAUDIO2_DEFAULT_CHANNELS instead of this->spec.channels. On
        Xbox360, this means 5.1 output, but on Windows, it means "figure out

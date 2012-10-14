@@ -33,7 +33,7 @@
    into the general blitting mechanism.
 */
 
-#if ((defined(_MFC_VER) && defined(_M_IX86)/* && !defined(_WIN32_WCE) still needed? */) || \
+#if ((defined(_MFC_VER) && defined(_M_IX86)) || \
      defined(__WATCOMC__) || \
      (defined(__GNUC__) && defined(__i386__))) && SDL_ASSEMBLY_ROUTINES
 /* There's a bug with gcc 4.4.1 and -O2 where srcp doesn't get the correct
@@ -209,7 +209,6 @@ SDL_SoftStretch(SDL_Surface * src, const SDL_Rect * srcrect,
     int src_locked;
     int dst_locked;
     int pos, inc;
-    int dst_width;
     int dst_maxrow;
     int src_row, dst_row;
     Uint8 *srcp = NULL;
@@ -286,7 +285,6 @@ SDL_SoftStretch(SDL_Surface * src, const SDL_Rect * srcrect,
     inc = (srcrect->h << 16) / dstrect->h;
     src_row = srcrect->y;
     dst_row = dstrect->y;
-    dst_width = dstrect->w * bpp;
 
 #ifdef USE_ASM_STRETCH
     /* Write the opcodes for this stretch */

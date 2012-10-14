@@ -240,18 +240,21 @@ main(int argc, char *argv[])
     }
 
     if (state->render_flags & SDL_RENDERER_PRESENTVSYNC) {
-        SDL_GL_SetSwapInterval(1);
+        /* try late-swap-tearing first. If not supported, try normal vsync. */
+        if (SDL_GL_SetSwapInterval(-1) == -1) {
+            SDL_GL_SetSwapInterval(1);
+        }
     } else {
-        SDL_GL_SetSwapInterval(0);
+        SDL_GL_SetSwapInterval(0);  /* disable vsync. */
     }
 
     SDL_GetCurrentDisplayMode(0, &mode);
-    printf("Screen BPP: %d\n", SDL_BITSPERPIXEL(mode.format));
+    printf("Screen BPP    : %d\n", SDL_BITSPERPIXEL(mode.format));
+    printf("Swap Interval : %d\n", SDL_GL_GetSwapInterval());
     printf("\n");
-    printf("Vendor     : %s\n", glGetString(GL_VENDOR));
-    printf("Renderer   : %s\n", glGetString(GL_RENDERER));
-    printf("Version    : %s\n", glGetString(GL_VERSION));
-    printf("Extensions : %s\n", glGetString(GL_EXTENSIONS));
+    printf("Vendor        : %s\n", glGetString(GL_VENDOR));
+    printf("Renderer      : %s\n", glGetString(GL_RENDERER));
+    printf("Version       : %s\n", glGetString(GL_VERSION));
     printf("\n");
 
     status = SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);

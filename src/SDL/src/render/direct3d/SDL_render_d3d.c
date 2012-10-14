@@ -29,10 +29,95 @@
 #include "SDL_loadso.h"
 #include "SDL_syswm.h"
 #include "../SDL_sysrender.h"
+#include "stdio.h"
 
 #if SDL_VIDEO_RENDER_D3D
 #define D3D_DEBUG_INFO
 #include <d3d9.h>
+#endif
+
+
+typedef interface ID3DXMatrixStack *LPD3DXMATRIXSTACK;
+typedef struct _D3DMATRIX D3DXMATRIX, *LPD3DXMATRIX;
+typedef struct _D3DVECTOR D3DXVECTOR3, *LPD3DXVECTOR3;
+
+DEFINE_GUID(IID_ID3DXMatrixStack,
+0xc7885ba7, 0xf990, 0x4fe7, 0x92, 0x2d, 0x85, 0x15, 0xe4, 0x77, 0xdd, 0x85);
+
+#undef INTERFACE
+#define INTERFACE ID3DXMatrixStack
+
+DECLARE_INTERFACE_(ID3DXMatrixStack, IUnknown)
+{
+    STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
+    STDMETHOD_(ULONG,AddRef)(THIS) PURE;
+    STDMETHOD_(ULONG,Release)(THIS) PURE;
+    STDMETHOD(Pop)(THIS) PURE;
+    STDMETHOD(Push)(THIS) PURE;
+    STDMETHOD(LoadIdentity)(THIS) PURE;
+    STDMETHOD(LoadMatrix)(THIS_ CONST D3DXMATRIX* pM ) PURE;
+    STDMETHOD(MultMatrix)(THIS_ CONST D3DXMATRIX* pM ) PURE;
+    STDMETHOD(MultMatrixLocal)(THIS_ CONST D3DXMATRIX* pM ) PURE;
+    STDMETHOD(RotateAxis)(THIS_ CONST D3DXVECTOR3* pV, FLOAT Angle) PURE;
+    STDMETHOD(RotateAxisLocal)(THIS_ CONST D3DXVECTOR3* pV, FLOAT Angle) PURE;
+    STDMETHOD(RotateYawPitchRoll)(THIS_ FLOAT Yaw, FLOAT Pitch, FLOAT Roll) PURE;
+    STDMETHOD(RotateYawPitchRollLocal)(THIS_ FLOAT Yaw, FLOAT Pitch, FLOAT Roll) PURE;
+    STDMETHOD(Scale)(THIS_ FLOAT x, FLOAT y, FLOAT z) PURE;
+    STDMETHOD(ScaleLocal)(THIS_ FLOAT x, FLOAT y, FLOAT z) PURE;
+    STDMETHOD(Translate)(THIS_ FLOAT x, FLOAT y, FLOAT z ) PURE;
+    STDMETHOD(TranslateLocal)(THIS_ FLOAT x, FLOAT y, FLOAT z) PURE;
+    STDMETHOD_(D3DXMATRIX*, GetTop)(THIS) PURE;
+};
+
+#undef INTERFACE
+
+#if !defined(__cplusplus) || defined(CINTERFACE)
+#define ID3DXMatrixStack_QueryInterface(p,a,b)            (p)->lpVtbl->QueryInterface(p,a,b)
+#define ID3DXMatrixStack_AddRef(p)                        (p)->lpVtbl->AddRef(p)
+#define ID3DXMatrixStack_Release(p)                       (p)->lpVtbl->Release(p)
+#define ID3DXMatrixStack_Pop(p)                           (p)->lpVtbl->Pop(p)
+#define ID3DXMatrixStack_Push(p)                          (p)->lpVtbl->Push(p)
+#define ID3DXMatrixStack_LoadIdentity(p)                  (p)->lpVtbl->LoadIdentity(p)
+#define ID3DXMatrixStack_LoadMatrix(p,a)                  (p)->lpVtbl->LoadMatrix(p,a)
+#define ID3DXMatrixStack_MultMatrix(p,a)                  (p)->lpVtbl->MultMatrix(p,a)
+#define ID3DXMatrixStack_MultMatrixLocal(p,a)             (p)->lpVtbl->MultMatrixLocal(p,a)
+#define ID3DXMatrixStack_RotateAxis(p,a,b)                (p)->lpVtbl->RotateAxis(p,a,b)
+#define ID3DXMatrixStack_RotateAxisLocal(p,a,b)           (p)->lpVtbl->RotateAxisLocal(p,a,b)
+#define ID3DXMatrixStack_RotateYawPitchRoll(p,a,b,c)      (p)->lpVtbl->RotateYawPitchRoll(p,a,b,c)
+#define ID3DXMatrixStack_RotateYawPitchRollLocal(p,a,b,c) (p)->lpVtbl->RotateYawPitchRollLocal(p,a,b,c)
+#define ID3DXMatrixStack_Scale(p,a,b,c)                   (p)->lpVtbl->Scale(p,a,b,c)
+#define ID3DXMatrixStack_ScaleLocal(p,a,b,c)              (p)->lpVtbl->ScaleLocal(p,a,b,c)
+#define ID3DXMatrixStack_Translate(p,a,b,c)               (p)->lpVtbl->Translate(p,a,b,c)
+#define ID3DXMatrixStack_TranslateLocal(p,a,b,c)          (p)->lpVtbl->TranslateLocal(p,a,b,c)
+#define ID3DXMatrixStack_GetTop(p)                        (p)->lpVtbl->GetTop(p)
+#else
+#define ID3DXMatrixStack_QueryInterface(p,a,b)            (p)->QueryInterface(a,b)
+#define ID3DXMatrixStack_AddRef(p)                        (p)->AddRef()
+#define ID3DXMatrixStack_Release(p)                       (p)->Release()
+#define ID3DXMatrixStack_Pop(p)    (p)->Pop()
+#define ID3DXMatrixStack_Push(p)    (p)->Push()
+#define ID3DXMatrixStack_LoadIdentity(p)    (p)->LoadIdentity()
+#define ID3DXMatrixStack_LoadMatrix(p,a)    (p)->LoadMatrix(a)
+#define ID3DXMatrixStack_MultMatrix(p,a)    (p)->MultMatrix(a)
+#define ID3DXMatrixStack_MultMatrixLocal(p,a)    (p)->MultMatrixLocal(a)
+#define ID3DXMatrixStack_RotateAxis(p,a,b)    (p)->RotateAxis(a,b)
+#define ID3DXMatrixStack_RotateAxisLocal(p,a,b)    (p)->RotateAxisLocal(a,b)
+#define ID3DXMatrixStack_RotateYawPitchRoll(p,a,b,c)    (p)->RotateYawPitchRollLocal(a,b,c)
+#define ID3DXMatrixStack_Scale(p,a,b,c)    (p)->Scale(a,b,c)
+#define ID3DXMatrixStack_ScaleLocal(p,a,b,c)    (p)->ScaleLocal(a,b,c)
+#define ID3DXMatrixStack_Translate(p,a,b,c)    (p)->Translate(a,b,c)
+#define ID3DXMatrixStack_TranslateLocal(p,a,b,c)    (p)->TranslateLocal(a,b,c)
+#define ID3DXMatrixStack_GetTop(p)    (p)->GetTop()
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+HRESULT WINAPI D3DXCreateMatrixStack(DWORD flags, LPD3DXMATRIXSTACK* ppstack);
+
+#ifdef __cplusplus
+}
 #endif
 
 #ifdef ASSEMBLE_SHADER
@@ -103,13 +188,16 @@ static int D3D_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D_UpdateViewport(SDL_Renderer * renderer);
 static int D3D_RenderClear(SDL_Renderer * renderer);
 static int D3D_RenderDrawPoints(SDL_Renderer * renderer,
-                                const SDL_Point * points, int count);
+                                const SDL_FPoint * points, int count);
 static int D3D_RenderDrawLines(SDL_Renderer * renderer,
-                               const SDL_Point * points, int count);
+                               const SDL_FPoint * points, int count);
 static int D3D_RenderFillRects(SDL_Renderer * renderer,
-                               const SDL_Rect * rects, int count);
+                               const SDL_FRect * rects, int count);
 static int D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
+                          const SDL_Rect * srcrect, const SDL_FRect * dstrect);
+static int D3D_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
+                          const SDL_Rect * srcrect, const SDL_FRect * dstrect,
+                          const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip);
 static int D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                                 Uint32 format, void * pixels, int pitch);
 static void D3D_RenderPresent(SDL_Renderer * renderer);
@@ -141,6 +229,8 @@ typedef struct
     D3DTEXTUREFILTERTYPE scaleMode;
     IDirect3DSurface9 *defaultRenderTarget;
     IDirect3DSurface9 *currentRenderTarget;
+    void* d3dxDLL;
+    ID3DXMatrixStack *matrixStack;
 } D3D_RenderData;
 
 typedef struct
@@ -347,6 +437,8 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     int w, h;
     SDL_DisplayMode fullscreen_mode;
     D3DMATRIX matrix;
+    int d3dxVersion;
+	char d3dxDLLFile[50];
 
     renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
     if (!renderer) {
@@ -375,8 +467,28 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
             SDL_UnloadObject(data->d3dDLL);
             data->d3dDLL = NULL;
         }
+
+        for (d3dxVersion=50;d3dxVersion>0;d3dxVersion--) {
+            SDL_snprintf(d3dxDLLFile, 49, "D3DX9_%02d.dll", d3dxVersion);
+            data->d3dxDLL = SDL_LoadObject(d3dxDLLFile);
+            if (data->d3dxDLL) {
+                HRESULT (WINAPI *D3DXCreateMatrixStack) (DWORD Flags, LPD3DXMATRIXSTACK*  ppStack);
+                D3DXCreateMatrixStack = (HRESULT (WINAPI *) (DWORD, LPD3DXMATRIXSTACK*)) SDL_LoadFunction(data->d3dxDLL, "D3DXCreateMatrixStack");
+                if (D3DXCreateMatrixStack) {
+                    D3DXCreateMatrixStack(0, &data->matrixStack);
+                    break;
+                }
+            }
+        }
+
+        if (!data->matrixStack) {
+            if (data->d3dxDLL) SDL_UnloadObject(data->d3dxDLL);
+        }
     }
-    if (!data->d3d) {
+
+
+    
+    if (!data->d3d || !data->matrixStack) {
         SDL_free(renderer);
         SDL_free(data);
         SDL_SetError("Unable to create Direct3D interface");
@@ -395,6 +507,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderDrawLines = D3D_RenderDrawLines;
     renderer->RenderFillRects = D3D_RenderFillRects;
     renderer->RenderCopy = D3D_RenderCopy;
+    renderer->RenderCopyEx = D3D_RenderCopyEx;
     renderer->RenderReadPixels = D3D_RenderReadPixels;
     renderer->RenderPresent = D3D_RenderPresent;
     renderer->DestroyTexture = D3D_DestroyTexture;
@@ -569,8 +682,6 @@ static int
 D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
-    SDL_Window *window = renderer->window;
-    D3DFORMAT display_format = renderdata->pparams.BackBufferFormat;
     D3D_TextureData *data;
     D3DPOOL pool;
     DWORD usage;
@@ -618,7 +729,6 @@ D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                   const SDL_Rect * rect, const void *pixels, int pitch)
 {
     D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
-    D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
     RECT d3drect;
     D3DLOCKED_RECT locked;
     const Uint8 *src;
@@ -853,7 +963,7 @@ D3D_SetBlendMode(D3D_RenderData * data, int blendMode)
 }
 
 static int
-D3D_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
+D3D_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
                      int count)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
@@ -880,8 +990,8 @@ D3D_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
 
     vertices = SDL_stack_alloc(Vertex, count);
     for (i = 0; i < count; ++i) {
-        vertices[i].x = (float) points[i].x;
-        vertices[i].y = (float) points[i].y;
+        vertices[i].x = points[i].x;
+        vertices[i].y = points[i].y;
         vertices[i].z = 0.0f;
         vertices[i].color = color;
         vertices[i].u = 0.0f;
@@ -899,7 +1009,7 @@ D3D_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
 }
 
 static int
-D3D_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
+D3D_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
                     int count)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
@@ -926,8 +1036,8 @@ D3D_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 
     vertices = SDL_stack_alloc(Vertex, count);
     for (i = 0; i < count; ++i) {
-        vertices[i].x = (float) points[i].x;
-        vertices[i].y = (float) points[i].y;
+        vertices[i].x = points[i].x;
+        vertices[i].y = points[i].y;
         vertices[i].z = 0.0f;
         vertices[i].color = color;
         vertices[i].u = 0.0f;
@@ -941,8 +1051,8 @@ D3D_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
        so we need to close the endpoint of the line */
     if (count == 2 ||
         points[0].x != points[count-1].x || points[0].y != points[count-1].y) {
-        vertices[0].x = (float) points[count-1].x;
-        vertices[0].y = (float) points[count-1].y;
+        vertices[0].x = points[count-1].x;
+        vertices[0].y = points[count-1].y;
         result = IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_POINTLIST, 1, vertices, sizeof(*vertices));
     }
 
@@ -955,7 +1065,7 @@ D3D_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 }
 
 static int
-D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects,
+D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects,
                     int count)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
@@ -982,12 +1092,12 @@ D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects,
     color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
 
     for (i = 0; i < count; ++i) {
-        const SDL_Rect *rect = &rects[i];
+        const SDL_FRect *rect = &rects[i];
 
-        minx = (float) rect->x;
-        miny = (float) rect->y;
-        maxx = (float) rect->x + rect->w;
-        maxy = (float) rect->y + rect->h;
+        minx = rect->x;
+        miny = rect->y;
+        maxx = rect->x + rect->w;
+        maxy = rect->y + rect->h;
 
         vertices[0].x = minx;
         vertices[0].y = miny;
@@ -1030,7 +1140,7 @@ D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects,
 
 static int
 D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-               const SDL_Rect * srcrect, const SDL_Rect * dstrect)
+               const SDL_Rect * srcrect, const SDL_FRect * dstrect)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     D3D_TextureData *texturedata = (D3D_TextureData *) texture->driverdata;
@@ -1045,10 +1155,10 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         return -1;
     }
 
-    minx = (float) dstrect->x - 0.5f;
-    miny = (float) dstrect->y - 0.5f;
-    maxx = (float) dstrect->x + dstrect->w - 0.5f;
-    maxy = (float) dstrect->y + dstrect->h - 0.5f;
+    minx = dstrect->x - 0.5f;
+    miny = dstrect->y - 0.5f;
+    maxx = dstrect->x + dstrect->w - 0.5f;
+    maxy = dstrect->y + dstrect->h - 0.5f;
 
     minu = (float) srcrect->x / texture->w;
     maxu = (float) (srcrect->x + srcrect->w) / texture->w;
@@ -1123,6 +1233,135 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             return -1;
         }
     }
+    return 0;
+}
+
+
+static int
+D3D_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
+               const SDL_Rect * srcrect, const SDL_FRect * dstrect,
+               const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip)
+{
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    D3D_TextureData *texturedata = (D3D_TextureData *) texture->driverdata;
+    LPDIRECT3DPIXELSHADER9 shader = NULL;
+    float minx, miny, maxx, maxy;
+    float minu, maxu, minv, maxv;
+    float centerx, centery;
+    DWORD color;
+    Vertex vertices[4];
+    HRESULT result;
+
+    if (D3D_ActivateRenderer(renderer) < 0) {
+        return -1;
+    }
+
+    centerx = center->x;
+    centery = center->y;
+
+    if (flip & SDL_FLIP_HORIZONTAL) {
+        minx = dstrect->w - centerx - 0.5f;
+        maxx = -centerx - 0.5f;
+    }
+    else {
+        minx = -centerx - 0.5f;
+        maxx = dstrect->w - centerx - 0.5f;
+    }
+
+    if (flip & SDL_FLIP_VERTICAL) {
+        miny = dstrect->h - centery - 0.5f;
+        maxy = -centery - 0.5f;
+    }
+    else {
+        miny = -centery - 0.5f;
+        maxy = dstrect->h - centery - 0.5f;
+    }
+
+    minu = (float) srcrect->x / texture->w;
+    maxu = (float) (srcrect->x + srcrect->w) / texture->w;
+    minv = (float) srcrect->y / texture->h;
+    maxv = (float) (srcrect->y + srcrect->h) / texture->h;
+
+    color = D3DCOLOR_ARGB(texture->a, texture->r, texture->g, texture->b);
+
+    vertices[0].x = minx;
+    vertices[0].y = miny;
+    vertices[0].z = 0.0f;
+    vertices[0].color = color;
+    vertices[0].u = minu;
+    vertices[0].v = minv;
+
+    vertices[1].x = maxx;
+    vertices[1].y = miny;
+    vertices[1].z = 0.0f;
+    vertices[1].color = color;
+    vertices[1].u = maxu;
+    vertices[1].v = minv;
+
+    vertices[2].x = maxx;
+    vertices[2].y = maxy;
+    vertices[2].z = 0.0f;
+    vertices[2].color = color;
+    vertices[2].u = maxu;
+    vertices[2].v = maxv;
+
+    vertices[3].x = minx;
+    vertices[3].y = maxy;
+    vertices[3].z = 0.0f;
+    vertices[3].color = color;
+    vertices[3].u = minu;
+    vertices[3].v = maxv;
+
+    D3D_SetBlendMode(data, texture->blendMode);
+
+    // Rotate and translate
+    ID3DXMatrixStack_Push(data->matrixStack);
+    ID3DXMatrixStack_LoadIdentity(data->matrixStack);
+    ID3DXMatrixStack_RotateYawPitchRoll(data->matrixStack, 0.0, 0.0, (float)(M_PI * (float) angle / 180.0f));
+    ID3DXMatrixStack_Translate(data->matrixStack, (float)dstrect->x + centerx, (float)dstrect->y + centery, (float)0.0);
+    IDirect3DDevice9_SetTransform(data->device, D3DTS_VIEW, (D3DMATRIX*)ID3DXMatrixStack_GetTop(data->matrixStack));
+
+    if (texturedata->scaleMode != data->scaleMode) {
+        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
+                                         texturedata->scaleMode);
+        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
+                                         texturedata->scaleMode);
+        data->scaleMode = texturedata->scaleMode;
+    }
+
+    result =
+        IDirect3DDevice9_SetTexture(data->device, 0, (IDirect3DBaseTexture9 *)
+                                    texturedata->texture);
+    if (FAILED(result)) {
+        D3D_SetError("SetTexture()", result);
+        return -1;
+    }
+    if (shader) {
+        result = IDirect3DDevice9_SetPixelShader(data->device, shader);
+        if (FAILED(result)) {
+            D3D_SetError("SetShader()", result);
+            return -1;
+        }
+    }
+    result =
+        IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_TRIANGLEFAN, 2,
+                                         vertices, sizeof(*vertices));
+    if (FAILED(result)) {
+        D3D_SetError("DrawPrimitiveUP()", result);
+        return -1;
+    }
+    if (shader) {
+        result = IDirect3DDevice9_SetPixelShader(data->device, NULL);
+        if (FAILED(result)) {
+            D3D_SetError("SetShader()", result);
+            return -1;
+        }
+    }
+    ID3DXMatrixStack_Pop(data->matrixStack);
+    ID3DXMatrixStack_Push(data->matrixStack);
+    ID3DXMatrixStack_LoadIdentity(data->matrixStack);
+    IDirect3DDevice9_SetTransform(data->device, D3DTS_VIEW, (D3DMATRIX*)ID3DXMatrixStack_GetTop(data->matrixStack));
+    ID3DXMatrixStack_Pop(data->matrixStack);
     return 0;
 }
 

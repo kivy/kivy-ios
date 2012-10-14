@@ -18,15 +18,8 @@
 #include "SDL_main.h"
 
 #ifdef main
-# ifndef _WIN32_WCE_EMULATION
 #  undef main
-# endif /* _WIN32_WCE_EMULATION */
 #endif /* main */
-
-#if defined(_WIN32_WCE) && _WIN32_WCE < 300
-/* seems to be undefined in Win CE although in online help */
-#define isspace(a) (((CHAR)a == ' ') || ((CHAR)a == '\t'))
-#endif /* _WIN32_WCE < 300 */
 
 static void
 UnEscapeQuotes(char *arg)
@@ -130,7 +123,7 @@ OutOfMemory(void)
     return FALSE;
 }
 
-#if defined(_MSC_VER) && !defined(_WIN32_WCE)
+#if defined(_MSC_VER)
 /* The VC++ compiler needs main defined */
 #define console_main main
 #endif
@@ -158,28 +151,9 @@ WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPTSTR szCmdLine, int sw)
     char **argv;
     int argc;
     char *cmdline;
-#ifdef _WIN32_WCE
-    wchar_t *bufp;
-    int nLen;
-#else
     char *bufp;
     size_t nLen;
-#endif
 
-#ifdef _WIN32_WCE
-    nLen = wcslen(szCmdLine) + 128 + 1;
-    bufp = SDL_stack_alloc(wchar_t, nLen * 2);
-    wcscpy(bufp, TEXT("\""));
-    GetModuleFileName(NULL, bufp + 1, 128 - 3);
-    wcscpy(bufp + wcslen(bufp), TEXT("\" "));
-    wcsncpy(bufp + wcslen(bufp), szCmdLine, nLen - wcslen(bufp));
-    nLen = wcslen(bufp) + 1;
-    cmdline = SDL_stack_alloc(char, nLen);
-    if (cmdline == NULL) {
-        return OutOfMemory();
-    }
-    WideCharToMultiByte(CP_ACP, 0, bufp, -1, cmdline, nLen, NULL, NULL);
-#else
     /* Grab the command line */
     bufp = GetCommandLine();
     nLen = SDL_strlen(bufp) + 1;
@@ -188,7 +162,6 @@ WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPTSTR szCmdLine, int sw)
         return OutOfMemory();
     }
     SDL_strlcpy(cmdline, bufp, nLen);
-#endif
 
     /* Parse it into argv and argc */
     argc = ParseCommandLine(cmdline, NULL);

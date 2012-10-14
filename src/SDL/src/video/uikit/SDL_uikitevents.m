@@ -30,9 +30,20 @@
 #import <Foundation/Foundation.h>
 #include "jumphack.h"
 
+static BOOL UIKit_EventPumpEnabled = YES;
+
+void
+SDL_iPhoneSetEventPump(SDL_bool enabled)
+{
+    UIKit_EventPumpEnabled = enabled;
+}
+
 void
 UIKit_PumpEvents(_THIS)
 {
+    if (!UIKit_EventPumpEnabled)
+        return;
+
     /*
         When the user presses the 'home' button on the iPod
         the application exits -- immediatly.

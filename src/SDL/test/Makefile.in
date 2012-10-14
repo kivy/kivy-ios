@@ -10,6 +10,7 @@ LIBS	= @LIBS@
 TARGETS = \
 	checkkeys$(EXE) \
 	loopwave$(EXE) \
+	testaudioinfo$(EXE) \
 	testdraw2$(EXE) \
 	testerror$(EXE) \
 	testfile$(EXE) \
@@ -22,6 +23,7 @@ TARGETS = \
 	testiconv$(EXE) \
 	testime$(EXE) \
 	testintersections$(EXE) \
+	testrelative$(EXE) \
 	testjoystick$(EXE) \
 	testkeys$(EXE) \
 	testloadso$(EXE) \
@@ -44,6 +46,7 @@ TARGETS = \
 	testver$(EXE) \
 	testwm2$(EXE) \
 	torturethread$(EXE) \
+	testrendercopyex$(EXE) \
 
 all: Makefile $(TARGETS)
 
@@ -70,6 +73,9 @@ testatomic$(EXE): $(srcdir)/testatomic.c
 
 testintersections$(EXE): $(srcdir)/testintersections.c $(srcdir)/common.c
 	$(CC) -o $@ $(srcdir)/testintersections.c $(srcdir)/common.c $(CFLAGS) $(LIBS)
+
+testrelative$(EXE): $(srcdir)/testrelative.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testrelative.c $(srcdir)/common.c $(CFLAGS) $(LIBS)
 
 testdraw2$(EXE): $(srcdir)/testdraw2.c $(srcdir)/common.c
 	$(CC) -o $@ $(srcdir)/testdraw2.c $(srcdir)/common.c $(CFLAGS) $(LIBS)
@@ -101,10 +107,10 @@ testthread$(EXE): $(srcdir)/testthread.c
 testiconv$(EXE): $(srcdir)/testiconv.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
-testime$(EXE): $(srcdir)/testime.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @SDL_TTF_LIB@
+testime$(EXE): $(srcdir)/testime.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testime.c $(srcdir)/common.c $(CFLAGS) $(LIBS) @SDL_TTF_LIB@
 
-testjoystick$(EXE): $(srcdir)/testjoystick.c
+testjoystick$(EXE): $(srcdir)/testjoystick.c $(srcdir)/common.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
 testkeys$(EXE): $(srcdir)/testkeys.c
@@ -116,11 +122,25 @@ testloadso$(EXE): $(srcdir)/testloadso.c
 testlock$(EXE): $(srcdir)/testlock.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
+ifeq (@ISMACOSX@,true)
 testnative$(EXE): $(srcdir)/testnative.c \
 			$(srcdir)/testnativecocoa.m \
 			$(srcdir)/testnativew32.c \
 			$(srcdir)/testnativex11.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) -L/usr/X11/lib -lX11 -framework Cocoa
+endif
+
+ifeq (@ISWINDOWS@,true)
+testnative$(EXE): $(srcdir)/testnative.c \
+			$(srcdir)/testnativew32.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
+endif
+
+ifeq (@ISUNIX@,true)
+testnative$(EXE): $(srcdir)/testnative.c \
+			$(srcdir)/testnativex11.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS) -L/usr/X11/lib -lX11
+endif
 
 testoverlay2$(EXE): $(srcdir)/testoverlay2.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
@@ -167,6 +187,9 @@ testwm2$(EXE): $(srcdir)/testwm2.c $(srcdir)/common.c
 torturethread$(EXE): $(srcdir)/torturethread.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
+testrendercopyex$(EXE): $(srcdir)/testrendercopyex.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testrendercopyex.c $(srcdir)/common.c $(CFLAGS) $(LIBS) @MATHLIB@
+	
 clean:
 	rm -f $(TARGETS)
 

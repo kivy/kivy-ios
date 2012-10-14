@@ -314,7 +314,6 @@ SDL_RunAudio(void *devicep)
     int stream_len;
     void *udata;
     void (SDLCALL * fill) (void *userdata, Uint8 * stream, int len);
-    int silence;
     Uint32 delay;
     /* For streaming when the buffer sizes don't match up */
     Uint8 *istream;
@@ -335,12 +334,6 @@ SDL_RunAudio(void *devicep)
     device->use_streamer = 0;
 
     if (device->convert.needed) {
-        if (device->convert.src_format == AUDIO_U8) {
-            silence = 0x80;
-        } else {
-            silence = 0;
-        }
-
 #if 0                           /* !!! FIXME: I took len_div out of the structure. Use rate_incr instead? */
         /* If the result of the conversion alters the length, i.e. resampling is being used, use the streamer */
         if (device->convert.len_mult != 1 || device->convert.len_div != 1) {
@@ -367,7 +360,6 @@ SDL_RunAudio(void *devicep)
         /* stream_len = device->convert.len; */
         stream_len = device->spec.size;
     } else {
-        silence = device->spec.silence;
         stream_len = device->spec.size;
     }
 
@@ -1036,7 +1028,7 @@ open_audio_device(const char *devname, int iscapture,
         char name[64];
         SDL_snprintf(name, sizeof (name), "SDLAudioDev%d", (int) (id + 1));
 /* !!! FIXME: this is nasty. */
-#if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
+#if defined(__WIN32__) && !defined(HAVE_LIBC)
 #undef SDL_CreateThread
         device->thread = SDL_CreateThread(SDL_RunAudio, name, device, NULL, NULL);
 #else

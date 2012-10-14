@@ -23,10 +23,25 @@
 #ifndef _SDL_x11window_h
 #define _SDL_x11window_h
 
+/* We need to queue the focus in/out changes because they may occur during
+   video mode changes and we can respond to them by triggering more mode
+   changes.
+*/
+#define PENDING_FOCUS_IN_TIME   200
+#define PENDING_FOCUS_OUT_TIME  200
+
+typedef enum
+{
+    PENDING_FOCUS_NONE,
+    PENDING_FOCUS_IN,
+    PENDING_FOCUS_OUT
+} PendingFocusEnum;
+
 typedef struct
 {
     SDL_Window *window;
     Window xwindow;
+    Window fswindow;  /* used if we can't have the WM handle fullscreen. */
     Visual *visual;
     Colormap colormap;
 #ifndef NO_SHARED_MEMORY
@@ -38,8 +53,14 @@ typedef struct
     GC gc;
     XIC ic;
     SDL_bool created;
+    PendingFocusEnum pending_focus;
+    Uint32 pending_focus_time;
+    XConfigureEvent last_xconfigure;
     struct SDL_VideoData *videodata;
 } SDL_WindowData;
+
+extern void X11_SetNetWMState(_THIS, Window xwindow, Uint32 flags);
+extern Uint32 X11_GetNetWMState(_THIS, Window xwindow);
 
 extern int X11_CreateWindow(_THIS, SDL_Window * window);
 extern int X11_CreateWindowFrom(_THIS, SDL_Window * window, const void *data);
@@ -54,6 +75,7 @@ extern void X11_RaiseWindow(_THIS, SDL_Window * window);
 extern void X11_MaximizeWindow(_THIS, SDL_Window * window);
 extern void X11_MinimizeWindow(_THIS, SDL_Window * window);
 extern void X11_RestoreWindow(_THIS, SDL_Window * window);
+extern void X11_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered);
 extern void X11_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
 extern int X11_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp);
 extern void X11_SetWindowGrab(_THIS, SDL_Window * window);

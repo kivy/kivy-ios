@@ -44,12 +44,8 @@ SDL_CreateMutex(void)
     mutex = (SDL_mutex *) SDL_malloc(sizeof(*mutex));
     if (mutex) {
         /* Initialize */
-#ifdef _WIN32_WCE
-        InitializeCriticalSection(&mutex->cs);
-#else
         /* On SMP systems, a non-zero spin count generally helps performance */
         InitializeCriticalSectionAndSpinCount(&mutex->cs, 2000);
-#endif
     } else {
         SDL_OutOfMemory();
     }

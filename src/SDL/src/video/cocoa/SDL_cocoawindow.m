@@ -224,6 +224,29 @@ static __inline__ void ConvertNSRect(NSRect *r)
     }
 }
 
+// We'll respond to key events by doing nothing so we don't beep.
+// We could handle key messages here, but we lose some in the NSApp dispatch,
+// where they get converted to action messages, etc.
+- (void)flagsChanged:(NSEvent *)theEvent
+{
+    //Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);
+}
+- (void)keyDown:(NSEvent *)theEvent
+{
+    //Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);
+}
+- (void)keyUp:(NSEvent *)theEvent
+{
+    //Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);
+}
+
+// We'll respond to selectors by doing nothing so we don't beep.
+// The escape key gets converted to a "cancel" selector, etc.
+- (void)doCommandBySelector:(SEL)aSelector
+{
+    //NSLog(@"doCommandBySelector: %@\n", NSStringFromSelector(aSelector));
+}
+
 - (void)mouseDown:(NSEvent *)theEvent
 {
     int button;
@@ -530,14 +553,6 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     /* Fill in the SDL window with the window data */
     {
         NSRect rect = [nswindow contentRectForFrameRect:[nswindow frame]];
-        NSView *contentView = [ nswindow contentView ];
-        /* Create view if not already exists */
-        if (!contentView) {
-            contentView = [[SDLView alloc] initWithFrame:rect];
-            [nswindow setContentView: contentView];
-            [contentView release];
-        }
-
         ConvertNSRect(&rect);
         window->x = (int)rect.origin.x;
         window->y = (int)rect.origin.y;
@@ -626,6 +641,12 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
         }
     }
     nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:YES screen:screen];
+
+    // Create a default view for this window
+    rect = [nswindow contentRectForFrameRect:[nswindow frame]];
+    NSView *contentView = [[SDLView alloc] initWithFrame:rect];
+    [nswindow setContentView: contentView];
+    [contentView release];
 
     [pool release];
 
@@ -819,6 +840,23 @@ Cocoa_RebuildWindow(SDL_WindowData * data, NSWindow * nswindow, unsigned style)
     [nswindow close];
 
     return data->nswindow;
+}
+
+void
+Cocoa_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
+{
+    /* this message arrived in 10.6. You're out of luck on older OSes. */
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
+    if ([nswindow respondsToSelector:@selector(setStyleMask:)]) {
+        [nswindow setStyleMask:GetWindowStyle(window)];
+        if (bordered) {
+            Cocoa_SetWindowTitle(_this, window);  // this got blanked out.
+        }
+    }
+    [pool release];
+#endif
 }
 
 void

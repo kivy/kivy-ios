@@ -120,12 +120,7 @@ DI_SetError(const char *str, HRESULT err)
 static int
 DI_GUIDIsSame(const GUID * a, const GUID * b)
 {
-    if (((a)->Data1 == (b)->Data1) &&
-        ((a)->Data2 == (b)->Data2) &&
-        ((a)->Data3 == (b)->Data3) &&
-        (SDL_strcmp((a)->Data4, (b)->Data4) == 0))
-        return 1;
-    return 0;
+    return (SDL_memcmp(a, b, sizeof (GUID)) == 0);
 }
 
 

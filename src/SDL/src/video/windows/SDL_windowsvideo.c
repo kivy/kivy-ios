@@ -51,11 +51,6 @@ WIN_DeleteDevice(SDL_VideoDevice * device)
     SDL_VideoData *data = (SDL_VideoData *) device->driverdata;
 
     SDL_UnregisterApp();
-#ifdef _WIN32_WCE
-    if(data->hAygShell) {
-       SDL_UnloadObject(data->hAygShell);
-    }
-#endif
 	if (data->userDLL) {
 		SDL_UnloadObject(data->userDLL);
 	}
@@ -88,15 +83,6 @@ WIN_CreateDevice(int devindex)
     }
     device->driverdata = data;
 
-#ifdef _WIN32_WCE
-    data->hAygShell = SDL_LoadObject("\\windows\\aygshell.dll");
-    if(0 == data->hAygShell)
-        data->hAygShell = SDL_LoadObject("aygshell.dll");
-    data->SHFullScreen = (0 != data->hAygShell ?
-        (PFNSHFullScreen) SDL_LoadFunction(data->hAygShell, "SHFullScreen") : 0);
-    data->CoordTransform = NULL;
-#endif
-
 	data->userDLL = SDL_LoadObject("USER32.DLL");
 	if (data->userDLL) {
 		data->CloseTouchInputHandle = (BOOL (WINAPI *)( HTOUCHINPUT )) SDL_LoadFunction(data->userDLL, "CloseTouchInputHandle");
@@ -125,6 +111,7 @@ WIN_CreateDevice(int devindex)
     device->MaximizeWindow = WIN_MaximizeWindow;
     device->MinimizeWindow = WIN_MinimizeWindow;
     device->RestoreWindow = WIN_RestoreWindow;
+    device->SetWindowBordered = WIN_SetWindowBordered;
     device->SetWindowFullscreen = WIN_SetWindowFullscreen;
     device->SetWindowGammaRamp = WIN_SetWindowGammaRamp;
     device->GetWindowGammaRamp = WIN_GetWindowGammaRamp;

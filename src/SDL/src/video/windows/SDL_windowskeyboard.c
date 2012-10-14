@@ -22,10 +22,6 @@
 
 #if SDL_VIDEO_DRIVER_WINDOWS
 
-#ifdef _WIN32_WCE
-#define SDL_DISABLE_WINDOWS_IME
-#endif
-
 #include "SDL_windowsvideo.h"
 
 #include "../../events/SDL_keyboard_c.h"
@@ -572,20 +568,20 @@ IME_GetId(SDL_VideoData *videodata, UINT uIndex)
                         #define pVerFixedInfo   ((VS_FIXEDFILEINFO FAR*)lpVerData)
                         DWORD dwVer = pVerFixedInfo->dwFileVersionMS;
                         dwVer = (dwVer & 0x00ff0000) << 8 | (dwVer & 0x000000ff) << 16;
-                        if (videodata->GetReadingString ||
-                            dwLang == LANG_CHT && (
+                        if ((videodata->GetReadingString) ||
+                            ((dwLang == LANG_CHT) && (
                             dwVer == MAKEIMEVERSION(4, 2) ||
                             dwVer == MAKEIMEVERSION(4, 3) ||
                             dwVer == MAKEIMEVERSION(4, 4) ||
                             dwVer == MAKEIMEVERSION(5, 0) ||
                             dwVer == MAKEIMEVERSION(5, 1) ||
                             dwVer == MAKEIMEVERSION(5, 2) ||
-                            dwVer == MAKEIMEVERSION(6, 0))
+                            dwVer == MAKEIMEVERSION(6, 0)))
                             ||
-                            dwLang == LANG_CHS && (
+                            ((dwLang == LANG_CHS) && (
                             dwVer == MAKEIMEVERSION(4, 1) ||
                             dwVer == MAKEIMEVERSION(4, 2) ||
-                            dwVer == MAKEIMEVERSION(5, 3))) {
+                            dwVer == MAKEIMEVERSION(5, 3)))) {
                             dwRet[0] = dwVer | dwLang;
                             dwRet[1] = pVerFixedInfo->dwFileVersionLS;
                             SDL_free(lpVerBuffer);
@@ -1050,7 +1046,6 @@ STDMETHODIMP UIElementSink_BeginUIElement(TSFSink *sink, DWORD dwUIElementId, BO
     if (SUCCEEDED(element->lpVtbl->QueryInterface(element, &IID_ITfReadingInformationUIElement, (LPVOID *)&preading))) {
         BSTR bstr;
         if (SUCCEEDED(preading->lpVtbl->GetString(preading, &bstr)) && bstr) {
-            WCHAR *s = (WCHAR *)bstr;
             SysFreeString(bstr);
         }
         preading->lpVtbl->Release(preading);
@@ -1133,7 +1128,7 @@ STDMETHODIMP IPPASink_QueryInterface(TSFSink *sink, REFIID riid, PVOID *ppv)
 
 STDMETHODIMP IPPASink_OnActivated(TSFSink *sink, DWORD dwProfileType, LANGID langid, REFCLSID clsid, REFGUID catid, REFGUID guidProfile, HKL hkl, DWORD dwFlags)
 {
-    static GUID TF_PROFILE_DAYI = {0x037B2C25, 0x480C, 0x4D7F, 0xB0, 0x27, 0xD6, 0xCA, 0x6B, 0x69, 0x78, 0x8A};
+    static const GUID TF_PROFILE_DAYI = { 0x037B2C25, 0x480C, 0x4D7F, { 0xB0, 0x27, 0xD6, 0xCA, 0x6B, 0x69, 0x78, 0x8A } };
     SDL_VideoData *videodata = (SDL_VideoData *)sink->data;
     videodata->ime_candlistindexbase = SDL_IsEqualGUID(&TF_PROFILE_DAYI, guidProfile) ? 0 : 1;
     if (SDL_IsEqualIID(catid, &GUID_TFCAT_TIP_KEYBOARD) && (dwFlags & TF_IPSINK_FLAG_ACTIVE))

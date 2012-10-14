@@ -27,7 +27,7 @@
 
 #include "../../core/windows/SDL_windows.h"
 
-#if defined(_MSC_VER) && !defined(_WIN32_WCE)
+#if defined(_MSC_VER)
 #include <msctf.h>
 #else
 #include "SDL_msctf.h"
@@ -114,12 +114,6 @@ typedef struct tagINPUTCONTEXT2 {
 typedef struct SDL_VideoData
 {
     int render;
-
-#ifdef _WIN32_WCE
-    void* hAygShell;
-    PFNSHFullScreen SHFullScreen;
-    PFCoordTransform CoordTransform;
-#endif
 
     const SDL_Scancode *key_layout;
 	DWORD clipboard_count;

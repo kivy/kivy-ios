@@ -40,6 +40,9 @@ extern int pthread_setname_np (pthread_t __target_thread, __const char *__name) 
 #include "SDL_thread.h"
 #include "../SDL_thread_c.h"
 #include "../SDL_systhread.h"
+#ifdef __ANDROID__
+#include "../../core/android/SDL_android.h"
+#endif
 
 /* List of signals to mask in the subthreads */
 static const int sig_list[] = {
@@ -51,6 +54,9 @@ static const int sig_list[] = {
 static void *
 RunThread(void *data)
 {
+#ifdef __ANDROID__
+    Android_JNI_SetupThread();
+#endif
     SDL_RunThread(data);
     return NULL;
 }

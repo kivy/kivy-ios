@@ -57,7 +57,7 @@ SDL_SetHintWithPriority(const char *name, const char *value,
                         SDL_HintPriority priority)
 {
     const char *env;
-    SDL_Hint *prev, *hint;
+    SDL_Hint *hint;
 
     if (!name || !value) {
         return SDL_FALSE;
@@ -68,8 +68,7 @@ SDL_SetHintWithPriority(const char *name, const char *value,
         return SDL_FALSE;
     }
 
-    prev = NULL;
-    for (hint = SDL_hints; hint; prev = hint, hint = hint->next) {
+    for (hint = SDL_hints; hint; hint = hint->next) {
         if (SDL_strcmp(name, hint->name) == 0) {
             if (priority < hint->priority) {
                 return SDL_FALSE;

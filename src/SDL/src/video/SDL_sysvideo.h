@@ -186,6 +186,7 @@ struct SDL_VideoDevice
     void (*MaximizeWindow) (_THIS, SDL_Window * window);
     void (*MinimizeWindow) (_THIS, SDL_Window * window);
     void (*RestoreWindow) (_THIS, SDL_Window * window);
+    void (*SetWindowBordered) (_THIS, SDL_Window * window, SDL_bool bordered);
     void (*SetWindowFullscreen) (_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
     int (*SetWindowGammaRamp) (_THIS, SDL_Window * window, const Uint16 * ramp);
     int (*GetWindowGammaRamp) (_THIS, SDL_Window * window, Uint16 * ramp);
@@ -233,6 +234,13 @@ struct SDL_VideoDevice
     void (*StopTextInput) (_THIS);
     void (*SetTextInputRect) (_THIS, SDL_Rect *rect);
 
+    /* Screen keyboard */
+    SDL_bool (*SDL_HasScreenKeyboardSupport) (_THIS, SDL_Window *window);
+    int (*SDL_ShowScreenKeyboard) (_THIS, SDL_Window *window);
+    int (*SDL_HideScreenKeyboard) (_THIS, SDL_Window *window);
+    int (*SDL_ToggleScreenKeyboard) (_THIS, SDL_Window *window);
+    SDL_bool (*SDL_IsScreenKeyboardShown) (_THIS, SDL_Window *window);
+
     /* Clipboard */
     int (*SetClipboardText) (_THIS, const char *text);
     char * (*GetClipboardText) (_THIS);
@@ -272,6 +280,8 @@ struct SDL_VideoDevice
         int minor_version;
         int flags;
         int profile_mask;
+        int use_egl;
+        int share_with_current_context;
         int retained_backing;
         int driver_loaded;
         char driver_path[256];
@@ -288,7 +298,7 @@ struct SDL_VideoDevice
     void *driverdata;
     struct SDL_GLDriverData *gl_data;
 
-#if SDL_VIDEO_OPENGL_ES
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     struct SDL_PrivateGLESData *gles_data;
 #endif
 

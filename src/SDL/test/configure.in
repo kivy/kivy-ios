@@ -13,9 +13,17 @@ dnl Check for compiler environment
 
 AC_C_CONST
 
+dnl We only care about this for building testnative at the moment, so these
+dnl  values shouldn't be considered absolute truth.
+dnl  (BeOS, for example, sets none of these.)
+ISUNIX="false"
+ISWINDOWS="false"
+ISMACOSX="false"
+
 dnl Figure out which math library to use
 case "$host" in
     *-*-cygwin* | *-*-mingw32*)
+        ISWINDOWS="true"
         EXE=".exe"
         MATHLIB=""
         SYS_GL_LIBS="-lopengl32"
@@ -26,11 +34,13 @@ case "$host" in
         SYS_GL_LIBS="-lGL"
         ;;
     *-*-darwin* )
+        ISMACOSX="true"
         EXE=""
         MATHLIB=""
         SYS_GL_LIBS="-Wl,-framework,OpenGL"
         ;;
     *-*-aix*)
+        ISUNIX="true"
         EXE=""
         if test x$ac_cv_prog_gcc = xyes; then
             CFLAGS="-mthreads"
@@ -56,6 +66,8 @@ case "$host" in
         SYS_GL_LIBS="-lGLES_CM"
         ;;
     *)
+        dnl Oh well, call it Unix...
+        ISUNIX="true"
         EXE=""
         MATHLIB="-lm"
         SYS_GL_LIBS="-lGL"
@@ -63,6 +75,9 @@ case "$host" in
 esac
 AC_SUBST(EXE)
 AC_SUBST(MATHLIB)
+AC_SUBST(ISMACOSX)
+AC_SUBST(ISWINDOWS)
+AC_SUBST(ISUNIX)
 
 dnl Check for SDL
 SDL_VERSION=2.0.0

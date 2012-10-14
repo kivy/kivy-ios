@@ -134,16 +134,27 @@
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC "/usr/X11R6/lib/libX11.6.dylib"
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT "/usr/X11R6/lib/libXext.6.dylib"
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XINERAMA "/usr/X11R6/lib/libXinerama.1.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT "/usr/X11R6/lib/libXi.6.dylib"
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT2 "/usr/X11R6/lib/libXi.6.dylib"
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR "/usr/X11R6/lib/libXrandr.2.dylib"
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XSS "/usr/X11R6/lib/libXss.1.dylib"
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XVIDMODE "/usr/X11R6/lib/libXxf86vm.1.dylib"
 #define SDL_VIDEO_DRIVER_X11_XINERAMA 1
-#define SDL_VIDEO_DRIVER_X11_XINPUT 1
 #define SDL_VIDEO_DRIVER_X11_XRANDR 1
 #define SDL_VIDEO_DRIVER_X11_XSCRNSAVER 1
 #define SDL_VIDEO_DRIVER_X11_XSHAPE 1
 #define SDL_VIDEO_DRIVER_X11_XVIDMODE 1
+#define SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM 1
+
+#ifdef MAC_OS_X_VERSION_10_8
+/*
+ * No matter the versions targeted, this is the 10.8 or later SDK, so you have
+ *  to use the external Xquartz, which is a more modern Xlib. Previous SDKs
+ *  used an older Xlib.
+ */
+#define SDL_VIDEO_DRIVER_X11_XINPUT2 1
+#define SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS 1
+#define SDL_VIDEO_DRIVER_X11_CONST_PARAM_XEXTADDDISPLAY 1
+#endif
 
 #ifndef SDL_VIDEO_RENDER_OGL
 #define SDL_VIDEO_RENDER_OGL	1

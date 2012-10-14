@@ -280,8 +280,6 @@ outputCallback(void *inRefCon,
         while (remaining > 0) {
             if (this->hidden->bufferOffset >= this->hidden->bufferSize) {
                 /* Generate the data */
-                SDL_memset(this->hidden->buffer, this->spec.silence,
-                           this->hidden->bufferSize);
                 SDL_mutexP(this->mixer_lock);
                 (*this->spec.callback)(this->spec.userdata,
                             this->hidden->buffer, this->hidden->bufferSize);
@@ -336,7 +334,7 @@ COREAUDIO_CloseDevice(_THIS)
             result = AudioOutputUnitStop(this->hidden->audioUnit);
 
             /* Remove the input callback */
-            SDL_memset(&callback, '\0', sizeof(AURenderCallbackStruct));
+            SDL_memset(&callback, 0, sizeof(AURenderCallbackStruct));
             result = AudioUnitSetProperty(this->hidden->audioUnit,
                                           kAudioUnitProperty_SetRenderCallback,
                                           scope, bus, &callback,
@@ -390,7 +388,7 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
     desc.componentSubType = kAudioUnitSubType_DefaultOutput;
     comp = FindNextComponent(NULL, &desc);
 #else
-    desc.componentSubType = kAudioUnitSubType_RemoteIO;  /* !!! FIXME: ? */
+    desc.componentSubType = kAudioUnitSubType_RemoteIO;
     comp = AudioComponentFindNext(NULL, &desc);
 #endif
 
@@ -431,7 +429,7 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
     CHECK_RESULT("AudioUnitSetProperty (kAudioUnitProperty_StreamFormat)");
 
     /* Set the audio callback */
-    SDL_memset(&callback, '\0', sizeof(AURenderCallbackStruct));
+    SDL_memset(&callback, 0, sizeof(AURenderCallbackStruct));
     callback.inputProc = ((iscapture) ? inputCallback : outputCallback);
     callback.inputProcRefCon = this;
     result = AudioUnitSetProperty(this->hidden->audioUnit,
