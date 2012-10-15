@@ -9,6 +9,8 @@
 #include "SDL/SDL_main.h"
 #include <dlfcn.h>
 
+void export_orientation();
+
 int main(int argc, char *argv[]) {
     int ret = 0;
     
@@ -34,6 +36,9 @@ int main(int argc, char *argv[]) {
     putenv("KIVY_IMAGE=imageio");
     putenv("KIVY_AUDIO=sdl");
     
+	// Export orientation preferences for Kivy
+	export_orientation();
+
     NSString * resourcePath = [[NSBundle mainBundle] resourcePath];
     NSLog(@"PythonHome is: %s", (char *)[resourcePath UTF8String]);
     Py_SetPythonHome((char *)[resourcePath UTF8String]);
@@ -69,3 +74,23 @@ int main(int argc, char *argv[]) {
     exit(ret);
     return ret;
 }
+
+// This method read available orientations from the Info.plist, and share them
+// in an environment variable. Kivy will automatically set the orientation
+// according to this environment value, if exist.
+void export_orientation() {
+	NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
+	NSArray *orientations = [info objectForKey:@"UISupportedInterfaceOrientations"];
+    NSString *result = [[NSString alloc] initWithString:@"KIVY_ORIENTATION="];
+    for (int i = 0; i < [orientations count]; i++) {
+        NSString *item = [orientations objectAtIndex:i];
+        item = [item substringFromIndex:22];
+        if (i > 0)
+            result = [result stringByAppendingString:@" "];
+        result = [result stringByAppendingString:item];
+    }
+
+    putenv([result UTF8String]);
+    //NSLog(@"Available orientation: %@", result);
+}
+
