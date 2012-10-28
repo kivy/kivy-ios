@@ -20,6 +20,7 @@ try pushd $TMPROOT/Python-$PYTHON_VERSION
 # Patch Python for temporary reduce PY_SSIZE_T_MAX otherzise, splitting string doesnet work
 try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-ssize-t-max.patch
 try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-dynload.patch
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-static-_sqlite3.patch
 
 # Copy our setup for modules
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
@@ -27,7 +28,7 @@ try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
 
 echo "Building for native machine ============================================"
 
-try ./configure CC="$CCACHE clang -Qunused-arguments -fcolor-diagnostics"
+try ./configure CC="$CCACHE clang -Qunused-arguments -fcolor-diagnostics" LDFLAGS="-lsqlite3"
 try make python.exe Parser/pgen
 try mv python.exe hostpython
 try mv Parser/pgen Parser/hostpgen
@@ -52,7 +53,8 @@ ln -s "$SDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib || echo 
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
 
 try ./configure CC="$ARM_CC" LD="$ARM_LD" \
-	CFLAGS="$ARM_CFLAGS" LDFLAGS="$ARM_LDFLAGS -Lextralibs/" \
+	CFLAGS="$ARM_CFLAGS" \
+	LDFLAGS="$ARM_LDFLAGS -Lextralibs/ -lsqlite3" \
 	--disable-toolbox-glue \
 	--host=armv7-apple-darwin \
 	--prefix=/python \

@@ -26,6 +26,7 @@
 		59994DAF148E558600863906 /* libpython2.7.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAA148E558600863906 /* libpython2.7.a */; };
 		59994DB0148E558600863906 /* libSDL_ttf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAB148E558600863906 /* libSDL_ttf.a */; };
 		59994DB1148E558600863906 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAC148E558600863906 /* libSDL2.a */; };
+		5983EC97163CB90D00475EFB /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5983EC96163CB90D00475EFB /* libsqlite3.dylib */; };
 		59994DB3148E564400863906 /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 59994DB2148E564400863906 /* lib */; };
 		596C7514150CFC75003F57D9 /* include in Resources */ = {isa = PBXBuildFile; fileRef = 596C7513150CFC75003F57D9 /* include */; };
 		59994E3B148E85C800863906 /* YourApp in Resources */ = {isa = PBXBuildFile; fileRef = 59994E3A148E85C800863906 /* YourApp */; };
@@ -43,6 +44,7 @@
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		5983EC96163CB90D00475EFB /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		598E034C14F80187000D1362 /* libSDL_mixer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL_mixer.a; path = ../build/lib/libSDL_mixer.a; sourceTree = "<group>"; };
 		598E035314F80578000D1362 /* libogg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libogg.a; path = ../build/lib/libogg.a; sourceTree = "<group>"; };
 		598E035914F8177A000D1362 /* libvorbisidec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbisidec.a; path = ../build/lib/libvorbisidec.a; sourceTree = "<group>"; };
@@ -67,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5983EC97163CB90D00475EFB /* libsqlite3.dylib in Frameworks */,
 				59ED7D0B150E325100A92BEE /* MessageUI.framework in Frameworks */,
 				59ED7D08150E0C4400A92BEE /* libios.a in Frameworks */,
 				598E035A14F8177A000D1362 /* libvorbisidec.a in Frameworks */,
@@ -142,6 +145,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5983EC96163CB90D00475EFB /* libsqlite3.dylib */,
 				59994DA8148E558600863906 /* libfreetype.a */,
 				59994DA9148E558600863906 /* libkivy.a */,
 				59994DAA148E558600863906 /* libpython2.7.a */,
