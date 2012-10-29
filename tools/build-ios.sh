@@ -3,9 +3,11 @@
 . $(dirname $0)/environment.sh
 
 OLD_CC="$CC"
+OLD_CFLAGS="$CFLAGS"
 OLD_LDFLAGS="$LDFLAGS"
 OLD_LDSHARED="$LDSHARED"
 export CC="$ARM_CC -I$BUILDROOT/include"
+export CFLAGS="$ARM_CFLAGS"
 export LDFLAGS="$ARM_LDFLAGS"
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
 
@@ -20,6 +22,7 @@ try cp iosbuild/usr/local/lib/python2.7/site-packages/ios.so "$BUILDROOT/python/
 popd
 
 export CC="$OLD_CC"
+export CFLAGS="$OLD_CFLAGS"
 export LDFLAGS="$OLD_LDFLAGS"
 export LDSHARED="$OLD_LDSHARED"
 
