@@ -14,6 +14,8 @@ cdef extern from "ios_wrapper.h":
     int ios_send_email(char *subject, char *text, char *mimetype, char
             *filename, char *filename_alias, ios_send_email_cb cb, void *userdata)
     void ios_open_url(char *url)
+    float ios_uiscreen_get_scale()
+    int ios_uiscreen_get_dpi()
 
 cdef void _send_email_done(char *status, void *data):
     cdef object callback = <object>data
@@ -159,3 +161,13 @@ def send_email(subject, text, mimetype=None, filename=None, filename_alias=None,
         return 0
 
     return 1
+
+def get_scale():
+    '''Return the UIScreen scale (1 on iPad, 2 on iPad 3)
+    '''
+    return ios_uiscreen_get_scale()
+
+def get_dpi():
+    '''Return the approximate DPI of the screen
+    '''
+    return ios_uiscreen_get_dpi()

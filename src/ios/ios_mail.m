@@ -109,3 +109,22 @@ int ios_send_email(char *subject, char *text, char *mimetype, char *filename,
 	return 1;
 }
 
+
+float ios_uiscreen_get_scale() {
+	float scale = 1.0;
+	if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
+		scale = [[UIScreen mainScreen] scale];
+	};
+	return scale;
+}
+
+int ios_uiscreen_get_dpi() {
+	float scale = ios_uiscreen_get_scale();
+	float dpi = 160 * scale;
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+		dpi = 132 * scale;
+	} else if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+		dpi = 163 * scale;
+	}
+	return dpi;
+}
