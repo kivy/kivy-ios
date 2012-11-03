@@ -14,6 +14,9 @@ Kivy for IOS
     pip install cython
 
 #. Build the whole toolchain with `tools/build_all.sh`
+
+   Make sure the output ends with '== Build ended'
+
 #. Create an Xcode project for your application with `tools/create-xcode-project.sh test /path/to/app`
 #. Open your newly created Xcode project
 #. Ensure code signing is setup correctly
