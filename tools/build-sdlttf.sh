@@ -19,7 +19,9 @@ if [ ! -f $TMPROOT/SDL_ttf-$SDLTTF_VERSION/.libs/libSDL_ttf.a ]; then
 	rm libSDL_ttf.la
 
 	# generate a sdl.pc file that contain all the information of our generated SDL
-	try ./configure --prefix=/usr/local/iphone \
+	set -x
+	try ./configure --prefix=$DESTROOT \
+		--with-freetype-prefix=$DESTROOT \
 		--host=arm-apple-darwin \
 		--enable-static=yes \
 		--enable-shared=no \

@@ -35,6 +35,7 @@ export LXML_VERSION=2.3.1
 export KIVYIOSROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
 export BUILDROOT="$KIVYIOSROOT/build"
 export TMPROOT="$KIVYIOSROOT/tmp"
+export DESTROOT="$KIVYIOSROOT/tmp/root"
 export CACHEROOT="$KIVYIOSROOT/.cache"
 
 # pkg-config for SDL and futures
@@ -65,6 +66,7 @@ try mkdir -p $BUILDROOT/include
 try mkdir -p $BUILDROOT/lib
 try mkdir -p $CACHEROOT
 try mkdir -p $TMPROOT
+try mkdir -p $DESTROOT
 
 # one method to deduplicate some symbol in libraries
 function deduplicate() {

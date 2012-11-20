@@ -28,12 +28,14 @@ fi
 if [ ! -f libogg/src/.libs/libogg.a ]; then
 	try cd libogg
 	try ./configure --disable-shared \
+		--prefix=$DESTROOT \
 		--host=arm-apple-darwin \
 		--enable-static=yes \
 		--enable-shared=no \
 		CC="$ARM_CC" AR="$ARM_AR" \
 		LDFLAGS="$ARM_LDFLAGS" CFLAGS="$ARM_CFLAGS"
 	try make
+	try make install
 	try cd ..
 fi
 
@@ -45,12 +47,14 @@ if [ ! -f libtremor/tremor/.libs/libvorbisidec.a ]; then
 	OGG_CFLAGS="-I../../libogg/include" \
 	OGG_LDFLAGS="-L../../libogg/src/.libs" \
 	PKG_CONFIG_LIBDIR="../../libogg" \
-	ACLOCAL_FLAGS="-I /usr/local/share/aclocal" ./autogen.sh \
+	ACLOCAL_FLAGS="-I $DESTROOT/share/aclocal -I /usr/local/share/aclocal" ./autogen.sh \
+	    --prefix=$DESTROOT \
 		--disable-shared \
 		--host=arm-apple-darwin \
 		--enable-static=yes \
 		--enable-shared=no
 	try make
+	try make install
 	try cd ../..
 fi
 
