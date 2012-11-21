@@ -24,6 +24,7 @@ try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-static-_sql
 
 # Copy our setup for modules
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
+try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
 
 
 echo "Building for native machine ============================================"
@@ -51,6 +52,7 @@ ln -s "$SDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib || echo 
 
 # Copy our setup for modules
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
+try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
 
 try ./configure CC="$ARM_CC" LD="$ARM_LD" \
 	CFLAGS="$ARM_CFLAGS" \
