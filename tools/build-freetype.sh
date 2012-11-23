@@ -2,12 +2,12 @@
 
 . $(dirname $0)/environment.sh
 
-if [ ! -f $CACHEROOT/freetype-$FT_VERSION.tar.bz2 ]; then
-	try curl -L http://download.savannah.gnu.org/releases/freetype/freetype-$FT_VERSION.tar.bz2 > $CACHEROOT/freetype-$FT_VERSION.tar.bz2
+if [ ! -f $CACHEROOT/freetype-$FT_VERSION.tar.gz ]; then
+	try curl -L http://download.savannah.gnu.org/releases/freetype/freetype-$FT_VERSION.tar.gz > $CACHEROOT/freetype-$FT_VERSION.tar.gz
 fi
 if [ ! -d $TMPROOT/freetype-$FT_VERSION ]; then
 	try rm -rf $TMPROOT/freetype-$FT_VERSION
-	try tar xjf $CACHEROOT/freetype-$FT_VERSION.tar.bz2
+	try tar xvf $CACHEROOT/freetype-$FT_VERSION.tar.gz
 	try mv freetype-$FT_VERSION $TMPROOT
 fi
 
