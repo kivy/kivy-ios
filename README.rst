@@ -9,7 +9,7 @@ Kivy for IOS
     brew link libtool
     brew link mercurial
 
-#. Install Cython (if you have pip, use it!)
+#. Install Cython
 ##. Install Python, if not already done!::
     brew install python
 
