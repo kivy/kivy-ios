@@ -9,8 +9,12 @@ Kivy for IOS
     brew link libtool
     brew link mercurial
 
-#. Install Cython (if you have pip, use it!)::
+#. Install Cython::
 
+    # easy-install method
+    sudo easy_install cython
+
+    # pip method if available (sudo might be needed.)
     pip install cython
 
 #. Build the whole toolchain with `tools/build_all.sh`
