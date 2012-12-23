@@ -4,8 +4,8 @@ pushd $KIVYIOSROOT/src/SDL/Xcode-iOS/SDL
 xcodebuild -project SDL.xcodeproj -target libSDL -configuration Release -sdk iphoneos$SDKVER
 popd
 
-cp src/SDL/Xcode-iOS/SDL/build/Release-iphoneos/libSDL2.a $BUILDROOT/lib
-cp -a src/SDL/include $BUILDROOT/include/SDL 
+cp $KIVYIOSROOT/src/SDL/Xcode-iOS/SDL/build/Release-iphoneos/libSDL2.a $BUILDROOT/lib
+cp -a $KIVYIOSROOT/src/SDL/include $BUILDROOT/include/SDL 
 
 cat>$BUILDROOT/pkgconfig/sdl.pc<<EOF
 # sdl pkg-config source file
