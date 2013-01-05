@@ -13,10 +13,10 @@ export LDSHARED="$KIVYIOSROOT/tools/liblink"
 
 try pushd $KIVYIOSROOT/src/ios
 HOSTPYTHON=$TMPROOT/Python-$PYTHON_VERSION/hostpython
-try cython *.pyx
+try $KIVYIOSROOT/tools/cythonize.py *.pyx
 try $HOSTPYTHON setup.py build_ext
 try $HOSTPYTHON setup.py install -O2 --root iosbuild
-try find iosbuild | grep -E '*\.(py|pyc|so\.o|so\.a|so\.libs)$$' | xargs rm
+try find iosbuild | grep -E '.*\.(py|pyc|so\.o|so\.a|so\.libs)$$' | xargs rm
 try rm -rdf "$BUILDROOT/python/lib/python2.7/site-packages/ios*"
 try cp iosbuild/usr/local/lib/python2.7/site-packages/ios.so "$BUILDROOT/python/lib/python2.7/site-packages"
 popd

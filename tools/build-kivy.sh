@@ -21,7 +21,27 @@ OLD_CFLAGS="$CFLAGS"
 OLD_LDSHARED="$LDSHARED"
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
 export CFLAGS="$ARM_CFLAGS"
-try make ios
+
+ln -s $KIVYIOSROOT/Python-$PYTHON_VERSION/python
+ln -s $KIVYIOSROOT/Python-$PYTHON_VERSION/python.exe
+
+rm -rdf iosbuild/
+try mkdir iosbuild
+
+echo "First build ========================================"
+HOSTPYTHON=$TMPROOT/Python-$PYTHON_VERSION/hostpython
+$HOSTPYTHON setup.py build_ext -g
+echo "cythoning =========================================="
+find . -name *.pyx -exec $KIVYIOSROOT/tools/cythonize.py {} \;
+echo "Second build ======================================="
+$HOSTPYTHON setup.py build_ext -g
+$HOSTPYTHON setup.py install -O2 --root iosbuild
+# Strip away the large stuff
+find iosbuild/ | grep -E '.*\.(py|pyc|so\.o|so\.a|so\.libs)$$' | xargs rm
+rm -rdf "$BUILDROOT/python/lib/python2.7/site-packages/kivy"
+# Copy to python for iOS installation
+cp -R "iosbuild/usr/local/lib/python2.7/site-packages/kivy" "$BUILDROOT/python/lib/python2.7/site-packages"
+
 export LDSHARED="$OLD_LDSHARED"
 export CFLAGS="$OLD_CFLAGS"
 popd

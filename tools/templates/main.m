@@ -50,6 +50,9 @@ int main(int argc, char *argv[]) {
     // If other modules are using thread, we need to initialize them before.
     PyEval_InitThreads();
 
+	// Add an importer for builtin modules
+	load_custom_builtin_importer();
+
     // Search and start main.py
     const char * prog = [
         [[NSBundle mainBundle] pathForResource:@"YourApp/main" ofType:@"pyo"] cStringUsingEncoding:
@@ -94,3 +97,28 @@ void export_orientation() {
     //NSLog(@"Available orientation: %@", result);
 }
 
+void load_custom_builtin_importer() {
+	static const char *custom_builtin_importer = \
+		"import sys, imp\n" \
+		"from os.path import exists, join\n" \
+		"class CustomBuiltinImporter(object):\n" \
+		"	def find_module(self, fullname, mpath=None):\n" \
+		"		if '.' not in fullname:\n" \
+		"			return\n" \
+		"		if mpath is None:\n" \
+		"			return\n" \
+		"		part = fullname.rsplit('.')[-1]\n" \
+		"		fn = join(mpath[0], '{}.so'.format(part))\n" \
+		"		if exists(fn):\n" \
+		"			return self\n" \
+		"		return\n" \
+		"	def load_module(self, fullname):\n" \
+		"		f = fullname.replace('.', '_')\n" \
+		"		mod = sys.modules.get(f)\n" \
+		"		if mod is None:\n" \
+		"			mod = imp.load_dynamic(f, f)\n" \
+		"			return mod\n" \
+		"		return mod\n" \
+		"sys.meta_path.append(RewriteImporter())";
+	PyRun_SimpleString(custom_builtin_importer);
+}

@@ -100,7 +100,7 @@ pushd $TMPROOT/lxml-$LXML_VERSION
 HOSTPYTHON=$TMPROOT/Python-$PYTHON_VERSION/hostpython
 XML2_CONFIG=$PREFIX/bin/xml2-config
 XSLT_CONFIG=$PREFIX/bin/xslt-config
-find . -name *.pyx -exec cython -t {} \;
+find . -name *.pyx -exec $KIVYIOSROOT/tools/cythonize.py -t {} \;
 try $HOSTPYTHON setup.py build_ext 
 try $HOSTPYTHON setup.py install -O2 --root iosbuild
 
