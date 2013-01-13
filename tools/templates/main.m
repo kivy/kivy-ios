@@ -10,6 +10,7 @@
 #include <dlfcn.h>
 
 void export_orientation();
+void custom_builtin_importer();
 
 int main(int argc, char *argv[]) {
     int ret = 0;
@@ -119,6 +120,6 @@ void load_custom_builtin_importer() {
 		"			mod = imp.load_dynamic(f, f)\n" \
 		"			return mod\n" \
 		"		return mod\n" \
-		"sys.meta_path.append(RewriteImporter())";
+		"sys.meta_path.append(CustomBuiltinImporter())";
 	PyRun_SimpleString(custom_builtin_importer);
 }
