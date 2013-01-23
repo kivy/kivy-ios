@@ -38,7 +38,7 @@ fi
 # build libxml2
 pushd $TMPROOT/libxml2-$XML2_VERSION
 if [ ! -f .libs/libxml2.a ]; then
-	try ./configure --prefix=/usr/local/iphone \
+	try ./configure \
 		--host=arm-apple-darwin \
 		--enable-static=yes \
 		--enable-shared=no \
@@ -100,12 +100,17 @@ pushd $TMPROOT/lxml-$LXML_VERSION
 HOSTPYTHON=$TMPROOT/Python-$PYTHON_VERSION/hostpython
 XML2_CONFIG=$PREFIX/bin/xml2-config
 XSLT_CONFIG=$PREFIX/bin/xslt-config
-find . -name *.pyx -exec $KIVYIOSROOT/tools/cythonize.py -t {} \;
+
+#pushd src
+#find . -name *.pyx -exec $KIVYIOSROOT/tools/cythonize.py {} \;
+#popd
+find . -name *.pyx -exec cython {} \;
+
 try $HOSTPYTHON setup.py build_ext 
 try $HOSTPYTHON setup.py install -O2 --root iosbuild
 
 find iosbuild/ | grep -E '*\.(py|pyc|so\.o|so\.a|so\.libs)$$' | xargs rm
--rm -rdf "$BUILDROOT/python/lib/python2.7/site-packages/lxml"
+rm -rdf "$BUILDROOT/python/lib/python2.7/site-packages/lxml"
 try cp -R "iosbuild/usr/local/lib/python2.7/site-packages/lxml" "$BUILDROOT/python/lib/python2.7/site-packages"
 
 popd
