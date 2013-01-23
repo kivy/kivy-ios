@@ -26,7 +26,7 @@ echo "-> Copy $SRCDIR to $APPDIR/YourApp"
 YOURAPPDIR=$APPDIR/YourApp
 
 echo "-> Synchronize source code"
-try rsync -av --delete $SRCDIR $YOURAPPDIR
+try rsync -av --delete $SRCDIR/ $YOURAPPDIR
 
 echo "-> Compile to pyo"
 $TMPROOT/Python-$PYTHON_VERSION/hostpython -OO -m compileall $YOURAPPDIR
