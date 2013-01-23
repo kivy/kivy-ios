@@ -10,7 +10,7 @@
 #include <dlfcn.h>
 
 void export_orientation();
-void custom_builtin_importer();
+void load_custom_builtin_importer();
 
 int main(int argc, char *argv[]) {
     int ret = 0;
@@ -100,7 +100,7 @@ void export_orientation() {
 
 void load_custom_builtin_importer() {
 	static const char *custom_builtin_importer = \
-		"import sys, imp\n" \
+		"import sys, imp\n" \   
 		"from os.path import exists, join\n" \
 		"class CustomBuiltinImporter(object):\n" \
 		"	def find_module(self, fullname, mpath=None):\n" \
@@ -117,7 +117,12 @@ void load_custom_builtin_importer() {
 		"		f = fullname.replace('.', '_')\n" \
 		"		mod = sys.modules.get(f)\n" \
 		"		if mod is None:\n" \
-		"			mod = imp.load_dynamic(f, f)\n" \
+        "			#print 'LOAD DYNAMIC', f\n" \
+		"			try:\n" \
+        "			    mod = imp.load_dynamic(f, f)\n" \
+        "			except ImportError:\n" \
+        "			    #print 'LOAD DYNAMIC FALLBACK', fullname\n" \
+        "			    mod = imp.load_dynamic(fullname, fullname)\n" \
 		"			return mod\n" \
 		"		return mod\n" \
 		"sys.meta_path.append(CustomBuiltinImporter())";
