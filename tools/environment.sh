@@ -23,6 +23,21 @@ if [ ! -d $DEVROOT ]; then
 	exit 1
 fi
 
+# iOS SDK Environmnent for the simulator
+export SIMULATOR_SDKVER=`xcodebuild -showsdks | fgrep "iphonesimulator" | tail -n 1 | awk '{print $2}'`
+export SIMULATOR_DEVROOT=`xcode-select -print-path`/Platforms/iPhoneSimulator.platform/Developer
+export SIMULATOR_SDKROOT=$SIMULATOR_DEVROOT/SDKs/iPhoneSimulator$SDKVER.sdk
+
+if [ ! -d $SIMULATOR_DEVROOT ]; then
+	echo "Unable to found the Xcode iPhoneSimulator.platform"
+	echo
+	echo "The path is automatically set from 'xcode-select -print-path'"
+	echo " + /Platforms/iPhoneSimulator.platform/Developer"
+	echo
+	echo "Ensure 'xcode-select -print-path' is set."
+	exit 1
+fi
+
 # version of packages
 export PYTHON_VERSION=2.7.1
 export SDLTTF_VERSION=2.0.10
@@ -45,7 +60,7 @@ export PKG_CONFIG_PATH="$BUILDROOT/pkgconfig:$PKG_CONFIG_PATH"
 # some tools
 export CCACHE=$(which ccache)
 
-# flags for arm compilation
+# flags for arm (device) compilation
 export ARM_CC="$CCACHE $DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2"
 export ARM_AR="$DEVROOT/usr/bin/ar"
 export ARM_LD="$DEVROOT/usr/bin/ld"
@@ -59,6 +74,17 @@ export ARM_LDFLAGS="$ARM_LDFLAGS -miphoneos-version-min=$SDKVER"
 # uncomment this line if you want debugging stuff
 export ARM_CFLAGS="$ARM_CFLAGS -O3"
 #export ARM_CFLAGS="$ARM_CFLAGS -O0 -g"
+
+# flags for i386 (simulator) compilation
+export i386_CC="$CCACHE $SIMULATOR_DEVROOT/usr/bin/i686-apple-darwin11-llvm-gcc-4.2"
+export i386_AR="$SIMULATOR_DEVROOT/usr/bin/ar"
+export i386_LD="$SIMULATOR_DEVROOT/usr/bin/ld"
+export i386_CFLAGS="-isysroot $SIMULATOR_SDKROOT"
+export i386_LDFLAGS="-isysroot $SIMULATOR_SDKROOT"
+
+# uncomment this line if you want debugging stuff
+export i386_CFLAGS="$i386_CFLAGS -O3"
+#export i386_CFLAGS="$i386_CFLAGS -O0 -g"
 
 # create build directory if not found
 try mkdir -p $BUILDROOT

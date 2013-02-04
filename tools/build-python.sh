@@ -26,15 +26,15 @@ try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-static-_sql
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
 try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
 
+# echo "Building for native machine ============================================"
 
-echo "Building for native machine ============================================"
-
-try ./configure CC="$CCACHE clang -Qunused-arguments -fcolor-diagnostics" LDFLAGS="-lsqlite3"
-try make python.exe Parser/pgen
-try mv python.exe hostpython
-try mv Parser/pgen Parser/hostpgen
-try make distclean
-
+if [ -e hostpython ]; then
+    try ./configure CC="$CCACHE clang -Qunused-arguments -fcolor-diagnostics" LDFLAGS="-lsqlite3"
+    try make python.exe Parser/pgen
+    try mv python.exe hostpython
+    try mv Parser/pgen Parser/hostpgen
+    try make distclean
+fi
 
 echo "Building for iOS ======================================================="
 
@@ -54,19 +54,55 @@ ln -s "$SDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib || echo 
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
 try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
 
-try ./configure CC="$ARM_CC" LD="$ARM_LD" \
-	CFLAGS="$ARM_CFLAGS" \
-	LDFLAGS="$ARM_LDFLAGS -Lextralibs/ -lsqlite3" \
-	--disable-toolbox-glue \
-	--host=armv7-apple-darwin \
-	--prefix=/python \
-    --without-doc-strings
+if [ ! -e $BUILDROOT/lib/libpython2.7-armv7.a ]; then
+    try ./configure CC="$ARM_CC" LD="$ARM_LD" \
+        CFLAGS="$ARM_CFLAGS" \
+        LDFLAGS="$ARM_LDFLAGS -Lextralibs/ -lsqlite3" \
+        --disable-toolbox-glue \
+        --host=armv7-apple-darwin \
+        --prefix=/python \
+        --without-doc-strings
 
-try make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
-     CROSS_COMPILE_TARGET=yes
+    try make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
+         CROSS_COMPILE_TARGET=yes
 
-try make install HOSTPYTHON=./hostpython CROSS_COMPILE_TARGET=yes prefix="$BUILDROOT/python"
+    try make install HOSTPYTHON=./hostpython CROSS_COMPILE_TARGET=yes prefix="$BUILDROOT/python"
 
-try mv -f $BUILDROOT/python/lib/libpython2.7.a $BUILDROOT/lib/
+    try mv -f $BUILDROOT/python/lib/libpython2.7.a \
+        $BUILDROOT/lib/libpython2.7-armv7.a
 
-deduplicate $BUILDROOT/lib/libpython2.7.a
+    deduplicate $BUILDROOT/lib/libpython2.7-armv7.a
+fi
+
+# build for i386 (simulator)
+
+if [ ! -e $BUILDROOT/lib/libpython2.7-i386.a ]; then
+    export CPPFLAGS="-I$SIMULATOR_SDKROOT/usr/include/"
+
+    echo "*************************"
+    echo CPPFLAGS=$CPPFLAGS
+    echo "*************************"
+
+    try ./configure CC="$i386_CC" LD="$i386_LD" \
+        CFLAGS="$i386_CFLAGS" \
+        LDFLAGS="$i386_LDFLAGS -Lextralibs/ -lsqlite3" \
+        --disable-toolbox-glue \
+        --prefix=/python \
+        --without-doc-strings
+
+    try make -j4 install prefix="$BUILDROOT/python"
+
+    try mv -f $BUILDROOT/python/lib/libpython2.7.a \
+        $BUILDROOT/lib/libpython2.7-i386.a
+
+    deduplicate $BUILDROOT/lib/libpython2.7-i386.a
+fi
+
+# combine the libs into a Universal lib
+
+if [ -e $BUILDROOT/lib/libpython2.7-i386.a ] && [ -e $BUILDROOT/lib/libpython2.7-armv7.a ]; then
+    try lipo -create -output $BUILDROOT/lib/libpython2.7.a \
+        $BUILDROOT/lib/libpython2.7-i386.a \
+        $BUILDROOT/lib/libpython2.7-armv7.a
+fi
+
