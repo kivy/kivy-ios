@@ -94,13 +94,13 @@ void export_orientation() {
         result = [result stringByAppendingString:item];
     }
 
-    putenv([result UTF8String]);
+    putenv((char *)[result UTF8String]);
     //NSLog(@"Available orientation: %@", result);
 }
 
 void load_custom_builtin_importer() {
 	static const char *custom_builtin_importer = \
-		"import sys, imp\n" \   
+		"import sys, imp\n" \
 		"from os.path import exists, join\n" \
 		"class CustomBuiltinImporter(object):\n" \
 		"	def find_module(self, fullname, mpath=None):\n" \
