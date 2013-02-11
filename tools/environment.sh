@@ -32,7 +32,7 @@ export XSLT_VERSION=1.1.26
 export LXML_VERSION=2.3.1
 
 # where the build will be located
-export KIVYIOSROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
+export KIVYIOSROOT=$PWD
 export BUILDROOT="$KIVYIOSROOT/build"
 export TMPROOT="$KIVYIOSROOT/tmp"
 export DESTROOT="$KIVYIOSROOT/tmp/root"
