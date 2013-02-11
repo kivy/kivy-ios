@@ -28,7 +28,7 @@ try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
 
 # echo "Building for native machine ============================================"
 
-if [ -e hostpython ]; then
+if [ ! -e hostpython ]; then
     try ./configure CC="$CCACHE clang -Qunused-arguments -fcolor-diagnostics" LDFLAGS="-lsqlite3"
     try make python.exe Parser/pgen
     try mv python.exe hostpython
