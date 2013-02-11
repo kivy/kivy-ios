@@ -42,13 +42,13 @@ echo "Building for iOS ======================================================="
 try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-xcompile.patch
 
 # set up environment variables for cross compilation
-export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin11/4.2.1/include/ -I$SDKROOT/usr/include/"
+export CPPFLAGS="-I$IOSSDKROOT/usr/lib/gcc/arm-apple-darwin11/4.2.1/include/ -I$IOSSDKROOT/usr/include/"
 export CPP="$CCACHE /usr/bin/cpp $CPPFLAGS"
 export MACOSX_DEPLOYMENT_TARGET=
 
 # make a link to a differently named library for who knows what reason
 mkdir extralibs||echo "foo"
-ln -s "$SDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib || echo "sdf"
+ln -s "$IOSSDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib || echo "sdf"
 
 # Copy our setup for modules
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local

@@ -34,13 +34,13 @@ $HOSTPYTHON setup.py build_ext -g
 echo "cythoning =========================================="
 find . -name *.pyx -exec $KIVYIOSROOT/tools/cythonize.py {} \;
 echo "Second build ======================================="
-$HOSTPYTHON setup.py build_ext -g
-$HOSTPYTHON setup.py install -O2 --root iosbuild
+try $HOSTPYTHON setup.py build_ext -g
+try $HOSTPYTHON setup.py install -O2 --root iosbuild
 # Strip away the large stuff
 find iosbuild/ | grep -E '.*\.(py|pyc|so\.o|so\.a|so\.libs)$$' | xargs rm
 rm -rdf "$BUILDROOT/python/lib/python2.7/site-packages/kivy"
 # Copy to python for iOS installation
-cp -R "iosbuild/usr/local/lib/python2.7/site-packages/kivy" "$BUILDROOT/python/lib/python2.7/site-packages"
+try cp -R "iosbuild/usr/local/lib/python2.7/site-packages/kivy" "$BUILDROOT/python/lib/python2.7/site-packages"
 
 export LDSHARED="$OLD_LDSHARED"
 export CFLAGS="$OLD_CFLAGS"

@@ -8,10 +8,10 @@ try () {
 	"$@" || exit -1
 }
 
-# iOS SDK Environmnent
+# iOS SDK Environmnent (don't use name "SDKROOT"!!! it will break the compilation)
 export SDKVER=`xcodebuild -showsdks | fgrep "iphoneos" | tail -n 1 | awk '{print $2}'`
 export DEVROOT=`xcode-select -print-path`/Platforms/iPhoneOS.platform/Developer
-export SDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
+export IOSSDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
 
 if [ ! -d $DEVROOT ]; then
 	echo "Unable to found the Xcode iPhoneOS.platform"
@@ -51,9 +51,9 @@ export ARM_AR="$DEVROOT/usr/bin/ar"
 export ARM_LD="$DEVROOT/usr/bin/ld"
 export ARM_CFLAGS="-march=armv7 -mcpu=arm176jzf -mcpu=cortex-a8"
 export ARM_CFLAGS="$ARM_CFLAGS -pipe -no-cpp-precomp"
-export ARM_CFLAGS="$ARM_CFLAGS -isysroot $SDKROOT"
+export ARM_CFLAGS="$ARM_CFLAGS -isysroot $IOSSDKROOT"
 export ARM_CFLAGS="$ARM_CFLAGS -miphoneos-version-min=$SDKVER"
-export ARM_LDFLAGS="-isysroot $SDKROOT"
+export ARM_LDFLAGS="-isysroot $IOSSDKROOT"
 export ARM_LDFLAGS="$ARM_LDFLAGS -miphoneos-version-min=$SDKVER"
 
 # uncomment this line if you want debugging stuff
