@@ -1,5 +1,14 @@
---- configure.in	(revision 18244)
+--- configure.in	(revision 18854)
 +++ configure.in	(working copy)
+@@ -9,7 +9,7 @@
+ AC_CANONICAL_HOST
+ AC_CANONICAL_TARGET
+ 
+-AM_CONFIG_HEADER([config.h])
++AC_CONFIG_HEADERS([config.h])
+ 
+ AM_INIT_AUTOMAKE(libvorbisidec,1.2.1)
+ 
 @@ -116,15 +116,6 @@
  then
    PKG_CHECK_MODULES(OGG, ogg >= 1.0, HAVE_OGG=yes, HAVE_OGG=no)
