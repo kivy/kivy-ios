@@ -44,3 +44,6 @@ _heapq _heapqmodule.c
 
 # Special inclusion for sqlite3
 _sqlite3 -DSQLITE_OMIT_LOAD_EXTENSION _sqlite/cache.c _sqlite/microprotocols.c _sqlite/row.c _sqlite/connection.c _sqlite/module.c _sqlite/statement.c _sqlite/cursor.c _sqlite/prepare_protocol.c _sqlite/util.c 
+
+# Include expat
+pyexpat expat/xmlparse.c expat/xmlrole.c expat/xmltok.c pyexpat.c -I$(srcdir)/Modules/expat -DHAVE_EXPAT_CONFIG_H -DUSE_PYEXPAT_CAPI
