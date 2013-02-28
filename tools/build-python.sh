@@ -7,20 +7,20 @@
 # http://latenitesoft.blogspot.com/2008/10/iphone-programming-tips-building-unix.html
 
 # download python and patch if they aren't there
-if [ ! -f $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2 ]; then
-    curl http://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.bz2 > $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2
+if [ ! -f $CACHEROOT/Python-$IOS_PYTHON_VERSION.tar.bz2 ]; then
+    curl http://www.python.org/ftp/python/$IOS_PYTHON_VERSION/Python-$IOS_PYTHON_VERSION.tar.bz2 > $CACHEROOT/Python-$IOS_PYTHON_VERSION.tar.bz2
 fi
 
 # get rid of old build
-rm -rf $TMPROOT/Python-$PYTHON_VERSION
-try tar -xjf $CACHEROOT/Python-$PYTHON_VERSION.tar.bz2
-try mv Python-$PYTHON_VERSION $TMPROOT
-try pushd $TMPROOT/Python-$PYTHON_VERSION
+rm -rf $TMPROOT/Python-$IOS_PYTHON_VERSION
+try tar -xjf $CACHEROOT/Python-$IOS_PYTHON_VERSION.tar.bz2
+try mv Python-$IOS_PYTHON_VERSION $TMPROOT
+try pushd $TMPROOT/Python-$IOS_PYTHON_VERSION
 
 # Patch Python for temporary reduce PY_SSIZE_T_MAX otherzise, splitting string doesnet work
-try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-ssize-t-max.patch
-try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-dynload.patch
-try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-static-_sqlite3.patch
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-ssize-t-max.patch
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-dynload.patch
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-static-_sqlite3.patch
 
 # Copy our setup for modules
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
@@ -37,7 +37,7 @@ try make distclean
 echo "Building for iOS ======================================================="
 
 # patch python to cross-compile
-try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$PYTHON_VERSION-xcompile.patch
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-xcompile.patch
 
 # set up environment variables for cross compilation
 export CPPFLAGS="-I$IOSSDKROOT/usr/lib/gcc/arm-apple-darwin11/4.2.1/include/ -I$IOSSDKROOT/usr/include/"

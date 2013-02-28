@@ -24,7 +24,7 @@ if [ ! -d $DEVROOT ]; then
 fi
 
 # version of packages
-export PYTHON_VERSION=2.7.1
+export IOS_PYTHON_VERSION=2.7.1
 export SDLTTF_VERSION=2.0.10
 export FT_VERSION=2.4.8
 export XML2_VERSION=2.7.8
@@ -44,6 +44,7 @@ export PKG_CONFIG_PATH="$BUILDROOT/pkgconfig:$PKG_CONFIG_PATH"
 
 # some tools
 export CCACHE=$(which ccache)
+export HOSTPYTHON="$TMPROOT/Python-$IOS_PYTHON_VERSION/hostpython"
 for fn in cython-2.7 cython; do
 	export CYTHON=$(which $fn)
 	if [ "X$CYTHON" != "X" ]; then

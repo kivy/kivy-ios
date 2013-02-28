@@ -22,14 +22,14 @@ OLD_LDSHARED="$LDSHARED"
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
 export CFLAGS="$ARM_CFLAGS"
 
-ln -s $KIVYIOSROOT/Python-$PYTHON_VERSION/python
-ln -s $KIVYIOSROOT/Python-$PYTHON_VERSION/python.exe
+ln -s $KIVYIOSROOT/Python-$IOS_PYTHON_VERSION/python
+ln -s $KIVYIOSROOT/Python-$IOS_PYTHON_VERSION/python.exe
 
 rm -rdf iosbuild/
 try mkdir iosbuild
 
 echo "First build ========================================"
-HOSTPYTHON=$TMPROOT/Python-$PYTHON_VERSION/hostpython
+HOSTPYTHON=$TMPROOT/Python-$IOS_PYTHON_VERSION/hostpython
 $HOSTPYTHON setup.py build_ext -g
 echo "cythoning =========================================="
 find . -name *.pyx -exec $KIVYIOSROOT/tools/cythonize.py {} \;

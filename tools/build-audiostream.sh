@@ -21,7 +21,6 @@ export LDFLAGS="$ARM_LDFLAGS"
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
 
 try pushd $TMPROOT/audiostream-master
-HOSTPYTHON=$TMPROOT/Python-$PYTHON_VERSION/hostpython
 $HOSTPYTHON setup.py build_ext &>/dev/null
 try find . -iname '*.pyx' -exec $KIVYIOSROOT/tools/cythonize.py {} \;
 try $HOSTPYTHON setup.py build_ext

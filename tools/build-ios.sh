@@ -12,7 +12,6 @@ export LDFLAGS="$ARM_LDFLAGS"
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
 
 try pushd $KIVYIOSROOT/src/ios
-HOSTPYTHON=$TMPROOT/Python-$PYTHON_VERSION/hostpython
 try $KIVYIOSROOT/tools/cythonize.py *.pyx
 try $HOSTPYTHON setup.py build_ext
 try $HOSTPYTHON setup.py install -O2 --root iosbuild

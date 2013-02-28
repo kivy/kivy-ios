@@ -97,7 +97,6 @@ export LDFLAGS="$ARM_LDFLAGS -L$PREFIX/lib"
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
 
 pushd $TMPROOT/lxml-$LXML_VERSION
-HOSTPYTHON=$TMPROOT/Python-$PYTHON_VERSION/hostpython
 XML2_CONFIG=$PREFIX/bin/xml2-config
 XSLT_CONFIG=$PREFIX/bin/xslt-config
 
