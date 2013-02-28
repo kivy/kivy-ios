@@ -1,7 +1,19 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import subprocess
+
+# resolve cython executable
+cython = None
+
+def resolve_cython():
+    global cython
+    for executable in ('cython', 'cython-2.7'):
+        for path in os.environ['PATH'].split(':'):
+            if executable in os.listdir(path):
+                cython = os.path.join(path, executable)
+                return
 
 def do(fn):
     print 'cythonize:', fn
@@ -13,7 +25,7 @@ def do(fn):
     package = '_'.join(parts[:-1])
 
     # cythonize
-    subprocess.Popen(['cython', fn]).communicate()
+    subprocess.Popen([cython, fn]).communicate()
 
     if not package:
         print 'no need to rewrite', fn
@@ -43,5 +55,6 @@ def do(fn):
 
 if __name__ == '__main__':
     print '-- cythonize', sys.argv
+    resolve_cython()
     for fn in sys.argv[1:]:
         do(fn)

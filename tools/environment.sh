@@ -44,6 +44,19 @@ export PKG_CONFIG_PATH="$BUILDROOT/pkgconfig:$PKG_CONFIG_PATH"
 
 # some tools
 export CCACHE=$(which ccache)
+for fn in cython-2.7 cython; do
+	export CYTHON=$(which $fn)
+	if [ "X$CYTHON" != "X" ]; then
+		echo "Cython found at $CYTHON"
+		break
+	fi
+done
+if [ "X$CYTHON" == "X" ]; then
+	print "Cython is not installed, aborting."
+	exit 1
+fi
+
+
 
 # flags for arm compilation
 export ARM_CC="$CCACHE $DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2"

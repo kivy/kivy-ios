@@ -104,7 +104,7 @@ XSLT_CONFIG=$PREFIX/bin/xslt-config
 #pushd src
 #find . -name *.pyx -exec $KIVYIOSROOT/tools/cythonize.py {} \;
 #popd
-find . -name *.pyx -exec cython {} \;
+find . -name *.pyx -exec $CYTHON {} \;
 
 try $HOSTPYTHON setup.py build_ext 
 try $HOSTPYTHON setup.py install -O2 --root iosbuild
