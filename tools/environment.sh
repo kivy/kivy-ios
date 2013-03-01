@@ -48,15 +48,19 @@ export HOSTPYTHON="$TMPROOT/Python-$IOS_PYTHON_VERSION/hostpython"
 for fn in cython-2.7 cython; do
 	export CYTHON=$(which $fn)
 	if [ "X$CYTHON" != "X" ]; then
-		echo "Cython found at $CYTHON"
 		break
 	fi
 done
 if [ "X$CYTHON" == "X" ]; then
-	print "Cython is not installed, aborting."
+	echo "Cython is not installed, aborting."
 	exit 1
 fi
 
+# check basic tools
+if [ "X$(which pkg-config)" == "X" ]; then
+	echo "pkg-config is not installed, aborting."
+	exit 1
+fi
 
 
 # flags for arm compilation
