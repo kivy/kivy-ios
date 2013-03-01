@@ -57,8 +57,15 @@ if [ "X$CYTHON" == "X" ]; then
 fi
 
 # check basic tools
-if [ "X$(which pkg-config)" == "X" ]; then
-	echo "pkg-config is not installed, aborting."
+CONFIGURATION_OK=1
+for tool in pkg-config autoconf automake libtool hg; do
+	if [ "X$(which $tool)" == "X" ]; then
+		echo "Missing requirement: $tool is not installed !"
+		CONFIGURATION_OK=0
+	fi
+done
+if [ $CONFIGURATION_OK -eq 0 ]; then
+	echo "Install thoses requirements first, then restart the script."
 	exit 1
 fi
 
