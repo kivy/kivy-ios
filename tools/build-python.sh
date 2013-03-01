@@ -55,6 +55,7 @@ try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
 try ./configure CC="$ARM_CC" LD="$ARM_LD" \
 	CFLAGS="$ARM_CFLAGS" \
 	LDFLAGS="$ARM_LDFLAGS -Lextralibs/ -lsqlite3" \
+	--without-pymalloc \
 	--disable-toolbox-glue \
 	--host=armv7-apple-darwin \
 	--prefix=/python \
