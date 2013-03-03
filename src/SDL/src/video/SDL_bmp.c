@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -51,7 +51,7 @@ SDL_Surface *
 SDL_LoadBMP_RW(SDL_RWops * src, int freesrc)
 {
     SDL_bool was_error;
-    long fp_offset = 0;
+    Sint64 fp_offset = 0;
     int bmpPitch;
     int i, pad;
     SDL_Surface *surface;
@@ -371,7 +371,7 @@ SDL_LoadBMP_RW(SDL_RWops * src, int freesrc)
 int
 SDL_SaveBMP_RW(SDL_Surface * saveme, SDL_RWops * dst, int freedst)
 {
-    long fp_offset;
+    Sint64 fp_offset;
     int i, pad;
     SDL_Surface *surface;
     Uint8 *bits;
@@ -515,7 +515,7 @@ SDL_SaveBMP_RW(SDL_Surface * saveme, SDL_RWops * dst, int freedst)
         }
 
         /* Write the bitmap offset */
-        bfOffBits = SDL_RWtell(dst) - fp_offset;
+        bfOffBits = (Uint32)(SDL_RWtell(dst) - fp_offset);
         if (SDL_RWseek(dst, fp_offset + 10, RW_SEEK_SET) < 0) {
             SDL_Error(SDL_EFSEEK);
         }
@@ -542,7 +542,7 @@ SDL_SaveBMP_RW(SDL_Surface * saveme, SDL_RWops * dst, int freedst)
         }
 
         /* Write the BMP file size */
-        bfSize = SDL_RWtell(dst) - fp_offset;
+        bfSize = (Uint32)(SDL_RWtell(dst) - fp_offset);
         if (SDL_RWseek(dst, fp_offset + 2, RW_SEEK_SET) < 0) {
             SDL_Error(SDL_EFSEEK);
         }

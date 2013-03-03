@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -127,6 +127,7 @@ WIN_AddDisplay(LPTSTR DeviceName)
     SDL_VideoDisplay display;
     SDL_DisplayData *displaydata;
     SDL_DisplayMode mode;
+    DISPLAY_DEVICE device;
 
 #ifdef DEBUG_MODES
     printf("Display: %s\n", WIN_StringToUTF8(DeviceName));
@@ -143,10 +144,15 @@ WIN_AddDisplay(LPTSTR DeviceName)
                sizeof(displaydata->DeviceName));
 
     SDL_zero(display);
+    device.cb = sizeof(device);
+    if (EnumDisplayDevices(DeviceName, 0, &device, 0)) {
+        display.name = WIN_StringToUTF8(device.DeviceString);
+    }
     display.desktop_mode = mode;
     display.current_mode = mode;
     display.driverdata = displaydata;
     SDL_AddVideoDisplay(&display);
+    SDL_free(display.name);
     return SDL_TRUE;
 }
 

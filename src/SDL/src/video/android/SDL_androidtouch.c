@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -40,15 +40,28 @@
 #define ACTION_POINTER_1_DOWN 5
 #define ACTION_POINTER_1_UP 6
 
+static SDL_FingerID leftFingerDown = 0;
+
+static void Android_GetWindowCoordinates(float x, float y,
+                                         int *window_x, int *window_y)
+{
+    int window_w, window_h;
+
+    SDL_GetWindowSize(Android_Window, &window_w, &window_h);
+    *window_x = (int)(x * window_w);
+    *window_y = (int)(y * window_h);
+}
+
 void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int action, float x, float y, float p) 
 {
     SDL_TouchID touchDeviceId = 0;
     SDL_FingerID fingerId = 0;
-    
+    int window_x, window_y;
+
     if (!Android_Window) {
         return;
     }
-    
+
     touchDeviceId = (SDL_TouchID)touch_device_id_in;
     if (!SDL_GetTouch(touchDeviceId)) {
         SDL_Touch touch;
@@ -68,18 +81,39 @@ void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int actio
         }
     }
 
-    
     fingerId = (SDL_FingerID)pointer_finger_id_in;
     switch (action) {
         case ACTION_DOWN:
         case ACTION_POINTER_1_DOWN:
+            if (!leftFingerDown) {
+                Android_GetWindowCoordinates(x, y, &window_x, &window_y);
+
+                /* send moved event */
+                SDL_SendMouseMotion(NULL, 0, window_x, window_y);
+
+                /* send mouse down event */
+                SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
+
+                leftFingerDown = fingerId;
+            }
             SDL_SendFingerDown(touchDeviceId, fingerId, SDL_TRUE, x, y, p);
             break;
         case ACTION_MOVE:
+            if (!leftFingerDown) {
+                Android_GetWindowCoordinates(x, y, &window_x, &window_y);
+
+                /* send moved event */
+                SDL_SendMouseMotion(NULL, 0, window_x, window_y);
+            }
             SDL_SendTouchMotion(touchDeviceId, fingerId, SDL_FALSE, x, y, p);
             break;
         case ACTION_UP:
         case ACTION_POINTER_1_UP:
+            if (fingerId == leftFingerDown) {
+                /* send mouse up */
+                SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+                leftFingerDown = 0;
+            }
             SDL_SendFingerDown(touchDeviceId, fingerId, SDL_FALSE, x, y, p);
             break;
         default:

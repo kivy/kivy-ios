@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -23,6 +23,9 @@
 #if SDL_VIDEO_DRIVER_COCOA
 
 #include "SDL_cocoavideo.h"
+
+/* We need this for IODisplayCreateInfoDictionary and kIODisplayOnlyPreferredName */
+#include <IOKit/graphics/IOGraphicsLib.h>
 
 /* we need this for ShowMenuBar() and HideMenuBar(). */
 #include <Carbon/Carbon.h>
@@ -217,9 +220,24 @@ Cocoa_ReleaseDisplayModeList(_THIS, CFArrayRef modelist)
     #endif
 }
 
+static const char *
+Cocoa_GetDisplayName(CGDirectDisplayID displayID)
+{
+    NSDictionary *deviceInfo = (NSDictionary *)IODisplayCreateInfoDictionary(CGDisplayIOServicePort(displayID), kIODisplayOnlyPreferredName);
+    NSDictionary *localizedNames = [deviceInfo objectForKey:[NSString stringWithUTF8String:kDisplayProductName]];
+    const char* displayName = NULL;
+    
+    if ([localizedNames count] > 0) {
+        displayName = SDL_strdup([[localizedNames objectForKey:[[localizedNames allKeys] objectAtIndex:0]] UTF8String]);
+    }
+    [deviceInfo release];
+    return displayName;
+}
+
 void
 Cocoa_InitModes(_THIS)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     CGDisplayErr result;
     CGDirectDisplayID *displays;
     CGDisplayCount numDisplays;
@@ -228,6 +246,7 @@ Cocoa_InitModes(_THIS)
     result = CGGetOnlineDisplayList(0, NULL, &numDisplays);
     if (result != kCGErrorSuccess) {
         CG_SetError("CGGetOnlineDisplayList()", result);
+        [pool release];
         return;
     }
     displays = SDL_stack_alloc(CGDirectDisplayID, numDisplays);
@@ -235,6 +254,7 @@ Cocoa_InitModes(_THIS)
     if (result != kCGErrorSuccess) {
         CG_SetError("CGGetOnlineDisplayList()", result);
         SDL_stack_free(displays);
+        [pool release];
         return;
     }
 
@@ -284,8 +304,11 @@ Cocoa_InitModes(_THIS)
             displaydata->display = displays[i];
 
             SDL_zero(display);
+            // this returns a stddup'ed string
+            display.name = (char *)Cocoa_GetDisplayName(displays[i]);
             if (!GetDisplayMode (_this, moderef, &mode)) {
                 Cocoa_ReleaseDisplayMode(_this, moderef);
+                if (display.name) SDL_free(display.name);
                 SDL_free(displaydata);
                 continue;
             }
@@ -294,9 +317,11 @@ Cocoa_InitModes(_THIS)
             display.current_mode = mode;
             display.driverdata = displaydata;
             SDL_AddVideoDisplay(&display);
+            if (display.name) SDL_free(display.name);
         }
     }
     SDL_stack_free(displays);
+    [pool release];
 }
 
 int

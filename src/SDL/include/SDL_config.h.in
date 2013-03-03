@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -70,6 +70,8 @@
 #undef HAVE_SIGNAL_H
 #undef HAVE_ALTIVEC_H
 #undef HAVE_PTHREAD_NP_H
+#undef HAVE_LIBUDEV_H
+#undef HAVE_DBUS_DBUS_H
 
 /* C library functions */
 #undef HAVE_MALLOC
@@ -139,6 +141,8 @@
 #undef HAVE_SIN
 #undef HAVE_SINF
 #undef HAVE_SQRT
+#undef HAVE_FSEEKO
+#undef HAVE_FSEEKO64
 #undef HAVE_SIGACTION
 #undef HAVE_SA_SIGACTION
 #undef HAVE_SETJMP

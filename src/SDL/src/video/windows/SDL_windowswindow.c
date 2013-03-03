@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -89,7 +89,7 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
     data->hwnd = hwnd;
     data->hdc = GetDC(hwnd);
     data->created = created;
-    data->mouse_pressed = SDL_FALSE;
+    data->mouse_button_flags = 0;
     data->videodata = videodata;
 
     window->driverdata = data;
@@ -354,8 +354,8 @@ WIN_SetWindowPositionInternal(_THIS, SDL_Window * window, UINT flags)
     int w, h;
 
     /* Figure out what the window area will be */
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        top = HWND_TOPMOST;
+    if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
+		top = HWND_TOPMOST;
     } else {
         top = HWND_NOTOPMOST;
     }
@@ -406,11 +406,11 @@ WIN_RaiseWindow(_THIS, SDL_Window * window)
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     HWND top;
 
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        top = HWND_TOPMOST;
-    } else {
-        top = HWND_NOTOPMOST;
-    }
+	if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
+		top = HWND_TOPMOST;
+	} else {
+		top = HWND_NOTOPMOST;
+	}
     SetWindowPos(hwnd, top, 0, 0, 0, 0, (SWP_NOMOVE | SWP_NOSIZE));
 }
 
@@ -467,11 +467,12 @@ WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
     int x, y;
     int w, h;
 
-    if (fullscreen) {
-        top = HWND_TOPMOST;
-    } else {
-        top = HWND_NOTOPMOST;
-    }
+	if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
+		top = HWND_TOPMOST;
+	} else {
+		top = HWND_NOTOPMOST;
+	}
+
     style = GetWindowLong(hwnd, GWL_STYLE);
     style &= ~STYLE_MASK;
     style |= GetWindowStyle(window);
@@ -538,12 +539,11 @@ WIN_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp)
 }
 
 void
-WIN_SetWindowGrab(_THIS, SDL_Window * window)
+WIN_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
 
-    if ((window->flags & SDL_WINDOW_INPUT_GRABBED) &&
-        (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
+    if (grabbed) {
         RECT rect;
         GetClientRect(hwnd, &rect);
         ClientToScreen(hwnd, (LPPOINT) & rect);
@@ -552,6 +552,23 @@ WIN_SetWindowGrab(_THIS, SDL_Window * window)
     } else {
         ClipCursor(NULL);
     }
+
+	if ( window->flags & SDL_WINDOW_FULLSCREEN )
+	{
+		HWND top;
+		SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+		HWND hwnd = data->hwnd;
+		UINT flags = SWP_NOMOVE | SWP_NOSIZE;
+
+		if ( SDL_ShouldAllowTopmost() && (window->flags & SDL_WINDOW_INPUT_FOCUS ) ) {
+			top = HWND_TOPMOST;
+		} else {
+			top = HWND_NOTOPMOST;
+			flags |= SWP_NOZORDER;
+		}
+		
+		SetWindowPos(hwnd, top, 0, 0, 0, 0, flags);
+	}
 }
 
 void

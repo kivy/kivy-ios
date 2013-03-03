@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -361,6 +361,12 @@ D3D_Reset(SDL_Renderer * renderer)
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     HRESULT result;
 
+    /* Release the default render target before reset */
+    if (data->defaultRenderTarget) {
+        IDirect3DSurface9_Release(data->defaultRenderTarget);
+        data->defaultRenderTarget = NULL;
+    }
+
     result = IDirect3DDevice9_Reset(data->device, &data->pparams);
     if (FAILED(result)) {
         if (result == D3DERR_DEVICELOST) {
@@ -377,6 +383,7 @@ D3D_Reset(SDL_Renderer * renderer)
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
                                     D3DCULL_NONE);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
+    IDirect3DDevice9_GetRenderTarget(data->device, 0, &data->defaultRenderTarget);
     return 0;
 }
 
@@ -538,9 +545,14 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     pparams.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
     if (window_flags & SDL_WINDOW_FULLSCREEN) {
+		if ( ( window_flags & SDL_WINDOW_FULLSCREEN_DESKTOP ) == SDL_WINDOW_FULLSCREEN_DESKTOP )  {
+			pparams.Windowed = TRUE;
+			pparams.FullScreen_RefreshRateInHz = 0;
+		} else {
         pparams.Windowed = FALSE;
         pparams.FullScreen_RefreshRateInHz =
             fullscreen_mode.refresh_rate;
+		}
     } else {
         pparams.Windowed = TRUE;
         pparams.FullScreen_RefreshRateInHz = 0;
@@ -1477,7 +1489,10 @@ D3D_DestroyRenderer(SDL_Renderer * renderer)
 
     if (data) {
         // Release the render target
-        IDirect3DSurface9_Release(data->defaultRenderTarget);
+        if (data->defaultRenderTarget) {
+            IDirect3DSurface9_Release(data->defaultRenderTarget);
+            data->defaultRenderTarget = NULL;
+        }
         if (data->currentRenderTarget != NULL) {
             IDirect3DSurface9_Release(data->currentRenderTarget);
             data->currentRenderTarget = NULL;

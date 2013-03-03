@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -108,6 +108,7 @@ typedef enum
     SDL_WINDOW_INPUT_GRABBED = 0x00000100,      /**< window has grabbed input focus */
     SDL_WINDOW_INPUT_FOCUS = 0x00000200,        /**< window has input focus */
     SDL_WINDOW_MOUSE_FOCUS = 0x00000400,        /**< window has mouse focus */
+	SDL_WINDOW_FULLSCREEN_DESKTOP = ( SDL_WINDOW_FULLSCREEN | 0x00001000 ),
     SDL_WINDOW_FOREIGN = 0x00000800             /**< window not created by SDL */
 } SDL_WindowFlags;
 
@@ -269,6 +270,15 @@ extern DECLSPEC const char *SDLCALL SDL_GetCurrentVideoDriver(void);
 extern DECLSPEC int SDLCALL SDL_GetNumVideoDisplays(void);
 
 /**
+ *  \brief Get the name of a display in UTF-8 encoding
+ *  
+ *  \return The name of a display, or NULL for an invalid display index.
+ *  
+ *  \sa SDL_GetNumVideoDisplays()
+ */
+extern DECLSPEC const char * SDLCALL SDL_GetDisplayName(int displayIndex);
+
+/**
  *  \brief Get the desktop area represented by a display, with the primary
  *         display located at 0,0
  *  
@@ -338,7 +348,7 @@ extern DECLSPEC SDL_DisplayMode * SDLCALL SDL_GetClosestDisplayMode(int displayI
  *  \return the display index of the display containing the center of the
  *          window, or -1 on error.
  */
-extern DECLSPEC int SDLCALL SDL_GetWindowDisplay(SDL_Window * window);
+extern DECLSPEC int SDLCALL SDL_GetWindowDisplayIndex(SDL_Window * window);
 
 /**
  *  \brief Set the display mode used when a fullscreen window is visible.
@@ -517,6 +527,48 @@ extern DECLSPEC void SDLCALL SDL_SetWindowSize(SDL_Window * window, int w,
  */
 extern DECLSPEC void SDLCALL SDL_GetWindowSize(SDL_Window * window, int *w,
                                                int *h);
+    
+/**
+ *  \brief Set the minimum size of a window's client area.
+ *
+ *  \note You can't change the minimum size of a fullscreen window, it
+ *        automatically matches the size of the display mode.
+ *
+ *  \sa SDL_GetWindowMinimumSize()
+ *  \sa SDL_SetWindowMaximumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_SetWindowMinimumSize(SDL_Window * window,
+                                                      int min_w, int min_h);
+    
+/**
+ *  \brief Get the minimum size of a window's client area.
+ *
+ *  \sa SDL_GetWindowMaximumSize()
+ *  \sa SDL_SetWindowMinimumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_GetWindowMinimumSize(SDL_Window * window,
+                                                      int *w, int *h);
+
+/**
+ *  \brief Set the maximum size of a window's client area.
+ *
+ *  \note You can't change the maximum size of a fullscreen window, it
+ *        automatically matches the size of the display mode.
+ *
+ *  \sa SDL_GetWindowMaximumSize()
+ *  \sa SDL_SetWindowMinimumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_SetWindowMaximumSize(SDL_Window * window,
+                                                      int max_w, int max_h);
+    
+/**
+ *  \brief Get the maximum size of a window's client area.
+ *
+ *  \sa SDL_GetWindowMinimumSize()
+ *  \sa SDL_SetWindowMaximumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_GetWindowMaximumSize(SDL_Window * window,
+                                                      int *w, int *h);
 
 /**
  *  \brief Set the border state of a window.
@@ -585,7 +637,7 @@ extern DECLSPEC void SDLCALL SDL_RestoreWindow(SDL_Window * window);
  *  \sa SDL_GetWindowDisplayMode()
  */
 extern DECLSPEC int SDLCALL SDL_SetWindowFullscreen(SDL_Window * window,
-                                                    SDL_bool fullscreen);
+                                                    Uint32 flags);
 
 /**
  *  \brief Get the SDL surface associated with the window.

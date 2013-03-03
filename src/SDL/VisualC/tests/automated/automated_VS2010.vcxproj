@@ -110,7 +110,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.d.." "$(TargetDir)\SDL2.d.."</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>

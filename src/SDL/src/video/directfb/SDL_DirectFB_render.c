@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -669,7 +669,7 @@ DirectFB_GetTexturePalette(SDL_Renderer * renderer,
             colors[i].r = entries[i].r;
             colors[i].g = entries[i].g;
             colors[i].b = entries[i].b;
-            colors->unused = SDL_ALPHA_OPAQUE;
+            colors[i].unused = SDL_ALPHA_OPAQUE;
         }
         return 0;
     } else {

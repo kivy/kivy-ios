@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -42,7 +42,7 @@ extern void BE_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered);
 extern void BE_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
 extern int BE_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp);
 extern int BE_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp);
-extern void BE_SetWindowGrab(_THIS, SDL_Window * window);
+extern void BE_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed);
 extern void BE_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool BE_GetWindowWMInfo(_THIS, SDL_Window * window,
                                     struct SDL_SysWMinfo *info);

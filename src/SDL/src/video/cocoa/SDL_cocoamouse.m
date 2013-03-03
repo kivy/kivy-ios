@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -22,6 +22,7 @@
 
 #if SDL_VIDEO_DRIVER_COCOA
 
+#include "SDL_assert.h"
 #include "SDL_events.h"
 #include "SDL_cocoavideo.h"
 
@@ -66,6 +67,68 @@ Cocoa_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
     if (nscursor) {
         cursor = SDL_calloc(1, sizeof(*cursor));
         if (cursor) {
+            cursor->driverdata = nscursor;
+        }
+    }
+
+    [pool release];
+
+    return cursor;
+}
+
+static SDL_Cursor *
+Cocoa_CreateSystemCursor(SDL_SystemCursor id)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSCursor *nscursor = NULL;
+    SDL_Cursor *cursor = NULL;
+
+    switch(id)
+    {
+    case SDL_SYSTEM_CURSOR_ARROW:
+        nscursor = [NSCursor arrowCursor];
+        break;
+    case SDL_SYSTEM_CURSOR_IBEAM:
+        nscursor = [NSCursor IBeamCursor];
+        break;
+    case SDL_SYSTEM_CURSOR_WAIT:
+        nscursor = [NSCursor arrowCursor];
+        break;
+    case SDL_SYSTEM_CURSOR_CROSSHAIR:
+        nscursor = [NSCursor crosshairCursor];
+        break;
+    case SDL_SYSTEM_CURSOR_WAITARROW:
+        nscursor = [NSCursor arrowCursor];
+        break;
+    case SDL_SYSTEM_CURSOR_SIZENWSE:
+    case SDL_SYSTEM_CURSOR_SIZENESW:
+        nscursor = [NSCursor closedHandCursor];
+        break;
+    case SDL_SYSTEM_CURSOR_SIZEWE:
+        nscursor = [NSCursor resizeLeftRightCursor];
+        break;
+    case SDL_SYSTEM_CURSOR_SIZENS:
+        nscursor = [NSCursor resizeUpDownCursor];
+        break;
+    case SDL_SYSTEM_CURSOR_SIZEALL:
+        nscursor = [NSCursor closedHandCursor];
+        break;
+    case SDL_SYSTEM_CURSOR_NO:
+        nscursor = [NSCursor operationNotAllowedCursor];
+        break;
+    case SDL_SYSTEM_CURSOR_HAND:
+        nscursor = [NSCursor pointingHandCursor];
+        break;
+    default:
+        SDL_assert(!"Unknown system cursor");
+        return NULL;
+    }
+
+    if (nscursor) {
+        cursor = SDL_calloc(1, sizeof(*cursor));
+        if (cursor) {
+            // We'll free it later, so retain it here
+            [nscursor retain];
             cursor->driverdata = nscursor;
         }
     }
@@ -139,6 +202,7 @@ Cocoa_InitMouse(_THIS)
     SDL_Mouse *mouse = SDL_GetMouse();
 
     mouse->CreateCursor = Cocoa_CreateCursor;
+    mouse->CreateSystemCursor = Cocoa_CreateSystemCursor;
     mouse->ShowCursor = Cocoa_ShowCursor;
     mouse->FreeCursor = Cocoa_FreeCursor;
     mouse->WarpMouse = Cocoa_WarpMouse;

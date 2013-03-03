@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -19,14 +19,16 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#if SDL_INPUT_LINUXEV
 #include <linux/input.h>
-#endif
+
+struct SDL_joylist_item;
 
 /* The private structure used to keep track of a joystick */
 struct joystick_hwdata
 {
     int fd;
+    struct SDL_joylist_item *item;
+    SDL_JoystickGUID guid;
     char *fname;                /* Used in haptic subsystem */
 
     /* The current linux joystick driver maps hats to two axes */
@@ -41,8 +43,6 @@ struct joystick_hwdata
     } *balls;
 
     /* Support for the Linux 2.4 unified input interface */
-#if SDL_INPUT_LINUXEV
-    SDL_bool is_hid;
     Uint8 key_map[KEY_MAX - BTN_MISC];
     Uint8 abs_map[ABS_MAX];
     struct axis_correct
@@ -50,5 +50,8 @@ struct joystick_hwdata
         int used;
         int coef[3];
     } abs_correct[ABS_MAX];
-#endif
+
+    int fresh;
 };
+
+/* vi: set ts=4 sw=4 expandtab: */

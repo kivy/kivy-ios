@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -107,6 +107,7 @@ CreateApplicationMenus(void)
     [menuItem setSubmenu:serviceMenu];
 
     [NSApp setServicesMenu:serviceMenu];
+    [serviceMenu release];
 
     [appleMenu addItem:[NSMenuItem separatorItem]];
 
@@ -156,6 +157,7 @@ CreateApplicationMenus(void)
 void
 Cocoa_RegisterApp(void)
 {
+    /* This can get called more than once! Be careful what you initialize! */
     ProcessSerialNumber psn;
     NSAutoreleasePool *pool;
 

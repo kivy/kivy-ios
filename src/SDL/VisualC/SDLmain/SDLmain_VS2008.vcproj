@@ -150,6 +150,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release_NoSTDIO|Win32"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			>
 			<Tool

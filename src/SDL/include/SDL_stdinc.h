@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -340,7 +340,7 @@ do {						\
 /* We can count on memcpy existing on Mac OS X and being well-tuned. */
 #if defined(__MACOSX__)
 #define SDL_memcpy      memcpy
-#elif defined(__GNUC__) && defined(i386)
+#elif defined(__GNUC__) && defined(i386) && !defined(__WIN32__)
 #define SDL_memcpy(dst, src, len)					  \
 do {									  \
 	int u0, u1, u2;						  	  \
@@ -633,7 +633,9 @@ extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen,
 #endif
 
 #ifndef HAVE_M_PI
+#ifndef M_PI
 #define M_PI    3.14159265358979323846264338327950288   /* pi */
+#endif
 #endif
 
 #ifdef HAVE_ATAN
@@ -748,8 +750,8 @@ extern DECLSPEC char *SDLCALL SDL_iconv_string(const char *tocode,
                                                const char *inbuf,
                                                size_t inbytesleft);
 #define SDL_iconv_utf8_locale(S)	SDL_iconv_string("", "UTF-8", S, SDL_strlen(S)+1)
-#define SDL_iconv_utf8_ucs2(S)		(Uint16 *)SDL_iconv_string("UCS-2", "UTF-8", S, SDL_strlen(S)+1)
-#define SDL_iconv_utf8_ucs4(S)		(Uint32 *)SDL_iconv_string("UCS-4", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_ucs2(S)		(Uint16 *)SDL_iconv_string("UCS-2-INTERNAL", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_ucs4(S)		(Uint32 *)SDL_iconv_string("UCS-4-INTERNAL", "UTF-8", S, SDL_strlen(S)+1)
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

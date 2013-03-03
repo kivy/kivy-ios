@@ -106,7 +106,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"
 copy "$(SolutionDir)\..\test\sample.bmp" "$(TargetDir)\sample.bmp"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -141,7 +141,7 @@ copy "$(SolutionDir)\..\test\sample.bmp" "$(TargetDir)\sample.bmp"</Command>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"
 copy $(SolutionDir)\..\test\sample.bmp" "$(TargetDir)\sample.bmp"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -177,7 +177,7 @@ copy $(SolutionDir)\..\test\sample.bmp" "$(TargetDir)\sample.bmp"</Command>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"
 copy "$(SolutionDir)\..\test\sample.bmp" "$(TargetDir)\sample.bmp"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -212,7 +212,7 @@ copy "$(SolutionDir)\..\test\sample.bmp" "$(TargetDir)\sample.bmp"</Command>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy" $(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+      <Command>copy" $(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"
 copy "$(SolutionDir)\..\test\sample.bmp" "$(TargetDir)\sample.bm"p</Command>
     </PostBuildEvent>
     <PostBuildEvent>

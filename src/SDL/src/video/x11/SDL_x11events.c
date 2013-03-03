@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -42,7 +42,7 @@
 #include <stdio.h>
 
 #ifdef SDL_INPUT_LINUXEV
-//Touch Input/event* includes
+/* Touch Input/event* includes */
 #include <linux/input.h>
 #include <fcntl.h>
 #endif
@@ -249,9 +249,22 @@ X11_DispatchEvent(_THIS)
 
         /* Gaining input focus? */
     case FocusIn:{
+            if (xevent.xfocus.detail == NotifyInferior) {
+#ifdef DEBUG_XEVENTS
+                printf("window %p: FocusIn (NotifierInferior, ignoring)\n", data);
+#endif
+                break;
+            }
 #ifdef DEBUG_XEVENTS
             printf("window %p: FocusIn!\n", data);
 #endif
+            if (data->pending_focus == PENDING_FOCUS_OUT &&
+                data->window == SDL_GetKeyboardFocus()) {
+                /* We want to reset the keyboard here, because we may have
+                   missed keyboard messages after our previous FocusOut.
+                 */
+                SDL_ResetKeyboard();
+            }
             data->pending_focus = PENDING_FOCUS_IN;
             data->pending_focus_time = SDL_GetTicks() + PENDING_FOCUS_IN_TIME;
         }
@@ -259,6 +272,13 @@ X11_DispatchEvent(_THIS)
 
         /* Losing input focus? */
     case FocusOut:{
+            if (xevent.xfocus.detail == NotifyInferior) {
+                /* We still have focus if a child gets focus */
+#ifdef DEBUG_XEVENTS
+                printf("window %p: FocusOut (NotifierInferior, ignoring)\n", data);
+#endif
+                break;
+            }
 #ifdef DEBUG_XEVENTS
             printf("window %p: FocusOut!\n", data);
 #endif
@@ -386,10 +406,28 @@ X11_DispatchEvent(_THIS)
 
         /* Have we been requested to quit (or another client message?) */
     case ClientMessage:{
-            if ((xevent.xclient.format == 32) &&
+            if ((xevent.xclient.message_type == videodata->WM_PROTOCOLS) &&
+                (xevent.xclient.format == 32) &&
+                (xevent.xclient.data.l[0] == videodata->_NET_WM_PING)) {
+                Window root = DefaultRootWindow(display);
+
+#ifdef DEBUG_XEVENTS
+                printf("window %p: _NET_WM_PING\n", data);
+#endif
+                xevent.xclient.window = root;
+                XSendEvent(display, root, False, SubstructureRedirectMask | SubstructureNotifyMask, &xevent);
+                break;
+            }
+
+            else if ((xevent.xclient.message_type == videodata->WM_PROTOCOLS) &&
+                (xevent.xclient.format == 32) &&
                 (xevent.xclient.data.l[0] == videodata->WM_DELETE_WINDOW)) {
 
+#ifdef DEBUG_XEVENTS
+                printf("window %p: WM_DELETE_WINDOW\n", data);
+#endif
                 SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_CLOSE, 0, 0);
+                break;
             }
         }
         break;
@@ -637,7 +675,7 @@ X11_Pending(Display * display)
 
 /* !!! FIXME: this should be exposed in a header, or something. */
 int SDL_GetNumTouch(void);
-
+void SDL_dbus_screensaver_tickle(_THIS);
 
 void
 X11_PumpEvents(_THIS)
@@ -650,6 +688,11 @@ X11_PumpEvents(_THIS)
         if (!data->screensaver_activity ||
             (int) (now - data->screensaver_activity) >= 30000) {
             XResetScreenSaver(data->display);
+
+            #if SDL_USE_LIBDBUS
+            SDL_dbus_screensaver_tickle(_this);
+            #endif
+
             data->screensaver_activity = now;
         }
     }   
@@ -747,33 +790,6 @@ X11_PumpEvents(_THIS)
 #endif
 }
 
-/* This is so wrong it hurts */
-#define GNOME_SCREENSAVER_HACK
-#ifdef GNOME_SCREENSAVER_HACK
-#include <unistd.h>
-static pid_t screensaver_inhibit_pid;
-static void
-gnome_screensaver_disable()
-{
-    screensaver_inhibit_pid = fork();
-    if (screensaver_inhibit_pid == 0) {
-        close(0);
-        close(1);
-        close(2);
-        execl("/usr/bin/gnome-screensaver-command",
-              "gnome-screensaver-command",
-              "--inhibit",
-              "--reason",
-              "GNOME screensaver doesn't respect MIT-SCREEN-SAVER", NULL);
-        exit(2);
-    }
-}
-static void
-gnome_screensaver_enable()
-{
-    kill(screensaver_inhibit_pid, 15);
-}
-#endif
 
 void
 X11_SuspendScreenSaver(_THIS)
@@ -797,11 +813,9 @@ X11_SuspendScreenSaver(_THIS)
     }
 #endif
 
-#ifdef GNOME_SCREENSAVER_HACK
+#if SDL_USE_LIBDBUS
     if (_this->suspend_screensaver) {
-        gnome_screensaver_disable();
-    } else {
-        gnome_screensaver_enable();
+        SDL_dbus_screensaver_tickle(_this);
     }
 #endif
 }

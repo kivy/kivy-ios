@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -42,6 +42,7 @@
 #include <IOKit/hid/IOHIDKeys.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <Carbon/Carbon.h>      /* for NewPtrClear, DisposePtr */
+#include <IOKit/IOMessage.h>
 
 /* For force feedback testing. */
 #include <ForceFeedback/ForceFeedback.h>
@@ -51,11 +52,21 @@
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 #include "SDL_sysjoystick_c.h"
+#include "SDL_events.h"
+#if !SDL_EVENTS_DISABLED
+#include "../../events/SDL_events_c.h"
+#endif
 
 
 /* Linked list of all available devices */
 static recDevice *gpDeviceList = NULL;
+/* OSX reference to the notification object that tells us about device insertion/removal */
+IONotificationPortRef notificationPort = 0;
+/* if 1 then a device was added since the last update call */
+static SDL_bool s_bDeviceAdded = SDL_FALSE;
 
+/* static incrementing counter for new joystick devices seen on the system. Devices should start with index 0 */
+static int s_joystick_instance_id = -1;
 
 static void
 HIDReportErrorNum(char *strError, long numError)
@@ -115,9 +126,19 @@ HIDRemovalCallback(void *target, IOReturn result, void *refcon, void *sender)
 {
     recDevice *device = (recDevice *) refcon;
     device->removed = 1;
-    device->uncentered = 1;
 }
 
+
+/* Called by the io port notifier on removal of this device
+ */
+void JoystickDeviceWasRemovedCallback( void * refcon, io_service_t service, natural_t messageType, void * messageArgument )
+{
+    if( messageType == kIOMessageServiceIsTerminated && refcon )
+    {
+		recDevice *device = (recDevice *) refcon;
+		device->removed = 1;
+	}
+}
 
 
 /* Create and open an interface to device, required prior to extracting values or building queues.
@@ -162,9 +183,33 @@ HIDCreateOpenDeviceInterface(io_object_t hidDevice, recDevice * pDevice)
             HIDReportErrorNum
                 ("Failed to open pDevice->interface via open.", result);
         else
+		{
+			pDevice->portIterator = 0;
+
+			// It's okay if this fails, we have another detection method below
             (*(pDevice->interface))->setRemovalCallback(pDevice->interface,
                                                         HIDRemovalCallback,
                                                         pDevice, pDevice);
+			
+			/* now connect notification for new devices */
+			pDevice->notificationPort = IONotificationPortCreate(kIOMasterPortDefault);
+			
+			CFRunLoopAddSource(CFRunLoopGetCurrent(), 
+							   IONotificationPortGetRunLoopSource(pDevice->notificationPort), 
+							   kCFRunLoopDefaultMode);
+			
+			// Register for notifications when a serial port is added to the system
+			result = IOServiceAddInterestNotification(pDevice->notificationPort,
+													  hidDevice,
+													  kIOGeneralInterest,
+													  JoystickDeviceWasRemovedCallback,
+													  pDevice,           
+													  &pDevice->portIterator);
+        	if (kIOReturnSuccess != result) {
+            	HIDReportErrorNum
+                	("Failed to register for removal callback.", result);		
+			}	
+		}
 
     }
     return result;
@@ -195,6 +240,12 @@ HIDCloseReleaseInterface(recDevice * pDevice)
             HIDReportErrorNum("Failed to release IOHIDDeviceInterface.",
                               result);
         pDevice->interface = NULL;
+		
+		if ( pDevice->portIterator )
+		{
+			IOObjectRelease( pDevice->portIterator );
+			pDevice->portIterator = 0;
+		}
     }
     return result;
 }
@@ -461,6 +512,26 @@ HIDGetDeviceInfo(io_object_t hidDevice, CFMutableDictionaryRef hidProperties,
                             ("CFNumberGetValue error retrieving pDevice->usage.");
             }
 
+			refCF =
+			CFDictionaryGetValue(hidProperties,
+								 CFSTR(kIOHIDVendorIDKey));
+            if (refCF) {
+                if (!CFNumberGetValue
+                    (refCF, kCFNumberLongType, &pDevice->guid.data[0]))
+                    SDL_SetError
+					("CFNumberGetValue error retrieving pDevice->guid.");
+            }
+			refCF =
+			CFDictionaryGetValue(hidProperties,
+								 CFSTR(kIOHIDProductIDKey));
+            if (refCF) {
+                if (!CFNumberGetValue
+                    (refCF, kCFNumberLongType, &pDevice->guid.data[8]))
+                    SDL_SetError
+					("CFNumberGetValue error retrieving pDevice->guid[8].");
+            }
+
+			
             if (NULL == refCF) {        /* get top level element HID usage page or usage */
                 /* use top level element instead */
                 CFTypeRef refCFTopElement = 0;
@@ -505,6 +576,7 @@ HIDBuildDevice(io_object_t hidDevice)
             if (kIOReturnSuccess == result) {
                 HIDGetDeviceInfo(hidDevice, hidProperties, pDevice);    /* hidDevice used to find parents in registry tree */
                 HIDGetCollectionElements(hidProperties, pDevice);
+				pDevice->instance_id = ++s_joystick_instance_id;
             } else {
                 DisposePtr((Ptr) pDevice);
                 pDevice = NULL;
@@ -569,6 +641,79 @@ HIDDisposeDevice(recDevice ** ppDevice)
 }
 
 
+/* Given an io_object_t from OSX adds a joystick device to our list if appropriate
+ */
+int 
+AddDeviceHelper( io_object_t ioHIDDeviceObject )
+{
+    recDevice *device;
+	
+	/* build a device record */
+	device = HIDBuildDevice(ioHIDDeviceObject);
+	if (!device)
+		return 0;
+	
+	/* Filter device list to non-keyboard/mouse stuff */
+	if ((device->usagePage != kHIDPage_GenericDesktop) ||
+		((device->usage != kHIDUsage_GD_Joystick &&
+		  device->usage != kHIDUsage_GD_GamePad &&
+		  device->usage != kHIDUsage_GD_MultiAxisController))) {
+		
+		/* release memory for the device */
+		HIDDisposeDevice(&device);
+		DisposePtr((Ptr) device);
+		return 0;
+	}
+	
+	/* We have to do some storage of the io_service_t for
+	 * SDL_HapticOpenFromJoystick */
+	if (FFIsForceFeedback(ioHIDDeviceObject) == FF_OK) {
+		device->ffservice = ioHIDDeviceObject;
+	} else {
+		device->ffservice = 0;
+	}
+	
+	device->send_open_event = 1;
+	s_bDeviceAdded = SDL_TRUE;
+	
+	/* Add device to the end of the list */
+	if ( !gpDeviceList )
+	{
+		gpDeviceList = device;
+	}
+	else
+	{
+		recDevice *curdevice;
+		
+		curdevice = gpDeviceList;
+		while ( curdevice->pNext )
+		{
+			curdevice = curdevice->pNext;
+		}
+		curdevice->pNext = device;
+	}
+	
+	return 1;
+}
+
+
+/* Called by our IO port notifier on the master port when a HID device is inserted, we iterate
+ *  and check for new joysticks
+ */
+void JoystickDeviceWasAddedCallback( void *refcon, io_iterator_t iterator )
+{
+    io_object_t ioHIDDeviceObject = 0;
+	
+	while ( ( ioHIDDeviceObject = IOIteratorNext(iterator) ) )
+	{
+		if ( ioHIDDeviceObject )
+		{
+			AddDeviceHelper( ioHIDDeviceObject );			
+		}
+	}
+}
+				
+
 /* Function to scan the system for joysticks.
  * Joystick 0 should be the system default joystick.
  * This function should return the number of available joysticks, or -1
@@ -581,10 +726,8 @@ SDL_SYS_JoystickInit(void)
     mach_port_t masterPort = 0;
     io_iterator_t hidObjectIterator = 0;
     CFMutableDictionaryRef hidMatchDictionary = NULL;
-    recDevice *device, *lastDevice;
     io_object_t ioHIDDeviceObject = 0;
-
-    SDL_numjoysticks = 0;
+	io_iterator_t portIterator = 0;
 
     if (gpDeviceList) {
         SDL_SetError("Joystick: Device list already inited.");
@@ -629,70 +772,120 @@ SDL_SYS_JoystickInit(void)
     }
     if (!hidObjectIterator) {   /* there are no joysticks */
         gpDeviceList = NULL;
-        SDL_numjoysticks = 0;
         return 0;
     }
     /* IOServiceGetMatchingServices consumes a reference to the dictionary, so we don't need to release the dictionary ref. */
 
     /* build flat linked list of devices from device iterator */
 
-    gpDeviceList = lastDevice = NULL;
+    gpDeviceList = NULL;
 
     while ((ioHIDDeviceObject = IOIteratorNext(hidObjectIterator))) {
-        /* build a device record */
-        device = HIDBuildDevice(ioHIDDeviceObject);
-        if (!device)
-            continue;
-
-        /* Filter device list to non-keyboard/mouse stuff */
-        if ((device->usagePage != kHIDPage_GenericDesktop) ||
-            ((device->usage != kHIDUsage_GD_Joystick &&
-              device->usage != kHIDUsage_GD_GamePad &&
-              device->usage != kHIDUsage_GD_MultiAxisController))) {
-
-            /* release memory for the device */
-            HIDDisposeDevice(&device);
-            DisposePtr((Ptr) device);
-            continue;
-        }
-
-        /* We have to do some storage of the io_service_t for
-         * SDL_HapticOpenFromJoystick */
-        if (FFIsForceFeedback(ioHIDDeviceObject) == FF_OK) {
-            device->ffservice = ioHIDDeviceObject;
-        } else {
-            device->ffservice = 0;
-        }
-
-        /* Add device to the end of the list */
-        if (lastDevice)
-            lastDevice->pNext = device;
-        else
-            gpDeviceList = device;
-        lastDevice = device;
+		AddDeviceHelper( ioHIDDeviceObject );
     }
     result = IOObjectRelease(hidObjectIterator);        /* release the iterator */
+	
+	/* now connect notification for new devices */
+	notificationPort = IONotificationPortCreate(masterPort);
+	hidMatchDictionary = IOServiceMatching(kIOHIDDeviceKey);
 
-    /* Count the total number of devices we found */
-    device = gpDeviceList;
-    while (device) {
-        SDL_numjoysticks++;
+	CFRunLoopAddSource(CFRunLoopGetCurrent(), 
+					   IONotificationPortGetRunLoopSource(notificationPort), 
+					   kCFRunLoopDefaultMode);
+	
+	// Register for notifications when a serial port is added to the system
+	result = IOServiceAddMatchingNotification(notificationPort,
+															kIOFirstMatchNotification,
+															hidMatchDictionary,
+															JoystickDeviceWasAddedCallback,
+															NULL,           
+															&portIterator);
+	while (IOIteratorNext(portIterator)) {}; // Run out the iterator or notifications won't start (you can also use it to iterate the available devices).
+
+    return SDL_SYS_NumJoysticks();
+}
+
+/* Function to return the number of joystick devices plugged in right now */
+int
+SDL_SYS_NumJoysticks()
+{
+	recDevice *device = gpDeviceList;
+    int nJoySticks = 0;
+	
+	while ( device )
+	{
+		nJoySticks++;
         device = device->pNext;
-    }
+	}
 
-    return SDL_numjoysticks;
+	return nJoySticks;
+}
+
+/* Function to cause any queued joystick insertions to be processed
+ */
+void
+SDL_SYS_JoystickDetect()
+{
+	if ( s_bDeviceAdded )
+	{
+		recDevice *device = gpDeviceList;
+		s_bDeviceAdded = SDL_FALSE;
+		int device_index = 0;
+		// send notifications
+		while ( device )
+		{
+			if ( device->send_open_event )
+			{
+				device->send_open_event = 0;
+#if !SDL_EVENTS_DISABLED
+				SDL_Event event;
+				event.type = SDL_JOYDEVICEADDED;
+				
+				if (SDL_GetEventState(event.type) == SDL_ENABLE) {
+					event.jdevice.which = device_index;
+					if ((SDL_EventOK == NULL)
+						|| (*SDL_EventOK) (SDL_EventOKParam, &event)) {
+						SDL_PushEvent(&event);
+					}
+				}
+#endif /* !SDL_EVENTS_DISABLED */
+			}
+			device_index++;
+			device = device->pNext;
+		}
+	}
+}
+
+SDL_bool
+SDL_SYS_JoystickNeedsPolling()
+{
+	return s_bDeviceAdded;
 }
 
 /* Function to get the device-dependent name of a joystick */
 const char *
-SDL_SYS_JoystickName(int index)
+SDL_SYS_JoystickNameForDeviceIndex(int device_index)
 {
     recDevice *device = gpDeviceList;
 
-    for (; index > 0; index--)
+    for (; device_index > 0; device_index--)
         device = device->pNext;
 
-    return device->product;
+	return device->product;
+}
+
+/* Function to return the instance id of the joystick at device_index
+ */
+SDL_JoystickID
+SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
+{
+    recDevice *device = gpDeviceList;
+    int index;
+	
+    for (index = device_index; index > 0; index--)
+        device = device->pNext;
+
+	return device->instance_id;
 }
 
 /* Function to open a joystick for use.
@@ -701,23 +894,42 @@ SDL_SYS_JoystickName(int index)
  * It returns 0, or -1 if there is an error.
  */
 int
-SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
+SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 {
     recDevice *device = gpDeviceList;
     int index;
 
-    for (index = joystick->index; index > 0; index--)
+    for (index = device_index; index > 0; index--)
         device = device->pNext;
 
+	joystick->instance_id = device->instance_id;
     joystick->hwdata = device;
-    joystick->name = device->product;
+	joystick->name = device->product;
 
-    joystick->naxes = device->axes;
-    joystick->nhats = device->hats;
-    joystick->nballs = 0;
-    joystick->nbuttons = device->buttons;
-
+	joystick->naxes = device->axes;
+	joystick->nhats = device->hats;
+	joystick->nballs = 0;
+	joystick->nbuttons = device->buttons;
     return 0;
+}
+
+/* Function to query if the joystick is currently attached
+ *   It returns 1 if attached, 0 otherwise.
+ */
+SDL_bool
+SDL_SYS_JoystickAttached(SDL_Joystick * joystick)
+{
+	recDevice *device = gpDeviceList;
+	
+	while ( device )
+	{
+		if ( joystick->instance_id == device->instance_id )
+			return SDL_TRUE;
+
+        device = device->pNext;
+	}
+	
+	return SDL_FALSE;
 }
 
 /* Function to update the state of a joystick - called as a device poll.
@@ -728,26 +940,49 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
 void
 SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
 {
-    recDevice *device = joystick->hwdata;
+	recDevice *device = joystick->hwdata;
     recElement *element;
     SInt32 value, range;
     int i;
 
+	if ( !device )
+		return;
+
     if (device->removed) {      /* device was unplugged; ignore it. */
-        if (device->uncentered) {
-            device->uncentered = 0;
+		recDevice *devicelist = gpDeviceList;
+		joystick->closed = 1;
+		joystick->uncentered = 1;
+		
+		if ( devicelist == device )
+		{
+			gpDeviceList = device->pNext;
+		}
+		else
+		{
+			while ( devicelist->pNext != device )
+			{
+				devicelist = devicelist->pNext;
+			}
+			
+			devicelist->pNext = device->pNext;
+		}
+		
+		DisposePtr((Ptr) device);
+		joystick->hwdata = NULL;
 
-            /* Tell the app that everything is centered/unpressed... */
-            for (i = 0; i < device->axes; i++)
-                SDL_PrivateJoystickAxis(joystick, i, 0);
-
-            for (i = 0; i < device->buttons; i++)
-                SDL_PrivateJoystickButton(joystick, i, 0);
-
-            for (i = 0; i < device->hats; i++)
-                SDL_PrivateJoystickHat(joystick, i, SDL_HAT_CENTERED);
-        }
-
+#if !SDL_EVENTS_DISABLED
+		SDL_Event event;
+		event.type = SDL_JOYDEVICEREMOVED;
+		
+		if (SDL_GetEventState(event.type) == SDL_ENABLE) {
+			event.jdevice.which = joystick->instance_id;
+			if ((SDL_EventOK == NULL)
+				|| (*SDL_EventOK) (SDL_EventOKParam, &event)) {
+				SDL_PushEvent(&event);
+			}
+		}
+#endif /* !SDL_EVENTS_DISABLED */
+		
         return;
     }
 
@@ -829,9 +1064,8 @@ SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
 /* Function to close a joystick after use */
 void
 SDL_SYS_JoystickClose(SDL_Joystick * joystick)
-{
-    /* Should we do anything here? */
-    return;
+{	
+	joystick->closed = 1;
 }
 
 /* Function to perform any system-specific joystick related cleanup */
@@ -840,6 +1074,29 @@ SDL_SYS_JoystickQuit(void)
 {
     while (NULL != gpDeviceList)
         gpDeviceList = HIDDisposeDevice(&gpDeviceList);
+	
+	if ( notificationPort )
+	{
+		IONotificationPortDestroy( notificationPort );
+		notificationPort = 0;
+	}
+}
+
+
+SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
+{
+    recDevice *device = gpDeviceList;
+    int index;
+	
+    for (index = device_index; index > 0; index--)
+        device = device->pNext;
+	
+	return device->guid;	
+}
+
+SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick *joystick)
+{
+	return joystick->hwdata->guid;
 }
 
 #endif /* SDL_JOYSTICK_IOKIT */

@@ -198,10 +198,6 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\..\test\common.c"
-			>
-		</File>
-		<File
 			RelativePath="..\..\..\test\testgl2.c"
 			>
 		</File>

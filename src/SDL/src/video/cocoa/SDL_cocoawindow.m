@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -200,10 +200,8 @@ static __inline__ void ConvertNSRect(NSRect *r)
         y = (int)(window->h - point.y);
 
         if (x >= 0 && x < window->w && y >= 0 && y < window->h) {
-            if (SDL_GetMouseFocus() != window) {
-                [self mouseEntered:nil];
-            }
             SDL_SendMouseMotion(window, 0, x, y);
+            SDL_SetCursor(NULL);
         }
     }
 
@@ -309,38 +307,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
     [self mouseUp:theEvent];
 }
 
-- (void)mouseEntered:(NSEvent *)theEvent
-{
-    SDL_SetMouseFocus(_data->window);
-
-    SDL_SetCursor(NULL);
-}
-
-- (void)mouseExited:(NSEvent *)theEvent
-{
-    SDL_Window *window = _data->window;
-
-    if (SDL_GetMouseFocus() == window) {
-        if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
-            int x, y;
-            NSPoint point;
-            CGPoint cgpoint;
-
-            point = [theEvent locationInWindow];
-            point.y = window->h - point.y;
-
-            SDL_SendMouseMotion(window, 0, (int)point.x, (int)point.y);
-            SDL_GetMouseState(&x, &y);
-            cgpoint.x = window->x + x;
-            cgpoint.y = window->y + y;
-            CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
-        } else {
-            SDL_SetMouseFocus(NULL);
-            SDL_SetCursor(NULL);
-        }
-    }
-}
-
 - (void)mouseMoved:(NSEvent *)theEvent
 {
     SDL_Mouse *mouse = SDL_GetMouse();
@@ -357,15 +323,26 @@ static __inline__ void ConvertNSRect(NSRect *r)
     y = (int)(window->h - point.y);
 
     if (x < 0 || x >= window->w || y < 0 || y >= window->h) {
-        if (SDL_GetMouseFocus() == window) {
-            [self mouseExited:theEvent];
+        if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
+            CGPoint cgpoint;
+
+            if (x < 0) {
+                x = 0;
+            } else if (x >= window->w) {
+                x = window->w - 1;
+            }
+            if (y < 0) {
+                y = 0;
+            } else if (y >= window->h) {
+                y = window->h - 1;
+            }
+
+            cgpoint.x = window->x + x;
+            cgpoint.y = window->y + y;
+            CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
         }
-    } else {
-        if (SDL_GetMouseFocus() != window) {
-            [self mouseEntered:theEvent];
-        }
-        SDL_SendMouseMotion(window, 0, x, y);
     }
+    SDL_SendMouseMotion(window, 0, x, y);
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
@@ -754,6 +731,36 @@ Cocoa_SetWindowSize(_THIS, SDL_Window * window)
 }
 
 void
+Cocoa_SetWindowMinimumSize(_THIS, SDL_Window * window)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
+        
+    NSSize minSize;
+    minSize.width = window->min_w;
+    minSize.height = window->min_h;
+        
+    [windata->nswindow setContentMinSize:minSize];
+    
+    [pool release];
+}
+
+void
+Cocoa_SetWindowMaximumSize(_THIS, SDL_Window * window)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
+        
+    NSSize maxSize;
+    maxSize.width = window->max_w;
+    maxSize.height = window->max_h;
+        
+    [windata->nswindow setContentMaxSize:maxSize];
+    
+    [pool release];
+}
+
+void
 Cocoa_ShowWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -923,7 +930,7 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     }
 
 #ifdef FULLSCREEN_TOGGLEABLE
-    if (fullscreen) {
+    if (SDL_ShouldAllowTopmost() && fullscreen) {
         /* OpenGL is rendering to the window, so make it visible! */
         [nswindow setLevel:CGShieldingWindowLevel()];
     } else {
@@ -992,11 +999,10 @@ Cocoa_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp)
 }
 
 void
-Cocoa_SetWindowGrab(_THIS, SDL_Window * window)
+Cocoa_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
 {
     /* Move the cursor to the nearest point in the window */
-    if ((window->flags & SDL_WINDOW_INPUT_GRABBED) &&
-        (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
+    if (grabbed) {
         int x, y;
         CGPoint cgpoint;
 
@@ -1005,6 +1011,17 @@ Cocoa_SetWindowGrab(_THIS, SDL_Window * window)
         cgpoint.y = window->y + y;
         CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
     }
+	
+    if ( window->flags & SDL_WINDOW_FULLSCREEN ) {
+		SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+
+		if (SDL_ShouldAllowTopmost() && (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
+			/* OpenGL is rendering to the window, so make it visible! */
+			[data->nswindow setLevel:CGShieldingWindowLevel()];
+		} else {
+			[data->nswindow setLevel:kCGNormalWindowLevel];
+		}
+	}
 }
 
 void

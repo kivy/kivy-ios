@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -22,9 +22,10 @@
 
 #if SDL_VIDEO_DRIVER_UIKIT
 
-#import <QuartzCore/QuartzCore.h>
-#import <OpenGLES/EAGLDrawable.h>
-#import "SDL_uikitopenglview.h"
+#include <QuartzCore/QuartzCore.h>
+#include <OpenGLES/EAGLDrawable.h>
+#include "SDL_uikitopenglview.h"
+#include "SDL_uikitmessagebox.h"
 
 
 @implementation SDL_uikitopenglview
@@ -180,7 +181,10 @@
 
 - (void)doLoop:(id)sender
 {
-    animationCallback(animationCallbackParam);
+    // Don't run the game loop while a messagebox is up
+    if (!UIKit_ShowingMessageBox()) {
+        animationCallback(animationCallbackParam);
+    }
 }
 
 - (void)setCurrentContext

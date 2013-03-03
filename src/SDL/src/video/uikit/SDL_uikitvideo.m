@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -89,7 +89,6 @@ UIKit_CreateDevice(int devindex)
     device->SDL_HasScreenKeyboardSupport = UIKit_HasScreenKeyboardSupport;
     device->SDL_ShowScreenKeyboard = UIKit_ShowScreenKeyboard;
     device->SDL_HideScreenKeyboard = UIKit_HideScreenKeyboard;
-    device->SDL_ToggleScreenKeyboard = UIKit_ToggleScreenKeyboard;
     device->SDL_IsScreenKeyboardShown = UIKit_IsScreenKeyboardShown;
 
     /* OpenGL (ES) functions */
@@ -127,6 +126,18 @@ void
 UIKit_VideoQuit(_THIS)
 {
     UIKit_QuitModes(_this);
+}
+
+/*
+ * iOS log support.
+ *
+ * This doesn't really have aything to do with the interfaces of the SDL video
+ *  subsystem, but we need to stuff this into an Objective-C source code file.
+ */
+
+void SDL_NSLog(const char *text)
+{
+    NSLog(@"%s", text);
 }
 
 #endif /* SDL_VIDEO_DRIVER_UIKIT */

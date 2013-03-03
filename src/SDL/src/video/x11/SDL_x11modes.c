@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -24,6 +24,7 @@
 
 #include "SDL_hints.h"
 #include "SDL_x11video.h"
+#include "edid.h"
 
 /*#define X11MODES_DEBUG*/
 
@@ -34,8 +35,10 @@
  * I can find.  For example, on Unity 3D if you show a fullscreen window while
  * the resolution is changing (within ~250 ms) your window will retain the
  * fullscreen state hint but be decorated and windowed.
+ *
+ * However, many people swear by it, so let them swear at it. :)
 */
-#define XRANDR_DISABLED_BY_DEFAULT
+/*#define XRANDR_DISABLED_BY_DEFAULT*/
 
 
 static int
@@ -427,6 +430,7 @@ X11_InitModes(_THIS)
         SDL_DisplayMode mode;
         SDL_DisplayModeData *modedata;
         XPixmapFormatValues *pixmapFormats;
+        char display_name[128];
         int i, n;
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
@@ -449,6 +453,7 @@ X11_InitModes(_THIS)
         if (!displaydata) {
             continue;
         }
+        display_name[0] = '\0';
 
         mode.format = X11_GetPixelFormatFromVisualInfo(data->display, &vinfo);
         if (SDL_ISPIXELFORMAT_INDEXED(mode.format)) {
@@ -527,6 +532,12 @@ X11_InitModes(_THIS)
             XRROutputInfo *output_info;
             XRRCrtcInfo *crtc;
             int output;
+            Atom EDID = XInternAtom(data->display, "EDID", False);
+            Atom *props;
+            int nprop;
+            unsigned long width_mm;
+            unsigned long height_mm;
+            int inches = 0;
 
             for (output = 0; output < res->noutput; output++) {
                 output_info = XRRGetOutputInfo(data->display, res, res->outputs[output]);
@@ -550,6 +561,54 @@ X11_InitModes(_THIS)
                 displaydata->use_xrandr = use_xrandr;
                 displaydata->xrandr_output = res->outputs[output];
                 SetXRandRModeInfo(data->display, res, output_info, crtc->mode, &mode);
+
+                /* Get the name of this display */
+                width_mm = output_info->mm_width;
+                height_mm = output_info->mm_height;
+                inches = (int)((sqrt(width_mm * width_mm +
+                                     height_mm * height_mm) / 25.4f) + 0.5f);
+                SDL_strlcpy(display_name, output_info->name, sizeof(display_name));
+
+                /* See if we can get the EDID data for the real monitor name */
+                props = XRRListOutputProperties(data->display, res->outputs[output], &nprop);
+                for (i = 0; i < nprop; ++i) {
+                    unsigned char *prop;
+                    int actual_format;
+                    unsigned long nitems, bytes_after;
+                    Atom actual_type;
+
+	                if (props[i] == EDID) {
+                        if (XRRGetOutputProperty(data->display,
+                                                 res->outputs[output], props[i],
+                                                 0, 100, False, False,
+                                                 AnyPropertyType,
+                                                 &actual_type, &actual_format,
+                                                 &nitems, &bytes_after, &prop) == Success ) {
+                            MonitorInfo *info = decode_edid(prop);
+                            if (info) {
+    #ifdef X11MODES_DEBUG
+                                printf("Found EDID data for %s\n", output_info->name);
+                                dump_monitor_info(info);
+    #endif
+                                SDL_strlcpy(display_name, info->dsc_product_name, sizeof(display_name));
+                                free(info);
+                            }
+                            XFree(prop);
+                        }
+                        break;
+                    }
+                }
+                if (props) {
+                    XFree(props);
+                }
+
+                if (*display_name && inches) {
+                    size_t len = SDL_strlen(display_name);
+                    SDL_snprintf(&display_name[len], sizeof(display_name)-len, " %d\"", inches);
+                }
+#ifdef X11MODES_DEBUG
+                printf("Display name: %s\n", display_name);
+#endif
 
                 XRRFreeOutputInfo(output_info);
                 XRRFreeCrtcInfo(crtc);
@@ -583,6 +642,9 @@ X11_InitModes(_THIS)
 #endif /* SDL_VIDEO_DRIVER_X11_XVIDMODE */
 
         SDL_zero(display);
+        if (*display_name) {
+            display.name = display_name;
+        }
         display.desktop_mode = mode;
         display.current_mode = mode;
         display.driverdata = displaydata;
@@ -803,6 +865,7 @@ X11_GetDisplayBounds(_THIS, SDL_VideoDisplay * sdl_display, SDL_Rect * rect)
         if (xinerama) {
             rect->x = xinerama[data->xinerama_screen].x_org;
             rect->y = xinerama[data->xinerama_screen].y_org;
+            XFree(xinerama);
         }
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XINERAMA */

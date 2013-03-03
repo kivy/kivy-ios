@@ -13,8 +13,8 @@ To compile and install SDL:
         If you are compiling using Visual C++ on Win32, you should read
         the file VisualC.html
 
-    2.  Look at the example programs in ./test, and check out the HTML
-        documentation in ./docs to see how to use the SDL library.
+    2.  Look at the example programs in ./test, and check out the online
+        documentation at http://wiki.libsdl.org/
 
     3.  Join the SDL developer mailing list by sending E-mail to
     	sdl-request@libsdl.org

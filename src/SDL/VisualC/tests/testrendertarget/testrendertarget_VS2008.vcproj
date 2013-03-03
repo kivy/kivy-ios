@@ -100,7 +100,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy SDL and data files"
-				CommandLine="copy &quot;$(SolutionDir)\SDL\$(ConfigurationName)\SDL2.dll&quot; &quot;$(TargetDir)\SDL2.dll&quot;&#x0D;&#x0A;copy &quot;$(SolutionDir)\..\test\icon.bmp&quot; &quot;$(ProjectDir)\icon.bmp&quot;&#x0D;&#x0A;copy &quot;$(SolutionDir)\..\test\sample.bmp&quot; &quot;$(ProjectDir)\sample.bmp&quot;"
+				CommandLine="copy &quot;$(SolutionDir)\SDL\$(ConfigurationName)\SDL2.dll&quot; &quot;$(TargetDir)\SDL2.dll&quot;&#x0D;&#x0A;copy &quot;$(SolutionDir)\..\test\icon.bmp&quot; &quot;$(ProjectDir)\icon.bmp&quot;&#x0D;&#x0A;copy &quot;$(SolutionDir)\..\test\sample.bmp&quot; &quot;$(ProjectDir)\sample.bmp&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -188,17 +188,13 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy SDL and data files"
-				CommandLine="copy &quot;$(SolutionDir)\SDL\$(ConfigurationName)\SDL2.dll&quot; &quot;$(TargetDir)\SDL2.dll&quot;&#x0D;&#x0A;copy &quot;$(SolutionDir)\..\test\icon.bmp&quot; &quot;$(ProjectDir)\icon.bmp&quot;&#x0D;&#x0A;copy &quot;$(SolutionDir)\..\test\sample.bmp&quot; &quot;$(ProjectDir)\sample.bmp&quot;"
+				CommandLine="copy &quot;$(SolutionDir)\SDL\$(ConfigurationName)\SDL2.dll&quot; &quot;$(TargetDir)\SDL2.dll&quot;&#x0D;&#x0A;copy &quot;$(SolutionDir)\..\test\icon.bmp&quot; &quot;$(ProjectDir)\icon.bmp&quot;&#x0D;&#x0A;copy &quot;$(SolutionDir)\..\test\sample.bmp&quot; &quot;$(ProjectDir)\sample.bmp&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath="..\..\..\test\common.c"
-			>
-		</File>
 		<File
 			RelativePath="..\..\..\test\testrendertarget.c"
 			>

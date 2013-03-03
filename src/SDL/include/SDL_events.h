@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -34,6 +34,7 @@
 #include "SDL_keyboard.h"
 #include "SDL_mouse.h"
 #include "SDL_joystick.h"
+#include "SDL_gamecontroller.h"
 #include "SDL_quit.h"
 #include "SDL_gesture.h"
 #include "SDL_touch.h"
@@ -90,6 +91,15 @@ typedef enum
     SDL_JOYHATMOTION,           /**< Joystick hat position change */
     SDL_JOYBUTTONDOWN,          /**< Joystick button pressed */
     SDL_JOYBUTTONUP,            /**< Joystick button released */
+    SDL_JOYDEVICEADDED,         /**< A new joystick has been inserted into the system */
+    SDL_JOYDEVICEREMOVED,       /**< An opened joystick has been removed */
+
+	/* Game controller events */
+	SDL_CONTROLLERAXISMOTION  = 0x650, /**< Game controller axis motion */
+	SDL_CONTROLLERBUTTONDOWN,          /**< Game controller button pressed */
+	SDL_CONTROLLERBUTTONUP,            /**< Game controller button released */
+	SDL_CONTROLLERDEVICEADDED,         /**< A new Game controller has been inserted into the system */
+	SDL_CONTROLLERDEVICEREMOVED,       /**< An opened Game controller has been removed */
 
     /* Touch events */
     SDL_FINGERDOWN      = 0x700,
@@ -231,7 +241,7 @@ typedef struct SDL_JoyAxisEvent
 {
     Uint32 type;        /**< ::SDL_JOYAXISMOTION */
     Uint32 timestamp;
-    Uint8 which;        /**< The joystick device index */
+    Uint8 which;        /**< The joystick instance id */
     Uint8 axis;         /**< The joystick axis index */
     Uint8 padding1;
     Uint8 padding2;
@@ -245,7 +255,7 @@ typedef struct SDL_JoyBallEvent
 {
     Uint32 type;        /**< ::SDL_JOYBALLMOTION */
     Uint32 timestamp;
-    Uint8 which;        /**< The joystick device index */
+    Uint8 which;        /**< The joystick instance id */
     Uint8 ball;         /**< The joystick trackball index */
     Uint8 padding1;
     Uint8 padding2;
@@ -260,7 +270,7 @@ typedef struct SDL_JoyHatEvent
 {
     Uint32 type;        /**< ::SDL_JOYHATMOTION */
     Uint32 timestamp;
-    Uint8 which;        /**< The joystick device index */
+    Uint8 which;        /**< The joystick instance id */
     Uint8 hat;          /**< The joystick hat index */
     Uint8 value;        /**< The hat position value.
                          *   \sa ::SDL_HAT_LEFTUP ::SDL_HAT_UP ::SDL_HAT_RIGHTUP
@@ -279,11 +289,58 @@ typedef struct SDL_JoyButtonEvent
 {
     Uint32 type;        /**< ::SDL_JOYBUTTONDOWN or ::SDL_JOYBUTTONUP */
     Uint32 timestamp;
-    Uint8 which;        /**< The joystick device index */
+    Uint8 which;        /**< The joystick instance id */
     Uint8 button;       /**< The joystick button index */
     Uint8 state;        /**< ::SDL_PRESSED or ::SDL_RELEASED */
     Uint8 padding1;
 } SDL_JoyButtonEvent;
+
+/**
+ *  \brief Joystick device event structure (event.jdevice.*)
+ */
+typedef struct SDL_JoyDeviceEvent
+{
+	Uint32 type;        /**< ::SDL_JOYDEVICEADDED or ::SDL_JOYDEVICEREMOVED */
+	Uint32 timestamp;
+	Uint32 which;        /**< The joystick device index for ADD, instance_id for REMOVE*/
+} SDL_JoyDeviceEvent;
+
+
+/**
+ *  \brief Game controller axis motion event structure (event.caxis.*)
+ */
+typedef struct SDL_ControllerAxisEvent
+{
+    Uint32 type;        /**< ::SDL_CONTROLLERAXISMOTION */
+    Uint32 timestamp;
+    Uint8 which;        /**< The joystick instance id */
+    SDL_GameControllerAxis axis;         /**< The joystick axis index */
+    int value;          /**< The axis value (range: -32768 to 32767) */
+} SDL_ControllerAxisEvent;
+
+
+/**
+ *  \brief Game controller button event structure (event.cbutton.*)
+ */
+typedef struct SDL_ControllerButtonEvent
+{
+    Uint32 type;        /**< ::SDL_CONTROLLERBUTTONDOWN or ::SDL_CONTROLLERBUTTONUP */
+    Uint32 timestamp;
+    Uint8 which;        /**< The joystick instance id */
+    SDL_GameControllerButton button;       /**< The joystick button index */
+    Uint8 state;        /**< ::SDL_PRESSED or ::SDL_RELEASED */
+} SDL_ControllerButtonEvent;
+
+
+/**
+ *  \brief Controller device event structure (event.cdevice.*)
+ */
+typedef struct SDL_ControllerDeviceEvent
+{
+	Uint32 type;        /**< ::SDL_CONTROLLERDEVICEADDED or ::SDL_CONTROLLERDEVICEREMOVED */
+	Uint32 timestamp;
+	Uint32 which;        /**< The joystick device index for ADD, instance_id for REMOVE*/
+} SDL_ControllerDeviceEvent;
 
 
 /**
@@ -336,7 +393,7 @@ typedef struct SDL_MultiGestureEvent
     SDL_TouchID touchId;        /**< The touch device index */
     float dTheta;
     float dDist;
-    float x;  //currently 0...1. Change to screen coords?
+    float x;  /* currently 0...1. Change to screen coords? */
     float y;  
     Uint16 numFingers;
     Uint16 padding;
@@ -430,6 +487,10 @@ typedef union SDL_Event
     SDL_JoyBallEvent jball;         /**< Joystick ball event data */
     SDL_JoyHatEvent jhat;           /**< Joystick hat event data */
     SDL_JoyButtonEvent jbutton;     /**< Joystick button event data */
+    SDL_JoyDeviceEvent jdevice;     /**< Joystick device change event data */
+	SDL_ControllerAxisEvent caxis;		/**< Game Controller button event data */
+	SDL_ControllerButtonEvent cbutton;  /**< Game Controller button event data */
+	SDL_ControllerDeviceEvent cdevice;  /**< Game Controller device event data */
     SDL_QuitEvent quit;             /**< Quit request event data */
     SDL_UserEvent user;             /**< Custom event data */
     SDL_SysWMEvent syswm;           /**< System dependent window event data */
@@ -438,6 +499,15 @@ typedef union SDL_Event
     SDL_MultiGestureEvent mgesture; /**< Multi Finger Gesture data */
     SDL_DollarGestureEvent dgesture; /**< Multi Finger Gesture data */
     SDL_DropEvent drop;             /**< Drag and drop event data */
+
+    /* This is necessary for ABI compatibility between Visual C++ and GCC
+       Visual C++ will respect the push pack pragma and use 52 bytes for
+       this structure, and GCC will use the alignment of the largest datatype
+       within the union, which is 8 bytes.
+
+       So... we'll add padding to force the size to be 56 bytes for both.
+    */
+    Uint8 padding[56];
 } SDL_Event;
 
 

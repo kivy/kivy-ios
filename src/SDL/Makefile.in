@@ -36,7 +36,10 @@ VERSION_OBJECTS = @VERSION_OBJECTS@
 SDLMAIN_TARGET = libSDL2main.a
 SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
 
-SRC_DIST = acinclude Android.mk autogen.sh BUGS build-scripts configure configure.in COPYING CREDITS include INSTALL Makefile.minimal Makefile.in README* sdl2-config.in sdl2.m4 sdl2.pc.in SDL2.spec.in src test TODO VisualC.html VisualC VisualCE WhatsNew Xcode Xcode-iOS
+SDLTEST_TARGET = libSDL2_test.a
+SDLTEST_OBJECTS = @SDLTEST_OBJECTS@
+
+SRC_DIST = acinclude Android.mk autogen.sh BUGS build-scripts configure configure.in COPYING CREDITS debian include INSTALL Makefile.minimal Makefile.in README* sdl2-config.in sdl2.m4 sdl2.pc.in SDL2.spec.in src test TODO VisualC.html VisualC WhatsNew Xcode Xcode-iOS
 GEN_DIST = SDL2.spec
 
 HDRS = \
@@ -44,22 +47,24 @@ HDRS = \
 	SDL_assert.h \
 	SDL_atomic.h \
 	SDL_audio.h \
+        SDL_bits.h \
 	SDL_blendmode.h \
 	SDL_clipboard.h \
 	SDL_cpuinfo.h \
 	SDL_endian.h \
 	SDL_error.h \
 	SDL_events.h \
+	SDL_gamecontroller.h \
 	SDL_gesture.h \
 	SDL_haptic.h \
 	SDL_hints.h \
-	SDL_input.h \
 	SDL_joystick.h \
 	SDL_keyboard.h \
 	SDL_keycode.h \
 	SDL_loadso.h \
 	SDL_log.h \
 	SDL_main.h \
+	SDL_messagebox.h \
 	SDL_mouse.h \
 	SDL_mutex.h \
 	SDL_name.h \
@@ -88,13 +93,15 @@ HDRS = \
 	begin_code.h \
 	close_code.h
 
+SDLTEST_HDRS = $(shell ls $(srcdir)/include | fgrep SDL_test)
+
 LT_AGE      = @LT_AGE@
 LT_CURRENT  = @LT_CURRENT@
 LT_RELEASE  = @LT_RELEASE@
 LT_REVISION = @LT_REVISION@
 LT_LDFLAGS  = -no-undefined -rpath $(DESTDIR)$(libdir) -release $(LT_RELEASE) -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
-all: $(srcdir)/configure Makefile $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
+all: $(srcdir)/configure Makefile $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET) $(objects)/$(SDLTEST_TARGET)
 
 $(srcdir)/configure: $(srcdir)/configure.in
 	@echo "Warning, configure.in is out of date"
@@ -121,13 +128,17 @@ $(objects)/$(SDLMAIN_TARGET): $(SDLMAIN_OBJECTS)
 	$(AR) cru $@ $(SDLMAIN_OBJECTS)
 	$(RANLIB) $@
 
+$(objects)/$(SDLTEST_TARGET): $(SDLTEST_OBJECTS)
+	$(AR) cru $@ $(SDLTEST_OBJECTS)
+	$(RANLIB) $@
+
 install: all install-bin install-hdrs install-lib install-data
 install-bin:
 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(bindir)
 	$(INSTALL) -m 755 sdl2-config $(DESTDIR)$(bindir)/sdl2-config
 install-hdrs: update-revision
 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(includedir)/SDL2
-	for file in $(HDRS); do \
+	for file in $(HDRS) $(SDLTEST_HDRS); do \
 	    $(INSTALL) -m 644 $(srcdir)/include/$$file $(DESTDIR)$(includedir)/SDL2/$$file; \
 	done
 	$(INSTALL) -m 644 include/SDL_config.h $(DESTDIR)$(includedir)/SDL2/SDL_config.h
@@ -137,11 +148,13 @@ install-hdrs: update-revision
 	    $(INSTALL) -m 644 $(srcdir)/include/SDL_revision.h $(DESTDIR)$(includedir)/SDL2/SDL_revision.h; \
 	fi
 
-install-lib: $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
+install-lib: $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET) $(objects)/$(SDLTEST_TARGET)
 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(libdir)
 	$(LIBTOOL) --mode=install $(INSTALL) $(objects)/$(TARGET) $(DESTDIR)$(libdir)/$(TARGET)
 	$(INSTALL) -m 644 $(objects)/$(SDLMAIN_TARGET) $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
 	$(RANLIB) $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
+	$(INSTALL) -m 644 $(objects)/$(SDLTEST_TARGET) $(DESTDIR)$(libdir)/$(SDLTEST_TARGET)
+	$(RANLIB) $(DESTDIR)$(libdir)/$(SDLTEST_TARGET)
 install-data:
 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(datadir)/aclocal
 	$(INSTALL) -m 644 $(srcdir)/sdl2.m4 $(DESTDIR)$(datadir)/aclocal/sdl2.m4
@@ -152,7 +165,7 @@ uninstall: uninstall-bin uninstall-hdrs uninstall-lib uninstall-data
 uninstall-bin:
 	rm -f $(DESTDIR)$(bindir)/sdl2-config
 uninstall-hdrs:
-	for file in $(HDRS); do \
+	for file in $(HDRS) $(SDLTEST_HDRS); do \
 	    rm -f $(DESTDIR)$(includedir)/SDL2/$$file; \
 	done
 	rm -f $(DESTDIR)$(includedir)/SDL2/SDL_config.h
@@ -161,6 +174,7 @@ uninstall-hdrs:
 uninstall-lib:
 	$(LIBTOOL) --mode=uninstall rm -f $(DESTDIR)$(libdir)/$(TARGET)
 	rm -f $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
+	rm -f $(DESTDIR)$(libdir)/$(SDLTEST_TARGET)
 uninstall-data:
 	rm -f $(DESTDIR)$(datadir)/aclocal/sdl2.m4
 	rm -f $(DESTDIR)$(libdir)/pkgconfig/sdl2.pc
@@ -196,6 +210,7 @@ dist $(distfile):
 	    -name '.#*' \) \
 	    -exec rm -f {} \;
 	if test -f $(distdir)/test/Makefile; then (cd $(distdir)/test && make distclean); fi
+	(cd $(distdir); build-scripts/updaterev.sh)
 	tar cvf - $(distdir) | gzip --best >$(distfile)
 	rm -rf $(distdir)
 

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -27,6 +27,8 @@
 #include "SDL_events_c.h"
 #include "../video/SDL_sysvideo.h"
 
+
+/*#define DEBUG_KEYBOARD*/
 
 /* Global keyboard information */
 
@@ -563,6 +565,9 @@ SDL_ResetKeyboard(void)
     SDL_Keyboard *keyboard = &SDL_keyboard;
     SDL_Scancode scancode;
 
+#ifdef DEBUG_KEYBOARD
+    printf("Resetting keyboard\n");
+#endif
     for (scancode = 0; scancode < SDL_NUM_SCANCODES; ++scancode) {
         if (keyboard->keystate[scancode] == SDL_PRESSED) {
             SDL_SendKeyboardKey(SDL_RELEASED, scancode);
@@ -607,6 +612,11 @@ SDL_SetKeyboardFocus(SDL_Window * window)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
 
+    if (keyboard->focus && !window) {
+        /* We won't get anymore keyboard messages, so reset keyboard state */
+        SDL_ResetKeyboard();
+    }
+
     /* See if the current window has lost focus */
     if (keyboard->focus && keyboard->focus != window) {
         SDL_SendWindowEvent(keyboard->focus, SDL_WINDOWEVENT_FOCUS_LOST,
@@ -648,7 +658,7 @@ SDL_SendKeyboardKey(Uint8 state, SDL_Scancode scancode)
     if (!scancode) {
         return 0;
     }
-#if 0
+#ifdef DEBUG_KEYBOARD
     printf("The '%s' key has been %s\n", SDL_GetScancodeName(scancode),
            state == SDL_PRESSED ? "pressed" : "released");
 #endif
@@ -850,6 +860,11 @@ SDL_Keycode
 SDL_GetKeyFromScancode(SDL_Scancode scancode)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
+    
+    if (scancode<SDL_SCANCODE_UNKNOWN || scancode >= SDL_NUM_SCANCODES) {
+          SDL_InvalidParamError("scancode");
+          return 0;
+    }
 
     return keyboard->keymap[scancode];
 }
@@ -885,17 +900,20 @@ SDL_Scancode SDL_GetScancodeFromName(const char *name)
 	int i;
 
 	if (!name || !*name) {
+	        SDL_InvalidParamError("name");
 		return SDL_SCANCODE_UNKNOWN;
 	}
 
 	for (i = 0; i < SDL_arraysize(SDL_scancode_names); ++i) {
 		if (!SDL_scancode_names[i]) {
 			continue;
-		}
+		}		
 		if (SDL_strcasecmp(name, SDL_scancode_names[i]) == 0) {
 			return (SDL_Scancode)i;
 		}
 	}
+
+	SDL_InvalidParamError("name");
 	return SDL_SCANCODE_UNKNOWN;
 }
 
@@ -943,6 +961,9 @@ SDL_GetKeyFromName(const char *name)
 {
 	SDL_Keycode key;
 
+        /* Check input */
+        if (name == NULL) return SDLK_UNKNOWN;
+        
 	/* If it's a single UTF-8 character, then that's the keycode itself */
 	key = *(const unsigned char *)name;
 	if (key >= 0xF0) {

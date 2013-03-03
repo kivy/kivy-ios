@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -340,9 +340,10 @@ COREAUDIO_CloseDevice(_THIS)
                                           scope, bus, &callback,
                                           sizeof(callback));
 
-            /* !!! FIXME: how does iOS free this? */
             #if MACOSX_COREAUDIO
             CloseComponent(this->hidden->audioUnit);
+            #else
+            AudioComponentInstanceDispose(this->hidden->audioUnit);
             #endif
 
             this->hidden->audioUnitOpened = 0;
@@ -538,8 +539,16 @@ COREAUDIO_Init(SDL_AudioDriverImpl * impl)
     impl->DetectDevices = COREAUDIO_DetectDevices;
 #else
     impl->OnlyHasDefaultOutputDevice = 1;
+
+    /* Set category to ambient sound so that other music continues playing.
+       You can change this at runtime in your own code if you need different
+       behavior.  If this is common, we can add an SDL hint for this.
+    */
+    AudioSessionInitialize(NULL, NULL, NULL, nil);
+    UInt32 category = kAudioSessionCategory_AmbientSound;
+    AudioSessionSetProperty(kAudioSessionProperty_AudioCategory, sizeof(UInt32), &category);
 #endif
-    
+
     impl->ProvidesOwnCallbackThread = 1;
 
     return 1;   /* this audio target is available. */

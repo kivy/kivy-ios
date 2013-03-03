@@ -80,14 +80,12 @@ Notes -- Keyboard
 
 The SDL keyboard API has been extended to support on-screen keyboards:
 
-int SDL_ShowScreenKeyboard(SDL_Window * window) 
-	-- reveals the onscreen keyboard.  Returns 0 on success and -1 on error.
-int SDL_HideScreenKeyboard(SDL_Window * window) 
-	-- hides the onscreen keyboard.  Returns 0 on success and -1 on error.
-SDL_bool SDL_IsScreenKeyboardShown(SDL_Window * window) 
-	-- returns whether or not the onscreen keyboard is currently visible.
-int SDL_ToggleScreenKeyboard(SDL_Window * window) 	
-	-- toggles the visibility of the onscreen keyboard.  Returns 0 on success and -1 on error.
+void SDL_StartTextInput()
+	-- enables text events and reveals the onscreen keyboard.
+void SDL_StopTextInput()
+	-- disables text events and hides the onscreen keyboard.
+SDL_bool SDL_IsTextInputActive()
+	-- returns whether or not text events are enabled (and the onscreen keyboard is visible)
 
 ==============================================================================
 Notes -- Reading and Writing files

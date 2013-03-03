@@ -27,7 +27,7 @@ UnEscapeQuotes(char *arg)
     char *last = NULL;
 
     while (*arg) {
-        if (*arg == '"' && *last == '\\') {
+        if (*arg == '"' && (last != NULL && *last == '\\')) {
             char *c_curr = arg;
             char *c_last = last;
 
@@ -146,22 +146,22 @@ console_main(int argc, char *argv[])
 
 /* This is where execution begins [windowed apps] */
 int WINAPI
-WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPTSTR szCmdLine, int sw)
+WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 {
     char **argv;
     int argc;
     char *cmdline;
-    char *bufp;
-    size_t nLen;
 
     /* Grab the command line */
-    bufp = GetCommandLine();
-    nLen = SDL_strlen(bufp) + 1;
-    cmdline = SDL_stack_alloc(char, nLen);
+    TCHAR *text = GetCommandLine();
+#if UNICODE
+    cmdline = SDL_iconv_string("UTF-8", "UCS-2-INTERNAL", (char *)(text), (SDL_wcslen(text)+1)*sizeof(WCHAR));
+#else
+    cmdline = SDL_strdup(text);
+#endif
     if (cmdline == NULL) {
         return OutOfMemory();
     }
-    SDL_strlcpy(cmdline, bufp, nLen);
 
     /* Parse it into argv and argc */
     argc = ParseCommandLine(cmdline, NULL);
@@ -173,6 +173,8 @@ WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPTSTR szCmdLine, int sw)
 
     /* Run the main program */
     console_main(argc, argv);
+
+    SDL_free(cmdline);
 
     /* Hush little compiler, don't you cry... */
     return 0;

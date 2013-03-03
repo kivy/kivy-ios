@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -127,22 +127,19 @@ Android_CreateDevice(int devindex)
     device->GL_SwapWindow = Android_GL_SwapWindow;
     device->GL_DeleteContext = Android_GL_DeleteContext;
 
+    /* Text input */
+    device->StartTextInput = Android_StartTextInput;
+    device->StopTextInput = Android_StopTextInput;
+    device->SetTextInputRect = Android_SetTextInputRect;
+
     /* Screen keyboard */
     device->SDL_HasScreenKeyboardSupport = Android_HasScreenKeyboardSupport;
-    device->SDL_ShowScreenKeyboard = Android_ShowScreenKeyboard;
-    device->SDL_HideScreenKeyboard = Android_HideScreenKeyboard;
-    device->SDL_ToggleScreenKeyboard = Android_ToggleScreenKeyboard;
     device->SDL_IsScreenKeyboardShown = Android_IsScreenKeyboardShown;
 
     /* Clipboard */
     device->SetClipboardText = Android_SetClipboardText;
     device->GetClipboardText = Android_GetClipboardText;
     device->HasClipboardText = Android_HasClipboardText;
-
-    /* Text input */
-    device->StartTextInput = Android_StartTextInput;
-    device->StopTextInput = Android_StopTextInput;
-    device->SetTextInputRect = Android_SetTextInputRect;
 
     return device;
 }
@@ -167,7 +164,6 @@ Android_VideoInit(_THIS)
         return -1;
     }
 
-    SDL_zero(mode);
     SDL_AddDisplayMode(&_this->displays[0], &mode);
 
     Android_InitKeyboard();

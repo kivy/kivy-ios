@@ -291,7 +291,11 @@ main(int argc, char *argv[])
             break;
         case SDL_MOUSEBUTTONUP:
             /*      mouse up toggles onscreen keyboard visibility */
-            SDL_ToggleScreenKeyboard(window);
+            if (SDL_IsTextInputActive()) {
+                SDL_StopTextInput();
+            } else {
+                SDL_StartTextInput();
+            }
             break;
         }
     }

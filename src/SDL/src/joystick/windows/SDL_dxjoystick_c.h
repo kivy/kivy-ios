@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -34,9 +34,14 @@
 
 #include "../../core/windows/SDL_windows.h"
 
-#define DIRECTINPUT_VERSION 0x0700      /* Need version 7 for force feedback. */
+#define DIRECTINPUT_VERSION 0x0800      /* Need version 7 for force feedback. Need verison 8 so IDirectInput8_EnumDevices doesn't leak like a sieve... */
 #include <dinput.h>
-
+#define COBJMACROS
+#include <wbemcli.h>
+#include <oleauto.h>
+#include <xinput.h>
+#include <devguid.h>
+#include <dbt.h>
 
 #define MAX_INPUTS	256     /* each joystick can have up to 256 inputs */
 
@@ -57,15 +62,42 @@ typedef struct input_t
     Uint8 num;
 } input_t;
 
+/* typedef's for XInput structs we use */
+typedef struct
+{
+	WORD                                wButtons;
+	BYTE                                bLeftTrigger;
+	BYTE                                bRightTrigger;
+	SHORT                               sThumbLX;
+	SHORT                               sThumbLY;
+	SHORT                               sThumbRX;
+	SHORT                               sThumbRY;
+	DWORD								dwPaddingReserved;
+} XINPUT_GAMEPAD_EX;
+
+typedef struct 
+{
+	DWORD                               dwPacketNumber;
+	XINPUT_GAMEPAD_EX                   Gamepad;
+} XINPUT_STATE_EX;
+
 /* The private structure used to keep track of a joystick */
 struct joystick_hwdata
 {
-    LPDIRECTINPUTDEVICE2 InputDevice;
+    LPDIRECTINPUTDEVICE8 InputDevice;
     DIDEVCAPS Capabilities;
     int buffered;
+	SDL_JoystickGUID guid;
 
     input_t Inputs[MAX_INPUTS];
     int NumInputs;
+	int NumSliders;
+	Uint8 removed;
+	Uint8 send_remove_event;
+	Uint8 bXInputDevice; // 1 if this device supports using the xinput API rather than DirectInput
+	Uint8 userid; // XInput userid index for this joystick
+	Uint8 currentXInputSlot; // the current position to write to in XInputState below, used so we can compare old and new values
+	XINPUT_STATE_EX	XInputState[2];
 };
 
 #endif /* SDL_JOYSTICK_DINPUT_H */

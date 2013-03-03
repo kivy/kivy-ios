@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -22,6 +22,9 @@
 
 #if SDL_VIDEO_DRIVER_ANDROID
 
+/* We're going to do this by default */
+#define SDL_ANDROID_BLOCK_ON_PAUSE  1
+
 #include "SDL_androidevents.h"
 #include "SDL_events.h"
 
@@ -36,7 +39,7 @@ Android_PumpEvents(_THIS)
 
     /*
      * Android_ResumeSem and Android_PauseSem are signaled from Java_org_libsdl_app_SDLActivity_nativePause and Java_org_libsdl_app_SDLActivity_nativeResume
-     * When the pause semaphoe is signaled, if SDL_ANDROID_BLOCK_ON_PAUSE is defined the event loop will block until the resume signal is emitted.
+     * When the pause semaphore is signaled, if SDL_ANDROID_BLOCK_ON_PAUSE is defined the event loop will block until the resume signal is emitted.
      * When the resume semaphore is signaled, SDL_GL_CreateContext is called which in turn calls Java code
      * SDLActivity::createGLContext -> SDLActivity:: initEGL -> SDLActivity::createEGLSurface -> SDLActivity::createEGLContext
      */
@@ -77,7 +80,6 @@ Android_PumpEvents(_THIS)
             isPaused = 1;
         }
 #endif
-
     }
 }
 

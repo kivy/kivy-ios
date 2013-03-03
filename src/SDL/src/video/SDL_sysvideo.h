@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -23,6 +23,7 @@
 #ifndef _SDL_sysvideo_h
 #define _SDL_sysvideo_h
 
+#include "SDL_messagebox.h"
 #include "SDL_shape.h"
 
 /* The SDL video driver */
@@ -73,6 +74,8 @@ struct SDL_Window
     char *title;
     int x, y;
     int w, h;
+    int min_w, min_h;
+    int max_w, max_h;
     Uint32 flags;
 
     /* Stored position and size for windowed mode */
@@ -107,6 +110,7 @@ struct SDL_Window
  */
 struct SDL_VideoDisplay
 {
+    char *name;
     int max_display_modes;
     int num_display_modes;
     SDL_DisplayMode *display_modes;
@@ -180,6 +184,8 @@ struct SDL_VideoDevice
     void (*SetWindowIcon) (_THIS, SDL_Window * window, SDL_Surface * icon);
     void (*SetWindowPosition) (_THIS, SDL_Window * window);
     void (*SetWindowSize) (_THIS, SDL_Window * window);
+    void (*SetWindowMinimumSize) (_THIS, SDL_Window * window);
+    void (*SetWindowMaximumSize) (_THIS, SDL_Window * window);
     void (*ShowWindow) (_THIS, SDL_Window * window);
     void (*HideWindow) (_THIS, SDL_Window * window);
     void (*RaiseWindow) (_THIS, SDL_Window * window);
@@ -190,7 +196,7 @@ struct SDL_VideoDevice
     void (*SetWindowFullscreen) (_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
     int (*SetWindowGammaRamp) (_THIS, SDL_Window * window, const Uint16 * ramp);
     int (*GetWindowGammaRamp) (_THIS, SDL_Window * window, Uint16 * ramp);
-    void (*SetWindowGrab) (_THIS, SDL_Window * window);
+    void (*SetWindowGrab) (_THIS, SDL_Window * window, SDL_bool grabbed);
     void (*DestroyWindow) (_THIS, SDL_Window * window);
     int (*CreateWindowFramebuffer) (_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch);
     int (*UpdateWindowFramebuffer) (_THIS, SDL_Window * window, SDL_Rect * rects, int numrects);
@@ -235,16 +241,18 @@ struct SDL_VideoDevice
     void (*SetTextInputRect) (_THIS, SDL_Rect *rect);
 
     /* Screen keyboard */
-    SDL_bool (*SDL_HasScreenKeyboardSupport) (_THIS, SDL_Window *window);
-    int (*SDL_ShowScreenKeyboard) (_THIS, SDL_Window *window);
-    int (*SDL_HideScreenKeyboard) (_THIS, SDL_Window *window);
-    int (*SDL_ToggleScreenKeyboard) (_THIS, SDL_Window *window);
+    SDL_bool (*SDL_HasScreenKeyboardSupport) (_THIS);
+    void (*SDL_ShowScreenKeyboard) (_THIS, SDL_Window *window);
+    void (*SDL_HideScreenKeyboard) (_THIS, SDL_Window *window);
     SDL_bool (*SDL_IsScreenKeyboardShown) (_THIS, SDL_Window *window);
 
     /* Clipboard */
     int (*SetClipboardText) (_THIS, const char *text);
     char * (*GetClipboardText) (_THIS);
     SDL_bool (*HasClipboardText) (_THIS);
+
+    /* MessageBox */
+    int (*ShowMessageBox) (_THIS, const SDL_MessageBoxData *messageboxdata, int *buttonid);
 
     /* * * */
     /* Data common to all drivers */
@@ -361,7 +369,10 @@ extern void SDL_OnWindowMinimized(SDL_Window * window);
 extern void SDL_OnWindowRestored(SDL_Window * window);
 extern void SDL_OnWindowFocusGained(SDL_Window * window);
 extern void SDL_OnWindowFocusLost(SDL_Window * window);
+extern void SDL_UpdateWindowGrab(SDL_Window * window);
 extern SDL_Window * SDL_GetFocusWindow(void);
+
+extern SDL_bool SDL_ShouldAllowTopmost();
 
 #endif /* _SDL_sysvideo_h */
 

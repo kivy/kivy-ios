@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -53,6 +53,11 @@
 #include <X11/extensions/xf86vmode.h>
 #endif
 
+#ifdef HAVE_DBUS_DBUS_H
+#define SDL_USE_LIBDBUS 1
+#include <dbus/dbus.h>
+#endif
+
 #include "SDL_x11dyn.h"
 
 #include "SDL_x11clipboard.h"
@@ -80,6 +85,7 @@ typedef struct SDL_VideoData
     SDL_bool net_wm;
 
     /* Useful atoms */
+    Atom WM_PROTOCOLS;
     Atom WM_DELETE_WINDOW;
     Atom _NET_WM_STATE;
     Atom _NET_WM_STATE_HIDDEN;
@@ -92,10 +98,15 @@ typedef struct SDL_VideoData
     Atom _NET_WM_NAME;
     Atom _NET_WM_ICON_NAME;
     Atom _NET_WM_ICON;
+    Atom _NET_WM_PING;
     Atom UTF8_STRING;
 
     SDL_Scancode key_layout[256];
     SDL_bool selection_waiting;    
+
+#if SDL_USE_LIBDBUS
+    DBusConnection *dbus;
+#endif
 } SDL_VideoData;
 
 extern SDL_bool X11_UseDirectColorVisuals(void);

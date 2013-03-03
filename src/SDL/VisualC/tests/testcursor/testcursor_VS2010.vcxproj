@@ -107,7 +107,7 @@
       <OutputFile>.\Debug/testcursor.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"
 copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -143,7 +143,7 @@ copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
       <OutputFile>.\Debug/testcursor.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"
 copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -181,7 +181,7 @@ copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
       <OutputFile>.\Release/testcursor.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"
 copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -218,7 +218,7 @@ copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
       <OutputFile>.\Release/testcursor.bsc</OutputFile>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"
 copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
     </PostBuildEvent>
     <PostBuildEvent>

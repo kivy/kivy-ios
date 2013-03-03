@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -37,6 +37,143 @@
 
 #if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
 #include "SDL_x11opengles.h"
+#endif
+
+/* !!! FIXME: move dbus stuff to somewhere under src/core/linux ... */
+#if SDL_USE_LIBDBUS
+/* we never link directly to libdbus. */
+#include "SDL_loadso.h"
+static const char *dbus_library = "libdbus-1.so.3";
+static void *dbus_handle = NULL;
+
+/* !!! FIXME: this is kinda ugly. */
+static SDL_bool
+load_dbus_sym(const char *fn, void **addr)
+{
+    *addr = SDL_LoadFunction(dbus_handle, fn);
+    if (*addr == NULL) {
+        /* Don't call SDL_SetError(): SDL_LoadFunction already did. */
+        return SDL_FALSE;
+    }
+
+    return SDL_TRUE;
+}
+
+/* libdbus entry points... */
+static DBusConnection *(*DBUS_dbus_bus_get_private)(DBusBusType, DBusError *) = NULL;
+static void (*DBUS_dbus_connection_set_exit_on_disconnect)(DBusConnection *, dbus_bool_t) = NULL;
+static dbus_bool_t (*DBUS_dbus_connection_send)(DBusConnection *, DBusMessage *, dbus_uint32_t *) = NULL;
+static void (*DBUS_dbus_connection_close)(DBusConnection *) = NULL;
+static void (*DBUS_dbus_connection_unref)(DBusConnection *) = NULL;
+static void (*DBUS_dbus_connection_flush)(DBusConnection *) = NULL;
+static DBusMessage *(*DBUS_dbus_message_new_method_call)(const char *, const char *, const char *, const char *) = NULL;
+static void (*DBUS_dbus_message_unref)(DBusMessage *) = NULL;
+static void (*DBUS_dbus_error_init)(DBusError *) = NULL;
+static dbus_bool_t (*DBUS_dbus_error_is_set)(const DBusError *) = NULL;
+static void (*DBUS_dbus_error_free)(DBusError *) = NULL;
+
+static int
+load_dbus_syms(void)
+{
+    /* cast funcs to char* first, to please GCC's strict aliasing rules. */
+    #define SDL_DBUS_SYM(x) \
+        if (!load_dbus_sym(#x, (void **) (char *) &DBUS_##x)) return -1
+
+    SDL_DBUS_SYM(dbus_bus_get_private);
+    SDL_DBUS_SYM(dbus_connection_set_exit_on_disconnect);
+    SDL_DBUS_SYM(dbus_connection_send);
+    SDL_DBUS_SYM(dbus_connection_close);
+    SDL_DBUS_SYM(dbus_connection_unref);
+    SDL_DBUS_SYM(dbus_connection_flush);
+    SDL_DBUS_SYM(dbus_message_new_method_call);
+    SDL_DBUS_SYM(dbus_message_unref);
+    SDL_DBUS_SYM(dbus_error_init);
+    SDL_DBUS_SYM(dbus_error_is_set);
+    SDL_DBUS_SYM(dbus_error_free);
+
+    #undef SDL_DBUS_SYM
+
+    return 0;
+}
+
+static void
+UnloadDBUSLibrary(void)
+{
+    if (dbus_handle != NULL) {
+        SDL_UnloadObject(dbus_handle);
+        dbus_handle = NULL;
+    }
+}
+
+static int
+LoadDBUSLibrary(void)
+{
+    int retval = 0;
+    if (dbus_handle == NULL) {
+        dbus_handle = SDL_LoadObject(dbus_library);
+        if (dbus_handle == NULL) {
+            retval = -1;
+            /* Don't call SDL_SetError(): SDL_LoadObject already did. */
+        } else {
+            retval = load_dbus_syms();
+            if (retval < 0) {
+                UnloadDBUSLibrary();
+            }
+        }
+    }
+
+    return retval;
+}
+
+static void
+X11_InitDBus(_THIS)
+{
+    if (LoadDBUSLibrary() != -1) {
+        SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+        DBusError err;
+        DBUS_dbus_error_init(&err);
+        data->dbus = DBUS_dbus_bus_get_private(DBUS_BUS_SESSION, &err);
+        if (DBUS_dbus_error_is_set(&err)) {
+            DBUS_dbus_error_free(&err);
+            if (data->dbus) {
+                DBUS_dbus_connection_unref(data->dbus);
+                data->dbus = NULL;
+            }
+            return;  /* oh well */
+        }
+        DBUS_dbus_connection_set_exit_on_disconnect(data->dbus, 0);
+    }
+}
+
+static void
+X11_QuitDBus(_THIS)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    if (data->dbus) {
+        DBUS_dbus_connection_close(data->dbus);
+        DBUS_dbus_connection_unref(data->dbus);
+        data->dbus = NULL;
+    }
+}
+
+void
+SDL_dbus_screensaver_tickle(_THIS)
+{
+    const SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    DBusConnection *conn = data->dbus;
+    if (conn != NULL) {
+        DBusMessage *msg = DBUS_dbus_message_new_method_call("org.gnome.ScreenSaver",
+                                                             "/org/gnome/ScreenSaver",
+                                                             "org.gnome.ScreenSaver",
+                                                             "SimulateUserActivity");
+        if (msg != NULL) {
+            if (DBUS_dbus_connection_send(conn, msg, NULL)) {
+                DBUS_dbus_connection_flush(conn);
+            }
+            DBUS_dbus_message_unref(msg);
+        }
+    }
+}
 #endif
 
 /* Initialization/Query functions */
@@ -156,8 +293,8 @@ X11_CreateDevice(int devindex)
         return NULL;
     }
 
-    // Need for threading gl calls. This is also required for the proprietary nVidia
-	//  driver to be threaded.
+    /* Need for threading gl calls. This is also required for the proprietary
+        nVidia driver to be threaded. */
     XInitThreads();
 
     /* Initialize all variables that we clean on shutdown */
@@ -349,6 +486,7 @@ X11_CheckWindowManager(_THIS)
 #endif
 }
 
+
 int
 X11_VideoInit(_THIS)
 {
@@ -370,6 +508,7 @@ X11_VideoInit(_THIS)
 
     /* Look up some useful Atoms */
 #define GET_ATOM(X) data->X = XInternAtom(data->display, #X, False)
+    GET_ATOM(WM_PROTOCOLS);
     GET_ATOM(WM_DELETE_WINDOW);
     GET_ATOM(_NET_WM_STATE);
     GET_ATOM(_NET_WM_STATE_HIDDEN);
@@ -382,6 +521,7 @@ X11_VideoInit(_THIS)
     GET_ATOM(_NET_WM_NAME);
     GET_ATOM(_NET_WM_ICON_NAME);
     GET_ATOM(_NET_WM_ICON);
+    GET_ATOM(_NET_WM_PING);
     GET_ATOM(UTF8_STRING);
 
     /* Detect the window manager */
@@ -399,6 +539,11 @@ X11_VideoInit(_THIS)
     X11_InitMouse(_this);
 
     X11_InitTouch(_this);
+
+#if SDL_USE_LIBDBUS
+    X11_InitDBus(_this);
+#endif
+
     return 0;
 }
 
@@ -420,6 +565,10 @@ X11_VideoQuit(_THIS)
     X11_QuitKeyboard(_this);
     X11_QuitMouse(_this);
     X11_QuitTouch(_this);
+
+#if SDL_USE_LIBDBUS
+    X11_QuitDBus(_this);
+#endif
 }
 
 SDL_bool

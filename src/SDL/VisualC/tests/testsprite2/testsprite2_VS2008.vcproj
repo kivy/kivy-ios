@@ -196,10 +196,6 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\..\test\common.c"
-			>
-		</File>
-		<File
 			RelativePath="..\..\..\test\testsprite2.c"
 			>
 		</File>

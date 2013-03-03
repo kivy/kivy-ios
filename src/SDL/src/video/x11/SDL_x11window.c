@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -22,6 +22,7 @@
 
 #if SDL_VIDEO_DRIVER_X11
 
+#include "SDL_hints.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_keyboard_c.h"
@@ -536,8 +537,14 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                     PropModeReplace,
                     (unsigned char *)&_NET_WM_WINDOW_TYPE_NORMAL, 1);
 
-    /* Allow the window to be deleted by the window manager */
-    XSetWMProtocols(display, w, &data->WM_DELETE_WINDOW, 1);
+    
+    {
+        Atom protocols[] = {
+            data->WM_DELETE_WINDOW, /* Allow window to be deleted by the WM */
+            data->_NET_WM_PING, /* Respond so WM knows we're alive */
+        };
+        XSetWMProtocols(display, w, protocols, sizeof (protocols) / sizeof (protocols[0]));
+    }
 
     if (SetupWindowData(_this, window, w, SDL_TRUE) < 0) {
         XDestroyWindow(display, w);
@@ -761,37 +768,28 @@ X11_SetWindowSize(_THIS, SDL_Window * window)
          XFree(sizehints);
 
         /* From Pierre-Loup:
-           For the windowed resize problem; WMs each have their little quirks with
-           that.  When you change the size hints, they get a ConfigureNotify event
-           with the WM_NORMAL_SIZE_HINTS Atom.  They all save the hints then, but
-           they don't all resize the window right away to enforce the new hints.
-           Those who do properly do it are:
-          
-             - XFWM
-             - metacity
-             - KWin
+           WMs each have their little quirks with that.  When you change the
+           size hints, they get a ConfigureNotify event with the
+           WM_NORMAL_SIZE_HINTS Atom.  They all save the hints then, but they
+           don't all resize the window right away to enforce the new hints.
 
-           These are great.  Now, others are more problematic as you could observe
-           first hand.  Compiz/Unity only falls into the code that does it on select
-           actions, such as window move, raise, map, etc.
+           Some of them resize only after:
+            - A user-initiated move or resize
+            - A code-initiated move or resize
+            - Hiding & showing window (Unmap & map)
 
-           WindowMaker is even more difficult and will _only_ do it on map.
-
-           Awesome only does it on user-initiated moves as far as I can tell.
-          
-           Your raise workaround only fixes compiz/Unity.  With that all "modern"
-           window managers are covered.  Trying to Hide/Show on windowed resize
-           (UnMap/Map) fixes both Unity and WindowMaker, but introduces subtle
-           problems with transitioning from Windowed to Fullscreen on Unity.  Since
-           some window moves happen after the transitions to fullscreen, that forces
-           SDL to fall from windowed to fullscreen repeatedly and it sometimes leaves
-           itself in a state where the fullscreen window is slightly offset by what
-           used to be the window decoration titlebar.
-        */
+           The following move & resize seems to help a lot of WMs that didn't
+           properly update after the hints were changed. We don't do a
+           hide/show, because there are supposedly subtle problems with doing so
+           and transitioning from windowed to fullscreen in Unity.
+         */
+        XResizeWindow(display, data->xwindow, window->w, window->h);
+        XMoveWindow(display, data->xwindow, window->x, window->y);
         XRaiseWindow(display, data->xwindow);
     } else {
         XResizeWindow(display, data->xwindow, window->w, window->h);
     }
+
     XFlush(display);
 }
 
@@ -1083,7 +1081,7 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
     XIfEvent(display, &ev, &isMapNotify, (XPointer)&data->xwindow);
     XCheckIfEvent(display, &ev, &isUnmapNotify, (XPointer)&data->xwindow);
 
-    X11_SetWindowGrab(_this, window);
+    SDL_UpdateWindowGrab(window);
 }
 
 static void
@@ -1109,7 +1107,7 @@ X11_EndWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _di
     }
 #endif
 
-    X11_SetWindowGrab(_this, window);
+    SDL_UpdateWindowGrab(window);
 
     XReparentWindow(display, data->xwindow, root, window->x, window->y);
 
@@ -1232,19 +1230,21 @@ X11_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
 }
 
 void
-X11_SetWindowGrab(_THIS, SDL_Window * window)
+X11_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
     SDL_bool oldstyle_fullscreen;
+    SDL_bool grab_keyboard;
+    const char *hint;
 
-    /* ICCCM2.0-compliant window managers can handle fullscreen windows */
+    /* ICCCM2.0-compliant window managers can handle fullscreen windows
+       If we're using XVidMode to change resolution we need to confine
+       the cursor so we don't pan around the virtual desktop.
+     */
     oldstyle_fullscreen = X11_IsWindowLegacyFullscreen(_this, window);
 
-    if (oldstyle_fullscreen ||
-        ((window->flags & SDL_WINDOW_INPUT_GRABBED) &&
-         (window->flags & SDL_WINDOW_INPUT_FOCUS))) {
-
+    if (oldstyle_fullscreen || grabbed) {
         /* Try to grab the mouse */
         for (;;) {
             int result =
@@ -1253,15 +1253,26 @@ X11_SetWindowGrab(_THIS, SDL_Window * window)
             if (result == GrabSuccess) {
                 break;
             }
-            SDL_Delay(100);
+            SDL_Delay(50);
         }
 
         /* Raise the window if we grab the mouse */
         XRaiseWindow(display, data->xwindow);
 
         /* Now grab the keyboard */
-        XGrabKeyboard(display, data->xwindow, True, GrabModeAsync,
-                      GrabModeAsync, CurrentTime);
+        hint = SDL_GetHint(SDL_HINT_GRAB_KEYBOARD);
+        if (hint && SDL_atoi(hint)) {
+            grab_keyboard = SDL_TRUE;
+        } else {
+            /* We need to do this with the old style override_redirect
+               fullscreen window otherwise we won't get keyboard focus.
+            */
+            grab_keyboard = oldstyle_fullscreen;
+        }
+        if (grab_keyboard) {
+            XGrabKeyboard(display, data->xwindow, True, GrabModeAsync,
+                          GrabModeAsync, CurrentTime);
+        }
     } else {
         XUngrabPointer(display, CurrentTime);
         XUngrabKeyboard(display, CurrentTime);

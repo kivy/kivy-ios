@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -56,8 +56,6 @@ typedef struct SDL_WindowData SDL_WindowData;
 -(void) mouseUp:(NSEvent *) theEvent;
 -(void) rightMouseUp:(NSEvent *) theEvent;
 -(void) otherMouseUp:(NSEvent *) theEvent;
--(void) mouseEntered:(NSEvent *)theEvent;
--(void) mouseExited:(NSEvent *)theEvent;
 -(void) mouseMoved:(NSEvent *) theEvent;
 -(void) mouseDragged:(NSEvent *) theEvent;
 -(void) rightMouseDragged:(NSEvent *) theEvent;
@@ -96,6 +94,8 @@ extern void Cocoa_SetWindowTitle(_THIS, SDL_Window * window);
 extern void Cocoa_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon);
 extern void Cocoa_SetWindowPosition(_THIS, SDL_Window * window);
 extern void Cocoa_SetWindowSize(_THIS, SDL_Window * window);
+extern void Cocoa_SetWindowMinimumSize(_THIS, SDL_Window * window);
+extern void Cocoa_SetWindowMaximumSize(_THIS, SDL_Window * window);
 extern void Cocoa_ShowWindow(_THIS, SDL_Window * window);
 extern void Cocoa_HideWindow(_THIS, SDL_Window * window);
 extern void Cocoa_RaiseWindow(_THIS, SDL_Window * window);
@@ -106,7 +106,7 @@ extern void Cocoa_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordere
 extern void Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
 extern int Cocoa_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp);
 extern int Cocoa_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp);
-extern void Cocoa_SetWindowGrab(_THIS, SDL_Window * window);
+extern void Cocoa_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed);
 extern void Cocoa_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool Cocoa_GetWindowWMInfo(_THIS, SDL_Window * window,
                                       struct SDL_SysWMinfo *info);

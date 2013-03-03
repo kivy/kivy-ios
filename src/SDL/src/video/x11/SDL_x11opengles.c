@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -321,7 +321,7 @@ X11_GLES_CreateContext(_THIS, SDL_Window * window)
 
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
-    SDL_GLContext context = 1;
+    SDL_GLContext context = (SDL_GLContext)1;
 
     XSync(display, False);
 
@@ -355,8 +355,10 @@ X11_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
     int retval;
 
-//    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
-//    Display *display = data->videodata->display;
+/*
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    Display *display = data->videodata->display;
+*/
 
     if (!_this->gles_data) {
         SDL_SetError("OpenGL not initialized");
@@ -371,7 +373,10 @@ X11_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         SDL_SetError("Unable to make EGL context current");
         retval = -1;
     }
-//    XSync(display, False);
+
+/*
+    XSync(display, False);
+*/
 
     return (retval);
 }

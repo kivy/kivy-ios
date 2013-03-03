@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -74,7 +74,16 @@ SDL_GLContext
 Android_GL_CreateContext(_THIS, SDL_Window * window)
 {
     if (!Android_JNI_CreateContext(_this->gl_config.major_version,
-                                   _this->gl_config.minor_version)) {
+                                   _this->gl_config.minor_version,
+                                   _this->gl_config.red_size,
+                                   _this->gl_config.green_size,
+                                   _this->gl_config.blue_size,
+                                   _this->gl_config.alpha_size,
+                                   _this->gl_config.buffer_size,
+                                   _this->gl_config.depth_size,
+                                   _this->gl_config.stencil_size,
+                                   _this->gl_config.multisamplebuffers,
+                                   _this->gl_config.multisamplesamples)) {
         SDL_SetError("Couldn't create OpenGL context - see Android log for details");
         return NULL;
     }

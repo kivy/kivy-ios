@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -204,6 +204,27 @@ load_pulseaudio_syms(void)
     return 0;
 }
 
+
+/* Check to see if we can connect to PulseAudio */
+static SDL_bool
+CheckPulseAudioAvailable()
+{
+    pa_simple *s;
+    pa_sample_spec ss;
+
+    ss.format = PA_SAMPLE_S16NE;
+    ss.channels = 1;
+    ss.rate = 22050;
+
+    s = PULSEAUDIO_pa_simple_new(NULL, "SDL", PA_STREAM_PLAYBACK, NULL,
+                                 "Test", &ss, NULL, NULL, NULL);
+    if (s) {
+        PULSEAUDIO_pa_simple_free(s);
+        return SDL_TRUE;
+    } else {
+        return SDL_FALSE;
+    }
+}
 
 /* This function waits until it is possible to write a full sound buffer */
 static void
@@ -476,11 +497,15 @@ PULSEAUDIO_Deinitialize(void)
     UnloadPulseAudioLibrary();
 }
 
-
 static int
 PULSEAUDIO_Init(SDL_AudioDriverImpl * impl)
 {
     if (LoadPulseAudioLibrary() < 0) {
+        return 0;
+    }
+
+    if (!CheckPulseAudioAvailable()) {
+        UnloadPulseAudioLibrary();
         return 0;
     }
 

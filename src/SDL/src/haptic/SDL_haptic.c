@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -238,7 +238,7 @@ SDL_JoystickIsHaptic(SDL_Joystick * joystick)
     int ret;
 
     /* Must be a valid joystick */
-    if (!SDL_PrivateJoystickValid(&joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         return -1;
     }
 
@@ -263,7 +263,7 @@ SDL_HapticOpenFromJoystick(SDL_Joystick * joystick)
     SDL_Haptic *haptic;
 
     /* Must be a valid joystick */
-    if (!SDL_PrivateJoystickValid(&joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         SDL_SetError("Haptic: Joystick isn't valid.");
         return NULL;
     }

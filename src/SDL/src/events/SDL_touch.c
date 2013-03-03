@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -125,7 +125,6 @@ SDL_AddTouch(const SDL_Touch * touch, char *name)
     SDL_memcpy(SDL_touchPads[index], touch, sizeof(*touch));
 
     /* we're setting the touch properties */
-    length = 0;
     length = SDL_strlen(name);
     SDL_touchPads[index]->focus = 0;
     SDL_touchPads[index]->name = SDL_malloc((length + 2) * sizeof(char));
@@ -268,7 +267,6 @@ SDL_AddFinger(SDL_Touch* touch,SDL_Finger *finger)
                 //printf("Making room for it!\n");
                 fingers = (SDL_Finger **) SDL_realloc(touch->fingers,
                                                      (touch->num_fingers + 1) * sizeof(SDL_Finger *));
-                touch->max_fingers = touch->num_fingers+1;
                 if (!fingers) {
                         SDL_OutOfMemory();
                         return -1;

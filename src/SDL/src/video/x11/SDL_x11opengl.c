@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -332,7 +332,7 @@ X11_GL_InitExtensions(_THIS)
     _this->gl_data->HAS_GLX_EXT_swap_control_tear = SDL_FALSE;
     if (HasExtension("GLX_EXT_swap_control", extensions)) {
         _this->gl_data->glXSwapIntervalEXT =
-            (int (*)(Display*,GLXDrawable,int))
+            (void (*)(Display*,GLXDrawable,int))
                 X11_GL_GetProcAddress(_this, "glXSwapIntervalEXT");
         if (HasExtension("GLX_EXT_swap_control_tear", extensions)) {
             _this->gl_data->HAS_GLX_EXT_swap_control_tear = SDL_TRUE;
@@ -460,8 +460,8 @@ X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int si
                                                       GLX_SLOW_VISUAL_EXT;
     }
 
-    // If we're supposed to use DirectColor visuals, and we've got the EXT_visual_info
-    //  extension, then add GLX_X_VISUAL_TYPE_EXT.
+    /* If we're supposed to use DirectColor visuals, and we've got the
+       EXT_visual_info extension, then add GLX_X_VISUAL_TYPE_EXT. */
     if (X11_UseDirectColorVisuals() &&
         _this->gl_data->HAS_GLX_EXT_visual_info) {
         attribs[i++] = GLX_X_VISUAL_TYPE_EXT;
@@ -628,7 +628,7 @@ X11_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
     Display *display = ((SDL_VideoData *) _this->driverdata)->display;
     Window drawable =
-        (window ? ((SDL_WindowData *) window->driverdata)->xwindow : None);
+        (context ? ((SDL_WindowData *) window->driverdata)->xwindow : None);
     GLXContext glx_context = (GLXContext) context;
     int status;
 
@@ -642,7 +642,6 @@ X11_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         SDL_SetError("Unable to make GL context current");
         status = -1;
     }
-    XSync(display, False);
 
     return (status);
 }
@@ -667,13 +666,23 @@ X11_GL_SetSwapInterval(_THIS, int interval)
         Display *display = ((SDL_VideoData *) _this->driverdata)->display;
         const SDL_WindowData *windowdata = (SDL_WindowData *)
             _this->current_glwin->driverdata;
+
         Window drawable = windowdata->xwindow;
-        status = _this->gl_data->glXSwapIntervalEXT(display,drawable,interval);
-        if (status != 0) {
-            SDL_SetError("glxSwapIntervalEXT failed");
-        } else {
-            swapinterval = interval;
-        }
+
+        /*
+         * This is a workaround for a bug in NVIDIA drivers. Bug has been reported
+         * and will be fixed in a future release (probably 319.xx).
+         *
+         * There's a bug where glXSetSwapIntervalEXT ignores updates because
+         * it has the wrong value cached. To work around it, we just run a no-op
+         * update to the current value.
+         */
+        int currentInterval = X11_GL_GetSwapInterval(_this);
+        _this->gl_data->glXSwapIntervalEXT(display, drawable, currentInterval);
+        _this->gl_data->glXSwapIntervalEXT(display, drawable, interval);
+
+        status = 0;
+        swapinterval = interval;
     } else if (_this->gl_data->glXSwapIntervalMESA) {
         status = _this->gl_data->glXSwapIntervalMESA(interval);
         if (status != 0) {

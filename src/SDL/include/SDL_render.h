@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -700,7 +700,7 @@ extern DECLSPEC int SDLCALL SDL_RenderCopy(SDL_Renderer * renderer,
  *                   entire rendering target.
  *  \param angle    An angle in degrees that indicates the rotation that will be applied to dstrect
  *  \param center   A pointer to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done aroud dstrect.w/2, dstrect.h/2)
- *  \param flip     A SFL_Flip value stating which flipping actions should be performed on the texture
+ *  \param flip     An SDL_RendererFlip value stating which flipping actions should be performed on the texture
  * 
  *  \return 0 on success, or -1 on error
  */

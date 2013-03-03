@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -195,7 +195,7 @@ int BE_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp) {
 }
 
 
-void BE_SetWindowGrab(_THIS, SDL_Window * window) {
+void BE_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed) {
 	/* TODO: Implement this! */
 }
 

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -1258,6 +1258,8 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
             case SDL_PIXELFORMAT_RGB888:
                 sourceType = GLES2_IMAGESOURCE_TEXTURE_RGB;
                 break;
+            default:
+                return -1;
         }
     }
     if (GLES2_SelectProgram(renderer, sourceType, blendMode) < 0)
@@ -1341,7 +1343,7 @@ GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect 
     
     rdata->glEnableVertexAttribArray(GLES2_ATTRIBUTE_CENTER);
     rdata->glEnableVertexAttribArray(GLES2_ATTRIBUTE_ANGLE);
-    fAngle[0] = fAngle[1] = fAngle[2] = fAngle[3] = (GLfloat)angle;
+    fAngle[0] = fAngle[1] = fAngle[2] = fAngle[3] = (GLfloat)(360.0f - angle);
     /* Calculate the center of rotation */
     translate[0] = translate[2] = translate[4] = translate[6] = (center->x + dstrect->x);
     translate[1] = translate[3] = translate[5] = translate[7] = (center->y + dstrect->y);
@@ -1424,6 +1426,8 @@ GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect 
             case SDL_PIXELFORMAT_RGB888:
                 sourceType = GLES2_IMAGESOURCE_TEXTURE_RGB;
                 break;
+            default:
+                return -1;
         }
     }
     if (GLES2_SelectProgram(renderer, sourceType, blendMode) < 0)

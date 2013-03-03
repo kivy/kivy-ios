@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -62,7 +62,8 @@ static void parse_valuators(const double *input_values,unsigned char *mask,int m
 #endif /* SDL_VIDEO_DRIVER_X11_XINPUT2 */
 
 void 
-X11_InitXinput2(_THIS) {
+X11_InitXinput2(_THIS)
+{
 #if SDL_VIDEO_DRIVER_X11_XINPUT2
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
@@ -83,7 +84,8 @@ X11_InitXinput2(_THIS) {
     *
     * FIXME:event and err are not needed but if not passed XQueryExtension returns SegmentationFault
     */
-    if (!XQueryExtension(data->display, "XInputExtension", &xinput2_opcode, &event, &err)) {
+    if (!SDL_X11_HAVE_XINPUT2 ||
+        !XQueryExtension(data->display, "XInputExtension", &xinput2_opcode, &event, &err)) {
         return;
     }
 
@@ -122,7 +124,8 @@ X11_InitXinput2(_THIS) {
 
 
 int 
-X11_HandleXinput2Event(SDL_VideoData *videodata,XGenericEventCookie *cookie) {
+X11_HandleXinput2Event(SDL_VideoData *videodata,XGenericEventCookie *cookie)
+{
 #if SDL_VIDEO_DRIVER_X11_XINPUT2
     if(cookie->extension != xinput2_opcode) {
         return 0;
@@ -175,7 +178,8 @@ X11_HandleXinput2Event(SDL_VideoData *videodata,XGenericEventCookie *cookie) {
 }
 
 void 
-X11_InitXinput2Multitouch(_THIS) {
+X11_InitXinput2Multitouch(_THIS)
+{
 #if SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     XIDeviceInfo *info;
@@ -218,7 +222,8 @@ X11_InitXinput2Multitouch(_THIS) {
 }
 
 void 
-X11_Xinput2SelectTouch(_THIS, SDL_Window *window) {
+X11_Xinput2SelectTouch(_THIS, SDL_Window *window)
+{
 #if SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH
     if (!X11_Xinput2IsMultitouchSupported()) {
         return;
@@ -243,7 +248,8 @@ X11_Xinput2SelectTouch(_THIS, SDL_Window *window) {
 
 
 int 
-X11_Xinput2IsInitialized() {
+X11_Xinput2IsInitialized()
+{
 #if SDL_VIDEO_DRIVER_X11_XINPUT2
     return xinput2_initialized;
 #else
@@ -252,7 +258,8 @@ X11_Xinput2IsInitialized() {
 }
 
 int
-X11_Xinput2IsMultitouchSupported() {
+X11_Xinput2IsMultitouchSupported()
+{
 #if SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH
     return xinput2_initialized && xinput2_multitouch_supported;
 #else

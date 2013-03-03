@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>SDL</ProjectName>
+    <ProjectName>SDL2</ProjectName>
     <ProjectGuid>{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}</ProjectGuid>
     <RootNamespace>SDL</RootNamespace>
   </PropertyGroup>
@@ -92,13 +92,14 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;imm32.lib;oleaut32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -123,13 +124,14 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;imm32.lib;oleaut32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -159,16 +161,20 @@
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <CompileAs>Default</CompileAs>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;imm32.lib;oleaut32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -190,16 +196,20 @@
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;imm32.lib;oleaut32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -207,6 +217,7 @@
     <ClInclude Include="..\..\include\SDL_assert.h" />
     <ClInclude Include="..\..\include\SDL_atomic.h" />
     <ClInclude Include="..\..\include\SDL_audio.h" />
+    <ClInclude Include="..\..\include\SDL_bits.h" />
     <ClInclude Include="..\..\include\SDL_blendmode.h" />
     <ClInclude Include="..\..\include\SDL_clipboard.h" />
     <ClInclude Include="..\..\include\SDL_config.h" />
@@ -219,8 +230,8 @@
     <ClInclude Include="..\..\include\SDL_gesture.h" />
     <ClInclude Include="..\..\include\SDL_haptic.h" />
     <ClInclude Include="..\..\include\SDL_hints.h" />
-    <ClInclude Include="..\..\include\SDL_input.h" />
     <ClInclude Include="..\..\include\SDL_joystick.h" />
+    <ClInclude Include="..\..\include\SDL_gamecontroller.h" />
     <ClInclude Include="..\..\include\SDL_keyboard.h" />
     <ClInclude Include="..\..\include\SDL_keycode.h" />
     <ClInclude Include="..\..\include\SDL_loadso.h" />
@@ -317,6 +328,7 @@
     <ClInclude Include="..\..\src\video\windows\SDL_windowsevents.h" />
     <ClInclude Include="..\..\src\video\windows\SDL_windowsframebuffer.h" />
     <ClInclude Include="..\..\src\video\windows\SDL_windowskeyboard.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowsmessagebox.h" />
     <ClInclude Include="..\..\src\video\windows\SDL_windowsmodes.h" />
     <ClInclude Include="..\..\src\video\windows\SDL_windowsmouse.h" />
     <ClInclude Include="..\..\src\video\windows\SDL_windowsopengl.h" />
@@ -398,6 +410,7 @@
     <ClCompile Include="..\..\src\haptic\SDL_haptic.c" />
     <ClCompile Include="..\..\src\stdlib\SDL_iconv.c" />
     <ClCompile Include="..\..\src\joystick\SDL_joystick.c" />
+    <ClCompile Include="..\..\src\joystick\SDL_gamecontroller.c" />
     <ClCompile Include="..\..\src\events\SDL_keyboard.c" />
     <ClCompile Include="..\..\src\stdlib\SDL_malloc.c" />
     <ClCompile Include="..\..\src\audio\SDL_mixer.c" />
@@ -432,6 +445,7 @@
     <ClCompile Include="..\..\src\video\windows\SDL_windowsevents.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowsframebuffer.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowskeyboard.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowsmessagebox.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowsmodes.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowsmouse.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowsopengl.c" />
