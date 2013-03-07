@@ -32,10 +32,12 @@ int main(int argc, char *argv[]) {
     putenv("KIVY_BUILD=ios");
     putenv("KIVY_NO_CONFIG=1");
     putenv("KIVY_NO_FILELOG=1");
-    putenv("KIVY_NO_CONSOLELOG=1");
     putenv("KIVY_WINDOW=sdl");
-    putenv("KIVY_IMAGE=imageio");
+    putenv("KIVY_IMAGE=imageio,tex");
     putenv("KIVY_AUDIO=sdl");
+    #if DEBUG
+    putenv("KIVY_NO_CONSOLELOG=1");
+    #endif
     
 	// Export orientation preferences for Kivy
 	export_orientation();
