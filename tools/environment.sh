@@ -13,6 +13,9 @@ export SDKVER=`xcodebuild -showsdks | fgrep "iphoneos" | tail -n 1 | awk '{print
 export DEVROOT=`xcode-select -print-path`/Platforms/iPhoneOS.platform/Developer
 export IOSSDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
 
+# Xcode doesn't include /usr/local/bin
+export PATH="$PATH":/usr/local/bin
+
 if [ ! -d $DEVROOT ]; then
 	echo "Unable to found the Xcode iPhoneOS.platform"
 	echo
