@@ -55,8 +55,12 @@ for fn in cython-2.7 cython; do
 	fi
 done
 if [ "X$CYTHON" == "X" ]; then
-	echo "Cython is not installed, aborting."
-	exit 1
+	echo
+	echo "Cython not found !"
+	echo "Ensure your PATH contain access to 'cython' or 'cython-2.7'"
+	echo
+	echo "Current PATH: $PATH"
+	echo
 fi
 
 # check basic tools
