@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     putenv("KIVY_WINDOW=sdl");
     putenv("KIVY_IMAGE=imageio,tex");
     putenv("KIVY_AUDIO=sdl");
-    #if DEBUG
+    #ifndef DEBUG
     putenv("KIVY_NO_CONSOLELOG=1");
     #endif
     
