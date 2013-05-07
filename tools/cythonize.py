@@ -11,6 +11,8 @@ def resolve_cython():
     global cython
     for executable in ('cython', 'cython-2.7'):
         for path in os.environ['PATH'].split(':'):
+            if not os.path.exists(path):
+                continue
             if executable in os.listdir(path):
                 cython = os.path.join(path, executable)
                 return
