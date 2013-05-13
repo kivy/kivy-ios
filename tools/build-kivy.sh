@@ -4,7 +4,7 @@
 
 if [ ! -d $TMPROOT/kivy ] ; then
 	try pushd $TMPROOT
-	try git clone https://github.com/kivy/kivy
+	try git clone -b stable https://github.com/kivy/kivy
 	try cd kivy
 	try popd
 fi
@@ -12,7 +12,7 @@ fi
 if [ "X$1" = "X-f" ] ; then
 	try pushd $TMPROOT/kivy
 	try git clean -dxf
-	try git pull origin master
+	try git pull origin stable
 	try popd
 fi
 
