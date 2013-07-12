@@ -16,12 +16,13 @@ fi
 # lib not found, compile it
 echo "Configuring...."
 pushd $TMPROOT/jpeg-6b
-echo try ./configure --prefix=$DESTROOT \
+try ./configure --prefix=$DESTROOT \
 	--host=arm-apple-darwin \
 	--enable-static=yes \
 	--enable-shared=no \
 	CC="$ARM_CC" AR="$ARM_AR" \
 	LDFLAGS="$ARM_LDFLAGS" CFLAGS="$ARM_CFLAGS"
+patch < $KIVYIOSROOT/src/jpeg_files/jpeg_makefile.patch
 try make clean
 make #With controlled errors
 

@@ -79,7 +79,7 @@ diff -rupN Imaging-1.1.7/setup.py Imaging-1.1.7_patched/setup.py
 +            tiff  = tcl = tk = lcms = None
 +            jpeg="jpeg"
 +            zlib="zlib"
-+            freetype="freetype"
++            freetype="freetype";freetype_version=21
 +        feature = feature()
 +
          files = ["_imaging.c"]
