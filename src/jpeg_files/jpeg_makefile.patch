@@ -1,0 +1,11 @@
+--- Makefile	2013-07-12 14:23:38.000000000 +0200
++++ Makefile_new	2013-07-12 14:26:34.000000000 +0200
+@@ -36,7 +36,7 @@
+ LDLIBS= 
+ 
+ # If using GNU libtool, LIBTOOL references it; if not, LIBTOOL is empty.
+-LIBTOOL = ./libtool
++LIBTOOL =
+ # $(O) expands to "lo" if using libtool, plain "o" if not.
+ # Similarly, $(A) expands to "la" or "a".
+ O = lo
