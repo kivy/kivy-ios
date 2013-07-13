@@ -9,6 +9,8 @@ try $(dirname $0)/build-sdl.sh
 try $(dirname $0)/build-freetype.sh
 try $(dirname $0)/build-sdlttf.sh
 try $(dirname $0)/build-sdlmixer.sh
+try $(dirname $0)/build-libjpeg.sh
+try $(dirname $0)/build-pil.sh
 try $(dirname $0)/build-kivy.sh
 
 echo '== Build done'
