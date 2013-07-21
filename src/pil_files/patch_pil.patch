@@ -1,0 +1,107 @@
+diff -rupN Imaging-1.1.7/_imaging.c Imaging-1.1.7_patched/_imaging.c
+--- Imaging-1.1.7/_imaging.c	2009-11-02 12:18:48.000000000 +0100
++++ Imaging-1.1.7_patched/_imaging.c	2013-07-12 10:58:39.000000000 +0200
+@@ -71,12 +71,28 @@
+  * See the README file for information on usage and redistribution.
+  */
+ 
+-
+ #include "Python.h"
+ 
+ #include "Imaging.h"
+ 
+ 
++#include <stdio.h>
++
++FILE *fopen$UNIX2003( const char *filename, const char *mode )
++{
++    return fopen(filename, mode);
++}
++
++size_t fwrite$UNIX2003( const void *a, size_t b, size_t c, FILE *d )
++{
++    return fwrite(a, b, c, d);
++}
++
++ssize_t write$UNIX2003(int a, const void *b, size_t c)
++{
++    return write(a,b,c);
++}
++
+ /* Configuration stuff. Feel free to undef things you don't need. */
+ #define WITH_IMAGECHOPS /* ImageChops support */
+ #define WITH_IMAGEDRAW /* ImageDraw support */
+diff -rupN Imaging-1.1.7/libImaging/Quant.c Imaging-1.1.7_patched/libImaging/Quant.c
+--- Imaging-1.1.7/libImaging/Quant.c	2009-11-01 02:29:14.000000000 +0100
++++ Imaging-1.1.7_patched/libImaging/Quant.c	2013-07-12 10:59:06.000000000 +0200
+@@ -20,10 +20,15 @@
+ 
+ #include "Imaging.h"
+ 
++#include <time.h>
++clock_t clock$UNIX2003(void)
++{
++    return clock();
++}
++
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <memory.h>
+-#include <time.h>
+ 
+ #include "Quant.h"
+ 
+@@ -33,6 +38,7 @@
+ 
+ #define NO_OUTPUT
+ 
++
+ typedef struct {
+     unsigned long scale;
+ } PixelHashData;
+diff -rupN Imaging-1.1.7/setup.py Imaging-1.1.7_patched/setup.py
+--- Imaging-1.1.7/setup.py	2009-11-15 17:06:10.000000000 +0100
++++ Imaging-1.1.7_patched/setup.py	2013-07-12 10:58:30.000000000 +0200
+@@ -88,6 +88,7 @@ from distutils.command.build_ext import 
+ 
+ try:
+     import _tkinter
++    _tkinter = None
+ except ImportError:
+     _tkinter = None
+ 
+@@ -283,6 +284,14 @@ class pil_build_ext(build_ext):
+         #
+         # core library
+ 
++
++        class feature:
++            tiff  = tcl = tk = lcms = None
++            jpeg="jpeg"
++            zlib="zlib"
++            freetype="freetype";freetype_version=21
++        feature = feature()
++
+         files = ["_imaging.c"]
+         for file in IMAGING:
+             files.append(file + ".c")
+@@ -348,7 +357,7 @@ class pil_build_ext(build_ext):
+                     dir = os.path.join(root, "Tk.framework", "Headers")
+                     add_directory(self.compiler.include_dirs, dir, 1)
+                     break
+-            if frameworks:
++            if False and frameworks:
+                 exts.append(Extension(
+                     "_imagingtk", ["_imagingtk.c", "Tk/tkImaging.c"],
+                     extra_compile_args=frameworks, extra_link_args=frameworks
+@@ -364,7 +373,9 @@ class pil_build_ext(build_ext):
+             exts.append(Extension("_imagingmath", ["_imagingmath.c"]))
+ 
+         self.extensions[:] = exts
+-
++        print "Extensions:"
++        for e in exts:
++            print e.name,str(e.sources)
+         build_ext.build_extensions(self)
+ 
+         #
