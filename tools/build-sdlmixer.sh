@@ -47,7 +47,7 @@ if [ ! -f libtremor/tremor/.libs/libvorbisidec.a ]; then
 	OGG_CFLAGS="-I../../libogg/include" \
 	OGG_LDFLAGS="-L../../libogg/src/.libs" \
 	PKG_CONFIG_LIBDIR="../../libogg" \
-	ACLOCAL_FLAGS="-I $DESTROOT/share/aclocal -I `aclocal --print-ac-dir`" ./autogen.sh \
+	ACLOCAL_FLAGS="-I $DESTROOT/share/aclocal -I `aclocal --print-ac-dir` -I /usr/local/share/aclocal" ./autogen.sh \
 	    --prefix=$DESTROOT \
 		--disable-shared \
 		--host=arm-apple-darwin \
