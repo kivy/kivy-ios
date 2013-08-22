@@ -33,6 +33,7 @@ export FT_VERSION=2.4.8
 export XML2_VERSION=2.7.8
 export XSLT_VERSION=1.1.26
 export LXML_VERSION=2.3.1
+export FFI_VERSION=3.0.13
 
 # where the build will be located
 export KIVYIOSROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"

@@ -15,7 +15,7 @@ OLD_CC="$CC"
 OLD_CFLAGS="$CFLAGS"
 OLD_LDFLAGS="$LDFLAGS"
 OLD_LDSHARED="$LDSHARED"
-export CC="$ARM_CC -I$BUILDROOT/include"
+export CC="$ARM_CC -I$BUILDROOT/include -I$BUILDROOT/include/ffi"
 export CFLAGS="$ARM_CFLAGS"
 export LDFLAGS="$ARM_LDFLAGS"
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
@@ -33,7 +33,7 @@ try $HOSTPYTHON setup.py install -O2 --root iosbuild
 # Strip away the large stuff
 find iosbuild/ | grep -E '.*\.(py|pyc|so\.o|so\.a|so\.libs)$$' | xargs rm
 rm -rdf "$BUILDROOT/python/lib/python2.7/site-packages/pyobjus"
-try cp -R "iosbuid/Library/Python/2.7/site-packages/pyobjus" "$BUILDROOT/python/lib/python2.7/site-packages"
+try cp -R "iosbuild/usr/local/lib/python2.7/site-packages/pyobjus" "$BUILDROOT/python/lib/python2.7/site-packages"
 popd
 
 export CC="$OLD_CC"
