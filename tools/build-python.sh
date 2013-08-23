@@ -50,21 +50,23 @@ ln -s "$IOSSDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib || ec
 
 # Copy our setup for modules
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
+try cat $KIVYIOSROOT/src/python_files/ModulesSetup.mobile >> Modules/Setup.local
 try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
 
 try ./configure CC="$ARM_CC" LD="$ARM_LD" \
-	CFLAGS="$ARM_CFLAGS" \
-	LDFLAGS="$ARM_LDFLAGS -Lextralibs/ -lsqlite3" \
-	--without-pymalloc \
-	--disable-toolbox-glue \
-	--host=armv7-apple-darwin \
-	--prefix=/python \
+    CFLAGS="$ARM_CFLAGS" \
+    LDFLAGS="$ARM_LDFLAGS -Lextralibs/ -lsqlite3 -L$BUILDROOT/lib -undefined dynamic_lookup" \
+    --without-pymalloc \
+    --disable-toolbox-glue \
+    --host=armv7-apple-darwin \
+    --prefix=/python \
     --without-doc-strings
 
 try make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
      CROSS_COMPILE_TARGET=yes
 
-try make install HOSTPYTHON=./hostpython CROSS_COMPILE_TARGET=yes prefix="$BUILDROOT/python"
+try make install HOSTPYTHON=./hostpython CROSS_COMPILE_TARGET=yes \
+    prefix="$BUILDROOT/python"
 
 try mv -f $BUILDROOT/python/lib/libpython2.7.a $BUILDROOT/lib/
 
