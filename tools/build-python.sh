@@ -63,8 +63,8 @@ try ./configure CC="$ARM_CC" LD="$ARM_LD" \
     --without-doc-strings
 
 # with undefined lookup, checks in configure just failed :(
-try cp $KIVYIOSROOT/src/python_files/pyconfig.h pyconfig.h
-try cp $KIVYIOSROOT/src/python_files/cfield.c Modules/_ctypes/cfield.c
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-pyconfig.patch
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-ctypes_duplicate.patch
 
 try make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
      CROSS_COMPILE_TARGET=yes

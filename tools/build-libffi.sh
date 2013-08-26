@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Building libffi ============================="
+
 . $(dirname $0)/environment.sh
 
 if [ ! -f $CACHEROOT/libffi-$FFI_VERSION.tar.gz ]; then
@@ -17,10 +19,10 @@ fi
 
 # lib not found, compile it
 pushd $TMPROOT/libffi-$FFI_VERSION
+try patch -p1 < $KIVYIOSROOT/src/ffi_files/ffi-$FFI_VERSION-sysv.S.patch
 
 try xcodebuild -project libffi.xcodeproj -target "libffi iOS" -configuration Release -sdk iphoneos$SDKVER OTHER_CFLAGS="-no-integrated-as"
 
 try cp build/Release-iphoneos/libffi.a $BUILDROOT/lib/libffi.a
 try cp -a build/Release-iphoneos/usr/local/include $BUILDROOT/include/ffi
-
 popd

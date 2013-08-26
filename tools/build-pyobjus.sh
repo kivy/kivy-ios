@@ -1,7 +1,8 @@
 #!/bin/bash
 
-. $(dirname $0)/environment.sh
+echo "Building pyobjus ============================="
 
+. $(dirname $0)/environment.sh
 
 if [ ! -d $TMPROOT/pyobjus ] ; then
 try pushd $TMPROOT
@@ -42,6 +43,5 @@ export LDFLAGS="$OLD_LDFLAGS"
 export LDSHARED="$OLD_LDSHARED"
 
 bd=$TMPROOT/pyobjus/build/lib.macosx-*/pyobjus
-echo $bd
 try $KIVYIOSROOT/tools/biglink $BUILDROOT/lib/libpyobjus.a $bd 
 deduplicate $BUILDROOT/lib/libpyobjus.a
