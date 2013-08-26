@@ -15,6 +15,10 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
+		2C18EF8C17CBD2900041C0E1 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C18EF8A17CBD2900041C0E1 /* libffi.a */; };
+		2C18EF8D17CBD2900041C0E1 /* libpyobjus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C18EF8B17CBD2900041C0E1 /* libpyobjus.a */; };
+		596C7514150CFC75003F57D9 /* include in Resources */ = {isa = PBXBuildFile; fileRef = 596C7513150CFC75003F57D9 /* include */; };
+		5983EC97163CB90D00475EFB /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5983EC96163CB90D00475EFB /* libsqlite3.dylib */; };
 		598E034D14F80187000D1362 /* libSDL_mixer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 598E034C14F80187000D1362 /* libSDL_mixer.a */; };
 		598E035414F80578000D1362 /* libogg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 598E035314F80578000D1362 /* libogg.a */; };
 		598E035A14F8177A000D1362 /* libvorbisidec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 598E035914F8177A000D1362 /* libvorbisidec.a */; };
@@ -26,9 +30,7 @@
 		59994DAF148E558600863906 /* libpython2.7.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAA148E558600863906 /* libpython2.7.a */; };
 		59994DB0148E558600863906 /* libSDL_ttf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAB148E558600863906 /* libSDL_ttf.a */; };
 		59994DB1148E558600863906 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAC148E558600863906 /* libSDL2.a */; };
-		5983EC97163CB90D00475EFB /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5983EC96163CB90D00475EFB /* libsqlite3.dylib */; };
 		59994DB3148E564400863906 /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 59994DB2148E564400863906 /* lib */; };
-		596C7514150CFC75003F57D9 /* include in Resources */ = {isa = PBXBuildFile; fileRef = 596C7513150CFC75003F57D9 /* include */; };
 		59994E3B148E85C800863906 /* YourApp in Resources */ = {isa = PBXBuildFile; fileRef = 59994E3A148E85C800863906 /* YourApp */; };
 		59ED7D08150E0C4400A92BEE /* libios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59ED7D07150E0C4400A92BEE /* libios.a */; };
 		59ED7D0B150E325100A92BEE /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59ED7D0A150E325100A92BEE /* MessageUI.framework */; };
@@ -40,10 +42,13 @@
 		01532DA9137C099F0076F6BF /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
 		01790B7A137E5ED900E037D1 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		1D6058910D05DD3D006BFB54 /* ##APPNAME##.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ##APPNAME##.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D6058910D05DD3D006BFB54 /* ##APPID##.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ##APPID##.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		2C18EF8A17CBD2900041C0E1 /* libffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libffi.a; path = ../build/lib/libffi.a; sourceTree = "<group>"; };
+		2C18EF8B17CBD2900041C0E1 /* libpyobjus.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpyobjus.a; path = ../build/lib/libpyobjus.a; sourceTree = "<group>"; };
+		596C7513150CFC75003F57D9 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = ../build/python/embed/include; sourceTree = "<group>"; };
 		5983EC96163CB90D00475EFB /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		598E034C14F80187000D1362 /* libSDL_mixer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL_mixer.a; path = ../build/lib/libSDL_mixer.a; sourceTree = "<group>"; };
 		598E035314F80578000D1362 /* libogg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libogg.a; path = ../build/lib/libogg.a; sourceTree = "<group>"; };
@@ -58,7 +63,6 @@
 		59994DAC148E558600863906 /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = ../build/lib/libSDL2.a; sourceTree = "<group>"; };
 		59994DB2148E564400863906 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = ../build/python/lib; sourceTree = SOURCE_ROOT; };
 		59994E3A148E85C800863906 /* YourApp */ = {isa = PBXFileReference; lastKnownFileType = folder; path = YourApp; sourceTree = "<group>"; };
-		596C7513150CFC75003F57D9 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = ../build/python/embed/include; sourceTree = "<group>"; };
 		59ED7D07150E0C4400A92BEE /* libios.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libios.a; path = ../build/lib/libios.a; sourceTree = "<group>"; };
 		59ED7D0A150E325100A92BEE /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* ##APPID##-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "##APPID##-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
@@ -69,6 +73,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C18EF8C17CBD2900041C0E1 /* libffi.a in Frameworks */,
+				2C18EF8D17CBD2900041C0E1 /* libpyobjus.a in Frameworks */,
 				5983EC97163CB90D00475EFB /* libsqlite3.dylib in Frameworks */,
 				59ED7D0B150E325100A92BEE /* MessageUI.framework in Frameworks */,
 				59ED7D08150E0C4400A92BEE /* libios.a in Frameworks */,
@@ -105,7 +111,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1D6058910D05DD3D006BFB54 /* ##APPNAME##.app */,
+				1D6058910D05DD3D006BFB54 /* ##APPID##.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -145,6 +151,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2C18EF8A17CBD2900041C0E1 /* libffi.a */,
+				2C18EF8B17CBD2900041C0E1 /* libpyobjus.a */,
 				5983EC96163CB90D00475EFB /* libsqlite3.dylib */,
 				59994DA8148E558600863906 /* libfreetype.a */,
 				59994DA9148E558600863906 /* libkivy.a */,
@@ -172,7 +180,7 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1D6058900D05DD3D006BFB54 /* ##APPNAME## */ = {
+		1D6058900D05DD3D006BFB54 /* ##APPID## */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "##APPID##" */;
 			buildPhases = (
@@ -187,7 +195,7 @@
 			);
 			name = ##APPID##;
 			productName = ##APPID##;
-			productReference = 1D6058910D05DD3D006BFB54 /* ##APPNAME##.app */;
+			productReference = 1D6058910D05DD3D006BFB54 /* ##APPID##.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -232,7 +240,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-   		113D17E2153E3DB5001310A5 /* ShellScript */ = {
+		113D17E2153E3DB5001310A5 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
 			files = (
@@ -243,7 +251,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "../tools/populate-project.sh ##APPNAME## ##SRCDIR## ";
+			shellScript = "../tools/populate-project.sh ##APPID## /Users/ivan/development/kivy-ios/kivy-test ";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -278,14 +286,14 @@
 					"\"$(PROJECT_DIR)/../build/python/include\"",
 				);
 				INFOPLIST_FILE = "##APPID##-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = ##SDKVER##;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(PROJECT_DIR)/../build/lib\"",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
-				PRODUCT_NAME = ##APPNAME##;
+				PRODUCT_NAME = ##APPID##;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
@@ -310,13 +318,13 @@
 					"\"$(PROJECT_DIR)/../build/python/include\"",
 				);
 				INFOPLIST_FILE = "##APPID##-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = ##SDKVER##;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(PROJECT_DIR)/../build/lib\"",
 				);
 				OTHER_LDFLAGS = "-all_load";
-				PRODUCT_NAME = ##APPNAME##;
+				PRODUCT_NAME = ##APPID##;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
@@ -339,7 +347,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
-				IPHONEOS_DEPLOYMENT_TARGET = ##SDKVER##;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				ONLY_ACTIVE_ARCH = YES;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -364,7 +372,7 @@
 				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = ##SDKVER##;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PROVISIONING_PROFILE = "";
