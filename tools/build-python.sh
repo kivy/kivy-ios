@@ -62,6 +62,10 @@ try ./configure CC="$ARM_CC" LD="$ARM_LD" \
     --prefix=/python \
     --without-doc-strings
 
+# with undefined lookup, checks in configure just failed :(
+try cp $KIVYIOSROOT/src/python_files/pyconfig.h pyconfig.h
+try cp $KIVYIOSROOT/src/python_files/cfield.c Modules/_ctypes/cfield.c
+
 try make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
      CROSS_COMPILE_TARGET=yes
 
