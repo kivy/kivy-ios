@@ -42,7 +42,7 @@
 		01532DA9137C099F0076F6BF /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
 		01790B7A137E5ED900E037D1 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		1D6058910D05DD3D006BFB54 /* ##APPID##.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ##APPID##.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D6058910D05DD3D006BFB54 /* ##APPNAME##.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ##APPNAME##.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -111,7 +111,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1D6058910D05DD3D006BFB54 /* ##APPID##.app */,
+				1D6058910D05DD3D006BFB54 /* ##APPNAME##.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -180,7 +180,7 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1D6058900D05DD3D006BFB54 /* ##APPID## */ = {
+		1D6058900D05DD3D006BFB54 /* ##APPNAME## */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "##APPID##" */;
 			buildPhases = (
@@ -195,7 +195,7 @@
 			);
 			name = ##APPID##;
 			productName = ##APPID##;
-			productReference = 1D6058910D05DD3D006BFB54 /* ##APPID##.app */;
+			productReference = 1D6058910D05DD3D006BFB54 /* ##APPNAME##.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -251,7 +251,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "../tools/populate-project.sh ##APPID## /Users/ivan/development/kivy-ios/kivy-test ";
+			shellScript = "../tools/populate-project.sh ##APPNAME## ##SRCDIR## ";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -286,14 +286,14 @@
 					"\"$(PROJECT_DIR)/../build/python/include\"",
 				);
 				INFOPLIST_FILE = "##APPID##-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = ##SDKVER##;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(PROJECT_DIR)/../build/lib\"",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
-				PRODUCT_NAME = ##APPID##;
+				PRODUCT_NAME = ##APPNAME##;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
@@ -318,13 +318,13 @@
 					"\"$(PROJECT_DIR)/../build/python/include\"",
 				);
 				INFOPLIST_FILE = "##APPID##-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = ##SDKVER##;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(PROJECT_DIR)/../build/lib\"",
 				);
 				OTHER_LDFLAGS = "-all_load";
-				PRODUCT_NAME = ##APPID##;
+				PRODUCT_NAME = ##APPNAME##;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
@@ -347,7 +347,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = ##SDKVER##;
 				ONLY_ACTIVE_ARCH = YES;
 				PROVISIONING_PROFILE = "";
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -372,7 +372,7 @@
 				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				IPHONEOS_DEPLOYMENT_TARGET = ##SDKVER##;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PROVISIONING_PROFILE = "";
