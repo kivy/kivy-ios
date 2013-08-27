@@ -12,8 +12,11 @@ APPID=$(echo $APPNAME | tr '[A-Z]' '[a-z]')
 TEMPLATESDIR=$(dirname $0)/templates/
 APPDIR=$KIVYIOSROOT/app-$APPID
 OLD_LC_CTYPE=$LC_CTYPE
+OLD_LANG=$LANG
+
 # fix for -> sed: RE error: illegal byte sequence
-LC_CTYPE=C 
+LC_CTYPE=C
+LANG=C
 
 if [ "X$APPNAME" == "X" ]; then
 	echo $(basename $0) "<appname> <source directory>"
@@ -42,9 +45,9 @@ try find $APPDIR -type f -exec sed -i '' "s/##SDKVER##/$SDKVER/g" {} \;
 try find $APPDIR -type f -exec sed -i '' "s^##SRCDIR##^$SRCDIR^g" {} \;
 
 LC_CTYPE=$OLD_LC_CTYPE
+LANG=$OLD_LANG
 
 echo "-> Done !"
-
 echo
 echo "Your project is available at $APPDIR"
 echo
