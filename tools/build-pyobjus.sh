@@ -24,10 +24,6 @@ export LDSHARED="$KIVYIOSROOT/tools/liblink"
 rm -rdf iosbuild/
 try mkdir iosbuild
 
-try pushd $TMPROOT/pyobjus/pyobjus
-find . -name *.pyx -exec $CYTHON {} \;
-popd
-
 try $HOSTPYTHON setup.py build_ext
 try $HOSTPYTHON setup.py install -O2 --root iosbuild
 
