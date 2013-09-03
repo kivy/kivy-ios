@@ -17,6 +17,8 @@
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
 		2C18EF8C17CBD2900041C0E1 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C18EF8A17CBD2900041C0E1 /* libffi.a */; };
 		2C18EF8D17CBD2900041C0E1 /* libpyobjus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C18EF8B17CBD2900041C0E1 /* libpyobjus.a */; };
+		2CB5F34417D51580006187AB /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CB5F34317D51580006187AB /* CoreMotion.framework */; };
+		2CB5F34717D5233A006187AB /* bridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 2CB5F34617D5233A006187AB /* bridge.m */; };
 		596C7514150CFC75003F57D9 /* include in Resources */ = {isa = PBXBuildFile; fileRef = 596C7513150CFC75003F57D9 /* include */; };
 		5983EC97163CB90D00475EFB /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5983EC96163CB90D00475EFB /* libsqlite3.dylib */; };
 		598E034D14F80187000D1362 /* libSDL_mixer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 598E034C14F80187000D1362 /* libSDL_mixer.a */; };
@@ -48,6 +50,9 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2C18EF8A17CBD2900041C0E1 /* libffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libffi.a; path = ../build/lib/libffi.a; sourceTree = "<group>"; };
 		2C18EF8B17CBD2900041C0E1 /* libpyobjus.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpyobjus.a; path = ../build/lib/libpyobjus.a; sourceTree = "<group>"; };
+		2CB5F34317D51580006187AB /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
+		2CB5F34517D5233A006187AB /* bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = SOURCE_ROOT; };
+		2CB5F34617D5233A006187AB /* bridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = bridge.m; sourceTree = SOURCE_ROOT; };
 		596C7513150CFC75003F57D9 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = ../build/python/embed/include; sourceTree = "<group>"; };
 		5983EC96163CB90D00475EFB /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		598E034C14F80187000D1362 /* libSDL_mixer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL_mixer.a; path = ../build/lib/libSDL_mixer.a; sourceTree = "<group>"; };
@@ -73,6 +78,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2CB5F34417D51580006187AB /* CoreMotion.framework in Frameworks */,
 				2C18EF8C17CBD2900041C0E1 /* libffi.a in Frameworks */,
 				2C18EF8D17CBD2900041C0E1 /* libpyobjus.a in Frameworks */,
 				5983EC97163CB90D00475EFB /* libsqlite3.dylib in Frameworks */,
@@ -104,6 +110,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				2CB5F34517D5233A006187AB /* bridge.h */,
+				2CB5F34617D5233A006187AB /* bridge.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -151,6 +159,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				2CB5F34317D51580006187AB /* CoreMotion.framework */,
 				2C18EF8A17CBD2900041C0E1 /* libffi.a */,
 				2C18EF8B17CBD2900041C0E1 /* libpyobjus.a */,
 				5983EC96163CB90D00475EFB /* libsqlite3.dylib */,
@@ -261,6 +270,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
+				2CB5F34717D5233A006187AB /* bridge.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
