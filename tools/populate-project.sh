@@ -35,6 +35,4 @@ echo "-> Remove unused files (pyc, py)"
 find $YOURAPPDIR -iname '*.py' -exec rm {} \;
 find $YOURAPPDIR -iname '*.pyc' -exec rm {} \;
 
-
 echo "-> Source code of $APPNAME updated."
-
