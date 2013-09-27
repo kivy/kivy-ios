@@ -1,6 +1,5 @@
 *.swo
 *.swp
-Python-*
 freetype-*
 build/*
 src/SDL/Xcode-iPhoneOS/SDL/build/
