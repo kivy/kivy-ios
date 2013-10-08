@@ -13,7 +13,7 @@ if [ ! -d $TMPROOT/libffi-$FFI_VERSION ]; then
     try mv libffi-$FFI_VERSION $TMPROOT
 fi
 
-if [ -f $TMPROOT/libffi-$FFI_VERSION/Release-iphoneos/libffi.a ]; then
+if [ -f $TMPROOT/libffi-$FFI_VERSION/build/Release-iphoneos/libffi.a ]; then
     exit 0;
 fi
 

@@ -48,6 +48,9 @@ while i < len(sys.argv):
 
     if opt.startswith("-D"):
         continue
+
+    if opt.startswith('-arch'):
+        continue
     
     if opt.startswith("-"):
         print sys.argv
@@ -69,16 +72,5 @@ f.close()
 
 print 'Liblink redirect linking with', objects
 subprocess.call([
-    '%s/usr/bin/ld' % environ.get('DEVROOT'), '-r',
+    environ.get('ARM_LD'), '-r',
     '-o', output + '.o', '-arch', 'armv7'] + objects)
-'''
-subprocess.call([
-"/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/arm-apple-darwin10-llvm-gcc-4.2",
-"-isysroot", environ.get('IOSSDKROOT'),
-"-r", "-march=armv7", "-mcpu=arm176jzf", "-mcpu=cortex-a8", "-o", output + ".o" ] + objects)
-'''
-
-
-        
-    
-        

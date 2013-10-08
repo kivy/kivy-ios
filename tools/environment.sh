@@ -79,14 +79,18 @@ fi
 
 
 # flags for arm compilation
-export ARM_CC="$CCACHE $DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2"
-export ARM_AR="$DEVROOT/usr/bin/ar"
-export ARM_LD="$DEVROOT/usr/bin/ld"
-export ARM_CFLAGS="-march=armv7 -mcpu=arm176jzf -mcpu=cortex-a8"
+#export ARM_CC="$CCACHE $DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2"
+#export ARM_AR="$DEVROOT/usr/bin/ar"
+#export ARM_LD="$DEVROOT/usr/bin/ld"
+export ARM_CC=$(xcrun -find -sdk iphoneos clang)
+export ARM_AR=$(xcrun -find -sdk iphoneos ar)
+export ARM_LD=$(xcrun -find -sdk iphoneos ld)
+
+export ARM_CFLAGS="-arch armv7"
 export ARM_CFLAGS="$ARM_CFLAGS -pipe -no-cpp-precomp"
 export ARM_CFLAGS="$ARM_CFLAGS -isysroot $IOSSDKROOT"
 export ARM_CFLAGS="$ARM_CFLAGS -miphoneos-version-min=$SDKVER"
-export ARM_LDFLAGS="-isysroot $IOSSDKROOT"
+export ARM_LDFLAGS="-arch armv7 -isysroot $IOSSDKROOT"
 export ARM_LDFLAGS="$ARM_LDFLAGS -miphoneos-version-min=$SDKVER"
 
 # uncomment this line if you want debugging stuff
