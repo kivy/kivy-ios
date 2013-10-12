@@ -14,7 +14,7 @@ fi
 if [ ! -d libtremor ]; then
 	try mkdir libtremor
 	try cd libtremor
-	try svn co http://svn.xiph.org/trunk/Tremor tremor
+	try svn co https://svn.xiph.org/trunk/Tremor tremor
 	try cd tremor
 	try patch -p0 < $KIVYIOSROOT/src/tremor-configure.patch
 	try cd ../..
