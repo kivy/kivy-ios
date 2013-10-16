@@ -11,8 +11,8 @@ fi
 if [ ! -d SDL_mixer ]; then
 	try hg clone http://hg.libsdl.org/SDL_mixer/#SDL-1.2
 fi
-if [ ! -d libtremor ]; then
-	try mkdir libtremor
+if [ ! -d libtremor/tremor ]; then
+	try mkdir -p libtremor
 	try cd libtremor
 	try svn co https://svn.xiph.org/trunk/Tremor tremor
 	try cd tremor
