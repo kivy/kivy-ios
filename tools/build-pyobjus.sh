@@ -6,7 +6,7 @@ echo "Building pyobjus ============================="
 
 if [ ! -d $TMPROOT/pyobjus ] ; then
 try pushd $TMPROOT
-try git clone git@github.com:kivy/pyobjus.git
+try git clone https://github.com/kivy/pyobjus.git
 try popd
 fi
 
