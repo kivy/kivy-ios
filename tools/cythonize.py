@@ -27,7 +27,7 @@ def do(fn):
     package = '_'.join(parts[:-1])
 
     # cythonize
-    subprocess.Popen([cython, fn]).communicate()
+    subprocess.Popen([cython, fn], env=os.environ).communicate()
 
     if not package:
         print 'no need to rewrite', fn
