@@ -38,6 +38,7 @@ echo "Building for iOS ======================================================="
 
 # patch python to cross-compile
 try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-xcompile.patch
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-setuppath.patch
 
 # set up environment variables for cross compilation
 #export CPPFLAGS="-I$IOSSDKROOT/usr/lib/gcc/arm-apple-darwin11/4.2.1/include/ -I$IOSSDKROOT/usr/include/"
