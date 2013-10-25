@@ -1,6 +1,6 @@
 diff -rupN Imaging-1.1.7/_imaging.c Imaging-1.1.7_patched/_imaging.c
---- Imaging-1.1.7/_imaging.c	2009-11-02 12:18:48.000000000 +0100
-+++ Imaging-1.1.7_patched/_imaging.c	2013-07-12 10:58:39.000000000 +0200
+--- Imaging-1.1.7/_imaging.c	2009-11-02 05:18:48.000000000 -0600
++++ Imaging-1.1.7_patched/_imaging.c	2013-10-25 15:07:23.000000000 -0500
 @@ -71,12 +71,28 @@
   * See the README file for information on usage and redistribution.
   */
@@ -32,8 +32,8 @@ diff -rupN Imaging-1.1.7/_imaging.c Imaging-1.1.7_patched/_imaging.c
  #define WITH_IMAGECHOPS /* ImageChops support */
  #define WITH_IMAGEDRAW /* ImageDraw support */
 diff -rupN Imaging-1.1.7/libImaging/Quant.c Imaging-1.1.7_patched/libImaging/Quant.c
---- Imaging-1.1.7/libImaging/Quant.c	2009-11-01 02:29:14.000000000 +0100
-+++ Imaging-1.1.7_patched/libImaging/Quant.c	2013-07-12 10:59:06.000000000 +0200
+--- Imaging-1.1.7/libImaging/Quant.c	2009-10-31 20:29:14.000000000 -0500
++++ Imaging-1.1.7_patched/libImaging/Quant.c	2013-10-25 15:07:23.000000000 -0500
 @@ -20,10 +20,15 @@
  
  #include "Imaging.h"
@@ -60,8 +60,8 @@ diff -rupN Imaging-1.1.7/libImaging/Quant.c Imaging-1.1.7_patched/libImaging/Qua
      unsigned long scale;
  } PixelHashData;
 diff -rupN Imaging-1.1.7/setup.py Imaging-1.1.7_patched/setup.py
---- Imaging-1.1.7/setup.py	2009-11-15 17:06:10.000000000 +0100
-+++ Imaging-1.1.7_patched/setup.py	2013-07-12 10:58:30.000000000 +0200
+--- Imaging-1.1.7/setup.py	2009-11-15 10:06:10.000000000 -0600
++++ Imaging-1.1.7_patched/setup.py	2013-10-25 15:08:08.000000000 -0500
 @@ -88,6 +88,7 @@ from distutils.command.build_ext import 
  
  try:
@@ -70,6 +70,22 @@ diff -rupN Imaging-1.1.7/setup.py Imaging-1.1.7_patched/setup.py
  except ImportError:
      _tkinter = None
  
+@@ -208,11 +209,11 @@ class pil_build_ext(build_ext):
+                 add_directory(include_dirs, tcl_dir)
+ 
+         # standard locations
+-        add_directory(library_dirs, "/usr/local/lib")
+-        add_directory(include_dirs, "/usr/local/include")
++        #add_directory(library_dirs, "/usr/local/lib")
++        #add_directory(include_dirs, "/usr/local/include")
+ 
+-        add_directory(library_dirs, "/usr/lib")
+-        add_directory(include_dirs, "/usr/include")
++        #add_directory(library_dirs, "/usr/lib")
++        #add_directory(include_dirs, "/usr/include")
+ 
+         #
+         # insert new dirs *before* default libs, to avoid conflicts
 @@ -283,6 +284,14 @@ class pil_build_ext(build_ext):
          #
          # core library
