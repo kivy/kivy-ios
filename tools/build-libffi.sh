@@ -21,8 +21,7 @@ fi
 pushd $TMPROOT/libffi-$FFI_VERSION
 try patch -p1 < $KIVYIOSROOT/src/ffi_files/ffi-$FFI_VERSION-sysv.S.patch
 
-try xcodebuild -project libffi.xcodeproj -target "libffi iOS" -configuration Release -sdk iphoneos$SDKVER OTHER_CFLAGS="-no-integrated-as"
-
-try cp build/Release-iphoneos/libffi.a $BUILDROOT/lib/libffi.a
-try cp -a build/Release-iphoneos/usr/local/include $BUILDROOT/include/ffi
+try xcodebuild  $XCODEBUILD_FLAGS  OTHER_CFLAGS="-no-integrated-as" -project libffi.xcodeproj -target "libffi iOS" 
+try cp build/Release-${TARGET_SDK}/libffi.a $BUILDROOT/lib/libffi.a
+try cp -a build/Release-${TARGET_SDK}/usr/local/include $BUILDROOT/include/ffi
 popd

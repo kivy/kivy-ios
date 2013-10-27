@@ -8,21 +8,26 @@ try () {
 	"$@" || exit -1
 }
 
+#KIVY_IOS_SDK=iphoneos
+export TARGET_SDK="iphonesimulator"
+export CPU_ARCHITECHTURE="i386"
+export XCODEBUILD_FLAGS="ONLY_ACTIVE_ARCH=NO ARCHS=$CPU_ARCHITECHTURE -configuration Release -sdk ${TARGET_SDK} --arch=$CPU_ARCHITECHTURE"
+
+
+
 # iOS SDK Environmnent (don't use name "SDKROOT"!!! it will break the compilation)
-export SDKVER=`xcodebuild -showsdks | fgrep "iphoneos" | tail -n 1 | awk '{print $2}'`
-export DEVROOT=`xcode-select -print-path`/Platforms/iPhoneOS.platform/Developer
-export IOSSDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
+#export SDKVER=`xcodebuild -showsdks | fgrep "$KIVY_IOS_SDK" | tail -n 1 | awk '{print $2}'`
+#export DEVROOT=`xcode-select -print-path`/Platforms/iPhoneOS.platform/Developer
+export SDKVER=`xcrun --sdk $TARGET_SDK --show-sdk-version`
+export IOSSDKROOT=`xcrun --sdk $TARGET_SDK --show-sdk-path`
 
 # Xcode doesn't include /usr/local/bin
 export PATH="$PATH":/usr/local/bin
 
-if [ ! -d $DEVROOT ]; then
-	echo "Unable to found the Xcode iPhoneOS.platform"
+if [ ! -d $IOSSDKROOT ]; then
+        echo "Unable to found the target $TARGET_SDK SDK "
 	echo
-	echo "The path is automatically set from 'xcode-select -print-path'"
-	echo " + /Platforms/iPhoneOS.platform/Developer"
-	echo
-	echo "Ensure 'xcode-select -print-path' is set."
+	echo "The path is automatically set from 'xcrun --sdk $TARGET_SDK --show-sdk-path'" 
 	exit 1
 fi
 
@@ -78,19 +83,21 @@ if [ $CONFIGURATION_OK -eq 0 ]; then
 fi
 
 
+
+
 # flags for arm compilation
 #export ARM_CC="$CCACHE $DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2"
 #export ARM_AR="$DEVROOT/usr/bin/ar"
 #export ARM_LD="$DEVROOT/usr/bin/ld"
-export ARM_CC=$(xcrun -find -sdk iphoneos clang)
-export ARM_AR=$(xcrun -find -sdk iphoneos ar)
-export ARM_LD=$(xcrun -find -sdk iphoneos ld)
+export ARM_CC=$(xcrun -find -sdk $TARGET_SDK clang)
+export ARM_AR=$(xcrun -find -sdk $TARGET_SDK ar)
+export ARM_LD=$(xcrun -find -sdk $TARGET_SDK ld)
 
-export ARM_CFLAGS="-arch armv7"
+export ARM_CFLAGS="-arch $CPU_ARCHITECHTURE"
 export ARM_CFLAGS="$ARM_CFLAGS -pipe -no-cpp-precomp"
 export ARM_CFLAGS="$ARM_CFLAGS -isysroot $IOSSDKROOT"
 export ARM_CFLAGS="$ARM_CFLAGS -miphoneos-version-min=$SDKVER"
-export ARM_LDFLAGS="-arch armv7 -isysroot $IOSSDKROOT"
+export ARM_LDFLAGS="-arch $CPU_ARCHITECHTURE -isysroot $IOSSDKROOT"
 export ARM_LDFLAGS="$ARM_LDFLAGS -miphoneos-version-min=$SDKVER"
 
 # uncomment this line if you want debugging stuff

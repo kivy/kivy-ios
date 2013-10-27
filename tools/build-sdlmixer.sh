@@ -63,17 +63,17 @@ popd
 try cp $TMPROOT/libogg/src/.libs/libogg.a $BUILDROOT/lib
 try cp $TMPROOT/libtremor/tremor/.libs/libvorbisidec.a $BUILDROOT/lib
 
-if [ -f $TMPROOT/SDL_mixer/libSDL_mixer-arm7.a ]; then
-	exit 0;
-fi
+#if [ -f $TMPROOT/SDL_mixer/libSDL_mixer-arm7.a ]; then
+#	exit 0;
+#fi
 
 if [ ! -f $TMPROOT/libtremor/ogg ]; then
 	ln -s $TMPROOT/libogg/include/ogg $TMPROOT/libtremor
 fi
 
 pushd $TMPROOT/SDL_mixer/Xcode-iOS
-try xcodebuild -project SDL_mixer.xcodeproj -configuration Release
+try xcodebuild $XCODEBUILD_FLAGS  -project SDL_mixer.xcodeproj 
 popd
 
-try cp $TMPROOT/SDL_mixer/Xcode-iOS/build/Release-iphoneos/libSDL_mixer.a $BUILDROOT/lib
+try cp $TMPROOT/SDL_mixer/Xcode-iOS/build/Release-$TARGET_SDK/libSDL_mixer.a $BUILDROOT/lib
 try cp -a $TMPROOT/SDL_mixer/SDL_mixer.h $BUILDROOT/include
