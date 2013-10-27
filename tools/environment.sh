@@ -97,6 +97,9 @@ export ARM_LDFLAGS="$ARM_LDFLAGS -miphoneos-version-min=$SDKVER"
 export ARM_CFLAGS="$ARM_CFLAGS -O3"
 #export ARM_CFLAGS="$ARM_CFLAGS -O0 -g"
 
+# ensure byte-compiling is working
+export PYTHONDONTWRITEBYTECODE=
+
 # create build directory if not found
 try mkdir -p $BUILDROOT
 try mkdir -p $BUILDROOT/include
