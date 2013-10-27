@@ -31,8 +31,8 @@ try rsync -av --delete $SRCDIR/ $YOURAPPDIR
 echo "-> Compile to pyo"
 $HOSTPYTHON -OO -m compileall $YOURAPPDIR
 
-echo "-> Remove unused files (pyc, py)"
-find $YOURAPPDIR -iname '*.py' -exec rm {} \;
-find $YOURAPPDIR -iname '*.pyc' -exec rm {} \;
+#echo "-> Remove unused files (pyc, py)"
+#find $YOURAPPDIR -iname '*.py' -exec rm {} \;
+#find $YOURAPPDIR -iname '*.pyc' -exec rm {} \;
 
 echo "-> Source code of $APPNAME updated."
