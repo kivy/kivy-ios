@@ -1,7 +1,7 @@
 #!/bin/bash
 . $(dirname $0)/environment.sh
 pushd $KIVYIOSROOT/src/SDL/Xcode-iOS/SDL
-xcodebuild -project SDL.xcodeproj -target libSDL -configuration Release -sdk iphoneos$SDKVER
+xcodebuild -project SDL.xcodeproj -target libSDL -configuration Release -sdk iphoneos$SDKVER SYMROOT=build
 popd
 
 cp $KIVYIOSROOT/src/SDL/Xcode-iOS/SDL/build/Release-iphoneos/libSDL2.a $BUILDROOT/lib
