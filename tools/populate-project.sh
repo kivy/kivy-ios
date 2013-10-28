@@ -31,7 +31,8 @@ echo "-> Synchronize source code"
 try rsync -av --delete $SRCDIR/ $YOURAPPDIR
 
 echo "-> Compile to pyo"
-$HOSTPYTHON -OO -m compileall $YOURAPPDIR
+#$HOSTPYTHON -OO -m compileall $YOURAPPDIR
+python -OO -m compileall $YOURAPPDIR
 
 #echo "-> Remove unused files (pyc, py)"
 #find $YOURAPPDIR -iname '*.py' -exec rm {} \;

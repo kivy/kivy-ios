@@ -34,8 +34,8 @@ try mkdir $APPDIR
 
 echo "-> Copy templates"
 try cp $TEMPLATESDIR/main.m $APPDIR/main.m
-try cp $TEMPLATESDIR/bridge.h $APPDIR/bridge.h
-try cp $TEMPLATESDIR/bridge.m $APPDIR/bridge.m
+#try cp $TEMPLATESDIR/bridge.h $APPDIR/bridge.h
+#try cp $TEMPLATESDIR/bridge.m $APPDIR/bridge.m
 try cp $TEMPLATESDIR/icon.png $APPDIR/icon.png
 try cp $TEMPLATESDIR/template-Info.plist $APPDIR/$APPID-Info.plist
 try cp -a $TEMPLATESDIR/template.xcodeproj $APPDIR/$APPID.xcodeproj
