@@ -6,6 +6,8 @@ try () {
 
 . $(dirname $0)/environment.sh
 
+export PYTHONDONTWRITEBYTECODE=
+
 APPNAME=$1
 APPID=$(echo $APPNAME | tr '[A-Z]' '[a-z]')
 APPDIR=$KIVYIOSROOT/app-$APPID
