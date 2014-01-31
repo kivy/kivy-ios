@@ -13,15 +13,15 @@
 /* guess the view controller from our SDL window.
  */
 UIViewController *get_viewcontroller(void) {
-	NSArray *windows = [[UIApplication sharedApplication] windows];
-	if ( windows == NULL ) {
-		printf("ios_wrapper: unable to get windows from shared application\n");
+	UIWindow *window = [[UIApplication sharedApplication] keyWindow];
+	if ( window == NULL ) {
+		printf("ios_wrapper: unable to get key window from shared application\n");
 		return NULL;
 	}
-	UIWindow *uiWindow = [windows objectAtIndex:0];
-	UIView* view = [uiWindow.subviews objectAtIndex:0]; 
-	id nextResponder = [view nextResponder]; 
-	if( [nextResponder isKindOfClass:[UIViewController class]] ) 
+  // return window.rootViewController;
+	UIView* view = [window.subviews objectAtIndex:0];
+	id nextResponder = [view nextResponder];
+	if( [nextResponder isKindOfClass:[UIViewController class]] )
 		return (UIViewController *)nextResponder;
 	return NULL;
 }
@@ -42,7 +42,6 @@ UIViewController *get_viewcontroller(void) {
 @synthesize callback;
 
 - (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error {
-	UIViewController* viewController = get_viewcontroller();
 	static char *statuses[] = {"unknown", "cancelled",  "saved", "sent", "failed"};
 
 	if ( callback != NULL ) {
@@ -58,8 +57,8 @@ UIViewController *get_viewcontroller(void) {
 		callback(status, userdata);
 	}
 
-	[viewController becomeFirstResponder];
-	[viewController dismissModalViewControllerAnimated:NO];
+  UIViewController* viewController = [controller presentingViewController];
+	[viewController dismissModalViewControllerAnimated:YES];
 }
 
 @end
@@ -103,7 +102,7 @@ int ios_send_email(char *subject, char *text, char *mimetype, char *filename,
 	}
 
 	controller.modalPresentationStyle = UIModalPresentationPageSheet;
-	[viewController presentModalViewController:controller animated:NO];
+	[viewController presentModalViewController:controller animated:YES];
 	[controller release];
 
 	return 1;
