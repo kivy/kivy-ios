@@ -2,9 +2,13 @@
 
 . $(dirname $0)/environment.sh
 
+if [ "X$KIVY_BRANCH" == "X" ]; then
+	KIVY_BRANCH=stable
+fi
+
 if [ ! -d $TMPROOT/kivy ] ; then
 	try pushd $TMPROOT
-	try git clone -b stable https://github.com/kivy/kivy
+	try git clone -b $KIVY_BRANCH https://github.com/kivy/kivy
 	try cd kivy
 	try popd
 fi
@@ -12,7 +16,7 @@ fi
 if [ "X$1" = "X-f" ] ; then
 	try pushd $TMPROOT/kivy
 	try git clean -dxf
-	try git pull origin stable
+	try git pull origin $KIVY_BRANCH
 	try popd
 fi
 
