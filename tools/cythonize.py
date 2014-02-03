@@ -18,7 +18,7 @@ def resolve_cython():
                 return
 
 def do(fn):
-    print 'cythonize:', fn
+    print('cythonize:', fn)
     parts = fn.split('/')
     assert(parts[-1].endswith('.pyx'))
     if parts[0] == '.':
@@ -30,7 +30,7 @@ def do(fn):
     subprocess.Popen([cython, fn], env=os.environ).communicate()
 
     if not package:
-        print 'no need to rewrite', fn
+        print('no need to rewrite', fn)
     else:
         # get the .c, and change the initXXX
         fn_c = fn[:-3] + 'c'
@@ -44,19 +44,19 @@ def do(fn):
         pat3 = 'Pyx_NAMESTR("{}")'.format(modname)
         sub3 = 'Pyx_NAMESTR("{}_{}")'.format(package, modname)
 
-        print '1: {} -> {}'.format(pat1, sub1)
-        print '2: {} -> {}'.format(pat2, sub2)
-        print '3: {} -> {}'.format(pat3, sub3)
+        print('1: {} -> {}'.format(pat1, sub1))
+        print('2: {} -> {}'.format(pat2, sub2))
+        print('3: {} -> {}'.format(pat3, sub3))
         data = data.replace(pat1, sub1)
         data = data.replace(pat2, sub2)
         data = data.replace(pat3, sub3)
 
-        print 'rewrite', fn_c
+        print('rewrite', fn_c)
         with open(fn_c, 'w') as fd:
             fd.write(data)
 
 if __name__ == '__main__':
-    print '-- cythonize', sys.argv
+    print('-- cythonize', sys.argv)
     resolve_cython()
     for fn in sys.argv[1:]:
         do(fn)
