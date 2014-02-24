@@ -8,7 +8,7 @@
 
 # download python and patch if they aren't there
 if [ ! -f $CACHEROOT/Python-$IOS_PYTHON_VERSION.tar.bz2 ]; then
-    curl http://www.python.org/ftp/python/$IOS_PYTHON_VERSION/Python-$IOS_PYTHON_VERSION.tar.bz2 > $CACHEROOT/Python-$IOS_PYTHON_VERSION.tar.bz2
+    curl http://legacy.python.org/ftp//python/$IOS_PYTHON_VERSION/Python-$IOS_PYTHON_VERSION.tar.bz2 > $CACHEROOT/Python-$IOS_PYTHON_VERSION.tar.bz2
 fi
 
 # get rid of old build
