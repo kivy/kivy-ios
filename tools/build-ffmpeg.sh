@@ -31,7 +31,7 @@ cd python
 export FFMPEG_LIBRAIRES="SDL2 SDL_mixer"
 export FFMPEG_LIBRARY_DIRS="$BUILDROOT/lib/lib"
 export FFMPEG_INCLUDES="$BUILDROOT/include $BUILDROOT/include/SDL"
-export FFMPEG_ROOT="$TMPROOT/ffmpeg-android/build/ffmpeg/armeabi-neon"
+export FFMPEG_ROOT="$TMPROOT/ffmpeg-android/build/ffmpeg/armeabi-a8"
 
 $HOSTPYTHON setup.py build_ext -v &>/dev/null
 try find . -iname '*.pyx' -exec $KIVYIOSROOT/tools/cythonize.py {} \;
