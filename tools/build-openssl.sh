@@ -18,7 +18,7 @@ fi
 if [ -d $TMPROOT/openssl/ios-openssl ] ; then
     try pushd .
     cd $TMPROOT/openssl/ios-openssl
-    build.sh
+    sh build.sh
     try popd
 fi
 
