@@ -6,9 +6,17 @@ if [ ! -d $TMPROOT/openssl ] ; then
     mkdir $TMPROOT/openssl
 fi
 
+# Check we have a cloned repo
 if [ ! -d $TMPROOT/openssl/ios-openssl ] ; then
-    try pushd $TMPROOT/openssl
+    try pushd .
+    cd $TMPROOT/openssl
     try git clone -b master https://github.com/zen-code/ios-openssl
+    try popd
+fi
+
+# Build the required binaries
+if [ -d $TMPROOT/openssl/ios-openssl ] ; then
+    try pushd .
     cd $TMPROOT/openssl/ios-openssl
     build.sh
     try popd
