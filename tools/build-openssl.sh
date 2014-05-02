@@ -15,13 +15,17 @@ if [ ! -d $TMPROOT/openssl/ios-openssl ] ; then
 fi
 
 # Build the required binaries
-if [ -d $TMPROOT/openssl/ios-openssl ] ; then
-    try pushd .
-    cd $TMPROOT/openssl/ios-openssl
-    sh build.sh
-    try popd
+if [ $TMPROOT/openssl/ios-openssl ] ; then
+    if [ ! $TMPROOT/openssl/ios-openssl/lib/libssl.a ] ; then
+        try pushd .
+        cd $TMPROOT/openssl/ios-openssl
+        sh build.sh
+        try popd
+    fi
 fi
 
-# copy to buildroot
-#cp $TMPROOT/SDL_ttf-$SDLTTF_VERSION/.libs/libSDL_ttf.a $BUILDROOT/lib/libSDL_ttf.a
-#cp -a $TMPROOT/SDL_ttf-$SDLTTF_VERSION/SDL_ttf.h $BUILDROOT/include
+# Copy the binaries to the appropriate places.
+if [ $TMPROOT/openssl/ios-openssl/lib/libssl.a ] ; then
+    cp $TMPROOT/openssl/ios-openssl/lib/libssl.a $BUILDROOT/lib/libssl.a
+    cp $TMPROOT/openssl/ios-openssl/lib/libcrypto.a $BUILDROOT/lib/libcrypto.a
+fi
