@@ -14,6 +14,8 @@ try $(dirname $0)/build-libjpeg.sh
 try $(dirname $0)/build-pil.sh
 try $(dirname $0)/build-kivy.sh
 try $(dirname $0)/build-pyobjus.sh
+# Uncomment the line below to add OpenSSL support libraries
+#try $(dirname $0)/build-openssl.sh
 
 echo '== Build done'
 echo "Available libraries in $BUILDROOT/lib"
