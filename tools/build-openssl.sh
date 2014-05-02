@@ -15,7 +15,7 @@ if [ ! -d $TMPROOT/openssl/ios-openssl ] ; then
 fi
 
 # Build the required binaries
-if [ $TMPROOT/openssl/ios-openssl ] ; then
+if [ -d $TMPROOT/openssl/ios-openssl ] ; then
     if [ ! $TMPROOT/openssl/ios-openssl/lib/libssl.a ] ; then
         try mkdir $TMPROOT/openssl/ios-openssl/lib
         try pushd .
