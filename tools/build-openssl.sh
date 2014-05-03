@@ -15,11 +15,15 @@ if [ ! -d $TMPROOT/openssl/ios-openssl ] ; then
 fi
 
 # Build the required binaries
+echo "About to test ..."
 if [ -d $TMPROOT/openssl/ios-openssl ] ; then
+    echo "ios-openssl folder found. Looking for binary..."
     if [ ! $TMPROOT/openssl/ios-openssl/lib/libssl.a ] ; then
+        echo "Binary not found. Building..."
         try mkdir $TMPROOT/openssl/ios-openssl/lib
         try pushd .
         cd $TMPROOT/openssl/ios-openssl
+        # Please refer to the script below for details of the OPenSSL build
         sh build.sh
         try popd
     fi
