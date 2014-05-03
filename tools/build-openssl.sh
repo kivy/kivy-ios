@@ -23,7 +23,7 @@ if [ -d $TMPROOT/openssl/ios-openssl ] ; then
         try mkdir $TMPROOT/openssl/ios-openssl/lib
         try pushd .
         cd $TMPROOT/openssl/ios-openssl
-        # Please refer to the script below for details of the OPenSSL build
+        # Please refer to the script below for details of the OpenSSL build
         sh build.sh
         try popd
     fi
