@@ -8,6 +8,7 @@ fi
 
 # Check we have a cloned repo
 if [ ! -d $TMPROOT/openssl/ios-openssl ] ; then
+    echo "ios-openssl repo not found. Pulling latest..."
     try pushd .
     cd $TMPROOT/openssl
     try git clone -b master https://github.com/zen-code/ios-openssl
@@ -15,9 +16,8 @@ if [ ! -d $TMPROOT/openssl/ios-openssl ] ; then
 fi
 
 # Build the required binaries
-echo "About to test ..."
 if [ -d $TMPROOT/openssl/ios-openssl ] ; then
-    echo "ios-openssl folder found. Looking for binary..."
+    echo "ios-openssl repo found. Looking for binary..."
     if [ ! -e $TMPROOT/openssl/ios-openssl/lib/libssl.a ] ; then
         echo "Binary not found. Building..."
         if [ ! -d $TMPROOT/openssl/ios-openssl/lib ] ; then
@@ -31,12 +31,6 @@ if [ -d $TMPROOT/openssl/ios-openssl ] ; then
     else
         echo "Binaries found. Skipping build..."
     fi
-else
-    echo "Folder found. Pulling latest..."
-    try pushd .
-    cd $TMPROOT/openssl/ios-openssl
-    git pull
-    try popd 
 fi
 
 # Copy the binaries to the appropriate places.
