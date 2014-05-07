@@ -72,7 +72,7 @@ if [ ! -f $TMPROOT/libtremor/ogg ]; then
 fi
 
 pushd $TMPROOT/SDL_mixer/Xcode-iOS
-try xcodebuild -project SDL_mixer.xcodeproj -configuration Release
+try xcodebuild -project SDL_mixer.xcodeproj -configuration Release SYMROOT=build
 popd
 
 try cp $TMPROOT/SDL_mixer/Xcode-iOS/build/Release-iphoneos/libSDL_mixer.a $BUILDROOT/lib
