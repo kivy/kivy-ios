@@ -1,0 +1,23 @@
+--- Python-2.7.1.old/Modules/_ctypes/cfield.c	2010-05-09 09:46:46.000000000 -0500
++++ Python-2.7.1/Modules/_ctypes/cfield.c	2013-10-27 16:13:05.000000000 -0500
+@@ -1748,6 +1748,7 @@
+ */
+ 
+ /* align and size are bogus for void, but they must not be zero */
++/*
+ ffi_type ffi_type_void = { 1, 1, FFI_TYPE_VOID };
+ 
+ ffi_type ffi_type_uint8 = { 1, 1, FFI_TYPE_UINT8 };
+@@ -1769,9 +1770,11 @@
+ #undef ffi_type_longdouble
+ #endif
+   /* This is already defined on OSX */
++/*
+ ffi_type ffi_type_longdouble = { sizeof(long double), LONGDOUBLE_ALIGN,
+                                  FFI_TYPE_LONGDOUBLE };
+ 
+ ffi_type ffi_type_pointer = { sizeof(void *), VOID_P_ALIGN, FFI_TYPE_POINTER };
++*/
+ 
+ /*---------------- EOF ----------------*/
+

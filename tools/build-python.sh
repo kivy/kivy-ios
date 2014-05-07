@@ -66,7 +66,7 @@ try ./configure CC="$ARM_CC" LD="$ARM_LD" \
 
 # with undefined lookup, checks in configure just failed :(
 try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-pyconfig.patch
-try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-ctypes_duplicate.patch
+try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-ctypes_duplicate.${CPU_ARCHITECHTURE}.patch
 
 try make -j4 HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
      CROSS_COMPILE_TARGET=yes

@@ -6,6 +6,8 @@ try () {
 
 . $(dirname $0)/environment.sh
 
+export PYTHONDONTWRITEBYTECODE=
+
 APPNAME=$1
 APPID=$(echo $APPNAME | tr '[A-Z]' '[a-z]')
 APPDIR=$KIVYIOSROOT/app-$APPID
@@ -29,10 +31,11 @@ echo "-> Synchronize source code"
 try rsync -av --delete $SRCDIR/ $YOURAPPDIR
 
 echo "-> Compile to pyo"
-$HOSTPYTHON -OO -m compileall $YOURAPPDIR
+#$HOSTPYTHON -OO -m compileall $YOURAPPDIR
+python -OO -m compileall $YOURAPPDIR
 
-echo "-> Remove unused files (pyc, py)"
-find $YOURAPPDIR -iname '*.py' -exec rm {} \;
-find $YOURAPPDIR -iname '*.pyc' -exec rm {} \;
+#echo "-> Remove unused files (pyc, py)"
+#find $YOURAPPDIR -iname '*.py' -exec rm {} \;
+#find $YOURAPPDIR -iname '*.pyc' -exec rm {} \;
 
 echo "-> Source code of $APPNAME updated."

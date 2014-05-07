@@ -11,30 +11,19 @@
 		010731C4137F20C300A8D3A0 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 010731C3137F20C300A8D3A0 /* QuartzCore.framework */; };
 		01532DAA137C099F0076F6BF /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 01532DA9137C099F0076F6BF /* icon.png */; };
 		01790B81137E5ED900E037D1 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01790B7A137E5ED900E037D1 /* OpenGLES.framework */; };
+		12021725181F13DE00466F76 /* kivy-ios-fat.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 12021724181F13DE00466F76 /* kivy-ios-fat.a */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765FD0DF74451002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765FC0DF74451002DB57D /* CoreGraphics.framework */; };
-		2C18EF8C17CBD2900041C0E1 /* libffi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C18EF8A17CBD2900041C0E1 /* libffi.a */; };
-		2C18EF8D17CBD2900041C0E1 /* libpyobjus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C18EF8B17CBD2900041C0E1 /* libpyobjus.a */; };
 		2CB5F34417D51580006187AB /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2CB5F34317D51580006187AB /* CoreMotion.framework */; };
-		2CB5F34717D5233A006187AB /* bridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 2CB5F34617D5233A006187AB /* bridge.m */; };
 		596C7514150CFC75003F57D9 /* include in Resources */ = {isa = PBXBuildFile; fileRef = 596C7513150CFC75003F57D9 /* include */; };
 		5983EC97163CB90D00475EFB /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5983EC96163CB90D00475EFB /* libsqlite3.dylib */; };
-		598E034D14F80187000D1362 /* libSDL_mixer.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 598E034C14F80187000D1362 /* libSDL_mixer.a */; };
-		598E035414F80578000D1362 /* libogg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 598E035314F80578000D1362 /* libogg.a */; };
-		598E035A14F8177A000D1362 /* libvorbisidec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 598E035914F8177A000D1362 /* libvorbisidec.a */; };
 		59994D8D148D48E300863906 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994D8C148D48E300863906 /* ImageIO.framework */; };
 		59994D90148D686900863906 /* libbz2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994D8F148D686900863906 /* libbz2.dylib */; };
 		59994D9E148E353000863906 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994D9D148E352F00863906 /* libz.dylib */; };
-		59994DAD148E558600863906 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DA8148E558600863906 /* libfreetype.a */; };
-		59994DAE148E558600863906 /* libkivy.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DA9148E558600863906 /* libkivy.a */; };
-		59994DAF148E558600863906 /* libpython2.7.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAA148E558600863906 /* libpython2.7.a */; };
-		59994DB0148E558600863906 /* libSDL_ttf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAB148E558600863906 /* libSDL_ttf.a */; };
-		59994DB1148E558600863906 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59994DAC148E558600863906 /* libSDL2.a */; };
 		59994DB3148E564400863906 /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 59994DB2148E564400863906 /* lib */; };
 		59994E3B148E85C800863906 /* YourApp in Resources */ = {isa = PBXBuildFile; fileRef = 59994E3A148E85C800863906 /* YourApp */; };
-		59ED7D08150E0C4400A92BEE /* libios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 59ED7D07150E0C4400A92BEE /* libios.a */; };
 		59ED7D0B150E325100A92BEE /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59ED7D0A150E325100A92BEE /* MessageUI.framework */; };
 /* End PBXBuildFile section */
 
@@ -43,33 +32,22 @@
 		010731C3137F20C300A8D3A0 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		01532DA9137C099F0076F6BF /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
 		01790B7A137E5ED900E037D1 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		12021724181F13DE00466F76 /* kivy-ios-fat.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "kivy-ios-fat.a"; path = "../build/lib/kivy-ios-fat.a"; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		1D6058910D05DD3D006BFB54 /* ##APPNAME##.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ##APPNAME##.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765FC0DF74451002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		2C18EF8A17CBD2900041C0E1 /* libffi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libffi.a; path = ../build/lib/libffi.a; sourceTree = "<group>"; };
-		2C18EF8B17CBD2900041C0E1 /* libpyobjus.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpyobjus.a; path = ../build/lib/libpyobjus.a; sourceTree = "<group>"; };
 		2CB5F34317D51580006187AB /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
-		2CB5F34517D5233A006187AB /* bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = SOURCE_ROOT; };
-		2CB5F34617D5233A006187AB /* bridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = bridge.m; sourceTree = SOURCE_ROOT; };
 		596C7513150CFC75003F57D9 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = ../build/python/embed/include; sourceTree = "<group>"; };
 		5983EC96163CB90D00475EFB /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
-		598E034C14F80187000D1362 /* libSDL_mixer.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL_mixer.a; path = ../build/lib/libSDL_mixer.a; sourceTree = "<group>"; };
-		598E035314F80578000D1362 /* libogg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libogg.a; path = ../build/lib/libogg.a; sourceTree = "<group>"; };
-		598E035914F8177A000D1362 /* libvorbisidec.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbisidec.a; path = ../build/lib/libvorbisidec.a; sourceTree = "<group>"; };
 		59994D8C148D48E300863906 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		59994D8F148D686900863906 /* libbz2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.dylib; path = usr/lib/libbz2.dylib; sourceTree = SDKROOT; };
 		59994D9D148E352F00863906 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
-		59994DA8148E558600863906 /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = ../build/lib/libfreetype.a; sourceTree = "<group>"; };
-		59994DA9148E558600863906 /* libkivy.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libkivy.a; path = ../build/lib/libkivy.a; sourceTree = "<group>"; };
-		59994DAA148E558600863906 /* libpython2.7.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpython2.7.a; path = ../build/lib/libpython2.7.a; sourceTree = "<group>"; };
-		59994DAB148E558600863906 /* libSDL_ttf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL_ttf.a; path = ../build/lib/libSDL_ttf.a; sourceTree = "<group>"; };
-		59994DAC148E558600863906 /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = ../build/lib/libSDL2.a; sourceTree = "<group>"; };
 		59994DB2148E564400863906 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = ../build/python/lib; sourceTree = SOURCE_ROOT; };
 		59994E3A148E85C800863906 /* YourApp */ = {isa = PBXFileReference; lastKnownFileType = folder; path = YourApp; sourceTree = "<group>"; };
-		59ED7D07150E0C4400A92BEE /* libios.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libios.a; path = ../build/lib/libios.a; sourceTree = "<group>"; };
 		59ED7D0A150E325100A92BEE /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
+		8D1107310486CEB800E47090 /* tracer-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "tracer-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		1D6058910D05DD3D006BFB54 /* ##APPNAME##.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ##APPNAME##.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D1107310486CEB800E47090 /* ##APPID##-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "##APPID##-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -79,19 +57,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				2CB5F34417D51580006187AB /* CoreMotion.framework in Frameworks */,
-				2C18EF8C17CBD2900041C0E1 /* libffi.a in Frameworks */,
-				2C18EF8D17CBD2900041C0E1 /* libpyobjus.a in Frameworks */,
+				12021725181F13DE00466F76 /* kivy-ios-fat.a in Frameworks */,
 				5983EC97163CB90D00475EFB /* libsqlite3.dylib in Frameworks */,
 				59ED7D0B150E325100A92BEE /* MessageUI.framework in Frameworks */,
-				59ED7D08150E0C4400A92BEE /* libios.a in Frameworks */,
-				598E035A14F8177A000D1362 /* libvorbisidec.a in Frameworks */,
-				598E035414F80578000D1362 /* libogg.a in Frameworks */,
-				598E034D14F80187000D1362 /* libSDL_mixer.a in Frameworks */,
-				59994DAD148E558600863906 /* libfreetype.a in Frameworks */,
-				59994DAE148E558600863906 /* libkivy.a in Frameworks */,
-				59994DAF148E558600863906 /* libpython2.7.a in Frameworks */,
-				59994DB0148E558600863906 /* libSDL_ttf.a in Frameworks */,
-				59994DB1148E558600863906 /* libSDL2.a in Frameworks */,
 				59994D90148D686900863906 /* libbz2.dylib in Frameworks */,
 				59994D9E148E353000863906 /* libz.dylib in Frameworks */,
 				59994D8D148D48E300863906 /* ImageIO.framework in Frameworks */,
@@ -105,7 +73,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
-
 /* Begin PBXGroup section */
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
@@ -159,19 +126,9 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				12021724181F13DE00466F76 /* kivy-ios-fat.a */,
 				2CB5F34317D51580006187AB /* CoreMotion.framework */,
-				2C18EF8A17CBD2900041C0E1 /* libffi.a */,
-				2C18EF8B17CBD2900041C0E1 /* libpyobjus.a */,
 				5983EC96163CB90D00475EFB /* libsqlite3.dylib */,
-				59994DA8148E558600863906 /* libfreetype.a */,
-				59994DA9148E558600863906 /* libkivy.a */,
-				59994DAA148E558600863906 /* libpython2.7.a */,
-				59994DAB148E558600863906 /* libSDL_ttf.a */,
-				598E035914F8177A000D1362 /* libvorbisidec.a */,
-				598E035314F80578000D1362 /* libogg.a */,
-				598E034C14F80187000D1362 /* libSDL_mixer.a */,
-				59994DAC148E558600863906 /* libSDL2.a */,
-				59ED7D07150E0C4400A92BEE /* libios.a */,
 				59994D9D148E352F00863906 /* libz.dylib */,
 				59994D8F148D686900863906 /* libbz2.dylib */,
 				59994D8C148D48E300863906 /* ImageIO.framework */,
@@ -181,8 +138,7 @@
 				01790B7A137E5ED900E037D1 /* OpenGLES.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
-				288765FC0DF74451002DB57D /* CoreGraphics.framework */,
-			);
+				288765FC0DF74451002DB57D /* CoreGraphics.framework */,			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
@@ -364,7 +320,7 @@
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = YES;
 				STRIP_STYLE = all;
-				SUPPORTED_PLATFORMS = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				TARGETED_DEVICE_FAMILY = 2;
 				VALID_ARCHS = armv7;
 			};
@@ -389,7 +345,7 @@
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				STRIP_INSTALLED_PRODUCT = YES;
-				SUPPORTED_PLATFORMS = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				TARGETED_DEVICE_FAMILY = 2;
 				USER_HEADER_SEARCH_PATHS = "";
 				VALID_ARCHS = armv7;

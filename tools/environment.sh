@@ -8,23 +8,6 @@ try () {
 	"$@" || exit -1
 }
 
-# iOS SDK Environmnent (don't use name "SDKROOT"!!! it will break the compilation)
-export SDKVER=`xcodebuild -showsdks | fgrep "iphoneos" | tail -n 1 | awk '{print $2}'`
-export DEVROOT=`xcode-select -print-path`/Platforms/iPhoneOS.platform/Developer
-export IOSSDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
-
-# Xcode doesn't include /usr/local/bin
-export PATH="$PATH":/usr/local/bin
-
-if [ ! -d $DEVROOT ]; then
-	echo "Unable to found the Xcode iPhoneOS.platform"
-	echo
-	echo "The path is automatically set from 'xcode-select -print-path'"
-	echo " + /Platforms/iPhoneOS.platform/Developer"
-	echo
-	echo "Ensure 'xcode-select -print-path' is set."
-	exit 1
-fi
 
 # version of packages
 export IOS_PYTHON_VERSION=2.7.1
@@ -35,16 +18,74 @@ export XSLT_VERSION=1.1.26
 export LXML_VERSION=2.3.1
 export FFI_VERSION=3.0.13
 
-# where the build will be located
+# Xcode doesn't include /usr/local/bin
+export PATH="$PATH":/usr/local/bin
+
+# ensure byte-compiling is working
+export PYTHONDONTWRITEBYTECODE=
+
+
+
+
+# set TARGET_SDK to iphonos by default if not specified
+if [ "X$TARGET_SDK" == "X" ]; then
+        export TARGET_SDK="iphoneos"
+fi
+
+#set architechuture based on which target we compiling for
+export CPU_ARCHITECHTURE="armv7"
+if [ "X$TARGET_SDK" == "Xiphonesimulator" ]; then
+        export CPU_ARCHITECHTURE="i386"
+fi
+
+# where our built is located
 export KIVYIOSROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
 export BUILDROOT="$KIVYIOSROOT/build"
 export TMPROOT="$KIVYIOSROOT/tmp"
 export DESTROOT="$KIVYIOSROOT/tmp/root"
 export CACHEROOT="$KIVYIOSROOT/.cache"
 
-# pkg-config for SDL and futures
-try mkdir -p $BUILDROOT/pkgconfig
-export PKG_CONFIG_PATH="$BUILDROOT/pkgconfig:$PKG_CONFIG_PATH"
+# iOS SDK Environmnent (don't use name "SDKROOT"!!! it will break the compilation)
+export SDKVER=`xcrun --sdk $TARGET_SDK --show-sdk-version`
+export IOSSDKROOT=`xcrun --sdk $TARGET_SDK --show-sdk-path`
+
+
+
+#find the right compiler and linker
+export ARM_CC=$(xcrun -find -sdk $TARGET_SDK clang)
+export ARM_AR=$(xcrun -find -sdk $TARGET_SDK ar)
+export ARM_LD=$(xcrun -find -sdk $TARGET_SDK ld)
+
+# flags for arm compilation 
+# (not really arm if building for simlator...but it's all the stuff we're cross comiling for iOS)
+export ARM_CFLAGS="-arch $CPU_ARCHITECHTURE"
+export ARM_CFLAGS="$ARM_CFLAGS -pipe -no-cpp-precomp"
+export ARM_CFLAGS="$ARM_CFLAGS -isysroot $IOSSDKROOT"
+export ARM_CFLAGS="$ARM_CFLAGS -miphoneos-version-min=$SDKVER"
+
+
+# flags for linker
+export ARM_LDFLAGS="-arch $CPU_ARCHITECHTURE -isysroot $IOSSDKROOT"
+export ARM_LDFLAGS="$ARM_LDFLAGS -miphoneos-version-min=$SDKVER"
+
+# uncomment this line if you want debugging stuff
+export ARM_CFLAGS="$ARM_CFLAGS -O3"
+#export ARM_CFLAGS="$ARM_CFLAGS -O0 -g"
+
+#general xcode build settings
+export XCODEBUILD_FLAGS="ONLY_ACTIVE_ARCH=NO ARCHS=$CPU_ARCHITECHTURE -configuration Release -sdk ${TARGET_SDK} --arch=$CPU_ARCHITECHTURE"
+
+
+
+
+##CHECK sanity of configuration
+if [ ! -d $IOSSDKROOT ]; then
+        echo "Unable to found the target $TARGET_SDK SDK "
+	echo
+	echo "The path is automatically set from 'xcrun --sdk $TARGET_SDK --show-sdk-path'" 
+	exit 1
+fi
+
 
 # some tools
 export CCACHE=$(which ccache)
@@ -78,27 +119,12 @@ if [ $CONFIGURATION_OK -eq 0 ]; then
 fi
 
 
-# flags for arm compilation
-#export ARM_CC="$CCACHE $DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2"
-#export ARM_AR="$DEVROOT/usr/bin/ar"
-#export ARM_LD="$DEVROOT/usr/bin/ld"
-export ARM_CC=$(xcrun -find -sdk iphoneos clang)
-export ARM_AR=$(xcrun -find -sdk iphoneos ar)
-export ARM_LD=$(xcrun -find -sdk iphoneos ld)
+#now do some setup...
 
-export ARM_CFLAGS="-arch armv7"
-export ARM_CFLAGS="$ARM_CFLAGS -pipe -no-cpp-precomp"
-export ARM_CFLAGS="$ARM_CFLAGS -isysroot $IOSSDKROOT"
-export ARM_CFLAGS="$ARM_CFLAGS -miphoneos-version-min=$SDKVER"
-export ARM_LDFLAGS="-arch armv7 -isysroot $IOSSDKROOT"
-export ARM_LDFLAGS="$ARM_LDFLAGS -miphoneos-version-min=$SDKVER"
+# pkg-config for SDL and futures
+try mkdir -p $BUILDROOT/pkgconfig
+export PKG_CONFIG_PATH="$BUILDROOT/pkgconfig:$PKG_CONFIG_PATH"
 
-# uncomment this line if you want debugging stuff
-export ARM_CFLAGS="$ARM_CFLAGS -O3"
-#export ARM_CFLAGS="$ARM_CFLAGS -O0 -g"
-
-# ensure byte-compiling is working
-export PYTHONDONTWRITEBYTECODE=
 
 # create build directory if not found
 try mkdir -p $BUILDROOT
