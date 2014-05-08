@@ -17,25 +17,17 @@ fi
 
 # Build the required binaries
 if [ -d $TMPROOT/openssl/ios-openssl ] ; then
-    echo "ios-openssl repo found. Looking for binary..."
-    if [ ! -e $TMPROOT/openssl/ios-openssl/lib/libssl.a ] ; then
-        echo "Binary not found. Building..."
-        if [ ! -d $TMPROOT/openssl/ios-openssl/lib ] ; then
-            try mkdir $TMPROOT/openssl/ios-openssl/lib
-        fi
-        try pushd .
-        cd $TMPROOT/openssl/ios-openssl
-        # Please refer to the script below for details of the OpenSSL build
-        sh build.sh
-        try popd
-    else
-        echo "Binaries found. Skipping build..."
+    echo "ios-openssl repo found. Building now..."
+    if [ ! -d $TMPROOT/openssl/ios-openssl/lib ] ; then
+        try mkdir $TMPROOT/openssl/ios-openssl/lib
     fi
+    try pushd .
+    cd $TMPROOT/openssl/ios-openssl
+    # Please refer to the script below for details of the OpenSSL build
+    sh build.sh
+    try popd
 fi
 
-# Copy the binaries to the appropriate places.
-if [ $TMPROOT/openssl/ios-openssl/lib/libssl.a ] ; then
-    echo "Copying built OpenSSL binaries..."
-    cp $TMPROOT/openssl/ios-openssl/lib/libssl.a $BUILDROOT/lib/libssl.a
-    cp $TMPROOT/openssl/ios-openssl/lib/libcrypto.a $BUILDROOT/lib/libcrypto.a
-fi
+echo "Copying built OpenSSL binaries..."
+cp $TMPROOT/openssl/ios-openssl/lib/libssl.a $BUILDROOT/lib/libssl.a
+cp $TMPROOT/openssl/ios-openssl/lib/libcrypto.a $BUILDROOT/lib/libcrypto.a
