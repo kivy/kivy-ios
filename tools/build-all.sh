@@ -3,10 +3,9 @@
 . $(dirname $0)/environment.sh
 
 try $(dirname $0)/build-libffi.sh
-# Uncomment the lines below to add OpenSSL support libraries
-#try $(dirname $0)/build-openssl.sh
-#try $(dirname $0)/build-openssl-link.sh
 try $(dirname $0)/build-python.sh
+# Uncomment the line below to add OpenSSL support libraries
+#try $(dirname $0)/build-openssl.sh
 try $(dirname $0)/reduce-python.sh
 try $(dirname $0)/build-ios.sh
 try $(dirname $0)/build-sdl.sh
