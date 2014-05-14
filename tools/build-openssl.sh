@@ -32,4 +32,4 @@ echo "Copying built OpenSSL binaries..."
 cp $TMPROOT/openssl/ios-openssl/lib/libssl.a $BUILDROOT/lib/libssl.a
 cp $TMPROOT/openssl/ios-openssl/lib/libcrypto.a $BUILDROOT/lib/libcrypto.a
 
-sh $KIVYIOSROOT/tools/build-ssllink.sh
+sh $KIVYIOSROOT/tools/build-openssl-link.sh
