@@ -4,8 +4,8 @@
 
 try $(dirname $0)/build-libffi.sh
 # Uncomment the lines below to add OpenSSL support libraries
-# try $(dirname $0)/build-openssl.sh
-# try $(dirname $0)/build-openssl-link.sh
+#try $(dirname $0)/build-openssl.sh
+#try $(dirname $0)/build-openssl-link.sh
 try $(dirname $0)/build-python.sh
 try $(dirname $0)/reduce-python.sh
 try $(dirname $0)/build-ios.sh
