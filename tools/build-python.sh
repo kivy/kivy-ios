@@ -30,7 +30,6 @@ if [ -f $KIVYIOSROOT/src/python_files/Setup.dist ]; then
     try cp $KIVYIOSROOT/src/python_files/Setup.dist Modules/Setup.dist
 fi
 
-read -p "Pausing for check, Corrent = $(pwd)"
 echo "Building for native machine ============================================"
 
 OSX_SDK_ROOT=`xcrun --sdk macosx --show-sdk-path`
