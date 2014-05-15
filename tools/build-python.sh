@@ -27,9 +27,10 @@ try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
 try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
 if [ -f $KIVYIOSROOT/src/python_files/Setup.dist ]; then
     # Used by build-openssl.sh to insert links 
-    $KIVYIOSROOT/src/python_files/Setup.dist Modules/Setup.dist
+    try cp $KIVYIOSROOT/src/python_files/Setup.dist Modules/Setup.dist
 fi
 
+read -p "Pausing for check, Corrent = $(pwd)"
 echo "Building for native machine ============================================"
 
 OSX_SDK_ROOT=`xcrun --sdk macosx --show-sdk-path`
@@ -60,7 +61,7 @@ try cat $KIVYIOSROOT/src/python_files/ModulesSetup.mobile >> Modules/Setup.local
 try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
 if [ -f $KIVYIOSROOT/src/python_files/Setup.dist ]; then
     # Used by build-openssl.sh to insert links 
-    $KIVYIOSROOT/src/python_files/Setup.dist Modules/Setup.dist
+    try cp $KIVYIOSROOT/src/python_files/Setup.dist Modules/Setup.dist
 fi
 
 try ./configure CC="$ARM_CC" LD="$ARM_LD" \
