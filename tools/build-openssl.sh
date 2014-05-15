@@ -15,17 +15,21 @@ if [ ! -d $TMPROOT/openssl/ios-openssl ] ; then
     try popd
 fi
 
-# Build the required binaries
-if [ -d $TMPROOT/openssl/ios-openssl ] ; then
-    echo "ios-openssl repo found. Building now..."
-    if [ ! -d $TMPROOT/openssl/ios-openssl/lib ] ; then
-        try mkdir $TMPROOT/openssl/ios-openssl/lib
+# Build the required binaries if not found (long process)
+if [ ! -f $BUILDROOT/lib/libssl.a ] ; then
+    if [ -d $TMPROOT/openssl/ios-openssl ] ; then
+        echo "ios-openssl repo found. Building now..."
+        if [ ! -d $TMPROOT/openssl/ios-openssl/lib ] ; then
+            try mkdir $TMPROOT/openssl/ios-openssl/lib
+        fi
+        try pushd .
+        cd $TMPROOT/openssl/ios-openssl
+        # Please refer to the script below for details of the OpenSSL build
+        sh build.sh
+        try popd
     fi
-    try pushd .
-    cd $TMPROOT/openssl/ios-openssl
-    # Please refer to the script below for details of the OpenSSL build
-    sh build.sh
-    try popd
+else
+    echo "Skipping build. Binary found: $BUILDROOT/lib/libssl.a"
 fi
 
 echo "Copying built OpenSSL binaries..."
