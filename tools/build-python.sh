@@ -25,6 +25,10 @@ try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-static-
 # Copy our setup for modules
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
 try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
+if [ -f $KIVYIOSROOT/src/python_files/Setup.dist ]; then
+    # Used by build-openssl.sh to insert links 
+    $KIVYIOSROOT/src/python_files/Setup.dist Modules/Setup.dist
+fi
 
 echo "Building for native machine ============================================"
 
