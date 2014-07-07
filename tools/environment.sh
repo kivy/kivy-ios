@@ -9,9 +9,13 @@ try () {
 }
 
 # iOS SDK Environmnent (don't use name "SDKROOT"!!! it will break the compilation)
+
 export SDKVER=`xcodebuild -showsdks | fgrep "iphoneos" | tail -n 1 | awk '{print $2}'`
+# will return the latest iphoneos version, here e.g. "7.1"
 export DEVROOT=`xcode-select -print-path`/Platforms/iPhoneOS.platform/Developer
+# path relative to root, by default "/Applications/Xcode.app/Contents/Developer", and appends the path to the DEVROOT as seen
 export IOSSDKROOT=$DEVROOT/SDKs/iPhoneOS$SDKVER.sdk
+# path to the wanted iOS SDK folder.. here in Xcode 5.1.1 the only dir in $DEVROOT/SDKs/
 
 # Xcode doesn't include /usr/local/bin
 export PATH="$PATH":/usr/local/bin
