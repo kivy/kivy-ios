@@ -22,6 +22,7 @@ Kivy for IOS
 #. Open your newly created Xcode project
 #. Ensure code signing is setup correctly
 #. Click on play
+#. To revise your code and update the app, use `tools/populate-project.sh test /path/to/app`
 
 Notes
 -----
