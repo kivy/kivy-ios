@@ -45,4 +45,4 @@ deduplicate $BUILDROOT/lib/libpyobjus.a
 # copy objc bridge class -> it is used for implementing some objc methods, eg. for accelerometer
 try cp $TMPROOT/pyobjus/objc_classes/aux/* $KIVYIOSROOT/tools/templates
 
-echo "Succesufully finished building pyobjus ==================="
+echo "Successfully finished building pyobjus ==================="
