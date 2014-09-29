@@ -51,10 +51,10 @@ while i < len(sys.argv):
 
     if opt.startswith('-arch'):
         continue
-    
+
     if opt.startswith("-"):
-        print sys.argv
-        print "Unknown option: ", opt
+        print(sys.argv)
+        print("Unknown option: ", opt)
         sys.exit(1)
 
     if not opt.endswith('.o'):
@@ -63,14 +63,14 @@ while i < len(sys.argv):
     objects.append(opt)
 
 
-f = file(output, "w")
+f = open(output, "w")
 f.close()
 
-f = file(output + ".libs", "w")
+f = open(output + ".libs", "w")
 f.write(" ".join(libs))
 f.close()
 
-print 'Liblink redirect linking with', objects
+print('Liblink redirect linking with', objects)
 subprocess.call([
     environ.get('ARM_LD'), '-r',
     '-o', output + '.o', '-arch', 'armv7'] + objects)
