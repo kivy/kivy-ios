@@ -25,6 +25,10 @@ try patch -p1 < $KIVYIOSROOT/src/python_files/Python-$IOS_PYTHON_VERSION-static-
 # Copy our setup for modules
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
 try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
+if [ -f $KIVYIOSROOT/src/python_files/Setup.dist ]; then
+    # Used by build-openssl.sh to insert links 
+    try cp $KIVYIOSROOT/src/python_files/Setup.dist Modules/Setup.dist
+fi
 
 echo "Building for native machine ============================================"
 
@@ -54,6 +58,10 @@ export MACOSX_DEPLOYMENT_TARGET=
 try cp $KIVYIOSROOT/src/python_files/ModulesSetup Modules/Setup.local
 try cat $KIVYIOSROOT/src/python_files/ModulesSetup.mobile >> Modules/Setup.local
 try cp $KIVYIOSROOT/src/python_files/_scproxy.py Lib/_scproxy.py
+if [ -f $KIVYIOSROOT/src/python_files/Setup.dist ]; then
+    # Used by build-openssl.sh to insert links 
+    try cp $KIVYIOSROOT/src/python_files/Setup.dist Modules/Setup.dist
+fi
 
 try ./configure CC="$ARM_CC" LD="$ARM_LD" \
     CFLAGS="$ARM_CFLAGS" \

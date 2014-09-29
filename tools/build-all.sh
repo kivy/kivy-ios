@@ -4,6 +4,9 @@
 
 try $(dirname $0)/build-libffi.sh
 try $(dirname $0)/build-python.sh
+# Uncomment the "try" line below to add OpenSSL support libraries
+# For more detail: https://github.com/zen-code/ios-openssl
+#try $(dirname $0)/build-openssl.sh
 try $(dirname $0)/reduce-python.sh
 try $(dirname $0)/build-ios.sh
 try $(dirname $0)/build-sdl.sh
