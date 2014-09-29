@@ -13,3 +13,5 @@ app-*
 src/ios/build/
 src/ios/iosbuild/
 src/ios/ios.c
+
+*.DS_Store*
