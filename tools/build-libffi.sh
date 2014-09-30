@@ -21,6 +21,9 @@ fi
 pushd $TMPROOT/libffi-$FFI_VERSION
 try patch -p1 < $KIVYIOSROOT/src/ffi_files/ffi-$FFI_VERSION-sysv.S.patch
 
+# libffi needs to use "-miphoneos-version-min=6.0" for xcode 6+ to compile it correctly
+sed -i.bak s/-miphoneos-version-min=4.0/-miphoneos-version-min=6.0/g generate-ios-source-and-headers.py
+
 try xcodebuild -project libffi.xcodeproj -target "libffi iOS" -configuration Release -sdk iphoneos$SDKVER OTHER_CFLAGS="-no-integrated-as"
 
 try cp build/Release-iphoneos/libffi.a $BUILDROOT/lib/libffi.a
