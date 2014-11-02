@@ -41,10 +41,10 @@ try cp $TEMPLATESDIR/template-Info.plist $APPDIR/$APPID-Info.plist
 try cp -a $TEMPLATESDIR/template.xcodeproj $APPDIR/$APPID.xcodeproj
 
 echo "-> Customize templates"
-try find $APPDIR -type f -not -iname *.png -exec sed -i '' "s/##APPID##/$APPID/g" {} \;
-try find $APPDIR -type f -not -iname *.png -exec sed -i '' "s/##APPNAME##/$APPNAME/g" {} \;
-try find $APPDIR -type f -not -iname *.png -exec sed -i '' "s/##SDKVER##/$SDKVER/g" {} \;
-try find $APPDIR -type f -not -iname *.png -exec sed -i '' "s^##SRCDIR##^$SRCDIR^g" {} \;
+try find $APPDIR -type f -not -iname '*.png' -exec sed -i '' "s/##APPID##/$APPID/g" {} \;
+try find $APPDIR -type f -not -iname '*.png' -exec sed -i '' "s/##APPNAME##/$APPNAME/g" {} \;
+try find $APPDIR -type f -not -iname '*.png' -exec sed -i '' "s/##SDKVER##/$SDKVER/g" {} \;
+try find $APPDIR -type f -not -iname '*.png' -exec sed -i '' "s^##SRCDIR##^$SRCDIR^g" {} \;
 
 LC_CTYPE=$OLD_LC_CTYPE
 LANG=$OLD_LANG
