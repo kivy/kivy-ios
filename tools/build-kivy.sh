@@ -24,7 +24,7 @@ pushd $TMPROOT/kivy
 OLD_CFLAGS="$CFLAGS"
 OLD_LDSHARED="$LDSHARED"
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
-export CFLAGS="$ARM_CFLAGS"
+export CFLAGS="$ARM_CFLAGS -I../../src/SDL/include/ -I/usr/local/Cellar/sdl_ttf/2.0.11/include/SDL/ -I/usr/local/Cellar/sdl_mixer/1.2.12/include/SDL"
 
 ln -s $KIVYIOSROOT/Python-$IOS_PYTHON_VERSION/python
 ln -s $KIVYIOSROOT/Python-$IOS_PYTHON_VERSION/python.exe
