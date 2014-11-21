@@ -16,7 +16,7 @@ OLD_CFLAGS="$CFLAGS"
 OLD_LDFLAGS="$LDFLAGS"
 OLD_LDSHARED="$LDSHARED"
 export CC="$ARM_CC -I$BUILDROOT/include"
-export CFLAGS="$ARM_CFLAGS"
+export CFLAGS="$ARM_CFLAGS -I../../src/SDL/include -I/usr/local/Cellar/sdl_mixer/1.2.12/include/SDL"
 export LDFLAGS="$ARM_LDFLAGS"
 export LDSHARED="$KIVYIOSROOT/tools/liblink"
 
