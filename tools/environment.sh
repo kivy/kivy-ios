@@ -38,6 +38,7 @@ export XML2_VERSION=2.7.8
 export XSLT_VERSION=1.1.26
 export LXML_VERSION=2.3.1
 export FFI_VERSION=3.0.13
+export NUMPY_VERSION=1.9.1
 
 # where the build will be located
 export KIVYIOSROOT="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )/../" && pwd )"
@@ -118,10 +119,16 @@ function deduplicate() {
 	echo "== Trying to remove duplicate symbol in $1"
 	try mkdir ddp
 	try cd ddp
-	try ar x $1
+	for var in "$@"; do
+		echo "  - extracting $var"
+		try ar x $var
+	done
+	echo "  - create the archive"
 	try ar rc $fn *.o
+	echo "  - finalize the archive"
 	try ranlib $fn
 	try mv -f $fn $1
 	try cd ..
 	try rm -rf ddp
+	echo "  - done: $1 updated"
 }

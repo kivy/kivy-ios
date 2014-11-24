@@ -17,7 +17,7 @@ try cd $BUILDROOT/python/lib/python2.7
 find . -iname '*.pyc' | xargs rm
 find . -iname '*.py' | xargs rm
 find . -iname 'test*' | xargs rm -rf
-rm -rf *test* lib* wsgiref bsddb curses idlelib hotshot || true
+rm -rf lib* wsgiref bsddb curses idlelib hotshot || true
 try cd ..
 rm -rf pkgconfig || true
 
