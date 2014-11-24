@@ -6,9 +6,13 @@ if [ "X$KIVY_BRANCH" == "X" ]; then
 	KIVY_BRANCH=stable
 fi
 
+if [ "X$KIVY_REPO" == "X" ]; then
+	KIVY_REPO=https://github.com/kivy/kivy
+fi
+
 if [ ! -d $TMPROOT/kivy ] ; then
 	try pushd $TMPROOT
-	try git clone -b $KIVY_BRANCH https://github.com/kivy/kivy
+	try git clone -b $KIVY_BRANCH $KIVY_REPO
 	try cd kivy
 	try popd
 fi
