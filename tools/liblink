@@ -52,6 +52,9 @@ while i < len(sys.argv):
     if opt.startswith('-arch'):
         continue
 
+    if opt.startswith("-Wl,"):
+        continue
+
     if opt.startswith("-"):
         print(sys.argv)
         print("Unknown option: ", opt)

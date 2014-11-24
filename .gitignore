@@ -13,5 +13,6 @@ app-*
 src/ios/build/
 src/ios/iosbuild/
 src/ios/ios.c
-
+tools/templates/bridge.h
+tools/templates/bridge.m
 *.DS_Store*
