@@ -105,6 +105,11 @@ export ARM_CFLAGS="$ARM_CFLAGS -O3"
 # ensure byte-compiling is working
 export PYTHONDONTWRITEBYTECODE=
 
+# ensure that no current flags in the user env will be used
+unset ARCHFLAGS
+unset CFLAGS
+unset LDFLAGS
+
 # create build directory if not found
 try mkdir -p $BUILDROOT
 try mkdir -p $BUILDROOT/include
