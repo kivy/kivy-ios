@@ -37,6 +37,86 @@ class ChromeDownloader(FancyURLopener):
 urlretrieve = ChromeDownloader().retrieve
 
 
+class Arch(object):
+    pass
+
+
+class ArchSimulator(Arch):
+    sdk = "iphonesimulator"
+    arch = "i386"
+    triple = "i386-apple-darwin11"
+    version_min = "-miphoneos-version-min=5.1.1"
+    sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
+
+
+class Arch64Simulator(Arch):
+    sdk = "iphonesimulator"
+    arch = "x86_64"
+    triple = "x86_64-apple-darwin13"
+    version_min = "-miphoneos-version-min=7.0"
+    sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
+
+
+class ArchIOS(Arch):
+    sdk = "iphoneos"
+    arch = "armv7"
+    triple = "arm-apple-darwin11"
+    version_min = "-miphoneos-version-min=5.1.1"
+    sysroot = sh.xcrun("--sdk", "iphoneos", "--show-sdk-path").strip()
+
+
+class Arch64IOS(Arch):
+    sdk = "iphoneos"
+    arch = "arm64"
+    triple = "aarch64-apple-darwin13"
+    version_min = "-miphoneos-version-min=7.0"
+    sysroot = sh.xcrun("--sdk", "iphoneos", "--show-sdk-path").strip()
+    
+
+class Graph(object):
+    # Taken from python-for-android/depsort
+    def __init__(self):
+        # `graph`: dict that maps each package to a set of its dependencies.
+        self.graph = {}
+
+    def add(self, dependent, dependency):
+        """Add a dependency relationship to the graph"""
+        self.graph.setdefault(dependent, set())
+        self.graph.setdefault(dependency, set())
+        if dependent != dependency:
+            self.graph[dependent].add(dependency)
+
+    def add_optional(self, dependent, dependency):
+        """Add an optional (ordering only) dependency relationship to the graph
+
+        Only call this after all mandatory requirements are added
+        """
+        if dependent in self.graph and dependency in self.graph:
+            self.add(dependent, dependency)
+
+    def find_order(self):
+        """Do a topological sort on a dependency graph
+
+        :Parameters:
+            :Returns:
+                iterator, sorted items form first to last
+        """
+        graph = dict((k, set(v)) for k, v in self.graph.items())
+        while graph:
+            # Find all items without a parent
+            leftmost = [l for l, s in graph.items() if not s]
+            if not leftmost:
+                raise ValueError('Dependency cycle detected! %s' % graph)
+            # If there is more than one, sort them for predictable order
+            leftmost.sort()
+            for result in leftmost:
+                # Yield and remove them from the graph
+                yield result
+                graph.pop(result)
+                for bset in graph.values():
+                    bset.discard(result)
+
+
 class Context(object):
     env = environ.copy()
     root_dir = None
@@ -87,7 +167,7 @@ class Context(object):
         self.cache_dir = "{}/.cache".format(self.root_dir)
         self.dist_dir = "{}/dist".format(self.root_dir)
         self.install_dir = "{}/dist/root".format(self.root_dir)
-        self.archs = ("i386", "armv7", "armv7s", "arm64")
+        self.archs = (ArchSimulator, Arch64Simulator, ArchIOS, Arch64IOS)
 
         # path to some tools
         self.ccache = sh.which("ccache")
@@ -128,6 +208,7 @@ class Context(object):
 class Recipe(object):
     version = None
     url = None
+    archs = []
     depends = []
 
     # API available for recipes
@@ -238,14 +319,20 @@ class Recipe(object):
 
     @property
     def archive_fn(self):
-        if hasattr(self, "ext"):
-            ext = self.ext
-        else:
-            ext = basename(self.url).split(".", 1)[-1]
-        fn = "{}/{}.{}".format(
+        bfn = basename(self.url.format(version=self.version))
+        fn = "{}/{}-{}".format(
             self.ctx.cache_dir,
-            self.name, ext)
+            self.name, bfn)
         return fn
+
+    @property
+    def filtered_archs(self):
+        for arch in self.ctx.archs:
+            if not self.archs or (arch.arch in self.archs):
+                yield arch
+
+    def get_build_dir(self, arch):
+        return join(self.ctx.build_dir, arch, self.archive_root)
 
     # Public Recipe API to be subclassed if needed
 
@@ -268,69 +355,117 @@ class Recipe(object):
 
     def extract(self):
         # recipe tmp directory
-        archive_root = self.get_archive_rootdir(self.archive_fn)
-        for arch in self.ctx.archs:
-            print("Extract {} for {}".format(self.name, arch))
-            self.extract_arch(arch, archive_root)
+        for arch in self.filtered_archs:
+            print("Extract {} for {}".format(self.name, arch.arch))
+            self.extract_arch(arch.arch)
 
-    def extract_arch(self, arch, archive_root):
+    def extract_arch(self, arch):
         build_dir = join(self.ctx.build_dir, arch)
-        if exists(join(build_dir, archive_root)):
+        if exists(join(build_dir, self.archive_root)):
             return
         ensure_dir(build_dir)
         self.extract_file(self.archive_fn, build_dir) 
 
     def build_all(self):
-        archive_root = self.get_archive_rootdir(self.archive_fn)
-        for arch in self.ctx.archs:
-            self.build_dir = join(self.ctx.build_dir, arch, archive_root)
+        filtered_archs = list(self.filtered_archs)
+        print("Build {} for {} (filtered)".format(
+            self.name,
+            ", ".join([x.arch for x in filtered_archs])))
+        for arch in self.filtered_archs:
+            self.build_dir = join(self.ctx.build_dir, arch.arch, self.archive_root)
             if self.has_marker("building"):
                 print("Warning: {} build for {} has been incomplete".format(
-                    self.name, arch))
+                    self.name, arch.arch))
                 print("Warning: deleting the build and restarting.")
                 shutil.rmtree(self.build_dir)
-                self.extract_arch(arch, archive_root)
+                self.extract_arch(arch.arch)
+
+            if self.has_marker("build_done"):
+                print("Build already done.")
+                continue
+
             self.set_marker("building")
 
             chdir(self.build_dir)
-            print("Prebuild {} for {}".format(self.name, arch))
+            print("Prebuild {} for {}".format(self.name, arch.arch))
             self.prebuild_arch(arch)
-            print("Build {} for {}".format(self.name, arch))
+            print("Build {} for {}".format(self.name, arch.arch))
             self.build_arch(arch)
-            print("Postbuild {} for {}".format(self.name, arch))
+            print("Postbuild {} for {}".format(self.name, arch.arch))
             self.postbuild_arch(arch)
             self.delete_marker("building")
+            self.set_marker("build_done")
+
+        name = self.name
+        if not name.startswith("lib"):
+            name = "lib{}".format(name)
+        static_fn = join(self.ctx.dist_dir, "lib", "{}.a".format(name))
+        ensure_dir(dirname(static_fn))
+        print("Assemble {} to {}".format(self.name, static_fn))
+        self.assemble_to(static_fn)
 
     def prebuild_arch(self, arch):
-        prebuild = "prebuild_{}".format(arch)
+        prebuild = "prebuild_{}".format(arch.arch)
         if hasattr(self, prebuild):
             getattr(self, prebuild)()
 
     def build_arch(self, arch):
-        build = "build_{}".format(arch)
+        build = "build_{}".format(arch.arch)
         if hasattr(self, build):
             getattr(self, build)()
 
     def postbuild_arch(self, arch):
-        postbuild = "postbuild_{}".format(arch)
+        postbuild = "postbuild_{}".format(arch.arch)
         if hasattr(self, postbuild):
             getattr(self, postbuild)()
 
+    def assemble_to(self, filename):
+        return
 
-def list_recipes():
-    recipes_dir = join(dirname(__file__), "recipes")
-    for name in listdir(recipes_dir):
-        fn = join(recipes_dir, name)
-        if isdir(fn):
-            yield name
+    @classmethod
+    def list_recipes(cls):
+        recipes_dir = join(dirname(__file__), "recipes")
+        for name in listdir(recipes_dir):
+            fn = join(recipes_dir, name)
+            if isdir(fn):
+                yield name
 
-def build_recipe(name, ctx):
-    mod = importlib.import_module("recipes.{}".format(name))
-    recipe = mod.recipe
-    recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
-    recipe.init_with_ctx(ctx)
-    recipe.execute()
+    @classmethod
+    def get_recipe(cls, name):
+        if not hasattr(cls, "recipes"):
+           cls.recipes = {}
+        if name in cls.recipes:
+            return cls.recipes[name]
+        mod = importlib.import_module("recipes.{}".format(name))
+        recipe = mod.recipe
+        recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
+        return recipe
 
+
+def build_recipes(names, ctx):
+    # gather all the dependencies
+    print("Want to build {}".format(names))
+    graph = Graph()
+    recipe_to_load = names
+    recipe_loaded = []
+    while names:
+        name = recipe_to_load.pop(0)
+        if name in recipe_loaded:
+            continue
+        print("Load recipe {}".format(name))
+        recipe = Recipe.get_recipe(name)
+        print("Recipe {} depends of {}".format(name, recipe.depends))
+        for depend in recipe.depends:
+            graph.add(name, depend)
+            recipe_to_load += recipe.depends
+        recipe_loaded.append(name)
+
+    build_order = list(graph.find_order())
+    print("Build order is {}".format(build_order))
+    for name in build_order:
+        recipe = Recipe.get_recipe(name)
+        recipe.init_with_ctx(ctx)
+        recipe.execute()
 
 def ensure_dir(filename):
     if not exists(filename):
@@ -343,5 +478,4 @@ if __name__ == "__main__":
         description='Compile Python and others extensions for iOS')
     args = parser.parse_args()
     ctx = Context()
-    print list(list_recipes())
-    build_recipe("libffi", ctx)
+    build_recipes(["python"], ctx)

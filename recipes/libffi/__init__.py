@@ -1,33 +1,49 @@
 from toolchain import Recipe, shprint
+from os.path import join, exists
 import sh
+import shutil
 
 
 class LibffiRecipe(Recipe):
-    version = "3.0.13"
+    version = "3.2.1"
     url = "ftp://sourceware.org/pub/libffi/libffi-{version}.tar.gz"
+    archs = ("armv7",)
 
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
-        self.apply_patch("ffi-3.0.13-sysv.S.patch")
-        if arch in ("armv7", "armv7s", "arm64"):
-            shprint(sh.sed,
-                    "-i.bak",
-                    "s/-miphoneos-version-min=4.0/-miphoneos-version-min=6.0/g",
-                    "generate-ios-source-and-headers.py")
+        # necessary as it doesn't compile with XCode 6.0. If we use 5.1.1, the
+        # compiler for i386 is not working.
+        shprint(sh.sed,
+                "-i.bak",
+                "s/-miphoneos-version-min=5.1.1/-miphoneos-version-min=6.0/g",
+                "generate-darwin-source-and-headers.py")
         self.set_marker("patched")
 
     def build_arch(self, arch):
-        if arch == "i386":
-            target_name = "libffi OS X"
-        else:
-            target_name = "libffi iOS"
-
         shprint(sh.xcodebuild,
                 "-project", "libffi.xcodeproj",
-                "-target", target_name,
-                "-configuration", "Release",
-                "-sdk", "iphoneos{}".format(self.ctx.sdkver),
-                "OTHER_CFLAGS=-no-integrated-as")
+                "-target", "libffi-iOS",
+                "-configuration", "Release")
+
+    def assemble_to(self, filename):
+        shutil.copy(join(
+            self.get_build_dir("armv7"),
+            "build/Release-iphoneos/libffi.a"),
+            filename)
+        for sdkarch, arch in (
+            ("iphoneos-arm64", "arm64"),
+            ("iphoneos-armv7", "armv7"),
+            ("iphonesimulator-i386", "i386"),
+            ("iphonesimulator-x86_64", "x86_64")):
+            dest_dir = join(self.ctx.dist_dir, "include", arch, "ffi")
+            if exists(dest_dir):
+                continue
+            shutil.copytree(join(
+                self.get_build_dir("armv7"),
+                "build_{}/include".format(sdkarch)),
+                join(self.ctx.dist_dir, "include", arch, "ffi"))
+
 
 recipe = LibffiRecipe()
+
