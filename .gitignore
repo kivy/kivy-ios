@@ -1,4 +1,6 @@
 *.swo
+*.pyc
+*.pyo
 *.swp
 freetype-*
 build/*
