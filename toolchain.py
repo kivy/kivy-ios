@@ -8,7 +8,7 @@ This tool intend to replace all the previous tools/ in shell script.
 import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename
-from os import listdir, unlink, makedirs, environ
+from os import listdir, unlink, makedirs, environ, chdir
 import zipfile
 import tarfile
 import importlib
@@ -23,6 +23,7 @@ except ImportError:
 def shprint(command, *args, **kwargs):
     kwargs["_iter"] = True
     kwargs["_out_bufsize"] = 1
+    kwargs["_err_to_out"] = True
     #kwargs["_err_to_out"] = True
     for line in command(*args, **kwargs):
         stdout.write(line)
@@ -60,7 +61,7 @@ class Context(object):
             print("No iphone SDK installed")
             ok = False
         else:
-            iphoneos = iphoneos[0].split()[-1]
+            iphoneos = iphoneos[0].split()[-1].replace("iphoneos", "")
             self.sdkver = iphoneos
 
         # get the latest iphonesimulator version
@@ -69,7 +70,7 @@ class Context(object):
             ok = False
             print("Error: No iphonesimulator SDK installed")
         else:
-            iphonesim = iphonesim[0].split()[-1]
+            iphonesim = iphonesim[0].split()[-1].replace("iphonesimulator", "")
             self.sdksimver = iphonesim
 
         # get the path for Developer
@@ -77,7 +78,7 @@ class Context(object):
             sh.xcode_select("-print-path").strip())
 
         # path to the iOS SDK
-        self.iossdkroot = "{}/SDKs.iPhoneOS{}.sdk".format(
+        self.iossdkroot = "{}/SDKs/iPhoneOS{}.sdk".format(
             self.devroot, self.sdkver)
 
         # root of the toolchain
@@ -116,10 +117,18 @@ class Context(object):
         ensure_dir(self.dist_dir)
         ensure_dir(self.install_dir)
 
+        # remove the most obvious flags that can break the compilation
+        self.env.pop("MACOSX_DEPLOYMENT_TARGET", None)
+        self.env.pop("PYTHONDONTWRITEBYTECODE", None)
+        self.env.pop("ARCHFLAGS", None)
+        self.env.pop("CFLAGS", None)
+        self.env.pop("LDFLAGS", None)
+
 
 class Recipe(object):
     version = None
     url = None
+    depends = []
 
     # API available for recipes
     def download_file(self, url, filename, cwd=None):
@@ -186,9 +195,19 @@ class Recipe(object):
         sh.patch("-t", "-d", self.build_dir, "-p1", "-i", filename)
 
     def copy_file(self, filename, dest):
+        print("Copy {} to {}".format(filename, dest))
         filename = join(self.recipe_dir, filename)
         dest = join(self.build_dir, dest)
         shutil.copy(filename, dest)
+
+    def append_file(self, filename, dest):
+        print("Append {} to {}".format(filename, dest))
+        filename = join(self.recipe_dir, filename)
+        dest = join(self.build_dir, dest)
+        with open(filename, "rb") as fd:
+            data = fd.read()
+        with open(dest, "ab") as fd:
+            fd.write(data)
 
     def has_marker(self, marker):
         """
@@ -203,10 +222,14 @@ class Recipe(object):
         with open(join(self.build_dir, ".{}".format(marker)), "w") as fd:
             fd.write("ok")
 
-    def marker(self, marker):
+    def delete_marker(self, marker):
         """
-        Return a context that will be executed only if the marker has been set
+        Delete a specific marker
         """
+        try:
+            unlink(join(self.build_dir, ".{}".format(marker)))
+        except:
+            pass
 
     @property
     def name(self):
@@ -226,6 +249,9 @@ class Recipe(object):
 
     # Public Recipe API to be subclassed if needed
 
+    def init_with_ctx(self, ctx):
+        self.ctx = ctx
+
     def execute(self):
         print("Download {}".format(self.name))
         self.download()
@@ -238,40 +264,54 @@ class Recipe(object):
         fn = self.archive_fn
         if not exists(fn):
             self.download_file(self.url.format(version=self.version), fn)
+        self.archive_root = self.get_archive_rootdir(self.archive_fn)
 
     def extract(self):
         # recipe tmp directory
         archive_root = self.get_archive_rootdir(self.archive_fn)
         for arch in self.ctx.archs:
             print("Extract {} for {}".format(self.name, arch))
-            build_dir = join(self.ctx.build_dir, arch)
-            if exists(join(build_dir, archive_root)):
-                continue
-            ensure_dir(build_dir)
-            self.extract_file(self.archive_fn, build_dir) 
+            self.extract_arch(arch, archive_root)
+
+    def extract_arch(self, arch, archive_root):
+        build_dir = join(self.ctx.build_dir, arch)
+        if exists(join(build_dir, archive_root)):
+            return
+        ensure_dir(build_dir)
+        self.extract_file(self.archive_fn, build_dir) 
 
     def build_all(self):
         archive_root = self.get_archive_rootdir(self.archive_fn)
         for arch in self.ctx.archs:
             self.build_dir = join(self.ctx.build_dir, arch, archive_root)
+            if self.has_marker("building"):
+                print("Warning: {} build for {} has been incomplete".format(
+                    self.name, arch))
+                print("Warning: deleting the build and restarting.")
+                shutil.rmtree(self.build_dir)
+                self.extract_arch(arch, archive_root)
+            self.set_marker("building")
+
+            chdir(self.build_dir)
+            print("Prebuild {} for {}".format(self.name, arch))
             self.prebuild_arch(arch)
+            print("Build {} for {}".format(self.name, arch))
             self.build_arch(arch)
+            print("Postbuild {} for {}".format(self.name, arch))
             self.postbuild_arch(arch)
+            self.delete_marker("building")
 
     def prebuild_arch(self, arch):
-        print("Prebuild {} for {}".format(self.name, arch))
         prebuild = "prebuild_{}".format(arch)
         if hasattr(self, prebuild):
             getattr(self, prebuild)()
 
     def build_arch(self, arch):
-        print("Build {} for {}".format(self.name, arch))
         build = "build_{}".format(arch)
         if hasattr(self, build):
             getattr(self, build)()
 
     def postbuild_arch(self, arch):
-        print("Postbuild {} for {}".format(self.name, arch))
         postbuild = "postbuild_{}".format(arch)
         if hasattr(self, postbuild):
             getattr(self, postbuild)()
@@ -284,11 +324,11 @@ def list_recipes():
         if isdir(fn):
             yield name
 
-def compile_recipe(name, ctx):
+def build_recipe(name, ctx):
     mod = importlib.import_module("recipes.{}".format(name))
     recipe = mod.recipe
     recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
-    recipe.ctx = ctx
+    recipe.init_with_ctx(ctx)
     recipe.execute()
 
 
@@ -304,4 +344,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     ctx = Context()
     print list(list_recipes())
-    compile_recipe("hostpython", ctx)
+    build_recipe("libffi", ctx)
