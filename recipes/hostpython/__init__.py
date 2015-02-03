@@ -13,10 +13,10 @@ class HostpythonRecipe(Recipe):
     def download(self):
         super(HostpythonRecipe, self).download()
         self.ctx.hostpython = join(
-                self.ctx.build_dir, "i386", self.archive_root,
+                self.ctx.build_dir, self.name, "i386", self.archive_root,
                 "hostpython")
         self.ctx.hostpgen = join(
-                self.ctx.build_dir, "i386", self.archive_root,
+                self.ctx.build_dir, self.name, "i386", self.archive_root,
                 "Parser", "hostpgen")
         print("Global: hostpython located at {}".format(self.ctx.hostpython))
         print("Global: hostpgen located at {}".format(self.ctx.hostpgen))

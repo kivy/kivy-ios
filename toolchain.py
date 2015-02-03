@@ -38,14 +38,40 @@ urlretrieve = ChromeDownloader().retrieve
 
 
 class Arch(object):
-    pass
+    def __init__(self, ctx):
+        super(Arch, self).__init__()
+        self.ctx = ctx
+
+    def get_env(self):
+        env = {}
+        env["CC"] = sh.xcrun("-find", "-sdk", self.sdk, "clang").strip()
+        env["AR"] = sh.xcrun("-find", "-sdk", self.sdk, "ar").strip()
+        env["LD"] = sh.xcrun("-find", "-sdk", self.sdk, "ld").strip()
+        env["CFLAGS"] = " ".join([
+            "-arch", self.arch,
+            "-pipe", "-no-cpp-precomp",
+            "--sysroot={}".format(self.sysroot),
+            "-I{}/include/{}".format(self.ctx.dist_dir, self.arch),
+            "-O3",
+            self.version_min
+        ])
+        env["LDFLAGS"] = " ".join([
+            "-arch", self.arch,
+            "--sysroot={}".format(self.sysroot),
+            "-L{}/{}".format(self.ctx.dist_dir, "lib"),
+            "-lsqlite3",
+            "-undefined", "dynamic_lookup",
+            self.version_min
+        ])
+        return env
+
 
 
 class ArchSimulator(Arch):
     sdk = "iphonesimulator"
     arch = "i386"
     triple = "i386-apple-darwin11"
-    version_min = "-miphoneos-version-min=5.1.1"
+    version_min = "-miphoneos-version-min=6.0.0"
     sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
 
 
@@ -61,7 +87,7 @@ class ArchIOS(Arch):
     sdk = "iphoneos"
     arch = "armv7"
     triple = "arm-apple-darwin11"
-    version_min = "-miphoneos-version-min=5.1.1"
+    version_min = "-miphoneos-version-min=6.0.0"
     sysroot = sh.xcrun("--sdk", "iphoneos", "--show-sdk-path").strip()
 
 
@@ -167,7 +193,11 @@ class Context(object):
         self.cache_dir = "{}/.cache".format(self.root_dir)
         self.dist_dir = "{}/dist".format(self.root_dir)
         self.install_dir = "{}/dist/root".format(self.root_dir)
-        self.archs = (ArchSimulator, Arch64Simulator, ArchIOS, Arch64IOS)
+        self.archs = (
+            ArchSimulator(self),
+            Arch64Simulator(self),
+            ArchIOS(self),
+            Arch64IOS(self))
 
         # path to some tools
         self.ccache = sh.which("ccache")
@@ -210,6 +240,7 @@ class Recipe(object):
     url = None
     archs = []
     depends = []
+    library = None
 
     # API available for recipes
     def download_file(self, url, filename, cwd=None):
@@ -332,7 +363,7 @@ class Recipe(object):
                 yield arch
 
     def get_build_dir(self, arch):
-        return join(self.ctx.build_dir, arch, self.archive_root)
+        return join(self.ctx.build_dir, self.name, arch, self.archive_root)
 
     # Public Recipe API to be subclassed if needed
 
@@ -360,7 +391,7 @@ class Recipe(object):
             self.extract_arch(arch.arch)
 
     def extract_arch(self, arch):
-        build_dir = join(self.ctx.build_dir, arch)
+        build_dir = join(self.ctx.build_dir, self.name, arch)
         if exists(join(build_dir, self.archive_root)):
             return
         ensure_dir(build_dir)
@@ -372,7 +403,7 @@ class Recipe(object):
             self.name,
             ", ".join([x.arch for x in filtered_archs])))
         for arch in self.filtered_archs:
-            self.build_dir = join(self.ctx.build_dir, arch.arch, self.archive_root)
+            self.build_dir = self.get_build_dir(arch.arch)
             if self.has_marker("building"):
                 print("Warning: {} build for {} has been incomplete".format(
                     self.name, arch.arch))
@@ -381,7 +412,7 @@ class Recipe(object):
                 self.extract_arch(arch.arch)
 
             if self.has_marker("build_done"):
-                print("Build already done.")
+                print("Build python for {} already done.".format(arch.arch))
                 continue
 
             self.set_marker("building")
@@ -401,8 +432,9 @@ class Recipe(object):
             name = "lib{}".format(name)
         static_fn = join(self.ctx.dist_dir, "lib", "{}.a".format(name))
         ensure_dir(dirname(static_fn))
-        print("Assemble {} to {}".format(self.name, static_fn))
-        self.assemble_to(static_fn)
+        print("Lipo {} to {}".format(self.name, static_fn))
+        self.make_lipo(static_fn)
+        print("Install {}".format(self.name))
 
     def prebuild_arch(self, arch):
         prebuild = "prebuild_{}".format(arch.arch)
@@ -419,8 +451,18 @@ class Recipe(object):
         if hasattr(self, postbuild):
             getattr(self, postbuild)()
 
-    def assemble_to(self, filename):
-        return
+    def make_lipo(self, filename):
+        if not self.library:
+            return
+        args = []
+        for arch in self.filtered_archs:
+            args += [
+                "-arch", arch.arch,
+                join(self.get_build_dir(arch.arch), self.library)]
+        shprint(sh.lipo, "-create", "-output", filename, *args)
+
+    def install(self):
+        pass
 
     @classmethod
     def list_recipes(cls):

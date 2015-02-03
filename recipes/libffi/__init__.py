@@ -26,23 +26,25 @@ class LibffiRecipe(Recipe):
                 "-target", "libffi-iOS",
                 "-configuration", "Release")
 
-    def assemble_to(self, filename):
+    def make_lipo(self, filename):
         shutil.copy(join(
             self.get_build_dir("armv7"),
             "build/Release-iphoneos/libffi.a"),
             filename)
+
+    def install(self):
         for sdkarch, arch in (
             ("iphoneos-arm64", "arm64"),
             ("iphoneos-armv7", "armv7"),
             ("iphonesimulator-i386", "i386"),
             ("iphonesimulator-x86_64", "x86_64")):
-            dest_dir = join(self.ctx.dist_dir, "include", arch, "ffi")
+            dest_dir = join(self.ctx.dist_dir, "include", arch)
             if exists(dest_dir):
                 continue
             shutil.copytree(join(
                 self.get_build_dir("armv7"),
                 "build_{}/include".format(sdkarch)),
-                join(self.ctx.dist_dir, "include", arch, "ffi"))
+                dest_dir)
 
 
 recipe = LibffiRecipe()
