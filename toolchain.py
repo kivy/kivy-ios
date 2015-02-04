@@ -193,6 +193,7 @@ class Context(object):
         self.cache_dir = "{}/.cache".format(self.root_dir)
         self.dist_dir = "{}/dist".format(self.root_dir)
         self.install_dir = "{}/dist/root".format(self.root_dir)
+        self.include_dir = "{}/dist/include".format(self.root_dir)
         self.archs = (
             ArchSimulator(self),
             Arch64Simulator(self),
@@ -226,6 +227,8 @@ class Context(object):
         ensure_dir(self.cache_dir)
         ensure_dir(self.dist_dir)
         ensure_dir(self.install_dir)
+        ensure_dir(self.include_dir)
+        ensure_dir(join(self.include_dir, "common"))
 
         # remove the most obvious flags that can break the compilation
         self.env.pop("MACOSX_DEPLOYMENT_TARGET", None)
@@ -435,6 +438,7 @@ class Recipe(object):
         print("Lipo {} to {}".format(self.name, static_fn))
         self.make_lipo(static_fn)
         print("Install {}".format(self.name))
+        self.install()
 
     def prebuild_arch(self, arch):
         prebuild = "prebuild_{}".format(arch.arch)
@@ -497,6 +501,7 @@ def build_recipes(names, ctx):
             continue
         print("Load recipe {}".format(name))
         recipe = Recipe.get_recipe(name)
+        graph.add(name, name)
         print("Recipe {} depends of {}".format(name, recipe.depends))
         for depend in recipe.depends:
             graph.add(name, depend)
@@ -516,9 +521,9 @@ def ensure_dir(filename):
 
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(
-        description='Compile Python and others extensions for iOS')
-    args = parser.parse_args()
+    #import argparse
+    #parser = argparse.ArgumentParser(
+    #    description='Compile Python and others extensions for iOS')
+    #args = parser.parse_args()
     ctx = Context()
-    build_recipes(["python"], ctx)
+    build_recipes(sys.argv[1:], ctx)
