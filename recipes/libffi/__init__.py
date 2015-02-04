@@ -7,7 +7,7 @@ import shutil
 class LibffiRecipe(Recipe):
     version = "3.2.1"
     url = "ftp://sourceware.org/pub/libffi/libffi-{version}.tar.gz"
-    archs = ("armv7",)
+    library = "build/Release-{arch.sdk}/libffi.a"
 
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
@@ -22,15 +22,12 @@ class LibffiRecipe(Recipe):
 
     def build_arch(self, arch):
         shprint(sh.xcodebuild,
+                "ONLY_ACTIVE_ARCH=NO",
+                "ARCHS={}".format(arch.arch),
+                "-sdk", arch.sdk,
                 "-project", "libffi.xcodeproj",
                 "-target", "libffi-iOS",
                 "-configuration", "Release")
-
-    def make_lipo(self, filename):
-        shutil.copy(join(
-            self.get_build_dir("armv7"),
-            "build/Release-iphoneos/libffi.a"),
-            filename)
 
     def install(self):
         for sdkarch, arch in (
@@ -42,7 +39,7 @@ class LibffiRecipe(Recipe):
             if exists(dest_dir):
                 continue
             shutil.copytree(join(
-                self.get_build_dir("armv7"),
+                self.get_build_dir(arch),
                 "build_{}/include".format(sdkarch)),
                 dest_dir)
 

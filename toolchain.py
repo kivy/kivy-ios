@@ -456,9 +456,10 @@ class Recipe(object):
             return
         args = []
         for arch in self.filtered_archs:
+            library = self.library.format(arch=arch)
             args += [
                 "-arch", arch.arch,
-                join(self.get_build_dir(arch.arch), self.library)]
+                join(self.get_build_dir(arch.arch), library)]
         shprint(sh.lipo, "-create", "-output", filename, *args)
 
     def install(self):
