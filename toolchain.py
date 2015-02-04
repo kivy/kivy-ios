@@ -51,7 +51,8 @@ class Arch(object):
             "-arch", self.arch,
             "-pipe", "-no-cpp-precomp",
             "--sysroot={}".format(self.sysroot),
-            "-I{}/include/{}".format(self.ctx.dist_dir, self.arch),
+            "-I{}/common".format(self.ctx.include_dir),
+            "-I{}/{}".format(self.ctx.include_dir, self.arch),
             "-O3",
             self.version_min
         ])
