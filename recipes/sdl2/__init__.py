@@ -9,6 +9,7 @@ class LibSDL2Recipe(Recipe):
     version = "2.0.3"
     url = "https://www.libsdl.org/release/SDL2-{version}.tar.gz"
     library = "Xcode-iOS/SDL/build/Release-{arch.sdk}/libSDL2.a"
+    include_dir = "include"
 
     def build_arch(self, arch):
         shprint(sh.xcodebuild,
@@ -19,14 +20,6 @@ class LibSDL2Recipe(Recipe):
                 "-target", "libSDL",
                 "-configuration", "Release")
 
-    def install(self):
-        for arch in self.filtered_archs:
-            dest_dir = join(self.ctx.include_dir, "common", "SDL2")
-            if exists(dest_dir):
-                shutil.rmtree(dest_dir)
-            shutil.copytree(
-                join(self.get_build_dir(arch.arch), "include"),
-                dest_dir)
 
 recipe = LibSDL2Recipe()
 

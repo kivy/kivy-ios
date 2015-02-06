@@ -8,6 +8,8 @@ class LibffiRecipe(Recipe):
     version = "3.2.1"
     url = "ftp://sourceware.org/pub/libffi/libffi-{version}.tar.gz"
     library = "build/Release-{arch.sdk}/libffi.a"
+    include_per_arch = True
+    include_dir = "build_{arch.sdk}-{arch.arch}/include"
 
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
@@ -28,20 +30,6 @@ class LibffiRecipe(Recipe):
                 "-project", "libffi.xcodeproj",
                 "-target", "libffi-iOS",
                 "-configuration", "Release")
-
-    def install(self):
-        for sdkarch, arch in (
-            ("iphoneos-arm64", "arm64"),
-            ("iphoneos-armv7", "armv7"),
-            ("iphonesimulator-i386", "i386"),
-            ("iphonesimulator-x86_64", "x86_64")):
-            dest_dir = join(self.ctx.dist_dir, "include", arch)
-            if exists(dest_dir):
-                continue
-            shutil.copytree(join(
-                self.get_build_dir(arch),
-                "build_{}/include".format(sdkarch)),
-                dest_dir)
 
 
 recipe = LibffiRecipe()

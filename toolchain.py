@@ -43,19 +43,29 @@ class Arch(object):
         self.ctx = ctx
 
     def get_env(self):
+        include_dirs = [
+            "-I{}/{}".format(
+                self.ctx.include_dir,
+                d.format(arch=self))
+            for d in self.ctx.include_dirs]
+
         env = {}
         env["CC"] = sh.xcrun("-find", "-sdk", self.sdk, "clang").strip()
         env["AR"] = sh.xcrun("-find", "-sdk", self.sdk, "ar").strip()
         env["LD"] = sh.xcrun("-find", "-sdk", self.sdk, "ld").strip()
+        env["OTHER_CFLAGS"] = " ".join(include_dirs)
+        env["OTHER_LDFLAGS"] = " ".join([
+            "-L{}/{}".format(self.ctx.dist_dir, "lib"),
+        ])
         env["CFLAGS"] = " ".join([
             "-arch", self.arch,
             "-pipe", "-no-cpp-precomp",
             "--sysroot={}".format(self.sysroot),
-            "-I{}/common".format(self.ctx.include_dir),
-            "-I{}/{}".format(self.ctx.include_dir, self.arch),
+            #"-I{}/common".format(self.ctx.include_dir),
+            #"-I{}/{}".format(self.ctx.include_dir, self.arch),
             "-O3",
             self.version_min
-        ])
+        ] + include_dirs)
         env["LDFLAGS"] = " ".join([
             "-arch", self.arch,
             "--sysroot={}".format(self.sysroot),
@@ -158,6 +168,8 @@ class Context(object):
 
     def __init__(self):
         super(Context, self).__init__()
+        self.include_dirs = []
+
         ok = True
 
         sdks = sh.xcodebuild("-showsdks").splitlines()
@@ -245,6 +257,8 @@ class Recipe(object):
     archs = []
     depends = []
     library = None
+    include_dir = None
+    include_per_arch = False
 
     # API available for recipes
     def download_file(self, url, filename, cwd=None):
@@ -347,6 +361,12 @@ class Recipe(object):
         except:
             pass
 
+    def get_include_dir(self):
+        """
+        Return the common include dir for this recipe
+        """
+        return join(self.ctx.include_dir, "common", self.name)
+
     @property
     def name(self):
         modname = self.__class__.__module__
@@ -373,6 +393,15 @@ class Recipe(object):
 
     def init_with_ctx(self, ctx):
         self.ctx = ctx
+        include_dir = None
+        if self.include_dir:
+            if self.include_per_arch:
+                include_dir = join("{arch.arch}", self.name)
+            else:
+                include_dir = join("common", self.name)
+        if include_dir:
+            print("Include dir added: {}".format(include_dir))
+            self.ctx.include_dirs.append(include_dir)
 
     def execute(self):
         print("Download {}".format(self.name))
@@ -438,6 +467,8 @@ class Recipe(object):
         ensure_dir(dirname(static_fn))
         print("Lipo {} to {}".format(self.name, static_fn))
         self.make_lipo(static_fn)
+        print("Install include files for {}".format(self.name))
+        self.install_include()
         print("Install {}".format(self.name))
         self.install()
 
@@ -466,6 +497,28 @@ class Recipe(object):
                 "-arch", arch.arch,
                 join(self.get_build_dir(arch.arch), library)]
         shprint(sh.lipo, "-create", "-output", filename, *args)
+
+    def install_include(self):
+        if not self.include_dir:
+            return
+        if self.include_per_arch:
+            for arch in self.ctx.arch:
+                build_dir = self.get_build_dir(arch.arch)
+                include_dir = self.include_dir.format(arch=arch, ctx=self.ctx)
+                src_dir = join(build_dir, include_dir)
+                dest_dir = join(self.ctx.include_dir, arch.arch, self.name)
+                if exists(dest_dir):
+                    shutil.rmtree(dest_dir)
+                shutil.copytree(src_dir, dest_dir)
+        else:
+            arch = list(self.filtered_archs)[0]
+            build_dir = self.get_build_dir(arch.arch)
+            include_dir = self.include_dir.format(arch=arch, ctx=self.ctx)
+            src_dir = join(build_dir, include_dir)
+            dest_dir = join(self.ctx.include_dir, "common", self.name)
+            if exists(dest_dir):
+                shutil.rmtree(dest_dir)
+            shutil.copytree(src_dir, dest_dir)
 
     def install(self):
         pass
@@ -511,10 +564,12 @@ def build_recipes(names, ctx):
 
     build_order = list(graph.find_order())
     print("Build order is {}".format(build_order))
-    for name in build_order:
-        recipe = Recipe.get_recipe(name)
+    recipes = [Recipe.get_recipe(name) for name in build_order]
+    for recipe in recipes:
         recipe.init_with_ctx(ctx)
+    for recipe in recipes:
         recipe.execute()
+
 
 def ensure_dir(filename):
     if not exists(filename):
