@@ -42,6 +42,15 @@ class Arch(object):
         super(Arch, self).__init__()
         self.ctx = ctx
 
+    @property
+    def include_dirs(self):
+        return [
+            "{}/{}".format(
+                self.ctx.include_dir,
+                d.format(arch=self))
+            for d in self.ctx.include_dirs]
+
+
     def get_env(self):
         include_dirs = [
             "-I{}/{}".format(
@@ -502,23 +511,38 @@ class Recipe(object):
         if not self.include_dir:
             return
         if self.include_per_arch:
-            for arch in self.ctx.arch:
-                build_dir = self.get_build_dir(arch.arch)
-                include_dir = self.include_dir.format(arch=arch, ctx=self.ctx)
-                src_dir = join(build_dir, include_dir)
-                dest_dir = join(self.ctx.include_dir, arch.arch, self.name)
-                if exists(dest_dir):
-                    shutil.rmtree(dest_dir)
-                shutil.copytree(src_dir, dest_dir)
+            archs = self.ctx.archs
         else:
-            arch = list(self.filtered_archs)[0]
-            build_dir = self.get_build_dir(arch.arch)
-            include_dir = self.include_dir.format(arch=arch, ctx=self.ctx)
-            src_dir = join(build_dir, include_dir)
-            dest_dir = join(self.ctx.include_dir, "common", self.name)
+            archs = [list(self.filtered_archs)[0]]
+
+        include_dirs = self.include_dir
+        if not isinstance(include_dirs, (list, tuple)):
+            include_dirs = list([include_dirs])
+
+        for arch in archs:
+            arch_dir = "common"
+            if self.include_per_arch:
+                arch_dir = arch.arch
+            dest_dir = join(self.ctx.include_dir, arch_dir, self.name)
             if exists(dest_dir):
                 shutil.rmtree(dest_dir)
-            shutil.copytree(src_dir, dest_dir)
+            build_dir = self.get_build_dir(arch.arch)
+
+            for include_dir in include_dirs:
+                dest_name = None
+                if isinstance(include_dir, (list, tuple)):
+                    include_dir, dest_name = include_dir
+                include_dir = include_dir.format(arch=arch, ctx=self.ctx)
+                src_dir = join(build_dir, include_dir)
+                if dest_name is None:
+                    dest_name = basename(src_dir)
+                if isdir(src_dir):
+                    shutil.copytree(src_dir, dest_dir)
+                else:
+                    dest = join(dest_dir, dest_name)
+                    print("Copy {} to {}".format(src_dir, dest))
+                    ensure_dir(dirname(dest))
+                    shutil.copy(src_dir, dest)
 
     def install(self):
         pass
