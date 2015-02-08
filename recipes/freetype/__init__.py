@@ -8,7 +8,8 @@ class FreetypeRecipe(Recipe):
     version = "2.5.5"
     url = "http://download.savannah.gnu.org/releases/freetype/freetype-{version}.tar.bz2"
     library = "objs/.libs/libfreetype.a"
-    include_dir = "include"
+    include_dir = ["include", ("builds/unix/ftconfig.h", "config/ftconfig.h")]
+    include_per_arch = True
 
     def build_arch(self, arch):
         build_env = arch.get_env()
