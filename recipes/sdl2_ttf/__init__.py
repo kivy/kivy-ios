@@ -2,28 +2,27 @@ from toolchain import Recipe, shprint
 from os.path import join
 import sh
 import shutil
+import shlex
 
 
 class LibSDL2TTFRecipe(Recipe):
     version = "2.0.12"
     url = "https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-{version}.tar.gz"
-    library = "Xcode-iOS/build/Release-{arch.sdk}/libSDL2_ttf.a"
+    library = "libSDL2_ttf.a"
     include_dir = "SDL_ttf.h"
     depends = ["sdl2", "freetype"]
 
     def build_arch(self, arch):
+        # XCode-iOS have shipped freetype that don't work with i386
+        # ./configure require too much things to setup it correcly.
+        # so build by hand.
         build_env = arch.get_env()
-        shprint(sh.xcodebuild,
-                "ONLY_ACTIVE_ARCH=NO",
-                "ARCHS={}".format(arch.arch),
-                "HEADER_SEARCH_PATHS={}".format(
-                    join(self.ctx.include_dir, "common", "SDL2")),
-                "OTHER_CFLAGS={}".format(build_env["OTHER_CFLAGS"]),
-                "OTHER_LDFLAGS={}".format(build_env["OTHER_LDFLAGS"]),
-                "-sdk", arch.sdk,
-                "-project", "Xcode-iOS/SDL_ttf.xcodeproj",
-                "-target", "Static Library",
-                "-configuration", "Release")
+        cc = sh.Command(build_env["CC"])
+        output = join(self.build_dir, "SDL_ttf.o")
+        args = shlex.split(build_env["CFLAGS"])
+        args += ["-c", "-o", output, "SDL_ttf.c"]
+        shprint(cc, *args)
+        shprint(sh.ar, "-q", join(self.build_dir, "libSDL2_ttf.a"), output)
 
     def install(self):
         for arch in self.filtered_archs:
