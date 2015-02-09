@@ -1,7 +1,6 @@
 from toolchain import Recipe, shprint
 from os.path import join
 import sh
-import shutil
 
 
 class LibSDL2ImageRecipe(Recipe):
@@ -22,11 +21,6 @@ class LibSDL2ImageRecipe(Recipe):
                 "-target", "libSDL_image",
                 "-configuration", "Release")
 
-    def install(self):
-        for arch in self.filtered_archs:
-            shutil.copy(
-                join(self.get_build_dir(arch.arch), "SDL_image.h"),
-                join(self.ctx.include_dir, "common", "SDL2"))
 
 recipe = LibSDL2ImageRecipe()
 
