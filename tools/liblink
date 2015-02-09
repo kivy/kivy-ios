@@ -74,6 +74,6 @@ f.write(" ".join(libs))
 f.close()
 
 print('Liblink redirect linking with', objects)
-subprocess.call([
-    environ.get('ARM_LD'), '-r',
-    '-o', output + '.o', '-arch', 'armv7'] + objects)
+ld = environ.get('ARM_LD')
+arch = environ.get('ARCH', 'armv7')
+subprocess.call([ld, '-r', '-o', output + '.o', '-arch', arch] + objects)

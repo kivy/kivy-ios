@@ -1,6 +1,7 @@
 from toolchain import Recipe, shprint
 from os.path import join
 import sh
+import os
 
 
 class PythonRecipe(Recipe):
@@ -46,6 +47,19 @@ class PythonRecipe(Recipe):
                 "CROSS_COMPILE_TARGET=yes",
                 "HOSTPYTHON={}".format(self.ctx.hostpython),
                 "HOSTPGEN={}".format(self.ctx.hostpgen))
+
+    def install(self):
+        arch = list(self.filtered_archs)[0]
+        build_env = arch.get_env()
+        build_dir = self.get_build_dir(arch.arch)
+        build_env["PATH"] = os.environ["PATH"]
+        shprint(sh.make,
+                "-C", build_dir,
+                "install",
+                "CROSS_COMPILE_TARGET=yes",
+                "HOSTPYTHON={}".format(self.ctx.hostpython),
+                "prefix={}".format(join(self.ctx.dist_dir, "root", "python")),
+                _env=build_env)
 
     def _patch_pyconfig(self):
         # patch pyconfig to remove some functionnalities

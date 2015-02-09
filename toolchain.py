@@ -69,7 +69,7 @@ class Arch(object):
         env["CFLAGS"] = " ".join([
             "-arch", self.arch,
             "-pipe", "-no-cpp-precomp",
-            "--sysroot={}".format(self.sysroot),
+            "--sysroot", self.sysroot,
             #"-I{}/common".format(self.ctx.include_dir),
             #"-I{}/{}".format(self.ctx.include_dir, self.arch),
             "-O3",
@@ -77,7 +77,7 @@ class Arch(object):
         ] + include_dirs)
         env["LDFLAGS"] = " ".join([
             "-arch", self.arch,
-            "--sysroot={}".format(self.sysroot),
+            "--sysroot", self.sysroot,
             "-L{}/{}".format(self.ctx.dist_dir, "lib"),
             "-lsqlite3",
             "-undefined", "dynamic_lookup",
