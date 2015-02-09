@@ -319,8 +319,11 @@ class Recipe(object):
             archive = tarfile.open(filename)
             root = archive.next().path.split("/")
             return root[0]
+        elif filename.endswith(".zip"):
+            with zipfile.ZipFile(filename) as zf:
+                return dirname(zf.namelist()[0])
         else:
-            print("Error: cannot detect root direction")
+            print("Error: cannot detect root directory")
             print("Unrecognized extension for {}".format(filename))
             raise Exception()
 
