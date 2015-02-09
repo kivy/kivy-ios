@@ -30,6 +30,23 @@ class HostpythonRecipe(Recipe):
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.set_marker("patched")
 
+    def postbuild_arch(self, arch):
+        makefile_fn = join(self.build_dir, "Makefile")
+        with open(makefile_fn) as fd:
+            lines = fd.readlines()
+        for index, line in enumerate(lines):
+            if "-bundle" not in line:
+                continue
+            parts = line.split(" ")
+            parts.remove("-bundle")
+            if "-bundle_loader" in parts:
+                i = parts.index("-bundle_loader")
+                parts.pop(i)
+                parts.pop(i)
+            lines[index] = " ".join(parts)
+        with open(makefile_fn, "w") as fd:
+            fd.writelines(lines)
+
     def build_i386(self):
         sdk_path = sh.xcrun("--sdk", "macosx", "--show-sdk-path").strip()
 
