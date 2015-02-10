@@ -194,7 +194,7 @@ class Context(object):
 
         # get the latest iphonesimulator version
         iphonesim = [x for x in sdks if "iphonesimulator" in x]
-        if not iphoneos:
+        if not iphonesim:
             ok = False
             print("Error: No iphonesimulator SDK installed")
         else:
