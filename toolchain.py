@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Tool for compiling iOS toolchain
 ================================
@@ -13,20 +14,40 @@ import zipfile
 import tarfile
 import importlib
 import sh
+import io
+import json
 import shutil
+from datetime import datetime
 try:
     from urllib.request import FancyURLopener
 except ImportError:
     from urllib import FancyURLopener
 
 
+IS_PY3 = sys.version_info[0] >= 3
+
+
 def shprint(command, *args, **kwargs):
     kwargs["_iter"] = True
     kwargs["_out_bufsize"] = 1
     kwargs["_err_to_out"] = True
-    #kwargs["_err_to_out"] = True
     for line in command(*args, **kwargs):
         stdout.write(line)
+
+
+def cache_execution(f):
+    def _cache_execution(self, *args, **kwargs):
+        state = self.ctx.state
+        key = "{}.{}".format(self.name, f.__name__)
+        key_time = "{}.at".format(key)
+        if key in state:
+            print("# (ignored) {} {}".format(f.__name__.capitalize(), self.name))
+            return
+        print("{} {}".format(f.__name__.capitalize(), self.name))
+        f(self, *args, **kwargs)
+        state[key] = True
+        state[key_time] = str(datetime.utcnow())
+    return _cache_execution
 
 
 class ChromeDownloader(FancyURLopener):
@@ -36,6 +57,50 @@ class ChromeDownloader(FancyURLopener):
 
 urlretrieve = ChromeDownloader().retrieve
 
+
+class JsonStore(object):
+    """Replacement of shelve using json, needed for support python 2 and 3.
+    """
+
+    def __init__(self, filename):
+        super(JsonStore, self).__init__()
+        self.filename = filename
+        self.data = {}
+        if exists(filename):
+            try:
+                with io.open(filename, encoding='utf-8') as fd:
+                    self.data = json.load(fd)
+            except ValueError:
+                print("Unable to read the state.db, content will be replaced.")
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+        self.sync()
+
+    def __delitem__(self, key):
+        del self.data[key]
+        self.sync()
+
+    def __contains__(self, item):
+        return item in self.data
+
+    def get(self, item, default=None):
+        return self.data.get(item, default)
+
+    def keys(self):
+        return self.data.keys()
+
+    def sync(self):
+        # http://stackoverflow.com/questions/12309269/write-json-data-to-file-in-python/14870531#14870531
+        if IS_PY3:
+            with open(self.filename, 'w') as fd:
+                json.dump(self.data, fd, ensure_ascii=False)
+        else:
+            with io.open(self.filename, 'w', encoding='utf-8') as fd:
+                fd.write(unicode(json.dumps(self.data, ensure_ascii=False)))
 
 class Arch(object):
     def __init__(self, ctx):
@@ -225,7 +290,8 @@ class Context(object):
         # path to some tools
         self.ccache = sh.which("ccache")
         if not self.ccache:
-            print("ccache is missing, the build will not be optimized in the future.")
+            #print("ccache is missing, the build will not be optimized in the future.")
+            pass
         for cython_fn in ("cython-2.7", "cython"):
             cython = sh.which(cython_fn)
             if cython:
@@ -258,6 +324,9 @@ class Context(object):
         self.env.pop("ARCHFLAGS", None)
         self.env.pop("CFLAGS", None)
         self.env.pop("LDFLAGS", None)
+
+        # set the state
+        self.state = JsonStore(join(self.dist_dir, "state.db"))
 
 
 class Recipe(object):
@@ -415,20 +484,29 @@ class Recipe(object):
             print("Include dir added: {}".format(include_dir))
             self.ctx.include_dirs.append(include_dir)
 
+    @property
+    def archive_root(self):
+        key = "{}.archive_root".format(self.name)
+        value = self.ctx.state.get(key)
+        if not key:
+            value = self.get_archive_rootdir(self.archive_fn)
+            self.ctx.state[key] = value
+        return value
+
     def execute(self):
-        print("Download {}".format(self.name))
         self.download()
-        print("Extract {}".format(self.name))
         self.extract()
-        print("Build {}".format(self.name))
         self.build_all()
 
+    @cache_execution
     def download(self):
         fn = self.archive_fn
         if not exists(fn):
             self.download_file(self.url.format(version=self.version), fn)
-        self.archive_root = self.get_archive_rootdir(self.archive_fn)
+        key = "{}.archive_root".format(self.name)
+        self.ctx.state[key] = self.get_archive_rootdir(self.archive_fn)
 
+    @cache_execution
     def extract(self):
         # recipe tmp directory
         for arch in self.filtered_archs:
@@ -442,35 +520,40 @@ class Recipe(object):
         ensure_dir(build_dir)
         self.extract_file(self.archive_fn, build_dir) 
 
+    @cache_execution
+    def build(self, arch):
+        self.build_dir = self.get_build_dir(arch.arch)
+        if self.has_marker("building"):
+            print("Warning: {} build for {} has been incomplete".format(
+                self.name, arch.arch))
+            print("Warning: deleting the build and restarting.")
+            shutil.rmtree(self.build_dir)
+            self.extract_arch(arch.arch)
+
+        if self.has_marker("build_done"):
+            print("Build python for {} already done.".format(arch.arch))
+            return
+
+        self.set_marker("building")
+
+        chdir(self.build_dir)
+        print("Prebuild {} for {}".format(self.name, arch.arch))
+        self.prebuild_arch(arch)
+        print("Build {} for {}".format(self.name, arch.arch))
+        self.build_arch(arch)
+        print("Postbuild {} for {}".format(self.name, arch.arch))
+        self.postbuild_arch(arch)
+        self.delete_marker("building")
+        self.set_marker("build_done")
+
+    @cache_execution
     def build_all(self):
         filtered_archs = list(self.filtered_archs)
         print("Build {} for {} (filtered)".format(
             self.name,
             ", ".join([x.arch for x in filtered_archs])))
         for arch in self.filtered_archs:
-            self.build_dir = self.get_build_dir(arch.arch)
-            if self.has_marker("building"):
-                print("Warning: {} build for {} has been incomplete".format(
-                    self.name, arch.arch))
-                print("Warning: deleting the build and restarting.")
-                shutil.rmtree(self.build_dir)
-                self.extract_arch(arch.arch)
-
-            if self.has_marker("build_done"):
-                print("Build python for {} already done.".format(arch.arch))
-                continue
-
-            self.set_marker("building")
-
-            chdir(self.build_dir)
-            print("Prebuild {} for {}".format(self.name, arch.arch))
-            self.prebuild_arch(arch)
-            print("Build {} for {}".format(self.name, arch.arch))
-            self.build_arch(arch)
-            print("Postbuild {} for {}".format(self.name, arch.arch))
-            self.postbuild_arch(arch)
-            self.delete_marker("building")
-            self.set_marker("build_done")
+            self.build(arch)
 
         name = self.name
         if not name.startswith("lib"):
@@ -499,6 +582,7 @@ class Recipe(object):
         if hasattr(self, postbuild):
             getattr(self, postbuild)()
 
+    @cache_execution
     def make_lipo(self, filename):
         if not self.library:
             return
@@ -510,6 +594,7 @@ class Recipe(object):
                 join(self.get_build_dir(arch.arch), library)]
         shprint(sh.lipo, "-create", "-output", filename, *args)
 
+    @cache_execution
     def install_include(self):
         if not self.include_dir:
             return
@@ -547,6 +632,7 @@ class Recipe(object):
                     ensure_dir(dirname(dest))
                     shutil.copy(src_dir, dest)
 
+    @cache_execution
     def install(self):
         pass
 
@@ -559,7 +645,7 @@ class Recipe(object):
                 yield name
 
     @classmethod
-    def get_recipe(cls, name):
+    def get_recipe(cls, name, ctx):
         if not hasattr(cls, "recipes"):
            cls.recipes = {}
         if name in cls.recipes:
@@ -580,10 +666,13 @@ def build_recipes(names, ctx):
         name = recipe_to_load.pop(0)
         if name in recipe_loaded:
             continue
-        print("Load recipe {}".format(name))
-        recipe = Recipe.get_recipe(name)
+        try:
+            recipe = Recipe.get_recipe(name, ctx)
+        except ImportError:
+            print("ERROR: No recipe named {}".format(name))
+            sys.exit(1)
         graph.add(name, name)
-        print("Recipe {} depends of {}".format(name, recipe.depends))
+        print("Loaded recipe {} (depends of {})".format(name, recipe.depends))
         for depend in recipe.depends:
             graph.add(name, depend)
             recipe_to_load += recipe.depends
@@ -591,7 +680,7 @@ def build_recipes(names, ctx):
 
     build_order = list(graph.find_order())
     print("Build order is {}".format(build_order))
-    recipes = [Recipe.get_recipe(name) for name in build_order]
+    recipes = [Recipe.get_recipe(name, ctx) for name in build_order]
     for recipe in recipes:
         recipe.init_with_ctx(ctx)
     for recipe in recipes:
@@ -604,9 +693,88 @@ def ensure_dir(filename):
 
 
 if __name__ == "__main__":
-    #import argparse
-    #parser = argparse.ArgumentParser(
-    #    description='Compile Python and others extensions for iOS')
-    #args = parser.parse_args()
-    ctx = Context()
-    build_recipes(sys.argv[1:], ctx)
+    import argparse
+    
+    class ToolchainCL(object):
+        def __init__(self):
+            parser = argparse.ArgumentParser(
+                    description="Tool for managing the iOS/Python toolchain",
+                    usage="""toolchain <command> [<args>]
+                    
+Available commands:
+    build         Build a specific recipe
+    recipes       List all the available recipes
+    clean         Clean the build
+    distclean     Clean the build and the result
+""")
+            parser.add_argument("command", help="Command to run")
+            args = parser.parse_args(sys.argv[1:2])
+            if not hasattr(self, args.command):
+                print 'Unrecognized command'
+                parser.print_help()
+                exit(1)
+            getattr(self, args.command)()
+
+        def build(self):
+            parser = argparse.ArgumentParser(
+                    description="Build the toolchain")
+            parser.add_argument("recipe", nargs="+", help="Recipe to compile")
+            args = parser.parse_args(sys.argv[2:])
+
+            ctx = Context()
+            build_recipes(args.recipe, ctx)
+
+        def recipes(self):
+            parser = argparse.ArgumentParser(
+                    description="List all the available recipes")
+            parser.add_argument(
+                    "--compact", action="store_true",
+                    help="Produce a compact list suitable for scripting")
+            args = parser.parse_args(sys.argv[2:])
+
+            if args.compact:
+                print(" ".join(list(Recipe.list_recipes())))
+            else:
+                ctx = Context()
+                for name in Recipe.list_recipes():
+                    recipe = Recipe.get_recipe(name, ctx)
+                    print("{recipe.name:<12} {recipe.version:<8}".format(
+                          recipe=recipe))
+
+        def clean(self):
+            parser = argparse.ArgumentParser(
+                    description="Clean the build")
+            args = parser.parse_args(sys.argv[2:])
+            ctx = Context()
+            if exists(ctx.build_dir):
+                shutil.rmtree(ctx.build_dir)
+
+        def distclean(self):
+            parser = argparse.ArgumentParser(
+                    description="Clean the build, download and dist")
+            args = parser.parse_args(sys.argv[2:])
+            ctx = Context()
+            if exists(ctx.build_dir):
+                shutil.rmtree(ctx.build_dir)
+            if exists(ctx.dist_dir):
+                shutil.rmtree(ctx.dist_dir)
+            if exists(ctx.cache_dir):
+                shutil.rmtree(ctx.cache_dir)
+
+        def status(self):
+            parser = argparse.ArgumentParser(
+                    description="Give a status of the build")
+            args = parser.parse_args(sys.argv[2:])
+            ctx = Context()
+            for recipe in Recipe.list_recipes():
+                key = "{}.build_all".format(recipe)
+                keytime = "{}.build_all.at".format(recipe)
+
+                if key in ctx.state:
+                    status = "Build OK (built at {})".format(ctx.state[keytime])
+                else:
+                    status = "Not built"
+                print("{:<12} - {}".format(
+                    recipe, status))
+
+    ToolchainCL()
