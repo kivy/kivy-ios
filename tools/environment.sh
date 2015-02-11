@@ -46,6 +46,7 @@ export BUILDROOT="$KIVYIOSROOT/build"
 export TMPROOT="$KIVYIOSROOT/tmp"
 export DESTROOT="$KIVYIOSROOT/tmp/root"
 export CACHEROOT="$KIVYIOSROOT/.cache"
+export DISTROOT="$KIVYIOSROOT/dist"
 
 # pkg-config for SDL and futures
 try mkdir -p $BUILDROOT/pkgconfig
@@ -53,7 +54,7 @@ export PKG_CONFIG_PATH="$BUILDROOT/pkgconfig:$PKG_CONFIG_PATH"
 
 # some tools
 export CCACHE=$(which ccache)
-export HOSTPYTHON="$TMPROOT/Python-$IOS_PYTHON_VERSION/hostpython"
+export HOSTPYTHON="$DISTROOT/hostpython/bin/python"
 for fn in cython-2.7 cython; do
 	export CYTHON=$(which $fn)
 	if [ "X$CYTHON" != "X" ]; then
