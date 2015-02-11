@@ -43,13 +43,17 @@ def do(fn):
         sub2 = 'PyInit{}_{}(void)'.format(package, modname)
         pat3 = 'Pyx_NAMESTR("{}")'.format(modname)
         sub3 = 'Pyx_NAMESTR("{}_{}")'.format(package, modname)
+        pat4 = '"{}"'.format(modname)
+        sub4 = '"{}_{}"'.format(package, modname)
 
         print('1: {} -> {}'.format(pat1, sub1))
         print('2: {} -> {}'.format(pat2, sub2))
         print('3: {} -> {}'.format(pat3, sub3))
+        print('4: {} -> {}'.format(pat4, sub4))
         data = data.replace(pat1, sub1)
         data = data.replace(pat2, sub2)
         data = data.replace(pat3, sub3)
+        data = data.replace(pat4, sub4)
 
         print('rewrite', fn_c)
         with open(fn_c, 'w') as fd:
