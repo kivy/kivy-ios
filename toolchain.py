@@ -39,11 +39,12 @@ def cache_execution(f):
     def _cache_execution(self, *args, **kwargs):
         state = self.ctx.state
         key = "{}.{}".format(self.name, f.__name__)
+        force = kwargs.pop("force", False)
         if args:
             for arg in args:
                 key += ".{}".format(arg)
         key_time = "{}.at".format(key)
-        if key in state:
+        if key in state and not force:
             print("# (ignored) {} {}".format(f.__name__.capitalize(), self.name))
             return
         print("{} {}".format(f.__name__.capitalize(), self.name))
@@ -507,17 +508,38 @@ class Recipe(object):
         return value
 
     def execute(self):
+        if self.custom_dir:
+            self.ctx.state.remove_all(self.name)
         self.download()
         self.extract()
         self.build_all()
 
+    @property
+    def custom_dir(self):
+        """Check if there is a variable name to specify a custom version /
+        directory to use instead of the current url.
+        """
+        d = environ.get("{}_DIR".format(self.name.upper()))
+        if not d:
+            return
+        if not exists(d):
+            return
+        return d
+
     @cache_execution
     def download(self):
-        fn = self.archive_fn
-        if not exists(fn):
-            self.download_file(self.url.format(version=self.version), fn)
         key = "{}.archive_root".format(self.name)
-        self.ctx.state[key] = self.get_archive_rootdir(self.archive_fn)
+        if self.custom_dir:
+            self.ctx.state[key] = basename(self.custom_dir)
+        else:
+            src_dir = join(self.recipe_dir, self.url)
+            if exists(src_dir):
+                self.ctx.state[key] = basename(src_dir)
+                return
+            fn = self.archive_fn
+            if not exists(fn):
+                self.download_file(self.url.format(version=self.version), fn)
+            self.ctx.state[key] = self.get_archive_rootdir(self.archive_fn)
 
     @cache_execution
     def extract(self):
@@ -528,10 +550,20 @@ class Recipe(object):
 
     def extract_arch(self, arch):
         build_dir = join(self.ctx.build_dir, self.name, arch)
-        if exists(join(build_dir, self.archive_root)):
-            return
-        ensure_dir(build_dir)
-        self.extract_file(self.archive_fn, build_dir) 
+        dest_dir = join(build_dir, self.archive_root)
+        if self.custom_dir:
+            if exists(dest_dir):
+                shutil.rmtree(dest_dir)
+            shutil.copytree(self.custom_dir, dest_dir)
+        else:
+            if exists(dest_dir):
+                return
+            src_dir = join(self.recipe_dir, self.url)
+            if exists(src_dir):
+                shutil.copytree(src_dir, dest_dir)
+                return
+            ensure_dir(build_dir)
+            self.extract_file(self.archive_fn, build_dir) 
 
     @cache_execution
     def build(self, arch):
@@ -732,9 +764,14 @@ Available commands:
             parser = argparse.ArgumentParser(
                     description="Build the toolchain")
             parser.add_argument("recipe", nargs="+", help="Recipe to compile")
+            parser.add_argument("--arch", help="Restrict compilation to this arch")
             args = parser.parse_args(sys.argv[2:])
 
             ctx = Context()
+            if args.arch:
+                archs = args.arch.split()
+                ctx.archs = [arch for arch in ctx.archs if arch.arch in archs]
+                print("Architectures restricted to: {}".format(archs))
             build_recipes(args.recipe, ctx)
 
         def recipes(self):
