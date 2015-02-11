@@ -21,6 +21,10 @@ class FreetypeRecipe(Recipe):
                 "LDFLAGS={}".format(build_env["LDFLAGS"]),
                 "--prefix=/",
                 "--host={}".format(arch.triple),
+                "--without-png",
+                "--without-bzip2",
+                "--without-fsspec",
+                "--without-old-mac-fonts",
                 "--enable-static=yes",
                 "--enable-shared=no")
         shprint(sh.make, "clean")
