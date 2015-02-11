@@ -37,11 +37,13 @@ class PythonRecipe(Recipe):
                 "--disable-toolbox-glue",
                 "--host={}-apple-darwin".format(arch),
                 "--prefix=/python",
+                "--with-system-ffi",
                 "--without-doc-strings",
                 _env=build_env)
 
         self._patch_pyconfig()
         self.apply_patch("ctypes_duplicate.patch")
+        self.apply_patch("ctypes_duplicate_longdouble.patch")
 
         shprint(sh.make, "-j4",
                 "CROSS_COMPILE_TARGET=yes",
