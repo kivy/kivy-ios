@@ -1,5 +1,6 @@
-from toolchain import Recipe, shprint
-from os.path import join
+from toolchain import Recipe, shprint, ensure_dir
+from os.path import join, exists
+import os
 import sh
 import shutil
 
@@ -10,14 +11,10 @@ class HostpythonRecipe(Recipe):
     depends = ["libffi", ]
     archs = ["i386"]
 
-    def download(self):
-        super(HostpythonRecipe, self).download()
-        self.ctx.hostpython = join(
-                self.ctx.build_dir, self.name, "i386", self.archive_root,
-                "hostpython")
-        self.ctx.hostpgen = join(
-                self.ctx.build_dir, self.name, "i386", self.archive_root,
-                "Parser", "hostpgen")
+    def init_with_ctx(self, ctx):
+        super(HostpythonRecipe, self).init_with_ctx(ctx)
+        self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython", "bin", "python")
+        self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython", "bin", "pgen")
         print("Global: hostpython located at {}".format(self.ctx.hostpython))
         print("Global: hostpgen located at {}".format(self.ctx.hostpgen))
 
@@ -49,16 +46,41 @@ class HostpythonRecipe(Recipe):
 
     def build_i386(self):
         sdk_path = sh.xcrun("--sdk", "macosx", "--show-sdk-path").strip()
-
         build_env = self.ctx.env.copy()
         build_env["CC"] = "clang -Qunused-arguments -fcolor-diagnostics"
         build_env["LDFLAGS"] = "-lsqlite3"
         build_env["CFLAGS"] = "--sysroot={}".format(sdk_path)
         configure = sh.Command(join(self.build_dir, "configure"))
-        shprint(configure, _env=build_env)
+        shprint(configure,
+                "--prefix={}".format(join(self.ctx.dist_dir, "hostpython")),
+                _env=build_env)
         shprint(sh.make, "-C", self.build_dir, "-j4", "python.exe", "Parser/pgen",
                 _env=build_env)
         shutil.move("python.exe", "hostpython")
         shutil.move("Parser/pgen", "Parser/hostpgen")
+
+    def install(self):
+        arch = list(self.filtered_archs)[0]
+        build_env = arch.get_env()
+        build_dir = self.get_build_dir(arch.arch)
+        build_env["PATH"] = os.environ["PATH"]
+        shprint(sh.make,
+                "-C", build_dir,
+                "bininstall", "inclinstall",
+                _env=build_env)
+        pylib_dir = join(self.ctx.dist_dir, "hostpython", "lib", "python2.7")
+        if exists(pylib_dir):
+            shutil.rmtree(pylib_dir)
+        shutil.copytree(
+            join(build_dir, "Lib"),
+            pylib_dir)
+        ensure_dir(join(pylib_dir, "config"))
+        shutil.copy(
+            join(build_dir, "Makefile"),
+            join(pylib_dir, "config", "Makefile"))
+        shutil.copy(
+            join(build_dir, "Parser", "pgen"),
+            join(self.ctx.dist_dir, "hostpython", "bin", "pgen"))
+
 
 recipe = HostpythonRecipe()
