@@ -20,6 +20,7 @@ class LibffiRecipe(Recipe):
                 "-i.bak",
                 "s/-miphoneos-version-min=5.1.1/-miphoneos-version-min=6.0/g",
                 "generate-darwin-source-and-headers.py")
+        self.apply_patch("fix-win32-unreferenced-symbol.patch")
         self.set_marker("patched")
 
     def build_arch(self, arch):
