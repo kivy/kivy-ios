@@ -39,6 +39,9 @@ def cache_execution(f):
     def _cache_execution(self, *args, **kwargs):
         state = self.ctx.state
         key = "{}.{}".format(self.name, f.__name__)
+        if args:
+            for arg in args:
+                key += ".{}".format(arg)
         key_time = "{}.at".format(key)
         if key in state:
             print("# (ignored) {} {}".format(f.__name__.capitalize(), self.name))
@@ -93,6 +96,13 @@ class JsonStore(object):
     def keys(self):
         return self.data.keys()
 
+    def remove_all(self, prefix):
+        for key in self.data.keys()[:]:
+            if not key.startswith(prefix):
+                continue
+            del self.data[key]
+        self.sync()
+
     def sync(self):
         # http://stackoverflow.com/questions/12309269/write-json-data-to-file-in-python/14870531#14870531
         if IS_PY3:
@@ -106,6 +116,9 @@ class Arch(object):
     def __init__(self, ctx):
         super(Arch, self).__init__()
         self.ctx = ctx
+
+    def __str__(self):
+        return self.arch
 
     @property
     def include_dirs(self):
@@ -744,10 +757,20 @@ Available commands:
         def clean(self):
             parser = argparse.ArgumentParser(
                     description="Clean the build")
+            parser.add_argument("recipe", nargs="*", help="Recipe to clean")
             args = parser.parse_args(sys.argv[2:])
             ctx = Context()
-            if exists(ctx.build_dir):
-                shutil.rmtree(ctx.build_dir)
+            if args.recipe:
+                for recipe in args.recipe:
+                    print("Cleaning {} build".format(recipe))
+                    ctx.state.remove_all("{}.".format(recipe))
+                    build_dir = join(ctx.build_dir, recipe)
+                    if exists(build_dir):
+                        shutil.rmtree(build_dir)
+            else:
+                print("Delete build directory")
+                if exists(ctx.build_dir):
+                    shutil.rmtree(ctx.build_dir)
 
         def distclean(self):
             parser = argparse.ArgumentParser(
@@ -776,5 +799,11 @@ Available commands:
                     status = "Not built"
                 print("{:<12} - {}".format(
                     recipe, status))
+
+        def create(self):
+            parser = argparse.ArgumentParser(
+                    description="Create a new xcode project")
+            args = parser.parse_args(sys.argv[2:])
+            
 
     ToolchainCL()
