@@ -33,6 +33,7 @@ class KivyRecipe(Recipe):
         build_env["LDSHARED"] = join(self.ctx.root_dir, "tools", "liblink")
         build_env["ARM_LD"] = build_env["LD"]
         build_env["ARCH"] = arch.arch
+        build_env["KIVY_SDL2_PATH"] = join(self.ctx.dist_dir, "include", "common", "sdl2")
         return build_env
 
     def build_arch(self, arch):
@@ -68,7 +69,7 @@ class KivyRecipe(Recipe):
         with open(pyconfig) as fd:
             lines = fd.readlines()
         _remove_line(lines, "flags['libraries'] = ['GLESv2']")
-        _remove_line(lines, "c_options['use_sdl'] = True")
+        #_remove_line(lines, "c_options['use_sdl'] = True")
         with open(pyconfig, "wb") as fd:
             fd.writelines(lines)
 
