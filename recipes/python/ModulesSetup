@@ -1,18 +1,18 @@
-posix posixmodule.c             # posix (UNIX) system calls
-errno errnomodule.c             # posix (UNIX) errno values
-pwd pwdmodule.c                 # this is needed to find out the user's home dir
+#posix posixmodule.c             # posix (UNIX) system calls
+#errno errnomodule.c             # posix (UNIX) errno values
+#pwd pwdmodule.c                 # this is needed to find out the user's home dir
                                 # if $HOME is not set
-_sre _sre.c                     # Fredrik Lundh's new regular expressions
-_codecs _codecsmodule.c         # access to the builtin codecs and codec registry
-zipimport zipimport.c
-_symtable symtablemodule.c
+#_sre _sre.c                     # Fredrik Lundh's new regular expressions
+#_codecs _codecsmodule.c         # access to the builtin codecs and codec registry
+#zipimport zipimport.c
+#_symtable symtablemodule.c
 array arraymodule.c     # array objects
 cmath cmathmodule.c # -lm # complex math library functions
 math mathmodule.c # -lm # math library functions, e.g. sin()
 _struct _struct.c       # binary structure packing/unpacking
 time timemodule.c # -lm # time operations and variables
 operator operator.c     # operator.add() and similar goodies
-_weakref _weakref.c     # basic weak reference support
+#_weakref _weakref.c     # basic weak reference support
 _random _randommodule.c # Random number generator
 _collections _collectionsmodule.c # Container types
 itertools itertoolsmodule.c     # Functions creating iterators for efficient looping
@@ -33,7 +33,7 @@ parser parsermodule.c
 cStringIO cStringIO.c
 cPickle cPickle.c
 zlib zlibmodule.c -I$(prefix)/include -L$(exec_prefix)/lib -lz
-xxsubtype xxsubtype.c
+#xxsubtype xxsubtype.c
 unicodedata unicodedata.c    # static Unicode character database
 
 # Theses modules are used by Kivy inside other module
