@@ -79,14 +79,14 @@ class KivyRecipe(Recipe):
         hostpython = sh.Command(self.ctx.hostpython)
         build_env = self.get_kivy_env(arch)
         shprint(hostpython, "setup.py", "install", "-O2",
-                "--root", join(build_dir, "iosbuild"),
+                "--prefix", join(build_dir, "iosbuild"),
                 _env=build_env)
         dest_dir = join(self.ctx.dist_dir, "root", "python", "lib", "python2.7",
                 "site-packages", "kivy")
         if exists(dest_dir):
             shutil.rmtree(dest_dir)
         shutil.copytree(
-            join(build_dir, "iosbuild", "usr", "local", "lib",
+            join(build_dir, "iosbuild", "lib",
                  "python2.7", "site-packages", "kivy"),
             dest_dir)
 
