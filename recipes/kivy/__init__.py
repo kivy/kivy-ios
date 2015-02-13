@@ -11,7 +11,7 @@ class KivyRecipe(Recipe):
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
     #include_dir = "SDL_image.h"
-    depends = ["python", "sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf"]
+    depends = ["python", "sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios"]
 
     def cythonize(self, filename):
         if filename.startswith(self.build_dir):
@@ -33,7 +33,11 @@ class KivyRecipe(Recipe):
         build_env["LDSHARED"] = join(self.ctx.root_dir, "tools", "liblink")
         build_env["ARM_LD"] = build_env["LD"]
         build_env["ARCH"] = arch.arch
-        build_env["KIVY_SDL2_PATH"] = join(self.ctx.dist_dir, "include", "common", "sdl2")
+        build_env["KIVY_SDL2_PATH"] = ":".join([
+            join(self.ctx.dist_dir, "include", "common", "sdl2"),
+            join(self.ctx.dist_dir, "include", "common", "sdl2_image"),
+            join(self.ctx.dist_dir, "include", "common", "sdl2_ttf"),
+            join(self.ctx.dist_dir, "include", "common", "sdl2_mixer")])
         return build_env
 
     def build_arch(self, arch):
