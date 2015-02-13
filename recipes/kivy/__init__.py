@@ -7,7 +7,7 @@ import shutil
 
 
 class KivyRecipe(Recipe):
-    version = "master"
+    version = "ios-poly-arch"
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
     #include_dir = "SDL_image.h"
