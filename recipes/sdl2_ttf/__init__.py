@@ -9,7 +9,7 @@ class LibSDL2TTFRecipe(Recipe):
     version = "2.0.12"
     url = "https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-{version}.tar.gz"
     library = "libSDL2_ttf.a"
-    include_dir = [("SDL_ttf.h", "../sdl2/SDL_ttf.h")]
+    include_dir = "SDL_ttf.h"
     depends = ["sdl2", "freetype"]
 
     def build_arch(self, arch):
