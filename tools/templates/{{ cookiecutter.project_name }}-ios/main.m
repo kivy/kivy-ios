@@ -1,12 +1,14 @@
 //
 //  main.m
-//  iOS-python-test
+//  {{ cookiecutter.project_name }}
 //
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#include <python2.7/Python.h>
-#include "SDL/SDL_main.h"
+//#include <python2.7/Python.h>
+//#include <Python.h>
+#include "../dist/root/python/include/python2.7/Python.h"
+#include "../dist/include/common/sdl2/SDL_main.h"
 #include <dlfcn.h>
 
 void export_orientation();
@@ -32,7 +34,7 @@ int main(int argc, char *argv[]) {
     putenv("KIVY_BUILD=ios");
     putenv("KIVY_NO_CONFIG=1");
     putenv("KIVY_NO_FILELOG=1");
-    putenv("KIVY_WINDOW=sdl");
+    putenv("KIVY_WINDOW=sdl2");
     putenv("KIVY_IMAGE=imageio,tex");
     putenv("KIVY_AUDIO=sdl");
     #ifndef DEBUG
@@ -97,7 +99,7 @@ void export_orientation() {
     }
 
     putenv((char *)[result UTF8String]);
-    //NSLog(@"Available orientation: %@", result);
+    NSLog(@"Available orientation: %@", result);
 }
 
 void load_custom_builtin_importer() {
@@ -128,7 +130,7 @@ void load_custom_builtin_importer() {
         "        f = fullname.replace('.', '_')\n" \
         "        mod = sys.modules.get(f)\n" \
         "        if mod is None:\n" \
-        "            #print 'LOAD DYNAMIC', f\n" \
+        "            #print 'LOAD DYNAMIC', f, sys.modules.keys()\n" \
         "            try:\n" \
         "                mod = imp.load_dynamic(f, f)\n" \
         "            except ImportError:\n" \

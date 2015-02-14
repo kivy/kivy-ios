@@ -13,7 +13,6 @@ from os import listdir, unlink, makedirs, environ, chdir
 import zipfile
 import tarfile
 import importlib
-import sh
 import io
 import json
 import shutil
@@ -22,6 +21,11 @@ try:
     from urllib.request import FancyURLopener
 except ImportError:
     from urllib import FancyURLopener
+
+curdir = dirname(__file__)
+sys.path.insert(0, join(curdir, "tools", "external"))
+
+import sh
 
 
 IS_PY3 = sys.version_info[0] >= 3
@@ -840,7 +844,21 @@ Available commands:
         def create(self):
             parser = argparse.ArgumentParser(
                     description="Create a new xcode project")
+            parser.add_argument("name", help="Name of your project")
+            parser.add_argument("directory", help="Directory where your project live")
             args = parser.parse_args(sys.argv[2:])
             
+            from cookiecutter.main import cookiecutter
+            ctx = Context()
+            template_dir = join(curdir, "tools", "templates")
+            context = {
+                "title": args.name,
+                "project_name": args.name.lower(),
+                "domain_name": "org.kivy.{}".format(args.name.lower()),
+                "project_dir": realpath(args.directory),
+                "version": "1.0.0",
+                "dist_dir": ctx.dist_dir,
+            }
+            cookiecutter(template_dir, no_input=True, extra_context=context)
 
     ToolchainCL()
