@@ -747,14 +747,18 @@ if __name__ == "__main__":
     class ToolchainCL(object):
         def __init__(self):
             parser = argparse.ArgumentParser(
-                    description="Tool for managing the iOS/Python toolchain",
+                    description="Tool for managing the iOS / Python toolchain",
                     usage="""toolchain <command> [<args>]
                     
 Available commands:
     build         Build a specific recipe
-    recipes       List all the available recipes
     clean         Clean the build
     distclean     Clean the build and the result
+    recipes       List all the available recipes
+    status        List all the recipes and their build status
+
+Xcode:
+    create        Create a new xcode project
 """)
             parser.add_argument("command", help="Command to run")
             args = parser.parse_args(sys.argv[1:2])
