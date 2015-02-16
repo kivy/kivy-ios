@@ -1,7 +1,6 @@
 from toolchain import Recipe, shprint
-from os.path import join, exists
+from os.path import join
 import sh
-import shutil
 
 
 class FreetypeRecipe(Recipe):
@@ -24,6 +23,7 @@ class FreetypeRecipe(Recipe):
                 "--without-png",
                 "--without-bzip2",
                 "--without-fsspec",
+                "--without-harfbuzz",
                 "--without-old-mac-fonts",
                 "--enable-static=yes",
                 "--enable-shared=no")
