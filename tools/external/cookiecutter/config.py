@@ -14,8 +14,6 @@ import logging
 import os
 import io
 
-import yaml
-
 from .exceptions import ConfigDoesNotExistException
 from .exceptions import InvalidConfiguration
 
@@ -36,6 +34,7 @@ def get_config(config_path):
     if not os.path.exists(config_path):
         raise ConfigDoesNotExistException
 
+    import yaml
     logger.debug('config_path is {0}'.format(config_path))
     with io.open(config_path, encoding='utf-8') as file_handle:
         try:
