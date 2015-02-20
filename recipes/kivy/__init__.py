@@ -10,7 +10,6 @@ class KivyRecipe(Recipe):
     version = "ios-poly-arch"
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
-    #include_dir = "SDL_image.h"
     depends = ["python", "sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios"]
 
     def cythonize(self, filename):

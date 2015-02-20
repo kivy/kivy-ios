@@ -1,7 +1,5 @@
 from toolchain import Recipe, shprint
-from os.path import join, exists
 import sh
-import shutil
 
 
 class LibffiRecipe(Recipe):
