@@ -605,12 +605,21 @@ class Recipe(object):
             self.build(arch)
 
         name = self.name
-        if not name.startswith("lib"):
-            name = "lib{}".format(name)
-        static_fn = join(self.ctx.dist_dir, "lib", "{}.a".format(name))
-        ensure_dir(dirname(static_fn))
-        print("Lipo {} to {}".format(self.name, static_fn))
-        self.make_lipo(static_fn)
+        if self.library:
+            print("Create lipo library for {}".format(name))
+            if not name.startswith("lib"):
+                name = "lib{}".format(name)
+            static_fn = join(self.ctx.dist_dir, "lib", "{}.a".format(name))
+            ensure_dir(dirname(static_fn))
+            print("Lipo {} to {}".format(self.name, static_fn))
+            self.make_lipo(static_fn)
+        elif self.libraries:
+            print("Create multiple lipo for {}".format(name))
+            for library in self.libraries:
+                static_fn = join(self.ctx.dist_dir, "lib", basename(library))
+                ensure_dir(dirname(static_fn))
+                print("  - Lipo-ize {}".format(library))
+                self.make_lipo(static_fn, library)
         print("Install include files for {}".format(self.name))
         self.install_include()
         print("Install {}".format(self.name))
@@ -632,15 +641,17 @@ class Recipe(object):
             getattr(self, postbuild)()
 
     @cache_execution
-    def make_lipo(self, filename):
-        if not self.library:
+    def make_lipo(self, filename, library=None):
+        if library is None:
+            library = self.library
+        if not library:
             return
         args = []
         for arch in self.filtered_archs:
-            library = self.library.format(arch=arch)
+            library_fn = library.format(arch=arch)
             args += [
                 "-arch", arch.arch,
-                join(self.get_build_dir(arch.arch), library)]
+                join(self.get_build_dir(arch.arch), library_fn)]
         shprint(sh.lipo, "-create", "-output", filename, *args)
 
     @cache_execution
