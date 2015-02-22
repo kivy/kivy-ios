@@ -12,6 +12,7 @@ class FFMpegRecipe(Recipe):
         "libavcodec/libavcodec.a",
         "libavdevice/libavdevice.a",
         "libavfilter/libavfilter.a",
+        "libavformat/libavformat.a",
         "libavresample/libavresample.a",
         "libavutil/libavutil.a",
         "libswresample/libswresample.a",
