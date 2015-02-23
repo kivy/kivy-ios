@@ -11,6 +11,10 @@ class FFPyplayerRecipe(Recipe):
     url = "https://github.com/tito/ffpyplayer/archive/{version}.zip"
     library = "libffpyplayer.a"
     depends = ["python", "ffmpeg"]
+    pbx_frameworks = [
+        "CoreVideo", "CoreMedia", "CoreImage", "AVFoundation", "UIKit",
+        "CoreMotion"]
+    pbx_libraries = ["libiconv"]
 
     def cythonize(self, filename):
         if filename.startswith(self.build_dir):

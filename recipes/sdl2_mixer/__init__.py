@@ -8,6 +8,8 @@ class LibSDL2MixerRecipe(Recipe):
     library = "Xcode-iOS/build/Release-{arch.sdk}/libSDL2_mixer.a"
     include_dir = "SDL_mixer.h"
     depends = ["sdl2"]
+    pbx_frameworks = ["ImageIO"]
+    pbx_libraries = ["libc++"]
 
     def build_arch(self, arch):
         shprint(sh.xcodebuild,

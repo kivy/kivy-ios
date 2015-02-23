@@ -9,6 +9,7 @@ class PythonRecipe(Recipe):
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
     depends = ["hostpython", "libffi", ]
     library = "libpython2.7.a"
+    pbx_libraries = ["libz", "libbz2", "libsqlite3"]
 
     def prebuild_arch(self, arch):
         # common to all archs

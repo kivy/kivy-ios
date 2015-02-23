@@ -11,6 +11,7 @@ class KivyRecipe(Recipe):
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
     depends = ["python", "sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios"]
+    pbx_frameworks = ["OpenGLES", "Accelerate"]
 
     def cythonize(self, filename):
         if filename.startswith(self.build_dir):

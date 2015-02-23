@@ -9,7 +9,7 @@ This tool intend to replace all the previous tools/ in shell script.
 import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename
-from os import listdir, unlink, makedirs, environ, chdir
+from os import listdir, unlink, makedirs, environ, chdir, getcwd
 import zipfile
 import tarfile
 import importlib
@@ -353,8 +353,11 @@ class Recipe(object):
     archs = []
     depends = []
     library = None
+    libraries = []
     include_dir = None
     include_per_arch = False
+    pbx_frameworks = []
+    pbx_libraries = []
 
     # API available for recipes
     def download_file(self, url, filename, cwd=None):
@@ -485,6 +488,20 @@ class Recipe(object):
             if not self.archs or (arch.arch in self.archs):
                 yield arch
 
+    @property
+    def dist_libraries(self):
+        libraries = []
+        name = self.name
+        if not name.startswith("lib"):
+            name = "lib{}".format(name)
+        if self.library:
+            static_fn = join(self.ctx.dist_dir, "lib", "{}.a".format(name))
+            libraries.append(static_fn)
+        for library in self.libraries:
+            static_fn = join(self.ctx.dist_dir, "lib", basename(library))
+            libraries.append(static_fn)
+        return libraries
+
     def get_build_dir(self, arch):
         return join(self.ctx.build_dir, self.name, arch, self.archive_root)
 
@@ -499,7 +516,7 @@ class Recipe(object):
             else:
                 include_dir = join("common", self.name)
         if include_dir:
-            print("Include dir added: {}".format(include_dir))
+            #print("Include dir added: {}".format(include_dir))
             self.ctx.include_dirs.append(include_dir)
 
     @property
@@ -752,6 +769,58 @@ def ensure_dir(filename):
         makedirs(filename)
 
 
+def update_pbxproj(filename):
+    # list all the compiled recipes
+    ctx = Context()
+    pbx_libraries = []
+    pbx_frameworks = []
+    libraries = []
+    for recipe in Recipe.list_recipes():
+        key = "{}.build_all".format(recipe)
+        if key not in ctx.state:
+            continue
+        recipe = Recipe.get_recipe(recipe, ctx)
+        recipe.init_with_ctx(ctx)
+        pbx_frameworks.extend(recipe.pbx_frameworks)
+        pbx_libraries.extend(recipe.pbx_libraries)
+        libraries.extend(recipe.dist_libraries)
+
+    pbx_frameworks = list(set(pbx_frameworks))
+    pbx_libraries = list(set(pbx_libraries))
+    libraries = list(set(libraries))
+
+    print("-" * 70)
+    print("The project need to have:")
+    print("iOS Frameworks: {}".format(pbx_frameworks))
+    print("iOS Libraries: {}".format(pbx_libraries))
+    print("Libraries: {}".format(libraries))
+
+    print("-" * 70)
+    print("Analysis of {}".format(filename))
+
+    from mod_pbxproj import XcodeProject
+    project = XcodeProject.Load(filename)
+    sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
+
+    group = project.get_or_create_group("Frameworks")
+    for framework in pbx_frameworks:
+        print("Ensure {} is in the project".format(framework))
+        f_path = join(sysroot, "System", "Library", "Frameworks",
+                      "{}.framework".format(framework))
+        project.add_file_if_doesnt_exist(f_path, parent=group, tree="DEVELOPER_DIR")
+    for library in pbx_libraries:
+        print("Ensure {} is in the project".format(library))
+        f_path = join(sysroot, "usr", "lib",
+                      "{}.dylib".format(library))
+        project.add_file_if_doesnt_exist(f_path, parent=group, tree="DEVELOPER_DIR")
+    for library in libraries:
+        print("Ensure {} is in the project".format(library))
+        project.add_file_if_doesnt_exist(library, parent=group)
+    if project.modified:
+        project.backup()
+        project.save()
+
+
 if __name__ == "__main__":
     import argparse
     
@@ -770,6 +839,7 @@ Available commands:
 
 Xcode:
     create        Create a new xcode project
+    update        Update an existing xcode project (frameworks, libraries..)
 """)
             parser.add_argument("command", help="Command to run")
             args = parser.parse_args(sys.argv[1:2])
@@ -875,5 +945,43 @@ Xcode:
                 "dist_dir": ctx.dist_dir,
             }
             cookiecutter(template_dir, no_input=True, extra_context=context)
+            filename = join(
+                    getcwd(),
+                    "{}-ios".format(args.name.lower()),
+                    "{}.xcodeproj".format(args.name.lower()),
+                    "project.pbxproj")
+            update_pbxproj(filename)
+            print("--")
+            print("Project directory : {}-ios".format(
+                args.name.lower()))
+            print("XCode project     : {0}-ios/{0}.xcodeproj".format(
+                args.name.lower()))
+
+        def update(self):
+            parser = argparse.ArgumentParser(
+                    description="Update an existing xcode project")
+            parser.add_argument("filename", help="Path to your project or xcodeproj")
+            args = parser.parse_args(sys.argv[2:])
+
+
+            filename = args.filename
+            if not filename.endswith(".xcodeproj"):
+                # try to find the xcodeproj
+                from glob import glob
+                xcodeproj = glob(join(filename, "*.xcodeproj"))
+                if not xcodeproj:
+                    print("ERROR: Unable to find a xcodeproj in {}".format(filename))
+                    sys.exit(1)
+                filename = xcodeproj[0]
+
+            filename = join(filename, "project.pbxproj")
+            if not exists(filename):
+                print("ERROR: {} not found".format(filename))
+                sys.exit(1)
+
+            update_pbxproj(filename)
+            print("--")
+            print("Project {} updated".format(filename))
+
 
     ToolchainCL()

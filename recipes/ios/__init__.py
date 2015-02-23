@@ -11,6 +11,7 @@ class IosRecipe(Recipe):
     url = "src"
     library = "libios.a"
     depends = ["python"]
+    pbx_frameworks = ["MessageUI", "CoreMotion", "UIKit"]
 
     def cythonize(self, filename):
         if filename.startswith(self.build_dir):

@@ -9,6 +9,7 @@ class LibSDL2ImageRecipe(Recipe):
     library = "Xcode-iOS/build/Release-{arch.sdk}/libSDL2_image.a"
     include_dir = "SDL_image.h"
     depends = ["sdl2"]
+    pbx_frameworks = ["CoreGraphics", "MobileCoreServices"]
 
     def build_arch(self, arch):
         shprint(sh.xcodebuild,

@@ -9,6 +9,8 @@ class LibSDL2Recipe(Recipe):
     url = "https://bitbucket.org/slime73/sdl-experiments/get/{version}.tar.gz"
     library = "Xcode-iOS/SDL/build/Release-{arch.sdk}/libSDL2.a"
     include_dir = "include"
+    pbx_frameworks = ["OpenGLES", "AudioToolbox", "QuartzCore", "CoreGraphics",
+            "CoreMotion"]
 
     def build_arch(self, arch):
         shprint(sh.xcodebuild,
