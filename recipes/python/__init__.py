@@ -63,6 +63,7 @@ class PythonRecipe(Recipe):
                 "HOSTPYTHON={}".format(self.ctx.hostpython),
                 "prefix={}".format(join(self.ctx.dist_dir, "root", "python")),
                 _env=build_env)
+        self.reduce_python()
 
     def _patch_pyconfig(self):
         # patch pyconfig to remove some functionnalities
@@ -98,6 +99,39 @@ class PythonRecipe(Recipe):
         lines.append("#define HAVE_GETHOSTBYNAME 1\n")
         with open(pyconfig, "wb") as fd:
             fd.writelines(lines)
+
+    def reduce_python(self):
+        print("Reduce python")
+        oldpwd = os.getcwd()
+        try:
+            print("Remove files unlikely to be used")
+            os.chdir(join(self.ctx.dist_dir, "root", "python"))
+            sh.rm("share")
+            sh.rm("bin")
+            os.chdir(join(self.ctx.dist_dir, "root", "python", "lib"))
+            sh.rm("-rf", "pkgconfig")
+            sh.rm("libpython2.7.a")
+            os.chdir(join(self.ctx.dist_dir, "root", "python", "lib", "python2.7"))
+            sh.find(".", "-iname", "*.pyc", "-exec", "rm", "{}", ";")
+            sh.find(".", "-iname", "*.py", "-exec", "rm", "{}", ";")
+            #sh.find(".", "-iname", "test*", "-exec", "rm", "-rf", "{}", ";")
+            sh.rm("-rf", "wsgiref", "bsddb", "curses", "idlelib", "hotshot")
+            sh.rm("-rf", sh.glob("lib*"))
+
+            # now create the zip.
+            print("Create a python27.zip")
+            sh.rm("config/libpython2.7.a")
+            sh.rm("config/python.o")
+            sh.rm("config/config.c.in")
+            sh.rm("config/makesetup")
+            sh.mv("config", "..")
+            sh.mv("site-packages", "..")
+            sh.zip("-r", "../python27.zip", sh.glob("*"))
+            sh.rm("-rf", sh.glob("*"))
+            sh.mv("../config", ".")
+            sh.mv("../site-packages", ".")
+        finally:
+            os.chdir(oldpwd)
 
 
 recipe = PythonRecipe()
