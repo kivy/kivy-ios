@@ -13,19 +13,6 @@ class KivyRecipe(Recipe):
     depends = ["python", "sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios"]
     pbx_frameworks = ["OpenGLES", "Accelerate"]
 
-    def cythonize(self, filename):
-        if filename.startswith(self.build_dir):
-            filename = filename[len(self.build_dir) + 1:]
-        print("Cythonize {}".format(filename))
-        cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
-        shprint(cmd, filename)
-
-    def cythonize_build(self):
-        root_dir = join(self.build_dir, "kivy")
-        for root, dirnames, filenames in os.walk(root_dir):
-            for filename in fnmatch.filter(filenames, "*.pyx"):
-                self.cythonize(join(root, filename))
-
     def get_kivy_env(self, arch):
         build_env = arch.get_env()
         build_env["KIVYIOSROOT"] = self.ctx.root_dir
@@ -54,14 +41,6 @@ class KivyRecipe(Recipe):
         shprint(hostpython, "setup.py", "build_ext", "-g",
                 _env=build_env)
         self.biglink()
-
-    def biglink(self):
-        dirs = []
-        for root, dirnames, filenames in os.walk(self.build_dir):
-            if fnmatch.filter(filenames, "*.so.libs"):
-                dirs.append(root)
-        cmd = sh.Command(join(self.ctx.root_dir, "tools", "biglink"))
-        shprint(cmd, join(self.build_dir, "libkivy.a"), *dirs)
 
     def _patch_setup(self):
         # patch setup to remove some functionnalities

@@ -13,19 +13,6 @@ class IosRecipe(Recipe):
     depends = ["python"]
     pbx_frameworks = ["MessageUI", "CoreMotion", "UIKit"]
 
-    def cythonize(self, filename):
-        if filename.startswith(self.build_dir):
-            filename = filename[len(self.build_dir) + 1:]
-        print("Cythonize {}".format(filename))
-        cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
-        shprint(cmd, filename)
-
-    def cythonize_build(self):
-        root_dir = self.build_dir
-        for root, dirnames, filenames in os.walk(root_dir):
-            for filename in fnmatch.filter(filenames, "*.pyx"):
-                self.cythonize(join(root, filename))
-
     def get_kivy_env(self, arch):
         build_env = arch.get_env()
         build_env["KIVYIOSROOT"] = self.ctx.root_dir
@@ -42,14 +29,6 @@ class IosRecipe(Recipe):
         shprint(hostpython, "setup.py", "build_ext", "-g",
                 _env=build_env)
         self.biglink()
-
-    def biglink(self):
-        dirs = []
-        for root, dirnames, filenames in os.walk(self.build_dir):
-            if fnmatch.filter(filenames, "*.so.libs"):
-                dirs.append(root)
-        cmd = sh.Command(join(self.ctx.root_dir, "tools", "biglink"))
-        shprint(cmd, join(self.build_dir, "libios.a"), *dirs)
 
     def install(self):
         arch = list(self.filtered_archs)[0]

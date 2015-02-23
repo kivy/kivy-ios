@@ -9,13 +9,14 @@ This tool intend to replace all the previous tools/ in shell script.
 import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename
-from os import listdir, unlink, makedirs, environ, chdir, getcwd
+from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
 import zipfile
 import tarfile
 import importlib
 import io
 import json
 import shutil
+import fnmatch
 from datetime import datetime
 try:
     from urllib.request import FancyURLopener
@@ -504,6 +505,27 @@ class Recipe(object):
 
     def get_build_dir(self, arch):
         return join(self.ctx.build_dir, self.name, arch, self.archive_root)
+
+    def cythonize(self, filename):
+        if filename.startswith(self.build_dir):
+            filename = filename[len(self.build_dir) + 1:]
+        print("Cythonize {}".format(filename))
+        cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
+        shprint(cmd, filename)
+
+    def cythonize_build(self):
+        root_dir = self.build_dir
+        for root, dirnames, filenames in walk(root_dir):
+            for filename in fnmatch.filter(filenames, "*.pyx"):
+                self.cythonize(join(root, filename))
+
+    def biglink(self):
+        dirs = []
+        for root, dirnames, filenames in walk(self.build_dir):
+            if fnmatch.filter(filenames, "*.so.libs"):
+                dirs.append(root)
+        cmd = sh.Command(join(self.ctx.root_dir, "tools", "biglink"))
+        shprint(cmd, join(self.build_dir, "lib{}.a".format(self.name)), *dirs)
 
     # Public Recipe API to be subclassed if needed
 
