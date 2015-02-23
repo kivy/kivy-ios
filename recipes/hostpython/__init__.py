@@ -48,11 +48,20 @@ class HostpythonRecipe(Recipe):
         sdk_path = sh.xcrun("--sdk", "macosx", "--show-sdk-path").strip()
         build_env = self.ctx.env.copy()
         build_env["CC"] = "clang -Qunused-arguments -fcolor-diagnostics"
-        build_env["LDFLAGS"] = "-lsqlite3"
-        build_env["CFLAGS"] = "--sysroot={}".format(sdk_path)
+        build_env["LDFLAGS"] = " ".join([
+                "-lsqlite3",
+                "-lffi",
+                "-L{}".format(join(self.ctx.dist_dir, "lib"))
+                ])
+        build_env["CFLAGS"] = " ".join([
+                "--sysroot={}".format(sdk_path),
+                "-I{}".format(join(self.ctx.dist_dir, "include", "i386", "libffi"))
+                ])
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
                 "--prefix={}".format(join(self.ctx.dist_dir, "hostpython")),
+                "--disable-toolbox-glue",
+                "--without-gcc",
                 _env=build_env)
         shprint(sh.make, "-C", self.build_dir, "-j4", "python.exe", "Parser/pgen",
                 _env=build_env)
