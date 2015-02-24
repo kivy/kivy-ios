@@ -652,7 +652,7 @@ class Recipe(object):
             ensure_dir(dirname(static_fn))
             print("Lipo {} to {}".format(self.name, static_fn))
             self.make_lipo(static_fn)
-        elif self.libraries:
+        if self.libraries:
             print("Create multiple lipo for {}".format(name))
             for library in self.libraries:
                 static_fn = join(self.ctx.dist_dir, "lib", basename(library))
