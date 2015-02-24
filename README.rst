@@ -13,6 +13,13 @@ The toolchain supports:
 - iPhone Simulator (x86 and x86_64)
 - iPhone / iOS (armv7 and arm64)
 
+Theses recipes are not ported to the new toolchain yet:
+
+- plyer
+- openssl
+- openssl-link
+- pil
+
 
 Requirements
 ------------
