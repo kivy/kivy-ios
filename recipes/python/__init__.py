@@ -106,8 +106,8 @@ class PythonRecipe(Recipe):
         try:
             print("Remove files unlikely to be used")
             os.chdir(join(self.ctx.dist_dir, "root", "python"))
-            sh.rm("share")
-            sh.rm("bin")
+            sh.rm("-rf", "share")
+            sh.rm("-rf", "bin")
             os.chdir(join(self.ctx.dist_dir, "root", "python", "lib"))
             sh.rm("-rf", "pkgconfig")
             sh.rm("libpython2.7.a")
