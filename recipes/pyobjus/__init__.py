@@ -2,7 +2,6 @@ from toolchain import Recipe, shprint
 from os.path import join
 import sh
 import os
-import fnmatch
 import shutil
 
 
