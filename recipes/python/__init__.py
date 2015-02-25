@@ -11,6 +11,13 @@ class PythonRecipe(Recipe):
     library = "libpython2.7.a"
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
 
+    def init_with_ctx(self, ctx):
+        super(PythonRecipe, self).init_with_ctx(ctx)
+        self.ctx.python_ver_dir = "python2.7"
+        self.ctx.site_packages_dir = join(
+            ctx.dist_dir, "root", "python", "lib", ctx.python_ver_dir,
+            "site-packages")
+
     def prebuild_arch(self, arch):
         # common to all archs
         if  self.has_marker("patched"):

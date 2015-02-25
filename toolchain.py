@@ -485,9 +485,11 @@ class Recipe(object):
 
     @property
     def filtered_archs(self):
+        result = []
         for arch in self.ctx.archs:
             if not self.archs or (arch.arch in self.archs):
-                yield arch
+                result.append(arch)
+        return result
 
     @property
     def dist_libraries(self):
@@ -540,6 +542,13 @@ class Recipe(object):
         if include_dir:
             #print("Include dir added: {}".format(include_dir))
             self.ctx.include_dirs.append(include_dir)
+
+    def get_recipe_env(self, arch=None):
+        """Return the env specialized for the recipe
+        """
+        if arch is None:
+            arch = self.filtered_archs[0]
+        return arch.get_env()
 
     @property
     def archive_root(self):
@@ -636,7 +645,7 @@ class Recipe(object):
 
     @cache_execution
     def build_all(self):
-        filtered_archs = list(self.filtered_archs)
+        filtered_archs = self.filtered_archs
         print("Build {} for {} (filtered)".format(
             self.name,
             ", ".join([x.arch for x in filtered_archs])))
@@ -700,7 +709,7 @@ class Recipe(object):
         if self.include_per_arch:
             archs = self.ctx.archs
         else:
-            archs = [list(self.filtered_archs)[0]]
+            archs = self.filtered_archs[0]
 
         include_dirs = self.include_dir
         if not isinstance(include_dirs, (list, tuple)):
@@ -753,6 +762,77 @@ class Recipe(object):
         recipe = mod.recipe
         recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
         return recipe
+
+
+class PythonRecipe(Recipe):
+    @cache_execution
+    def install(self):
+        self.install_python_package()
+        self.reduce_python_package()
+
+    def install_python_package(self, name=None, env=None, is_dir=True):
+        """Automate the installation of a Python package into the target
+        site-packages.
+
+        It will works with the first filtered_archs, and the name of the recipe.
+        """
+        arch = self.filtered_archs[0]
+        if name is None:
+            name = self.name
+        if env is None:
+            env = self.get_recipe_env(arch)
+        print("Install {} into the site-packages".format(name))
+        build_dir = self.get_build_dir(arch.arch)
+        chdir(build_dir)
+        hostpython = sh.Command(self.ctx.hostpython)
+        iosbuild = join(build_dir, "iosbuild")
+        shprint(hostpython, "setup.py", "install", "-O2",
+                "--prefix", iosbuild,
+                _env=env)
+        dest_dir = join(self.ctx.site_packages_dir, name)
+        if is_dir:
+            if exists(dest_dir):
+                shutil.rmtree(dest_dir)
+            func = shutil.copytree
+        else:
+            func = shutil.copy
+        func(
+            join(iosbuild, "lib",
+                 self.ctx.python_ver_dir, "site-packages", name),
+            dest_dir)
+
+    def reduce_python_package(self):
+        """Feel free to remove things you don't want in the final
+        site-packages.
+        """
+        pass
+
+
+class CythonRecipe(PythonRecipe):
+    pre_build_ext = False
+
+    def get_recipe_env(self, arch):
+        env = super(CythonRecipe, self).get_recipe_env(arch)
+        env["KIVYIOSROOT"] = self.ctx.root_dir
+        env["IOSSDKROOT"] = arch.sysroot
+        env["LDSHARED"] = join(self.ctx.root_dir, "tools", "liblink")
+        env["ARM_LD"] = env["LD"]
+        env["ARCH"] = arch.arch
+        return env
+
+    def build_arch(self, arch):
+        build_env = self.get_recipe_env(arch)
+        hostpython = sh.Command(self.ctx.hostpython)
+        if self.pre_build_ext:
+            try:
+                shprint(hostpython, "setup.py", "build_ext", "-g",
+                        _env=build_env)
+            except:
+                pass
+        self.cythonize_build()
+        shprint(hostpython, "setup.py", "build_ext", "-g",
+                _env=build_env)
+        self.biglink()
 
 
 def build_recipes(names, ctx):
