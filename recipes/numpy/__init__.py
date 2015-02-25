@@ -1,11 +1,10 @@
-from toolchain import Recipe, shprint
-from os.path import join, exists
+from toolchain import CythonRecipe
+from os.path import join
 import sh
-import os
 import shutil
 
 
-class NumpyRecipe(Recipe):
+class NumpyRecipe(CythonRecipe):
     version = "1.9.1"
     url = "http://pypi.python.org/packages/source/n/numpy/numpy-{version}.tar.gz"
     library = "libnumpy.a"
@@ -19,49 +18,24 @@ class NumpyRecipe(Recipe):
         self.apply_patch("numpy-1.9.1.patch")
         self.set_marker("patched")
 
-    def get_kivy_env(self, arch):
-        build_env = arch.get_env()
-        build_env["KIVYIOSROOT"] = self.ctx.root_dir
-        build_env["LDSHARED"] = join(self.ctx.root_dir, "tools", "liblink")
-        build_env["ARM_LD"] = build_env["LD"]
+    def get_recipe_env(self, arch):
+        env = super(NumpyRecipe, self).get_recipe_env(arch)
         # CC must have the CFLAGS with arm arch, because numpy tries first to
         # compile and execute an empty C to see if the compiler works. This is
         # obviously not working when crosscompiling
-        build_env["CC"] = "{} {}".format(
-                build_env["CC"],
-                build_env["CFLAGS"])
-        build_env["ARCH"] = arch.arch
+        env["CC"] = "{} {}".format(env["CC"], env["CFLAGS"])
         # Numpy configuration. Don't try to compile anything related to it,
         # we're going to use the Accelerate framework
-        build_env["NPYCONFIG"] = "env BLAS=None LAPACK=None ATLAS=None"
-        return build_env
+        env["NPYCONFIG"] = "env BLAS=None LAPACK=None ATLAS=None"
+        return env
 
     def build_arch(self, arch):
-        build_env = self.get_kivy_env(arch)
-        hostpython = sh.Command(self.ctx.hostpython)
-        shprint(hostpython, "setup.py", "build_ext", "-g", "-v",
-                _env=build_env)
+        super(NumpyRecipe, self).build_arch(arch)
         sh.cp(sh.glob(join(self.build_dir, "build", "temp.*", "libnpy*.a")),
               self.build_dir)
-        self.biglink()
 
-    def install(self):
-        arch = list(self.filtered_archs)[0]
-        build_dir = self.get_build_dir(arch.arch)
-        os.chdir(build_dir)
-        hostpython = sh.Command(self.ctx.hostpython)
-        build_env = self.get_kivy_env(arch)
-        shprint(hostpython, "setup.py", "install", "-O2",
-                "--prefix", join(build_dir, "iosbuild"),
-                _env=build_env)
-        dest_dir = join(self.ctx.dist_dir, "root", "python", "lib", "python2.7",
-                "site-packages", "numpy")
-        if exists(dest_dir):
-            shutil.rmtree(dest_dir)
-        shutil.copytree(
-            join(build_dir, "iosbuild", "lib",
-                 "python2.7", "site-packages", "numpy"),
-            dest_dir)
+    def reduce_python_package(self):
+        dest_dir = join(self.ctx.site_packages_dir, "numpy")
         shutil.rmtree(join(dest_dir, "core", "include"))
         shutil.rmtree(join(dest_dir, "core", "tests"))
         shutil.rmtree(join(dest_dir, "distutils"))
