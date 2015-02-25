@@ -21,6 +21,7 @@ class HostpythonRecipe(Recipe):
     def prebuild_arch(self, arch):
         if  self.has_marker("patched"):
             return
+        self.copy_file("_scproxy.py", "Lib/_scproxy.py")
         self.apply_patch("ssize-t-max.patch")
         self.apply_patch("dynload.patch")
         self.apply_patch("static-_sqlite3.patch")
