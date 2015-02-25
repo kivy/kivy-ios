@@ -19,6 +19,7 @@ Theses recipes are not ported to the new toolchain yet:
 - openssl
 - openssl-link
 - pil
+- lxml
 
 
 Requirements
