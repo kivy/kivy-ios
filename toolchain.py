@@ -709,7 +709,7 @@ class Recipe(object):
         if self.include_per_arch:
             archs = self.ctx.archs
         else:
-            archs = self.filtered_archs[0]
+            archs = self.filtered_archs[:1]
 
         include_dirs = self.include_dir
         if not isinstance(include_dirs, (list, tuple)):
