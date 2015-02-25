@@ -1,12 +1,8 @@
-from toolchain import Recipe, shprint
-from os.path import join, exists
-import sh
-import os
-import fnmatch
-import shutil
+from toolchain import CythonRecipe
+from os.path import join
 
 
-class KivyRecipe(Recipe):
+class KivyRecipe(CythonRecipe):
     version = "ios-poly-arch"
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
