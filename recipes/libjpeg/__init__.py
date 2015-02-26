@@ -2,26 +2,17 @@ from toolchain import Recipe, shprint
 from os.path import join, exists
 import sh
 import os
-import fnmatch
-import shutil
 
 
 class JpegRecipe(Recipe):
     version = "v9a"
-    url = "http://www.ijg.org/files/jpegsrc.{}.tar.gz".format(version)
-    library = "libjpeg.la"
+    url = "http://www.ijg.org/files/jpegsrc.{version}.tar.gz"
+    library = ".libs/libjpeg.a"
     include_dir = [
         ("jpeglib.h", ""),
-        ("cdjpeg.h", ""),
         ("jconfig.h", ""),
-        ("jdct.h", ""),
         ("jerror.h", ""),
-        ("jinclude.h", ""),
-        ("jmemsys.h", ""),
         ("jmorecfg.h", ""),
-        ("jpegint.h", ""),
-        ("jversion.h", ""),
-        ("transupp.h", "")
         ]
     include_per_arch = True
 
@@ -36,8 +27,7 @@ class JpegRecipe(Recipe):
                 "LDFLAGS={}".format(build_env["LDFLAGS"]),
                 "--prefix=/",
                 "--host={}".format(arch.triple),
-                "--enable-static=yes",
-                "--enable-shared=no")
+                "--disable-shared")
         shprint(sh.make, "clean")
         shprint(sh.make)
 
