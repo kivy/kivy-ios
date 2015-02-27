@@ -508,27 +508,6 @@ class Recipe(object):
     def get_build_dir(self, arch):
         return join(self.ctx.build_dir, self.name, arch, self.archive_root)
 
-    def cythonize(self, filename):
-        if filename.startswith(self.build_dir):
-            filename = filename[len(self.build_dir) + 1:]
-        print("Cythonize {}".format(filename))
-        cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
-        shprint(cmd, filename)
-
-    def cythonize_build(self):
-        root_dir = self.build_dir
-        for root, dirnames, filenames in walk(root_dir):
-            for filename in fnmatch.filter(filenames, "*.pyx"):
-                self.cythonize(join(root, filename))
-
-    def biglink(self):
-        dirs = []
-        for root, dirnames, filenames in walk(self.build_dir):
-            if fnmatch.filter(filenames, "*.so.libs"):
-                dirs.append(root)
-        cmd = sh.Command(join(self.ctx.root_dir, "tools", "biglink"))
-        shprint(cmd, join(self.build_dir, "lib{}.a".format(self.name)), *dirs)
-
     # Public Recipe API to be subclassed if needed
 
     def init_with_ctx(self, ctx):
@@ -810,6 +789,30 @@ class PythonRecipe(Recipe):
 
 class CythonRecipe(PythonRecipe):
     pre_build_ext = False
+    cythonize = True
+
+    def cythonize_file(self, filename):
+        if filename.startswith(self.build_dir):
+            filename = filename[len(self.build_dir) + 1:]
+        print("Cythonize {}".format(filename))
+        cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
+        shprint(cmd, filename)
+
+    def cythonize_build(self):
+        if not self.cythonize:
+            return
+        root_dir = self.build_dir
+        for root, dirnames, filenames in walk(root_dir):
+            for filename in fnmatch.filter(filenames, "*.pyx"):
+                self.cythonize_file(join(root, filename))
+
+    def biglink(self):
+        dirs = []
+        for root, dirnames, filenames in walk(self.build_dir):
+            if fnmatch.filter(filenames, "*.so.libs"):
+                dirs.append(root)
+        cmd = sh.Command(join(self.ctx.root_dir, "tools", "biglink"))
+        shprint(cmd, join(self.build_dir, "lib{}.a".format(self.name)), *dirs)
 
     def get_recipe_env(self, arch):
         env = super(CythonRecipe, self).get_recipe_env(arch)
