@@ -357,6 +357,8 @@ class Recipe(object):
     libraries = []
     include_dir = None
     include_per_arch = False
+    frameworks = []
+    sources = []
     pbx_frameworks = []
     pbx_libraries = []
 
@@ -653,6 +655,10 @@ class Recipe(object):
                 self.make_lipo(static_fn, library)
         print("Install include files for {}".format(self.name))
         self.install_include()
+        print("Install frameworks for {}".format(self.name))
+        self.install_frameworks()
+        print("Install sources for {}".format(self.name))
+        self.install_sources()
         print("Install {}".format(self.name))
         self.install()
 
@@ -684,6 +690,36 @@ class Recipe(object):
                 "-arch", arch.arch,
                 join(self.get_build_dir(arch.arch), library_fn)]
         shprint(sh.lipo, "-create", "-output", filename, *args)
+
+    @cache_execution
+    def install_frameworks(self):
+        if not self.frameworks:
+            return
+        arch = self.filtered_archs[0]
+        build_dir = self.get_build_dir(arch.arch)
+        for framework in self.frameworks:
+            print(" - Install {}".format(framework))
+            src = join(build_dir, framework)
+            dest = join(self.ctx.dist_dir, "frameworks", framework)
+            ensure_dir(dirname(dest))
+            if exists(dest):
+                shutil.rmtree(dest)
+            shutil.copytree(src, dest)
+
+    @cache_execution
+    def install_sources(self):
+        if not self.sources:
+            return
+        arch = self.filtered_archs[0]
+        build_dir = self.get_build_dir(arch.arch)
+        for source in self.sources:
+            print(" - Install {}".format(source))
+            src = join(build_dir, source)
+            dest = join(self.ctx.dist_dir, "sources", self.name)
+            ensure_dir(dirname(dest))
+            if exists(dest):
+                shutil.rmtree(dest)
+            shutil.copytree(src, dest)
 
     @cache_execution
     def install_include(self):
@@ -883,7 +919,9 @@ def update_pbxproj(filename):
     ctx = Context()
     pbx_libraries = []
     pbx_frameworks = []
+    frameworks = []
     libraries = []
+    sources = []
     for recipe in Recipe.list_recipes():
         key = "{}.build_all".format(recipe)
         if key not in ctx.state:
@@ -893,6 +931,9 @@ def update_pbxproj(filename):
         pbx_frameworks.extend(recipe.pbx_frameworks)
         pbx_libraries.extend(recipe.pbx_libraries)
         libraries.extend(recipe.dist_libraries)
+        frameworks.extend(recipe.frameworks)
+        if recipe.sources:
+            sources.append(recipe.name)
 
     pbx_frameworks = list(set(pbx_frameworks))
     pbx_libraries = list(set(pbx_libraries))
@@ -902,7 +943,9 @@ def update_pbxproj(filename):
     print("The project need to have:")
     print("iOS Frameworks: {}".format(pbx_frameworks))
     print("iOS Libraries: {}".format(pbx_libraries))
+    print("iOS local Frameworks: {}".format(frameworks))
     print("Libraries: {}".format(libraries))
+    print("Sources to link: {}".format(sources))
 
     print("-" * 70)
     print("Analysis of {}".format(filename))
@@ -912,10 +955,16 @@ def update_pbxproj(filename):
     sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
 
     group = project.get_or_create_group("Frameworks")
+    g_classes = project.get_or_create_group("Classes")
     for framework in pbx_frameworks:
-        print("Ensure {} is in the project".format(framework))
-        f_path = join(sysroot, "System", "Library", "Frameworks",
-                      "{}.framework".format(framework))
+        framework_name = "{}.framework".format(framework)
+        if framework_name in frameworks:
+            print("Ensure {} is in the project (local)".format(framework))
+            f_path = join(ctx.dist_dir, "frameworks", framework_name)
+        else:
+            print("Ensure {} is in the project (system)".format(framework))
+            f_path = join(sysroot, "System", "Library", "Frameworks",
+                          "{}.framework".format(framework))
         project.add_file_if_doesnt_exist(f_path, parent=group, tree="DEVELOPER_DIR")
     for library in pbx_libraries:
         print("Ensure {} is in the project".format(library))
@@ -925,6 +974,12 @@ def update_pbxproj(filename):
     for library in libraries:
         print("Ensure {} is in the project".format(library))
         project.add_file_if_doesnt_exist(library, parent=group)
+    for name in sources:
+        print("Ensure {} sources are used".format(name))
+        fn = join(ctx.dist_dir, "sources", name)
+        project.add_folder(fn, parent=g_classes)
+
+
     if project.modified:
         project.backup()
         project.save()
