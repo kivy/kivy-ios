@@ -365,6 +365,8 @@ class Recipe(object):
         """
         Download an `url` to `outfn`
         """
+        if not url:
+            return
         def report_hook(index, blksize, size):
             if size <= 0:
                 progression = '{0} bytes'.format(index * blksize)
@@ -387,6 +389,8 @@ class Recipe(object):
         """
         Extract the `filename` into the directory `cwd`.
         """
+        if not filename:
+            return
         print("Extract {} into {}".format(filename, cwd))
         if filename.endswith(".tgz") or filename.endswith(".tar.gz"):
             shprint(sh.tar, "-C", cwd, "-xvzf", filename)

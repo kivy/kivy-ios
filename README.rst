@@ -15,10 +15,9 @@ The toolchain supports:
 
 Theses recipes are not ported to the new toolchain yet:
 
-- plyer
 - openssl
 - openssl-link
-- pil
+- lxml
 
 
 Requirements
