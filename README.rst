@@ -25,7 +25,10 @@ Requirements
 
 Currently, the toolchain requires few tools to let you compile. You need:
 
-#. Xcode 6, with iOS SDK installed / command line tools.
+#. Xcode 6, with iOS SDK installed / command line tools::
+
+    xcode-select --install
+
 #. Using brew, you can install dependencies::
 
     brew install autoconf automake libtool pkg-config
@@ -94,3 +97,8 @@ Then click on `Play`, and enjoy.
     the `<title>-ios/YourApp` directory. Don't make changes in the -ios
     directory directly.
 
+FAQ
+---
+
+Fatal error: "stdio.h" file not found
+    You need to install the Command line tools: `xcode-select --install`
