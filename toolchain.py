@@ -321,7 +321,7 @@ class Context(object):
             print("Missing requirement: cython is not installed")
 
         # check the basic tools
-        for tool in ("pkg-config", "autoconf", "automake", "libtool", "hg"):
+        for tool in ("pkg-config", "autoconf", "automake", "libtool"):
             if not sh.which(tool):
                 print("Missing requirement: {} is not installed".format(
                     tool))
