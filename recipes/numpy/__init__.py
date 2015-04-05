@@ -11,6 +11,7 @@ class NumpyRecipe(CythonRecipe):
     libraries = ["libnpymath.a", "libnpysort.a"]
     depends = ["python"]
     pbx_frameworks = ["Accelerate"]
+    cythonize = False
 
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
