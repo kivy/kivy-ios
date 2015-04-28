@@ -52,7 +52,7 @@ class FFMpegRecipe(Recipe):
                 "s/%define HAVE_CLOSESOCKET 1//g",
                 "config.asm")
         shprint(sh.make, "clean", _env=build_env)
-        shprint(sh.make, "-j3", _env=build_env)
+        shprint(sh.make, "-j4", _env=build_env)
         shprint(sh.make, "install")
 
 
