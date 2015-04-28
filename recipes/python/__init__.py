@@ -40,7 +40,7 @@ class PythonRecipe(Recipe):
                 "CC={}".format(build_env["CC"]),
                 "LD={}".format(build_env["LD"]),
                 "CFLAGS={}".format(build_env["CFLAGS"]),
-                "LDFLAGS={}".format(build_env["LDFLAGS"]),
+                "LDFLAGS={} -undefined dynamic_lookup".format(build_env["LDFLAGS"]),
                 "--without-pymalloc",
                 "--disable-toolbox-glue",
                 "--host={}-apple-darwin".format(arch),

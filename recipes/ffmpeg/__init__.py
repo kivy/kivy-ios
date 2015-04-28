@@ -39,18 +39,6 @@ class FFMpegRecipe(Recipe):
                 "--extra-ldflags={}".format(build_env["LDFLAGS"]),
                 *options,
                 _env=build_env)
-        shprint(sh.sed,
-                "-i.bak",
-                "s/HAVE_CLOSESOCKET=yes//g",
-                "config.mak")
-        shprint(sh.sed,
-                "-i.bak",
-                "s/#define HAVE_CLOSESOCKET 1//g",
-                "config.h")
-        shprint(sh.sed,
-                "-i.bak",
-                "s/%define HAVE_CLOSESOCKET 1//g",
-                "config.asm")
         shprint(sh.make, "clean", _env=build_env)
         shprint(sh.make, "-j3", _env=build_env)
         shprint(sh.make, "install")
