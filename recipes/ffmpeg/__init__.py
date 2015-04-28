@@ -4,7 +4,7 @@ import sh
 
 
 class FFMpegRecipe(Recipe):
-    version = "2.5.4"
+    version = "2.6.2"
     url = "http://www.ffmpeg.org/releases/ffmpeg-{version}.tar.bz2"
     include_per_arch = True
     include_dir = "dist/include"
