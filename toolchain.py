@@ -789,6 +789,14 @@ class PythonRecipe(Recipe):
         self.install_python_package()
         self.reduce_python_package()
 
+    def remove_junk(self, d):
+        exts = ["pyc", "py", "so.lib", "so.o", "sh"]
+        for root, dirnames, filenames in walk(d):
+            for fn in filenames:
+                ext = fn.rsplit(".", 1)[-1]
+                if ext in exts:
+                    unlink(join(root, fn))
+
     def install_python_package(self, name=None, env=None, is_dir=True):
         """Automate the installation of a Python package into the target
         site-packages.
@@ -809,6 +817,7 @@ class PythonRecipe(Recipe):
                 "--prefix", iosbuild,
                 _env=env)
         dest_dir = join(self.ctx.site_packages_dir, name)
+        self.remove_junk(ios_build)
         if is_dir:
             if exists(dest_dir):
                 shutil.rmtree(dest_dir)

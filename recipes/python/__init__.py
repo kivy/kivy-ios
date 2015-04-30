@@ -131,6 +131,7 @@ class PythonRecipe(Recipe):
             sh.rm("config/python.o")
             sh.rm("config/config.c.in")
             sh.rm("config/makesetup")
+            sh.rm("config/install-sh")
             sh.mv("config", "..")
             sh.mv("site-packages", "..")
             sh.zip("-r", "../python27.zip", sh.glob("*"))
