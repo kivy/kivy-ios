@@ -817,7 +817,7 @@ class PythonRecipe(Recipe):
                 "--prefix", iosbuild,
                 _env=env)
         dest_dir = join(self.ctx.site_packages_dir, name)
-        self.remove_junk(ios_build)
+        self.remove_junk(iosbuild)
         if is_dir:
             if exists(dest_dir):
                 shutil.rmtree(dest_dir)
