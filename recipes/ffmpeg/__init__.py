@@ -4,7 +4,7 @@ import sh
 
 
 class FFMpegRecipe(Recipe):
-    version = "2.5.4"
+    version = "2.6.2"
     url = "http://www.ffmpeg.org/releases/ffmpeg-{version}.tar.bz2"
     include_per_arch = True
     include_dir = "dist/include"
@@ -52,7 +52,7 @@ class FFMpegRecipe(Recipe):
                 "s/%define HAVE_CLOSESOCKET 1//g",
                 "config.asm")
         shprint(sh.make, "clean", _env=build_env)
-        shprint(sh.make, "-j3", _env=build_env)
+        shprint(sh.make, "-j4", _env=build_env)
         shprint(sh.make, "install")
 
 
