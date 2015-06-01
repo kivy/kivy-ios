@@ -16,7 +16,7 @@ class LibSDL2ImageRecipe(Recipe):
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
                 "HEADER_SEARCH_PATHS={}".format(
-                    join(self.ctx.include_dir, "common", "SDL2")),
+                    join(self.ctx.include_dir, "common", "sdl2")),
                 "-sdk", arch.sdk,
                 "-project", "Xcode-iOS/SDL_image.xcodeproj",
                 "-target", "libSDL_image",
