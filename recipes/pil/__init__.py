@@ -6,8 +6,9 @@ import fnmatch
 
 
 class PillowRecipe(Recipe):
-    version = "2.7.0"
-    url = "https://github.com/python-pillow/Pillow/archive/{version}.zip"
+    version = "2.8.2"
+    url = "https://pypi.python.org/packages/source/P/Pillow/Pillow-{version}.tar.gz"
+    #url = "https://github.com/python-pillow/Pillow/archive/{version}.tar.gz"
     library = "libpil.a"
     depends = ["hostpython", "host_setuptools", "pkgresources", "freetype", "libjpeg", "python", "ios"]
     pbx_libraries = ["libz", "libbz2"]
@@ -48,8 +49,8 @@ class PillowRecipe(Recipe):
         build_env = self.get_pil_env(arch)
         dest_dir = join(self.ctx.dist_dir, "root", "python")
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
-        shprint(hostpython, "setup.py", "install", "-O2",
-                "--prefix", dest_dir,
+        shprint(hostpython, "-m", "easy_install",
+                "--prefix", dest_dir, "-Z", "./",
                 _env=build_env)
 
     def biglink(self):
