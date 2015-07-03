@@ -3,8 +3,8 @@ from os.path import join
 
 
 class KivyRecipe(CythonRecipe):
-    version = "1.9.0"
-    url = "https://github.com/rnixx/kivy/archive/{version}.zip"
+    version = "1.9.1"
+    url = "https://github.com/rnixx/kivy/archive/master.zip"
     library = "libkivy.a"
     depends = ["python", "sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios"]
     pbx_frameworks = ["OpenGLES", "Accelerate"]
