@@ -9,12 +9,9 @@ import os
 class PycryptoRecipe(CythonRecipe):
     version = "2.6.1"
     url = "https://ftp.dlitz.net/pub/dlitz/crypto/pycrypto/pycrypto-{version}.tar.gz"
-    #url = 'src'
     depends = ["python", "openssl"]
-    #cythonize = False
     include_per_arch = True
     library="libpycrypto.a"
-    #pre_build_ext = True
 
 
     def build_arch(self, arch):
@@ -30,12 +27,8 @@ class PycryptoRecipe(CythonRecipe):
                 "--host={}".format(arch),
                 "ac_cv_func_malloc_0_nonnull=yes",
                 "ac_cv_func_realloc_0_nonnull=yes",
-                #"enable-static=yes",
-                #"enable-shared=no"
                )     
         hostpython = sh.Command(self.ctx.hostpython)
-        #shprint(hostpython, "setup.py", "build_ext", "--inplace", "-v",
-        #        _env=build_env)
         super(PycryptoRecipe, self).build_arch(arch)
 
     def install(self):
@@ -48,9 +41,7 @@ class PycryptoRecipe(CythonRecipe):
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
         shprint(hostpython, "-m", "easy_install",
                 "--prefix", dest_dir, "-Z", "./",
-                _env=build_env)
-        #print('installing to {}').format(dest_dir)
-        #shprint(hostpython, "setup.py", "install", "--home={}".format(dest_dir + '/lib/python2.7'), _env=build_env)
-        #shprint(hostpython, "-m", "pip", "install", "--root", dest_dir, "./")
+               _env=build_env)
 
 recipe = PycryptoRecipe()
+

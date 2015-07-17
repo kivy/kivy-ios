@@ -424,14 +424,15 @@ class Recipe(object):
             print("Unrecognized extension for {}".format(filename))
             raise Exception()
 
-    def apply_patch(self, filename):
+    def apply_patch(self, filename, target_dir=''):
         """
         Apply a patch from the current recipe directory into the current
         build directory.
         """
+        target_dir = target_dir or self.build_dir
         print("Apply patch {}".format(filename))
         filename = join(self.recipe_dir, filename)
-        sh.patch("-t", "-d", self.build_dir, "-p1", "-i", filename)
+        sh.patch("-t", "-d", target_dir, "-p1", "-i", filename)
 
     def copy_file(self, filename, dest):
         print("Copy {} to {}".format(filename, dest))
