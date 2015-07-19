@@ -39,9 +39,7 @@ class PycryptoRecipe(CythonRecipe):
         build_env = arch.get_env()
         dest_dir = join(self.ctx.dist_dir, "root", "python")
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
-        shprint(hostpython, "-m", "easy_install",
-                "--prefix", dest_dir, "-Z", "./",
-               _env=build_env)
+        shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
 recipe = PycryptoRecipe()
 
