@@ -51,3 +51,5 @@ pyexpat expat/xmlparse.c expat/xmlrole.c expat/xmltok.c pyexpat.c -I$(srcdir)/Mo
 
 # Future (used by numpy)
 future_builtins future_builtins.c
+
+_ssl _ssl.c -DUSE_SSL -lssl -lcrypto
