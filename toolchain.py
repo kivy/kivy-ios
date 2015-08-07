@@ -164,7 +164,6 @@ class Arch(object):
             "--sysroot", self.sysroot,
             "-L{}/{}".format(self.ctx.dist_dir, "lib"),
             "-lsqlite3",
-            "-undefined", "dynamic_lookup",
             self.version_min
         ])
         return env
