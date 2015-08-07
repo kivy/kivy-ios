@@ -556,11 +556,12 @@ class Recipe(object):
         """Check if there is a variable name to specify a custom version /
         directory to use instead of the current url.
         """
-        d = environ.get("{}_DIR".format(self.name.upper()))
+        envname = "{}_DIR".format(self.name.upper())
+        d = environ.get(envname)
         if not d:
             return
         if not exists(d):
-            return
+            raise ValueError("Invalid path passed into {}".format(envname))
         return d
 
     @cache_execution
