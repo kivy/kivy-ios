@@ -23,6 +23,7 @@ datetime datetimemodule.c       # date/time type
 _bisect _bisectmodule.c # Bisection algorithms
 fcntl fcntlmodule.c     # fcntl(2) and ioctl(2)
 select selectmodule.c   # select(2); not on ancient System V
+_csv _csv.c
 _socket socketmodule.c
 _md5 md5module.c md5.c
 _sha shamodule.c
