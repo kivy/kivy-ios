@@ -30,6 +30,8 @@ class PythonRecipe(Recipe):
         self.apply_patch("xcompile.patch")
         self.apply_patch("setuppath.patch")
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
+        if "openssl.build_all" in self.ctx.state:
+             self.append_file("ModulesSetup.openssl", 'Modules/Setup.local')
 
         self.set_marker("patched")
 
