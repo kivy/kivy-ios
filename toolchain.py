@@ -401,9 +401,7 @@ class Recipe(object):
             shprint(sh.tar, "-C", cwd, "-xvjf", filename)
 
         elif filename.endswith(".zip"):
-            zf = zipfile.ZipFile(filename)
-            zf.extractall(path=cwd)
-            zf.close()
+            shprint(sh.unzip, "-d", cwd, filename)
 
         else:
             print("Error: cannot extract, unreconized extension for {}".format(
