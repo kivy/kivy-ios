@@ -1,19 +1,19 @@
 Kivy for IOS
 ============
 
-This toolchain is designed to compile the necessary library for iOS to run your
-application, and manage the creation of the Xcode project.
+This toolchain is designed to compile the necessary libraries for iOS to run
+your application and manage the creation of the Xcode project.
 
-Currently, we do not provide any binary distribution of this toolchain, but we
-aim to do it. So you do need to compile it at least one time before being about
-to create your Xcode project.
+Currently, we do not provide any binary distributions of this toolchain, but we
+aim to. Until then, you do need to compile it at least once before creating
+your Xcode project.
 
 The toolchain supports:
 
 - iPhone Simulator (x86 and x86_64)
 - iPhone / iOS (armv7 and arm64)
 
-Theses recipes are not ported to the new toolchain yet:
+These recipes are not ported to the new toolchain yet:
 
 - openssl
 - openssl-link
@@ -23,13 +23,13 @@ Theses recipes are not ported to the new toolchain yet:
 Requirements
 ------------
 
-Currently, the toolchain requires few tools to let you compile. You need:
+Currently, the toolchain requires a few tools for compilation. You will need:
 
-#. Xcode 6, with iOS SDK installed / command line tools::
+#. Xcode 6 or above, with an iOS SDK and command line tools installed::
 
     xcode-select --install
 
-#. Using brew, you can install dependencies::
+#. Using brew, you can install the following dependencies::
 
     brew install autoconf automake libtool pkg-config
     brew link libtool
@@ -48,7 +48,7 @@ we call a `recipe` to compile it. For example, Python, libffi, SDL2, SDL_image,
 freetype... all the dependencies, compilation and packaging instructions are
 contained in a `recipe`.
 
-You can list the available recipes and the version with::
+You can list the available recipes and their versions with::
 
     $ ./toolchain.py recipes
     freetype     2.5.5
@@ -63,29 +63,30 @@ You can list the available recipes and the version with::
     sdl2_mixer   2.0.0
     sdl2_ttf     2.0.12
 
-Then, starts the compilation with::
+Then, start the compilation with::
 
     $ ./toolchain.py build kivy
 
-The Kivy recipe depends on severals one, like all the sdl* and python. sdl2_ttf
-depends on freetype, etc. You can think as: it will compile everything
+The Kivy recipe depends on several others, like the sdl* and python recipes.
+These may in turn depend on others e.g. sdl2_ttf depends on freetype, etc.
+You can think of it as follows: the kivy recipe will compile everything
 necessary for a minimal working version of Kivy.
 
-Don't grab a coffee, just do diner. Compiling all the things the first time, 4x
-(remember, 4 archs, 2 per platforms), it will take time. (todo: provide a way
-to not compile for the simulator.).
+Don't grab a coffee, just do diner. Compiling all the libraries for the first
+time, 4x over (remember, 4 archs, 2 per platforms), will take time. (TODO:
+provide a way to not compile for the simulator.).
 
 Create the Xcode project
 ------------------------
 
-The `toolchain.py` can create for you the initial Xcode project::
+The `toolchain.py` can create the initial Xcode project for you::
 
     $ # ./toolchain.py create <title> <app_directory>
     $ ./toolchain.py create Touchtracer ~/code/kivy/examples/demo/touchtracer
 
 Your app directory must contain a main.py. A directory named `<title>-ios`
 will be created, with an Xcode project in it.
-You can open the Xcode project::
+You can open the Xcode project using::
 
     $ open touchtracer-ios/touchtracer.xcodeproj
 
