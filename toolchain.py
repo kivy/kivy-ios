@@ -1011,6 +1011,7 @@ Available commands:
 Xcode:
     create        Create a new xcode project
     update        Update an existing xcode project (frameworks, libraries..)
+    launchimage   Create Launch images for your xcode project
 """)
             parser.add_argument("command", help="Command to run")
             args = parser.parse_args(sys.argv[1:2])
@@ -1152,6 +1153,38 @@ Xcode:
             update_pbxproj(filename)
             print("--")
             print("Project {} updated".format(filename))
+
+        def launchimage(self):
+            parser = argparse.ArgumentParser(
+                    description="Generate LaunchImage for your project")
+            parser.add_argument("filename", help="Path to your project or xcodeproj")
+            parser.add_argument("image", help="Path to your initial presplash.png")
+            args = parser.parse_args(sys.argv[2:])
+
+            if not exists(args.image):
+                print("ERROR: image path does not exists.")
+                return
+
+            filename = args.filename
+            if not filename.endswith(".xcodeproj"):
+                # try to find the xcodeproj
+                from glob import glob
+                xcodeproj = glob(join(filename, "*.xcodeproj"))
+                if not xcodeproj:
+                    print("ERROR: Unable to find a xcodeproj in {}".format(filename))
+                    sys.exit(1)
+                filename = xcodeproj[0]
+
+            project_name = filename.split("/")[-1].replace(".xcodeproj", "")
+            images_xcassets = realpath(join(filename, "..", project_name,
+                "Images.xcassets"))
+            if not exists(images_xcassets):
+                print("WARNING: Images.xcassets not found, creating it.")
+                makedirs(images_xcassets)
+            print("Images.xcassets located at {}".format(images_xcassets))
+
+            from xcassets import launchimage
+            launchimage(images_xcassets, args.image)
 
 
     ToolchainCL()
