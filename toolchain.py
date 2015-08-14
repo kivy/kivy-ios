@@ -1134,7 +1134,6 @@ Xcode:
             parser.add_argument("filename", help="Path to your project or xcodeproj")
             args = parser.parse_args(sys.argv[2:])
 
-
             filename = args.filename
             if not filename.endswith(".xcodeproj"):
                 # try to find the xcodeproj
