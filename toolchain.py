@@ -523,7 +523,7 @@ class Recipe(object):
             else:
                 include_dir = join("common", self.name)
         if include_dir:
-            #print("Include dir added: {}".format(include_dir))
+            print("Include dir added: {}".format(include_dir))
             self.ctx.include_dirs.append(include_dir)
 
     def get_recipe_env(self, arch=None):
@@ -902,15 +902,17 @@ def build_recipes(names, ctx):
             print("ERROR: No recipe named {}".format(name))
             sys.exit(1)
         graph.add(name, name)
-        print("Loaded recipe {} (depends of {})".format(name, recipe.depends))
+        print("Loaded recipe {} (depends of {}, optional are {})".format(name,
+            recipe.depends, recipe.optional_depends))
         for depend in recipe.depends:
             graph.add(name, depend)
             recipe_to_load += recipe.depends
         for depend in recipe.optional_depends:
             # in case of compilation after the initial one, take in account
             # of the already compiled recipes
-            key = "{}.build_all".format(name)
+            key = "{}.build_all".format(depend)
             if key in ctx.state:
+                recipe_to_load.append(name)
                 graph.add(name, depend)
             else:
                 graph.add_optional(name, depend)
