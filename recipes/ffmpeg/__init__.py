@@ -27,12 +27,12 @@ class FFMpegRecipe(Recipe):
             "--disable-doc",
             "--enable-pic",
             "--enable-avresample")
-        options = (
+        options = [
             "--disable-everything",
             "--enable-parser=h264,aac",
             "--enable-decoder=h263,h264,aac",
             "--enable-filter=aresample,resample,crop",
-            "--enable-protocol=file,http,https,tls_openssl",
+            "--enable-protocol=file,http",
             "--enable-demuxer=sdp",
             "--enable-pic",
             "--enable-small",
@@ -41,12 +41,6 @@ class FFMpegRecipe(Recipe):
             "--disable-shared",
             # libpostproc is GPL: https://ffmpeg.org/pipermail/ffmpeg-user/2012-February/005162.html
             "--enable-gpl",
-            # enable openssl if needed
-            # if [ "X$BUILD_openssl" != "X" ]; then
-            #    FLAGS="--enable-openssl --enable-nonfree"
-            #    FLAGS="--enable-protocol=https,tls_openssl"
-            # fi
-
             # disable some unused algo
             # note: "golomb" are the one used in our video test, so don't use --disable-golomb
             # note: and for aac decoding: "rdft", "mdct", and "fft" are needed
@@ -61,7 +55,13 @@ class FFMpegRecipe(Recipe):
             "--disable-programs",
             "--disable-doc",
             "--enable-pic",
-            "--enable-avresample")
+            "--enable-avresample"]
+
+        if "openssl.build_all" in self.ctx.state:
+            options += [
+                "--enable-openssl",
+                "--enable-nonfree",
+                "--enable-protocol=https,tls_openssl"]
 
         build_env = arch.get_env()
         build_env["VERBOSE"] = "1"
