@@ -8,6 +8,7 @@ class FFMpegRecipe(Recipe):
     url = "http://www.ffmpeg.org/releases/ffmpeg-{version}.tar.bz2"
     include_per_arch = True
     include_dir = "dist/include"
+    optional_depends = ["openssl"]
     libraries = [
         "libavcodec/libavcodec.a",
         "libavdevice/libavdevice.a",

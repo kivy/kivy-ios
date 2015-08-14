@@ -1,7 +1,6 @@
 from toolchain import Recipe, shprint
-from os.path import join, exists
+from os.path import join
 import sh
-import os
 
 
 arch_mapper = {'i386': 'darwin-i386-cc',
