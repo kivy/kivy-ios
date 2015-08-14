@@ -1155,10 +1155,18 @@ Xcode:
             print("Project {} updated".format(filename))
 
         def launchimage(self):
+            import xcassets
+            self._xcassets("LaunchImage", xcassets.launchimage)
+
+        def icon(self):
+            import xcassets
+            self._xcassets("Icon", xcassets.icon)
+
+        def _xcassets(self, title, command):
             parser = argparse.ArgumentParser(
-                    description="Generate LaunchImage for your project")
+                    description="Generate {} for your project".format(title))
             parser.add_argument("filename", help="Path to your project or xcodeproj")
-            parser.add_argument("image", help="Path to your initial presplash.png")
+            parser.add_argument("image", help="Path to your initial {}.png".format(title.lower()))
             args = parser.parse_args(sys.argv[2:])
 
             if not exists(args.image):
@@ -1183,8 +1191,6 @@ Xcode:
                 makedirs(images_xcassets)
             print("Images.xcassets located at {}".format(images_xcassets))
 
-            from xcassets import launchimage
-            launchimage(images_xcassets, args.image)
-
+            command(images_xcassets, args.image)
 
     ToolchainCL()
