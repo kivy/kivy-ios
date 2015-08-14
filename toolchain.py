@@ -352,6 +352,7 @@ class Recipe(object):
     url = None
     archs = []
     depends = []
+    optional_depends = []
     library = None
     libraries = []
     include_dir = None
@@ -905,6 +906,14 @@ def build_recipes(names, ctx):
         for depend in recipe.depends:
             graph.add(name, depend)
             recipe_to_load += recipe.depends
+        for depend in recipe.optional_depends:
+            # in case of compilation after the initial one, take in account
+            # of the already compiled recipes
+            key = "{}.build_all".format(name)
+            if key in ctx.state:
+                graph.add(name, depend)
+            else:
+                graph.add_optional(name, depend)
         recipe_loaded.append(name)
 
     build_order = list(graph.find_order())
