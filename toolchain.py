@@ -9,7 +9,7 @@ This tool intend to replace all the previous tools/ in shell script.
 import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename
-from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
+from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk, remove
 import zipfile
 import tarfile
 import importlib
@@ -410,8 +410,14 @@ class Recipe(object):
 
     def get_archive_rootdir(self, filename):
         if filename.endswith(".tgz") or filename.endswith(".tar.gz") or \
-            filename.endswith(".tbz2") or filename.endswith(".tar.bz2"):
-            archive = tarfile.open(filename)
+                filename.endswith(".tbz2") or filename.endswith(".tar.bz2"):
+            try:
+                archive = tarfile.open(filename)
+            except tarfile.ReadError:
+                print('Error extracting the archive {0}'.format(filename))
+                print('This is usually caused by a corrupt download. The file'
+                      ' will be removed and re-downloaded on the next run.')
+                remove(filename)
             root = archive.next().path.split("/")
             return root[0]
         elif filename.endswith(".zip"):
