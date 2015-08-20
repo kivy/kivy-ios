@@ -1043,12 +1043,22 @@ Xcode:
             parser = argparse.ArgumentParser(
                     description="Build the toolchain")
             parser.add_argument("recipe", nargs="+", help="Recipe to compile")
-            parser.add_argument("--arch", help="Restrict compilation to this arch")
+            parser.add_argument("--arch", action="append",
+                                help="Restrict compilation to this arch")
             args = parser.parse_args(sys.argv[2:])
 
             ctx = Context()
             if args.arch:
-                archs = args.arch.split()
+                if len(args.arch) == 1:
+                    archs = args.arch[0].split()
+                else:
+                    archs = args.arch
+                available_archs = [arch.arch for arch in ctx.archs]
+                for arch in archs[:]:
+                    if arch not in available_archs:
+                        print("ERROR: Architecture {} invalid".format(arch))
+                        archs.remove(arch)
+                        continue
                 ctx.archs = [arch for arch in ctx.archs if arch.arch in archs]
                 print("Architectures restricted to: {}".format(archs))
             build_recipes(args.recipe, ctx)
