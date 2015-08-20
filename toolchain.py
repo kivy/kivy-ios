@@ -1029,6 +1029,7 @@ Xcode:
     create        Create a new xcode project
     update        Update an existing xcode project (frameworks, libraries..)
     launchimage   Create Launch images for your xcode project
+    icon          Create Icons for your xcode project
 """)
             parser.add_argument("command", help="Command to run")
             args = parser.parse_args(sys.argv[1:2])
