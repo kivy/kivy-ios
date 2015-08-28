@@ -128,12 +128,15 @@ appicon_json = {
       "filename" : "Icon152.png",
       "scale" : "2x"
     },
-    {
-      "size" : "120x120",
-      "idiom" : "car",
-      "filename" : "Icon120.png",
-      "scale" : "1x"
-    },
+    # If activated, we got a submission error:
+    # "Error ITMS-9000: Invalid Image Path - No image found at the path
+    # referenced under key 'CFBundleIcons': 'AppIcon120x120'"
+    # {
+    #   "size" : "120x120",
+    #   "idiom" : "car",
+    #   "filename" : "Icon120.png",
+    #   "scale" : "1x"
+    # },
     {
       "size" : "24x24",
       "idiom" : "watch",
