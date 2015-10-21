@@ -20,13 +20,6 @@ class FFMpegRecipe(Recipe):
         "libswscale/libswscale.a"]
 
     def build_arch(self, arch):
-        options = (
-            "--enable-cross-compile",
-            "--disable-debug",
-            "--disable-programs",
-            "--disable-doc",
-            "--enable-pic",
-            "--enable-avresample")
         options = [
             "--disable-everything",
             "--enable-parser=h264,aac",
