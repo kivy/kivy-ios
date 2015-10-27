@@ -161,7 +161,6 @@ class Arch(object):
         ] + include_dirs)
         env["LDFLAGS"] = " ".join([
             "-arch", self.arch,
-            "-ios_version_min", "7.0",
             "--sysroot", self.sysroot,
             "-L{}/{}".format(self.ctx.dist_dir, "lib"),
             "-lsqlite3",
