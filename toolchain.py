@@ -161,6 +161,7 @@ class Arch(object):
         ] + include_dirs)
         env["LDFLAGS"] = " ".join([
             "-arch", self.arch,
+            "-ios_version_min", "7.0",
             "--sysroot", self.sysroot,
             "-L{}/{}".format(self.ctx.dist_dir, "lib"),
             "-lsqlite3",
@@ -174,7 +175,7 @@ class ArchSimulator(Arch):
     sdk = "iphonesimulator"
     arch = "i386"
     triple = "i386-apple-darwin11"
-    version_min = "-miphoneos-version-min=6.0.0"
+    version_min = "-miphoneos-version-min=7.0"
     sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
 
 
@@ -190,7 +191,7 @@ class ArchIOS(Arch):
     sdk = "iphoneos"
     arch = "armv7"
     triple = "arm-apple-darwin11"
-    version_min = "-miphoneos-version-min=6.0.0"
+    version_min = "-miphoneos-version-min=7.0"
     sysroot = sh.xcrun("--sdk", "iphoneos", "--show-sdk-path").strip()
 
 
