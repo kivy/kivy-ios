@@ -8,6 +8,7 @@ class PythonRecipe(Recipe):
     version = "2.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
     depends = ["hostpython", "libffi", ]
+    #depends = ["libffi", ]
     optional_depends = ["openssl"]
     library = "libpython2.7.a"
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
@@ -61,6 +62,10 @@ class PythonRecipe(Recipe):
                 "CROSS_COMPILE_TARGET=yes",
                 "HOSTPYTHON={}".format(self.ctx.hostpython),
                 "HOSTPGEN={}".format(self.ctx.hostpgen))
+#        shprint(sh.make, "-j4",
+#                "CROSS_COMPILE_TARGET=yes",
+#                "HOSTPYTHON={}".format("/usr/bin/python2.7"),
+#                "HOSTPGEN={}".format(self.ctx.hostpgen))
 
     def install(self):
         arch = list(self.filtered_archs)[0]
@@ -74,6 +79,13 @@ class PythonRecipe(Recipe):
                 "HOSTPYTHON={}".format(self.ctx.hostpython),
                 "prefix={}".format(join(self.ctx.dist_dir, "root", "python")),
                 _env=build_env)
+#        shprint(sh.make,
+#                "-C", build_dir,
+#                "install",
+#                "CROSS_COMPILE_TARGET=yes",
+#                "HOSTPYTHON={}".format("/usr/bin/python2.7"),
+#                "prefix={}".format(join(self.ctx.dist_dir, "root", "python")),
+#                _env=build_env)
         self.reduce_python()
 
     def _patch_pyconfig(self):

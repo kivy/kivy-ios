@@ -13,6 +13,7 @@ class HostpythonRecipe(Recipe):
 
     def init_with_ctx(self, ctx):
         super(HostpythonRecipe, self).init_with_ctx(ctx)
+        #self.ctx.hostpython = "\"" + join("PYTHONHOME=",self.ctx.dist_dir, "hostpython") + "  " + join(self.ctx.dist_dir, "hostpython", "bin", "python") + "\""
         self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython", "bin", "python")
         self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython", "bin", "pgen")
         print("Global: hostpython located at {}".format(self.ctx.hostpython))

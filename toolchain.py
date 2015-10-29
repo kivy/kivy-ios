@@ -816,7 +816,9 @@ class PythonRecipe(Recipe):
         print("Install {} into the site-packages".format(name))
         build_dir = self.get_build_dir(arch.arch)
         chdir(build_dir)
+        env["PYTHONHOME"] = join(self.ctx.dist_dir, "hostpython")
         hostpython = sh.Command(self.ctx.hostpython)
+        #hostpython = sh.Command("/usr/bin/python2.7")
         iosbuild = join(build_dir, "iosbuild")
         shprint(hostpython, "setup.py", "install", "-O2",
                 "--prefix", iosbuild,
@@ -879,7 +881,9 @@ class CythonRecipe(PythonRecipe):
 
     def build_arch(self, arch):
         build_env = self.get_recipe_env(arch)
+        build_env["PYTHONHOME"] = join(self.ctx.dist_dir, "hostpython")
         hostpython = sh.Command(self.ctx.hostpython)
+        #hostpython = sh.Command("/usr/bin/python2.7")
         if self.pre_build_ext:
             try:
                 shprint(hostpython, "setup.py", "build_ext", "-g",
