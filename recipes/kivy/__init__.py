@@ -1,16 +1,6 @@
 from toolchain import CythonRecipe
 from os.path import join
 
-from sys import stdout
-import sh
-
-def shprint(command, *args, **kwargs):
-    kwargs["_iter"] = True
-    kwargs["_out_bufsize"] = 1
-    kwargs["_err_to_out"] = True
-    for line in command(*args, **kwargs):
-        stdout.write(line)
-
 
 class KivyRecipe(CythonRecipe):
     version = "1.9.0"
@@ -31,21 +21,7 @@ class KivyRecipe(CythonRecipe):
 
     def build_arch(self, arch):
         self._patch_setup()
-        build_env = self.get_recipe_env(arch)
-        build_env["PYTHONHOME"] = join(self.ctx.dist_dir, "hostpython")
-        #print 'build_env=', build_env
-        hostpython = sh.Command(self.ctx.hostpython)
-        #hostpython = sh.Command("/usr/bin/python2.7")
-        if self.pre_build_ext:
-            try:
-                shprint(hostpython, "setup.py", "build_ext", "-g",
-                        _env=build_env)
-            except:
-                pass
-        self.cythonize_build()
-        shprint(hostpython, "setup.py", "build_ext", "-g",
-                _env=build_env)
-        self.biglink()
+        super(KivyRecipe, self).build_arch(arch)
 
     def _patch_setup(self):
         # patch setup to remove some functionnalities

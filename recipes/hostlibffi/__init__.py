@@ -37,7 +37,7 @@ class LibffiRecipe(Recipe):
         shprint(sh.xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
-                "-sdk", "macosx10.11",
+                "-sdk", "macosx",
                 "install", "installhdrs",
                 "-project", "libffi.xcodeproj",
                 "-target", "libffi-Mac",

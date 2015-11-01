@@ -174,7 +174,7 @@ class ArchSimulator(Arch):
     sdk = "iphonesimulator"
     arch = "i386"
     triple = "i386-apple-darwin11"
-    version_min = "-miphoneos-version-min=7.0"
+    version_min = "-miphoneos-version-min=6.0.0"
     sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
 
 
@@ -190,7 +190,7 @@ class ArchIOS(Arch):
     sdk = "iphoneos"
     arch = "armv7"
     triple = "arm-apple-darwin11"
-    version_min = "-miphoneos-version-min=7.0"
+    version_min = "-miphoneos-version-min=6.0.0"
     sysroot = sh.xcrun("--sdk", "iphoneos", "--show-sdk-path").strip()
 
 
@@ -816,9 +816,7 @@ class PythonRecipe(Recipe):
         print("Install {} into the site-packages".format(name))
         build_dir = self.get_build_dir(arch.arch)
         chdir(build_dir)
-        env["PYTHONHOME"] = join(self.ctx.dist_dir, "hostpython")
         hostpython = sh.Command(self.ctx.hostpython)
-        #hostpython = sh.Command("/usr/bin/python2.7")
         iosbuild = join(build_dir, "iosbuild")
         shprint(hostpython, "setup.py", "install", "-O2",
                 "--prefix", iosbuild,
@@ -881,9 +879,7 @@ class CythonRecipe(PythonRecipe):
 
     def build_arch(self, arch):
         build_env = self.get_recipe_env(arch)
-        build_env["PYTHONHOME"] = join(self.ctx.dist_dir, "hostpython")
         hostpython = sh.Command(self.ctx.hostpython)
-        #hostpython = sh.Command("/usr/bin/python2.7")
         if self.pre_build_ext:
             try:
                 shprint(hostpython, "setup.py", "build_ext", "-g",

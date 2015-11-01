@@ -13,7 +13,6 @@ class HostpythonRecipe(Recipe):
 
     def init_with_ctx(self, ctx):
         super(HostpythonRecipe, self).init_with_ctx(ctx)
-        #self.ctx.hostpython = "\"" + join("PYTHONHOME=",self.ctx.dist_dir, "hostpython") + "  " + join(self.ctx.dist_dir, "hostpython", "bin", "python") + "\""
         self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython", "bin", "python")
         self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython", "bin", "pgen")
         print("Global: hostpython located at {}".format(self.ctx.hostpython))
@@ -26,7 +25,6 @@ class HostpythonRecipe(Recipe):
         self.apply_patch("ssize-t-max.patch")
         self.apply_patch("dynload.patch")
         self.apply_patch("static-_sqlite3.patch")
-        self.apply_patch("ldfix.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.set_marker("patched")
 
@@ -52,8 +50,10 @@ class HostpythonRecipe(Recipe):
         build_env = self.ctx.env.copy()
         build_env["CC"] = "clang -Qunused-arguments -fcolor-diagnostics"
         build_env["LDFLAGS"] = " ".join([
-                "-L{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "lib")),
-                "-lsqlite3"])
+                "-lsqlite3",
+                "-lffi",
+                "-L{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "lib"))
+                ])
         build_env["CFLAGS"] = " ".join([
                 "--sysroot={}".format(sdk_path),
                 "-I{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "include"))
@@ -62,7 +62,6 @@ class HostpythonRecipe(Recipe):
         shprint(configure,
                 "--prefix={}".format(join(self.ctx.dist_dir, "hostpython")),
                 "--disable-toolbox-glue",
-                "--with-system-ffi",
                 "--without-gcc",
                 _env=build_env)
         shprint(sh.make, "-C", self.build_dir, "-j4", "python.exe", "Parser/pgen",
