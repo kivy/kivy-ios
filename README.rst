@@ -1,4 +1,4 @@
-Kivy for IOS
+Kivy for iOS
 ============
 
 This toolchain is designed to compile the necessary libraries for iOS to run
@@ -103,3 +103,42 @@ FAQ
 
 Fatal error: "stdio.h" file not found
     You need to install the Command line tools: `xcode-select --install`
+
+Support
+-------
+
+If you need assistance, you can ask for help on our mailing list:
+
+* User Group : https://groups.google.com/group/kivy-users
+* Email      : kivy-users@googlegroups.com
+
+We also have an IRC channel:
+
+* Server  : irc.freenode.net
+* Port    : 6667, 6697 (SSL only)
+* Channel : #kivy
+
+Contributing
+------------
+
+We love pull requests and discussing novel ideas. Check out our
+`contribution guide <http://kivy.org/docs/contribute.html>`_ and
+feel free to improve Kivy for iOS.
+
+The following mailing list and IRC channel are used exclusively for
+discussions about developing the Kivy framework and its sister projects:
+
+* Dev Group : https://groups.google.com/group/kivy-dev
+* Email     : kivy-dev@googlegroups.com
+
+IRC channel:
+
+* Server  : irc.freenode.net
+* Port    : 6667, 6697 (SSL only)
+* Channel : #kivy-dev
+
+License
+-------
+
+Kivy for iOS is released under the terms of the MIT License. Please refer to the
+LICENSE file.
