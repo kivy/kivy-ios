@@ -1,0 +1,11 @@
+--- ../src/src/hash_SHA2_template.c	2015-07-15 15:25:59.000000000 +0530
++++ src/hash_SHA2_template.c	2015-07-17 15:35:13.000000000 +0530
+@@ -87,7 +87,7 @@
+  * return 1 on success
+  * return 0 if the length overflows
+  */
+-static int add_length(hash_state *hs, sha2_word_t inc) {
++int add_length(hash_state *hs, sha2_word_t inc) {
+     sha2_word_t overflow_detector;
+     overflow_detector = hs->length_lower;
+     hs->length_lower += inc;
