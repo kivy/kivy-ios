@@ -8,8 +8,8 @@ import shutil
 class HostpythonRecipe(Recipe):
     version = "2.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
-    depends = ["libffi", ]
-    archs = ["i386"]
+    depends = ["hostlibffi", ]
+    archs = ["x86_64"]
 
     def init_with_ctx(self, ctx):
         super(HostpythonRecipe, self).init_with_ctx(ctx)
@@ -45,18 +45,18 @@ class HostpythonRecipe(Recipe):
         with open(makefile_fn, "w") as fd:
             fd.writelines(lines)
 
-    def build_i386(self):
+    def build_x86_64(self):
         sdk_path = sh.xcrun("--sdk", "macosx", "--show-sdk-path").strip()
         build_env = self.ctx.env.copy()
         build_env["CC"] = "clang -Qunused-arguments -fcolor-diagnostics"
         build_env["LDFLAGS"] = " ".join([
                 "-lsqlite3",
                 "-lffi",
-                "-L{}".format(join(self.ctx.dist_dir, "lib"))
+                "-L{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "lib"))
                 ])
         build_env["CFLAGS"] = " ".join([
                 "--sysroot={}".format(sdk_path),
-                "-I{}".format(join(self.ctx.dist_dir, "include", "i386", "libffi"))
+                "-I{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "include"))
                 ])
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
