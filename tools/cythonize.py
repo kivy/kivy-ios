@@ -14,8 +14,12 @@ def resolve_cython():
             if not os.path.exists(path):
                 continue
             if executable in os.listdir(path):
-                cython = os.path.join(path, executable)
-                return
+                # make user path to cython is exist
+                # and cython is accessible from Popen
+                cython_path = os.path.join(path, executable)
+                if os.path.exists(cython_path):
+                    cython = os.path.join(path, executable)
+                    return
 
 def do(fn):
     print('cythonize:', fn)
@@ -27,6 +31,8 @@ def do(fn):
     package = '_'.join(parts[:-1])
 
     # cythonize
+    # make sure cython is not None
+    assert cython != None, 'Path to cython not found'
     subprocess.Popen([cython, fn], env=os.environ).communicate()
 
     if not package:
