@@ -413,13 +413,14 @@ class Recipe(object):
                 filename.endswith(".tbz2") or filename.endswith(".tar.bz2"):
             try:
                 archive = tarfile.open(filename)
+                root = archive.next().path.split("/")
+                return root[0]
             except tarfile.ReadError:
                 print('Error extracting the archive {0}'.format(filename))
                 print('This is usually caused by a corrupt download. The file'
                       ' will be removed and re-downloaded on the next run.')
                 remove(filename)
-            root = archive.next().path.split("/")
-            return root[0]
+                
         elif filename.endswith(".zip"):
             with zipfile.ZipFile(filename) as zf:
                 return dirname(zf.namelist()[0])
