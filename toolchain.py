@@ -418,6 +418,8 @@ class Recipe(object):
                 print('This is usually caused by a corrupt download. The file'
                       ' will be removed and re-downloaded on the next run.')
                 remove(filename)
+                return
+
             root = archive.next().path.split("/")
             return root[0]
         elif filename.endswith(".zip"):
