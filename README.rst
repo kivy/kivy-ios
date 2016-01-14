@@ -15,8 +15,6 @@ The toolchain supports:
 
 These recipes are not ported to the new toolchain yet:
 
-- openssl
-- openssl-link
 - lxml
 
 
@@ -56,6 +54,7 @@ You can list the available recipes and their versions with::
     ios          master
     kivy         ios-poly-arch
     libffi       3.2.1
+    openssl      1.0.2e
     pyobjus      master
     python       2.7.1
     sdl2         iOS-improvements
