@@ -66,6 +66,10 @@ Then, start the compilation with::
 
     $ ./toolchain.py build kivy
 
+You can build recipes at the same time by adding them as parameters::
+
+    $ ./toolchain.py build openssl kivy
+
 The Kivy recipe depends on several others, like the sdl* and python recipes.
 These may in turn depend on others e.g. sdl2_ttf depends on freetype, etc.
 You can think of it as follows: the kivy recipe will compile everything
