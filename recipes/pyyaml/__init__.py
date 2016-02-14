@@ -1,11 +1,10 @@
 # pure-python package, this can be removed when we'll support any python package
+import os
+import sh
 from toolchain import PythonRecipe, shprint
-from os.path import join
-import sh, os
 
 class PyYamlRecipe(PythonRecipe):
     version = "3.11"
-    # url = "https://github.com/mitsuhiko/click/archive/{version}.zip"
     url = "https://pypi.python.org/packages/source/P/PyYAML/PyYAML-{version}.tar.gz"
     depends = ["python"]
 
@@ -15,8 +14,8 @@ class PyYamlRecipe(PythonRecipe):
         os.chdir(build_dir)
         hostpython = sh.Command(self.ctx.hostpython)
         build_env = arch.get_env()
-        dest_dir = join(self.ctx.dist_dir, "root", "python")
-        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
+        dest_dir = os.path.join(self.ctx.dist_dir, "root", "python")
+        build_env['PYTHONPATH'] = os.path.join(dest_dir, 'lib', 'python2.7', 'site-packages')
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
 recipe = PyYamlRecipe()
