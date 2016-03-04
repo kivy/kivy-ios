@@ -1,0 +1,141 @@
+diff -u libffi-3.2.1/libffi.xcodeproj/project.pbxproj libffi-3.2.1-orig/libffi.xcodeproj/project.pbxproj
+--- libffi-3.2.1/libffi.xcodeproj/project.pbxproj	2015-10-26 18:06:27.000000000 -0400
++++ libffi-3.2.1-orig/libffi.xcodeproj/project.pbxproj	2014-11-08 07:47:24.000000000 -0500
+@@ -7,10 +7,10 @@
+ 	objects = {
+ 
+ /* Begin PBXBuildFile section */
+-		DBFA714A187F1D8600A76262 /* ffi.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA713E187F1D8600A76262 /* ffi.h */; settings = {ATTRIBUTES = (Public, ); }; };
+-		DBFA714B187F1D8600A76262 /* ffi_common.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA713F187F1D8600A76262 /* ffi_common.h */; settings = {ATTRIBUTES = (Public, ); }; };
+-		DBFA714C187F1D8600A76262 /* fficonfig.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7140187F1D8600A76262 /* fficonfig.h */; settings = {ATTRIBUTES = (Private, ); }; };
+-		DBFA714D187F1D8600A76262 /* ffitarget.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7141187F1D8600A76262 /* ffitarget.h */; settings = {ATTRIBUTES = (Public, ); }; };
++		DBFA714A187F1D8600A76262 /* ffi.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA713E187F1D8600A76262 /* ffi.h */; };
++		DBFA714B187F1D8600A76262 /* ffi_common.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA713F187F1D8600A76262 /* ffi_common.h */; };
++		DBFA714C187F1D8600A76262 /* fficonfig.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7140187F1D8600A76262 /* fficonfig.h */; };
++		DBFA714D187F1D8600A76262 /* ffitarget.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7141187F1D8600A76262 /* ffitarget.h */; };
+ 		DBFA714E187F1D8600A76262 /* closures.c in Sources */ = {isa = PBXBuildFile; fileRef = DBFA7143187F1D8600A76262 /* closures.c */; };
+ 		DBFA714F187F1D8600A76262 /* closures.c in Sources */ = {isa = PBXBuildFile; fileRef = DBFA7143187F1D8600A76262 /* closures.c */; };
+ 		DBFA7156187F1D8600A76262 /* prep_cif.c in Sources */ = {isa = PBXBuildFile; fileRef = DBFA7147187F1D8600A76262 /* prep_cif.c */; };
+@@ -28,12 +28,12 @@
+ 		DBFA717D187F1D9B00A76262 /* darwin_i386.S in Sources */ = {isa = PBXBuildFile; fileRef = DBFA7174187F1D9B00A76262 /* darwin_i386.S */; };
+ 		DBFA717E187F1D9B00A76262 /* ffi64_x86_64.c in Sources */ = {isa = PBXBuildFile; fileRef = DBFA7175187F1D9B00A76262 /* ffi64_x86_64.c */; };
+ 		DBFA717F187F1D9B00A76262 /* ffi_i386.c in Sources */ = {isa = PBXBuildFile; fileRef = DBFA7176187F1D9B00A76262 /* ffi_i386.c */; };
+-		DBFA718E187F1DA100A76262 /* ffi_i386.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7182187F1DA100A76262 /* ffi_i386.h */; settings = {ATTRIBUTES = (Private, ); }; };
+-		DBFA718F187F1DA100A76262 /* ffi_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7183187F1DA100A76262 /* ffi_x86_64.h */; settings = {ATTRIBUTES = (Private, ); }; };
+-		DBFA7190187F1DA100A76262 /* fficonfig_i386.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7184187F1DA100A76262 /* fficonfig_i386.h */; settings = {ATTRIBUTES = (Private, ); }; };
+-		DBFA7191187F1DA100A76262 /* fficonfig_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7185187F1DA100A76262 /* fficonfig_x86_64.h */; settings = {ATTRIBUTES = (Private, ); }; };
+-		DBFA7192187F1DA100A76262 /* ffitarget_i386.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7186187F1DA100A76262 /* ffitarget_i386.h */; settings = {ATTRIBUTES = (Private, ); }; };
+-		DBFA7193187F1DA100A76262 /* ffitarget_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7187187F1DA100A76262 /* ffitarget_x86_64.h */; settings = {ATTRIBUTES = (Private, ); }; };
++		DBFA718E187F1DA100A76262 /* ffi_i386.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7182187F1DA100A76262 /* ffi_i386.h */; };
++		DBFA718F187F1DA100A76262 /* ffi_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7183187F1DA100A76262 /* ffi_x86_64.h */; };
++		DBFA7190187F1DA100A76262 /* fficonfig_i386.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7184187F1DA100A76262 /* fficonfig_i386.h */; };
++		DBFA7191187F1DA100A76262 /* fficonfig_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7185187F1DA100A76262 /* fficonfig_x86_64.h */; };
++		DBFA7192187F1DA100A76262 /* ffitarget_i386.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7186187F1DA100A76262 /* ffitarget_i386.h */; };
++		DBFA7193187F1DA100A76262 /* ffitarget_x86_64.h in Headers */ = {isa = PBXBuildFile; fileRef = DBFA7187187F1DA100A76262 /* ffitarget_x86_64.h */; };
+ 		DBFA7194187F1DA100A76262 /* darwin64_x86_64.S in Sources */ = {isa = PBXBuildFile; fileRef = DBFA718A187F1DA100A76262 /* darwin64_x86_64.S */; };
+ 		DBFA7195187F1DA100A76262 /* darwin_i386.S in Sources */ = {isa = PBXBuildFile; fileRef = DBFA718B187F1DA100A76262 /* darwin_i386.S */; };
+ 		DBFA7196187F1DA100A76262 /* ffi64_x86_64.c in Sources */ = {isa = PBXBuildFile; fileRef = DBFA718C187F1DA100A76262 /* ffi64_x86_64.c */; };
+@@ -123,7 +123,7 @@
+ 				DBFA713D187F1D8600A76262 /* include */,
+ 				DBFA7142187F1D8600A76262 /* src */,
+ 			);
+-			path = darwin_common;
++			path = "darwin_common";
+ 			sourceTree = "<group>";
+ 		};
+ 		DBFA713D187F1D8600A76262 /* include */ = {
+@@ -155,7 +155,7 @@
+ 				DBFA715D187F1D9B00A76262 /* include */,
+ 				DBFA716A187F1D9B00A76262 /* src */,
+ 			);
+-			path = darwin_ios;
++			path = "darwin_ios";
+ 			sourceTree = "<group>";
+ 		};
+ 		DBFA715D187F1D9B00A76262 /* include */ = {
+@@ -223,7 +223,7 @@
+ 				DBFA7181187F1DA100A76262 /* include */,
+ 				DBFA7188187F1DA100A76262 /* src */,
+ 			);
+-			path = darwin_osx;
++			path = "darwin_osx";
+ 			sourceTree = "<group>";
+ 		};
+ 		DBFA7181187F1DA100A76262 /* include */ = {
+@@ -265,16 +265,16 @@
+ 			isa = PBXHeadersBuildPhase;
+ 			buildActionMask = 2147483647;
+ 			files = (
+-				DBFA714A187F1D8600A76262 /* ffi.h in Headers */,
++				DBFA714C187F1D8600A76262 /* fficonfig.h in Headers */,
+ 				DBFA714D187F1D8600A76262 /* ffitarget.h in Headers */,
+-				DBFA714B187F1D8600A76262 /* ffi_common.h in Headers */,
++				DBFA714A187F1D8600A76262 /* ffi.h in Headers */,
+ 				DBFA718F187F1DA100A76262 /* ffi_x86_64.h in Headers */,
+-				DBFA718E187F1DA100A76262 /* ffi_i386.h in Headers */,
+-				DBFA7192187F1DA100A76262 /* ffitarget_i386.h in Headers */,
+-				DBFA7193187F1DA100A76262 /* ffitarget_x86_64.h in Headers */,
+-				DBFA714C187F1D8600A76262 /* fficonfig.h in Headers */,
+ 				DBFA7191187F1DA100A76262 /* fficonfig_x86_64.h in Headers */,
++				DBFA718E187F1DA100A76262 /* ffi_i386.h in Headers */,
+ 				DBFA7190187F1DA100A76262 /* fficonfig_i386.h in Headers */,
++				DBFA714B187F1D8600A76262 /* ffi_common.h in Headers */,
++				DBFA7193187F1DA100A76262 /* ffitarget_x86_64.h in Headers */,
++				DBFA7192187F1DA100A76262 /* ffitarget_i386.h in Headers */,
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+ 		};
+@@ -414,7 +414,7 @@
+ 			buildSettings = {
+ 				HEADER_SEARCH_PATHS = (
+ 					"$(inherited)",
+-					darwin_common/include,
++					"darwin_common/include",
+ 				);
+ 				ONLY_ACTIVE_ARCH = YES;
+ 			};
+@@ -425,7 +425,7 @@
+ 			buildSettings = {
+ 				HEADER_SEARCH_PATHS = (
+ 					"$(inherited)",
+-					darwin_common/include,
++					"darwin_common/include",
+ 				);
+ 			};
+ 			name = Release;
+@@ -465,7 +465,7 @@
+ 				GCC_WARN_UNUSED_VARIABLE = YES;
+ 				HEADER_SEARCH_PATHS = (
+ 					"$(inherited)",
+-					darwin_ios/include,
++					"darwin_ios/include",
+ 				);
+ 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+ 				"IPHONEOS_DEPLOYMENT_TARGET[arch=arm64]" = 7.0;
+@@ -505,7 +505,7 @@
+ 				GCC_WARN_UNUSED_VARIABLE = YES;
+ 				HEADER_SEARCH_PATHS = (
+ 					"$(inherited)",
+-					darwin_ios/include,
++					"darwin_ios/include",
+ 				);
+ 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+ 				"IPHONEOS_DEPLOYMENT_TARGET[arch=arm64]" = 7.0;
+@@ -552,7 +552,7 @@
+ 				GCC_WARN_UNUSED_VARIABLE = YES;
+ 				HEADER_SEARCH_PATHS = (
+ 					"$(inherited)",
+-					darwin_osx/include,
++					"darwin_osx/include",
+ 				);
+ 				MACOSX_DEPLOYMENT_TARGET = 10.6;
+ 				ONLY_ACTIVE_ARCH = YES;
+@@ -592,7 +592,7 @@
+ 				GCC_WARN_UNUSED_VARIABLE = YES;
+ 				HEADER_SEARCH_PATHS = (
+ 					"$(inherited)",
+-					darwin_osx/include,
++					"darwin_osx/include",
+ 				);
+ 				MACOSX_DEPLOYMENT_TARGET = 10.6;
+ 				OTHER_LDFLAGS = "-Wl,-no_compact_unwind";

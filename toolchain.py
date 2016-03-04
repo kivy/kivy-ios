@@ -9,7 +9,7 @@ This tool intend to replace all the previous tools/ in shell script.
 import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename
-from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
+from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk, remove
 import zipfile
 import tarfile
 import importlib
@@ -164,7 +164,6 @@ class Arch(object):
             "--sysroot", self.sysroot,
             "-L{}/{}".format(self.ctx.dist_dir, "lib"),
             "-lsqlite3",
-            "-undefined", "dynamic_lookup",
             self.version_min
         ])
         return env
@@ -353,6 +352,7 @@ class Recipe(object):
     url = None
     archs = []
     depends = []
+    optional_depends = []
     library = None
     libraries = []
     include_dir = None
@@ -401,9 +401,7 @@ class Recipe(object):
             shprint(sh.tar, "-C", cwd, "-xvjf", filename)
 
         elif filename.endswith(".zip"):
-            zf = zipfile.ZipFile(filename)
-            zf.extractall(path=cwd)
-            zf.close()
+            shprint(sh.unzip, "-d", cwd, filename)
 
         else:
             print("Error: cannot extract, unreconized extension for {}".format(
@@ -412,8 +410,16 @@ class Recipe(object):
 
     def get_archive_rootdir(self, filename):
         if filename.endswith(".tgz") or filename.endswith(".tar.gz") or \
-            filename.endswith(".tbz2") or filename.endswith(".tar.bz2"):
-            archive = tarfile.open(filename)
+                filename.endswith(".tbz2") or filename.endswith(".tar.bz2"):
+            try:
+                archive = tarfile.open(filename)
+            except tarfile.ReadError:
+                print('Error extracting the archive {0}'.format(filename))
+                print('This is usually caused by a corrupt download. The file'
+                      ' will be removed and re-downloaded on the next run.')
+                remove(filename)
+                return
+
             root = archive.next().path.split("/")
             return root[0]
         elif filename.endswith(".zip"):
@@ -424,14 +430,15 @@ class Recipe(object):
             print("Unrecognized extension for {}".format(filename))
             raise Exception()
 
-    def apply_patch(self, filename):
+    def apply_patch(self, filename, target_dir=''):
         """
         Apply a patch from the current recipe directory into the current
         build directory.
         """
+        target_dir = target_dir or self.build_dir
         print("Apply patch {}".format(filename))
         filename = join(self.recipe_dir, filename)
-        sh.patch("-t", "-d", self.build_dir, "-p1", "-i", filename)
+        sh.patch("-t", "-d", target_dir, "-p1", "-i", filename)
 
     def copy_file(self, filename, dest):
         print("Copy {} to {}".format(filename, dest))
@@ -525,7 +532,7 @@ class Recipe(object):
             else:
                 include_dir = join("common", self.name)
         if include_dir:
-            #print("Include dir added: {}".format(include_dir))
+            print("Include dir added: {}".format(include_dir))
             self.ctx.include_dirs.append(include_dir)
 
     def get_recipe_env(self, arch=None):
@@ -556,11 +563,12 @@ class Recipe(object):
         """Check if there is a variable name to specify a custom version /
         directory to use instead of the current url.
         """
-        d = environ.get("{}_DIR".format(self.name.upper()))
+        envname = "{}_DIR".format(self.name.upper())
+        d = environ.get(envname)
         if not d:
             return
         if not exists(d):
-            return
+            raise ValueError("Invalid path passed into {}".format(envname))
         return d
 
     @cache_execution
@@ -903,10 +911,20 @@ def build_recipes(names, ctx):
             print("ERROR: No recipe named {}".format(name))
             sys.exit(1)
         graph.add(name, name)
-        print("Loaded recipe {} (depends of {})".format(name, recipe.depends))
+        print("Loaded recipe {} (depends of {}, optional are {})".format(name,
+            recipe.depends, recipe.optional_depends))
         for depend in recipe.depends:
             graph.add(name, depend)
             recipe_to_load += recipe.depends
+        for depend in recipe.optional_depends:
+            # in case of compilation after the initial one, take in account
+            # of the already compiled recipes
+            key = "{}.build_all".format(depend)
+            if key in ctx.state:
+                recipe_to_load.append(name)
+                graph.add(name, depend)
+            else:
+                graph.add_optional(name, depend)
         recipe_loaded.append(name)
 
     build_order = list(graph.find_order())
@@ -1013,6 +1031,8 @@ Available commands:
 Xcode:
     create        Create a new xcode project
     update        Update an existing xcode project (frameworks, libraries..)
+    launchimage   Create Launch images for your xcode project
+    icon          Create Icons for your xcode project
 """)
             parser.add_argument("command", help="Command to run")
             args = parser.parse_args(sys.argv[1:2])
@@ -1026,12 +1046,22 @@ Xcode:
             parser = argparse.ArgumentParser(
                     description="Build the toolchain")
             parser.add_argument("recipe", nargs="+", help="Recipe to compile")
-            parser.add_argument("--arch", help="Restrict compilation to this arch")
+            parser.add_argument("--arch", action="append",
+                                help="Restrict compilation to this arch")
             args = parser.parse_args(sys.argv[2:])
 
             ctx = Context()
             if args.arch:
-                archs = args.arch.split()
+                if len(args.arch) == 1:
+                    archs = args.arch[0].split()
+                else:
+                    archs = args.arch
+                available_archs = [arch.arch for arch in ctx.archs]
+                for arch in archs[:]:
+                    if arch not in available_archs:
+                        print("ERROR: Architecture {} invalid".format(arch))
+                        archs.remove(arch)
+                        continue
                 ctx.archs = [arch for arch in ctx.archs if arch.arch in archs]
                 print("Architectures restricted to: {}".format(archs))
             build_recipes(args.recipe, ctx)
@@ -1136,7 +1166,6 @@ Xcode:
             parser.add_argument("filename", help="Path to your project or xcodeproj")
             args = parser.parse_args(sys.argv[2:])
 
-
             filename = args.filename
             if not filename.endswith(".xcodeproj"):
                 # try to find the xcodeproj
@@ -1156,5 +1185,43 @@ Xcode:
             print("--")
             print("Project {} updated".format(filename))
 
+        def launchimage(self):
+            import xcassets
+            self._xcassets("LaunchImage", xcassets.launchimage)
+
+        def icon(self):
+            import xcassets
+            self._xcassets("Icon", xcassets.icon)
+
+        def _xcassets(self, title, command):
+            parser = argparse.ArgumentParser(
+                    description="Generate {} for your project".format(title))
+            parser.add_argument("filename", help="Path to your project or xcodeproj")
+            parser.add_argument("image", help="Path to your initial {}.png".format(title.lower()))
+            args = parser.parse_args(sys.argv[2:])
+
+            if not exists(args.image):
+                print("ERROR: image path does not exists.")
+                return
+
+            filename = args.filename
+            if not filename.endswith(".xcodeproj"):
+                # try to find the xcodeproj
+                from glob import glob
+                xcodeproj = glob(join(filename, "*.xcodeproj"))
+                if not xcodeproj:
+                    print("ERROR: Unable to find a xcodeproj in {}".format(filename))
+                    sys.exit(1)
+                filename = xcodeproj[0]
+
+            project_name = filename.split("/")[-1].replace(".xcodeproj", "")
+            images_xcassets = realpath(join(filename, "..", project_name,
+                "Images.xcassets"))
+            if not exists(images_xcassets):
+                print("WARNING: Images.xcassets not found, creating it.")
+                makedirs(images_xcassets)
+            print("Images.xcassets located at {}".format(images_xcassets))
+
+            command(images_xcassets, args.image)
 
     ToolchainCL()

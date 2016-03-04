@@ -12,6 +12,12 @@ class LibSDL2Recipe(Recipe):
     pbx_frameworks = ["OpenGLES", "AudioToolbox", "QuartzCore", "CoreGraphics",
             "CoreMotion"]
 
+    def prebuild_arch(self, arch):
+        if self.has_marker("patched"):
+            return
+        self.apply_patch("uikit-transparent.patch")
+        self.set_marker("patched")
+
     def build_arch(self, arch):
         shprint(sh.xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",

@@ -1,35 +1,33 @@
-Kivy for IOS
+Kivy for iOS
 ============
 
-This toolchain is designed to compile the necessary library for iOS to run your
-application, and manage the creation of the Xcode project.
+This toolchain is designed to compile the necessary libraries for iOS to run
+your application and manage the creation of the Xcode project.
 
-Currently, we do not provide any binary distribution of this toolchain, but we
-aim to do it. So you do need to compile it at least one time before being about
-to create your Xcode project.
+Currently, we do not provide any binary distributions of this toolchain, but we
+aim to. Until then, you do need to compile it at least once before creating
+your Xcode project.
 
 The toolchain supports:
 
 - iPhone Simulator (x86 and x86_64)
 - iPhone / iOS (armv7 and arm64)
 
-Theses recipes are not ported to the new toolchain yet:
+These recipes are not ported to the new toolchain yet:
 
-- openssl
-- openssl-link
 - lxml
 
 
 Requirements
 ------------
 
-Currently, the toolchain requires few tools to let you compile. You need:
+Currently, the toolchain requires a few tools for compilation. You will need:
 
-#. Xcode 6, with iOS SDK installed / command line tools::
+#. Xcode 6 or above, with an iOS SDK and command line tools installed::
 
     xcode-select --install
 
-#. Using brew, you can install dependencies::
+#. Using brew, you can install the following dependencies::
 
     brew install autoconf automake libtool pkg-config
     brew link libtool
@@ -48,7 +46,7 @@ we call a `recipe` to compile it. For example, Python, libffi, SDL2, SDL_image,
 freetype... all the dependencies, compilation and packaging instructions are
 contained in a `recipe`.
 
-You can list the available recipes and the version with::
+You can list the available recipes and their versions with::
 
     $ ./toolchain.py recipes
     freetype     2.5.5
@@ -56,6 +54,7 @@ You can list the available recipes and the version with::
     ios          master
     kivy         ios-poly-arch
     libffi       3.2.1
+    openssl      1.0.2e
     pyobjus      master
     python       2.7.1
     sdl2         iOS-improvements
@@ -63,29 +62,34 @@ You can list the available recipes and the version with::
     sdl2_mixer   2.0.0
     sdl2_ttf     2.0.12
 
-Then, starts the compilation with::
+Then, start the compilation with::
 
     $ ./toolchain.py build kivy
 
-The Kivy recipe depends on severals one, like all the sdl* and python. sdl2_ttf
-depends on freetype, etc. You can think as: it will compile everything
+You can build recipes at the same time by adding them as parameters::
+
+    $ ./toolchain.py build openssl kivy
+
+The Kivy recipe depends on several others, like the sdl* and python recipes.
+These may in turn depend on others e.g. sdl2_ttf depends on freetype, etc.
+You can think of it as follows: the kivy recipe will compile everything
 necessary for a minimal working version of Kivy.
 
-Don't grab a coffee, just do diner. Compiling all the things the first time, 4x
-(remember, 4 archs, 2 per platforms), it will take time. (todo: provide a way
-to not compile for the simulator.).
+Don't grab a coffee, just do diner. Compiling all the libraries for the first
+time, 4x over (remember, 4 archs, 2 per platforms), will take time. (TODO:
+provide a way to not compile for the simulator.).
 
 Create the Xcode project
 ------------------------
 
-The `toolchain.py` can create for you the initial Xcode project::
+The `toolchain.py` can create the initial Xcode project for you::
 
     $ # ./toolchain.py create <title> <app_directory>
     $ ./toolchain.py create Touchtracer ~/code/kivy/examples/demo/touchtracer
 
 Your app directory must contain a main.py. A directory named `<title>-ios`
 will be created, with an Xcode project in it.
-You can open the Xcode project::
+You can open the Xcode project using::
 
     $ open touchtracer-ios/touchtracer.xcodeproj
 
@@ -102,3 +106,45 @@ FAQ
 
 Fatal error: "stdio.h" file not found
     You need to install the Command line tools: `xcode-select --install`
+    
+You must rebuild it with bitcode enabled (Xcode setting ENABLE_BITCODE)...
+    We don't support bitcode. You need to go to the your project setting, and disable bitcode
+
+Support
+-------
+
+If you need assistance, you can ask for help on our mailing list:
+
+* User Group : https://groups.google.com/group/kivy-users
+* Email      : kivy-users@googlegroups.com
+
+We also have an IRC channel:
+
+* Server  : irc.freenode.net
+* Port    : 6667, 6697 (SSL only)
+* Channel : #kivy
+
+Contributing
+------------
+
+We love pull requests and discussing novel ideas. Check out our
+`contribution guide <http://kivy.org/docs/contribute.html>`_ and
+feel free to improve Kivy for iOS.
+
+The following mailing list and IRC channel are used exclusively for
+discussions about developing the Kivy framework and its sister projects:
+
+* Dev Group : https://groups.google.com/group/kivy-dev
+* Email     : kivy-dev@googlegroups.com
+
+IRC channel:
+
+* Server  : irc.freenode.net
+* Port    : 6667, 6697 (SSL only)
+* Channel : #kivy-dev
+
+License
+-------
+
+Kivy for iOS is released under the terms of the MIT License. Please refer to the
+LICENSE file.

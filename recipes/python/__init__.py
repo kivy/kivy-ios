@@ -8,6 +8,7 @@ class PythonRecipe(Recipe):
     version = "2.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
     depends = ["hostpython", "libffi", ]
+    optional_depends = ["openssl"]
     library = "libpython2.7.a"
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
 
@@ -30,6 +31,8 @@ class PythonRecipe(Recipe):
         self.apply_patch("xcompile.patch")
         self.apply_patch("setuppath.patch")
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
+        if "openssl.build_all" in self.ctx.state:
+             self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
 
         self.set_marker("patched")
 
@@ -40,7 +43,7 @@ class PythonRecipe(Recipe):
                 "CC={}".format(build_env["CC"]),
                 "LD={}".format(build_env["LD"]),
                 "CFLAGS={}".format(build_env["CFLAGS"]),
-                "LDFLAGS={}".format(build_env["LDFLAGS"]),
+                "LDFLAGS={} -undefined dynamic_lookup".format(build_env["LDFLAGS"]),
                 "--without-pymalloc",
                 "--disable-toolbox-glue",
                 "--host={}-apple-darwin".format(arch),

@@ -1,0 +1,94 @@
+diff -Naur --exclude 'build*' --exclude darwin_ios --exclude '*.swp' ../armv7/libffi-3.2.1/generate-darwin-source-and-headers.py libffi-3.2.1/generate-darwin-source-and-headers.py
+--- ../armv7/libffi-3.2.1/generate-darwin-source-and-headers.py	2015-02-11 02:28:30.000000000 +0100
++++ libffi-3.2.1/generate-darwin-source-and-headers.py	2015-02-11 12:33:38.000000000 +0100
+@@ -19,7 +19,7 @@
+     prefix = "#ifdef __i386__\n\n"
+     suffix = "\n\n#endif"
+     src_dir = 'x86'
+-    src_files = ['darwin.S', 'win32.S', 'ffi.c']
++    src_files = ['darwin.S', 'ffi.c']
+ 
+ 
+ class simulator64_platform(Platform):
+diff -Naur --exclude 'build*' --exclude darwin_ios --exclude '*.swp' ../armv7/libffi-3.2.1/src/x86/ffi.c libffi-3.2.1/src/x86/ffi.c
+--- ../armv7/libffi-3.2.1/src/x86/ffi.c	2014-11-08 13:47:24.000000000 +0100
++++ libffi-3.2.1/src/x86/ffi.c	2015-02-11 12:41:27.000000000 +0100
+@@ -393,6 +393,7 @@
+     case FFI_SYSV:
+     case FFI_MS_CDECL:
+ #endif
++#ifdef X86_WIN322
+     case FFI_STDCALL:
+     case FFI_THISCALL:
+     case FFI_FASTCALL:
+@@ -402,6 +403,7 @@
+                      ecif.rvalue, fn);
+       break;
+ #endif
++#endif
+     default:
+       FFI_ASSERT(0);
+       break;
+@@ -741,6 +743,7 @@
+                            &ffi_closure_SYSV,
+                            (void*)codeloc);
+     }
++#ifdef X86_WIN32
+   else if (cif->abi == FFI_REGISTER)
+     {
+       FFI_INIT_TRAMPOLINE_WIN32 (&closure->tramp[0],
+@@ -765,7 +768,6 @@
+                                    &ffi_closure_STDCALL,
+                                    (void*)codeloc);
+     }
+-#ifdef X86_WIN32
+   else if (cif->abi == FFI_MS_CDECL)
+     {
+       FFI_INIT_TRAMPOLINE (&closure->tramp[0],
+@@ -909,7 +911,7 @@
+     case FFI_SYSV:
+     case FFI_MS_CDECL:
+ #endif
+-#ifndef X86_WIN64
++#ifdef X86_WIN32
+     case FFI_STDCALL:
+     case FFI_THISCALL:
+     case FFI_FASTCALL:
+diff -Naur --exclude 'build*' --exclude darwin_ios --exclude '*.swp' ../armv7/libffi-3.2.1/src/x86/win32.S libffi-3.2.1/src/x86/win32.S
+--- ../armv7/libffi-3.2.1/src/x86/win32.S	2014-11-11 15:41:37.000000000 +0100
++++ libffi-3.2.1/src/x86/win32.S	2015-02-11 12:33:46.000000000 +0100
+@@ -37,8 +37,6 @@
+ #define CIF_BYTES_OFFSET 16
+ #define CIF_FLAGS_OFFSET 20
+ 
+-#ifdef _MSC_VER
+-
+ #define CLOSURE_CIF_OFFSET ((FFI_TRAMPOLINE_SIZE + 3) AND NOT 3)
+ 
+ .386
+@@ -1344,8 +1342,6 @@
+         .align 4
+ .LEFDE5:
+ 
+-#endif /* !_MSC_VER */
+-
+ #if defined __ELF__ && defined __linux__
+         .section	.note.GNU-stack,"",@progbits
+ #endif
+diff -Naur --exclude 'build*' --exclude darwin_ios --exclude '*.swp' ../armv7/libffi-3.2.1/src/x86/win64.S libffi-3.2.1/src/x86/win64.S
+--- ../armv7/libffi-3.2.1/src/x86/win64.S	2014-11-08 13:47:24.000000000 +0100
++++ libffi-3.2.1/src/x86/win64.S	2015-02-11 12:31:27.000000000 +0100
+@@ -16,7 +16,6 @@
+ 		   unsigned *rvalue, void (*fn)());
+  */
+ 
+-#ifdef _MSC_VER
+ PUBLIC	ffi_call_win64
+ 
+ EXTRN	__chkstk:NEAR
+@@ -516,5 +515,4 @@
+ 	pop	%rbp
+ 	retq
+ 	.seh_endproc
+-#endif /* !_MSC_VER */
+ 
