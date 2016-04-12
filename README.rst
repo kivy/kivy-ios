@@ -107,8 +107,8 @@ FAQ
 Fatal error: "stdio.h" file not found
     You need to install the Command line tools: `xcode-select --install`
     
-You must rebuild it with bitcode enabled (Xcode setting ENABLE_BITCODE)...
-    We don't support bitcode. You need to go to the your project setting, and disable bitcode
+You must build with bitcode disabled (Xcode setting ENABLE_BITCODE should be No).
+    We don't support bitcode. You need to go to the project setting, and disable bitcode.
 
 Support
 -------
