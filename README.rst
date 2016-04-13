@@ -84,7 +84,7 @@ Create the Xcode project
 
 The `toolchain.py` can create the initial Xcode project for you::
 
-    $ # ./toolchain.py create <title> <app_directory>
+    $ ./toolchain.py create <title> <app_directory>
     $ ./toolchain.py create Touchtracer ~/code/kivy/examples/demo/touchtracer
 
 Your app directory must contain a main.py. A directory named `<title>-ios`
