@@ -48,7 +48,8 @@ class HostpythonRecipe(Recipe):
     def build_x86_64(self):
         sdk_path = sh.xcrun("--sdk", "macosx", "--show-sdk-path").strip()
         build_env = self.ctx.env.copy()
-        build_env["CC"] = "clang -Qunused-arguments -fcolor-diagnostics"
+        ccache = (build_env["CCACHE"] + ' ') if 'CCACHE' in build_env else ''
+        build_env["CC"] = ccache + "clang -Qunused-arguments -fcolor-diagnostics"
         build_env["LDFLAGS"] = " ".join([
                 "-lsqlite3",
                 "-lffi",
