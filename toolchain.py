@@ -783,11 +783,22 @@ class Recipe(object):
     def get_recipe(cls, name, ctx):
         if not hasattr(cls, "recipes"):
            cls.recipes = {}
+
+        if '==' in name:
+            name, version = name.split('==')
+        else:
+            version = None
+
         if name in cls.recipes:
-            return cls.recipes[name]
-        mod = importlib.import_module("recipes.{}".format(name))
-        recipe = mod.recipe
-        recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
+            recipe = cls.recipes[name]
+        else:
+            mod = importlib.import_module("recipes.{}".format(name))
+            recipe = mod.recipe
+            recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
+
+        if version:
+            recipe.version = version
+
         return recipe
 
 
