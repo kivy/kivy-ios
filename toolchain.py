@@ -122,6 +122,7 @@ class Arch(object):
     def __init__(self, ctx):
         super(Arch, self).__init__()
         self.ctx = ctx
+        self._ccsh = None
 
     def __str__(self):
         return self.arch
@@ -143,7 +144,32 @@ class Arch(object):
             for d in self.ctx.include_dirs]
 
         env = {}
-        env["CC"] = sh.xcrun("-find", "-sdk", self.sdk, "clang").strip()
+        ccache = sh.which('ccache').strip()
+        cc = sh.xcrun("-find", "-sdk", self.sdk, "clang").strip()
+        if ccache:
+            use_ccache = environ.get("USE_CCACHE", "1")
+            if use_ccache != '1':
+                env["CC"] = cc
+            else:
+                if not self._ccsh:
+                    self._ccsh = ccsh = sh.mktemp().strip()
+                    with open(ccsh, 'w') as f:
+                        f.write('#!/bin/sh\n')
+                        f.write(ccache + ' ' + cc + ' "$@"\n')
+                    sh.chmod('+x', ccsh)
+                else:
+                    ccsh = self._ccsh
+                env["USE_CCACHE"] = '1'
+                env["CCACHE"] = ccache
+                env["CC"] = ccsh
+
+                env.update({k: v for k, v in environ.items() if k.startswith('CCACHE_')})
+                env.setdefault('CCACHE_MAXSIZE', '10G')
+                env.setdefault('CCACHE_HARDLINK', 'true')
+                env.setdefault('CCACHE_SLOPPINESS', ('file_macro,time_macros,'
+                    'include_file_mtime,include_file_ctime,file_stat_matches'))
+        else:
+            env["CC"] = cc
         env["AR"] = sh.xcrun("-find", "-sdk", self.sdk, "ar").strip()
         env["LD"] = sh.xcrun("-find", "-sdk", self.sdk, "ld").strip()
         env["OTHER_CFLAGS"] = " ".join(include_dirs)
