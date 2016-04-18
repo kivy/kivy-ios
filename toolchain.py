@@ -144,9 +144,10 @@ class Arch(object):
             for d in self.ctx.include_dirs]
 
         env = {}
-        ccache = sh.which('ccache').strip()
+        ccache = sh.which('ccache')
         cc = sh.xcrun("-find", "-sdk", self.sdk, "clang").strip()
         if ccache:
+            ccache = ccache.strip()
             use_ccache = environ.get("USE_CCACHE", "1")
             if use_ccache != '1':
                 env["CC"] = cc
