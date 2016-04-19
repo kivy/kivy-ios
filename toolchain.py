@@ -1231,6 +1231,21 @@ Xcode:
             import xcassets
             self._xcassets("Icon", xcassets.icon)
 
+        def xcode(self):
+            parser = argparse.ArgumentParser(description="Open the xcode project")
+            parser.add_argument("filename", help="Path to your project or xcodeproj")
+            args = parser.parse_args(sys.argv[2:])
+            filename = args.filename
+            if not filename.endswith(".xcodeproj"):
+                # try to find the xcodeproj
+                from glob import glob
+                xcodeproj = glob(join(filename, "*.xcodeproj"))
+                if not xcodeproj:
+                    print("ERROR: Unable to find a xcodeproj in {}".format(filename))
+                    sys.exit(1)
+                filename = xcodeproj[0]
+            sh.open(filename)
+
         def _xcassets(self, title, command):
             parser = argparse.ArgumentParser(
                     description="Generate {} for your project".format(title))
