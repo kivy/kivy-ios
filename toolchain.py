@@ -1223,6 +1223,36 @@ Xcode:
             print("--")
             print("Project {} updated".format(filename))
 
+        def pip(self):
+            ctx = Context()
+            for recipe in Recipe.list_recipes():
+                key = "{}.build_all".format(recipe)
+                if key not in ctx.state:
+                    continue
+                recipe = Recipe.get_recipe(recipe, ctx)
+                recipe.init_with_ctx(ctx)
+            print(ctx.site_packages_dir)
+            if not hasattr(ctx, "site_packages_dir"):
+                print("ERROR: python must be compiled before using pip")
+                sys.exit(1)
+
+            pip_env = {
+                "CC": "/bin/false",
+                "CXX": "/bin/false",
+                "PYTHONPATH": ctx.site_packages_dir,
+                "PYTHONOPTIMIZE": "2",
+                "PIP_INSTALL_TARGET": ctx.site_packages_dir
+            }
+            print pip_env
+            pip_path = sh.which("pip")
+            args = [pip_path] + sys.argv[2:]
+            if not pip_path:
+                print("ERROR: pip not found")
+                sys.exit(1)
+            import os
+            print("-- execute pip with: {}".format(args)) 
+            os.execve(pip_path, args, pip_env)
+
         def launchimage(self):
             import xcassets
             self._xcassets("LaunchImage", xcassets.launchimage)
