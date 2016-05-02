@@ -119,7 +119,7 @@ void load_custom_builtin_importer() {
         "    def find_module(self, fullname, mpath=None):\n" \
         "        if '.' not in fullname:\n" \
         "            return\n" \
-        "        if mpath is None:\n" \
+        "        if not mpath:\n" \
         "            return\n" \
         "        part = fullname.rsplit('.')[-1]\n" \
         "        fn = join(mpath[0], '{}.so'.format(part))\n" \
