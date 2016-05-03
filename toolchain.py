@@ -546,7 +546,7 @@ class Recipe(object):
     def archive_root(self):
         key = "{}.archive_root".format(self.name)
         value = self.ctx.state.get(key)
-        if not key:
+        if not value:
             value = self.get_archive_rootdir(self.archive_fn)
             self.ctx.state[key] = value
         return value
