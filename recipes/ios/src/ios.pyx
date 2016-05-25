@@ -196,7 +196,7 @@ class IOSKeyboard(object):
 
     @protocol('KeyboardDelegates')
     def keyboardWillShow(self, notification):
-        self.kheight = notification.userInfo().objectForKey_(
+        self.kheight = get_scale() * notification.userInfo().objectForKey_(
             'UIKeyboardFrameEndUserInfoKey').CGRectValue().size.height
         from kivy.core.window import Window
         Window.trigger_keyboard_height()
