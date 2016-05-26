@@ -398,10 +398,10 @@ class Recipe(object):
             return
         def report_hook(index, blksize, size):
             if size <= 0:
-                progression = '{0} bytes'.format(index * blksize)
+                progression = '{} bytes'.format(index * blksize)
             else:
-                progression = '{0:.2f}%'.format(
-                        index * blksize * 100. / float(size))
+                progression = '{:.2%}'.format(
+                        index * blksize / float(size))
             stdout.write('- Download {}\r'.format(progression))
             stdout.flush()
 
