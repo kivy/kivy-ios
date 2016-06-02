@@ -1060,7 +1060,7 @@ if __name__ == "__main__":
                     usage="""toolchain <command> [<args>]
                     
 Available commands:
-    build         Build a specific recipe
+    build         Build an external package, found in recipes/
     clean         Clean the build
     distclean     Clean the build and the result
     recipes       List all the available recipes
