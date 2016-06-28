@@ -99,11 +99,25 @@ You can open the Xcode project using::
 
 Then click on `Play`, and enjoy.
 
-.. notes::
+.. note::
 
     Everytime you press `Play`, your application directory will be synced to
     the `<title>-ios/YourApp` directory. Don't make changes in the -ios
     directory directly.
+
+Configuring your App
+--------------------
+
+When you first build your XCode project, a 'main.m' file is created in your
+XCode project folder. This file configures your environment variables and
+controls your application startup. You can edit this file to customize your
+launch environment.
+
+.. note::
+
+    If you wish to restrict your apps orientation, you should do this via
+    the 'export_orientation' function in 'main.m'. The XCode orientation
+    settings should be set to support all. 
 
 FAQ
 ---
