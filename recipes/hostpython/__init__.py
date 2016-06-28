@@ -65,9 +65,9 @@ class HostpythonRecipe(Recipe):
                 "--disable-toolbox-glue",
                 "--without-gcc",
                 _env=build_env)
-        shprint(sh.make, "-C", self.build_dir, "-j4", "python.exe", "Parser/pgen",
+        shprint(sh.make, "-C", self.build_dir, "-j4", "python", "Parser/pgen",
                 _env=build_env)
-        shutil.move("python.exe", "hostpython")
+        shutil.move("python", "hostpython")
         shutil.move("Parser/pgen", "Parser/hostpgen")
 
     def install(self):
