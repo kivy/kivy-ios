@@ -75,6 +75,9 @@ class HostpythonRecipe(Recipe):
         build_env = arch.get_env()
         build_dir = self.get_build_dir(arch.arch)
         build_env["PATH"] = os.environ["PATH"]
+        shprint(sh.ln, "-s",
+                join(build_dir, "hostpython"),
+                join(build_dir, "Python"))
         shprint(sh.make,
                 "-C", build_dir,
                 "bininstall", "inclinstall",
