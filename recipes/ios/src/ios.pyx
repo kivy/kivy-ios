@@ -171,3 +171,43 @@ def get_dpi():
     '''Return the approximate DPI of the screen
     '''
     return ios_uiscreen_get_dpi()
+
+
+from pyobjus import autoclass, selector, protocol
+from pyobjus.protocols import protocols
+
+NSNotificationCenter = autoclass('NSNotificationCenter')
+
+protocols["KeyboardDelegates"] = {
+    'keyboardWillShow': ('v16@0:4@8', "v32@0:8@16"),
+    'keyboardDidHide': ('v16@0:4@8', "v32@0:8@16")}
+
+
+class IOSKeyboard(object):
+    '''Get listener for keyboard height.
+    '''
+
+    kheight = 0
+
+    def __init__(self, **kwargs):
+        super(IOSKeyboard, self).__init__()
+        NSNotificationCenter.defaultCenter().addObserver_selector_name_object_(self, selector("keyboardWillShow"), "UIKeyboardWillShowNotification", None)
+        NSNotificationCenter.defaultCenter().addObserver_selector_name_object_(self, selector("keyboardDidHide"), "UIKeyboardDidHideNotification", None)        
+
+    @protocol('KeyboardDelegates')
+    def keyboardWillShow(self, notification):
+        self.kheight = get_scale() * notification.userInfo().objectForKey_(
+            'UIKeyboardFrameEndUserInfoKey').CGRectValue().size.height
+        from kivy.core.window import Window
+        Window.trigger_keyboard_height()
+
+    @protocol('KeyboardDelegates')
+    def keyboardDidHide(self, notification):
+        self.kheight = 0
+        from kivy.core.window import Window
+        Window.trigger_keyboard_height()
+
+iOSKeyboard = IOSKeyboard()
+
+def get_kheight():
+    return iOSKeyboard.kheight
