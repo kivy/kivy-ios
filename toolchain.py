@@ -835,12 +835,12 @@ class PythonRecipe(Recipe):
         self.install_python_package()
         self.reduce_python_package()
 
-    def remove_junk(self, d):
-        exts = ["pyc", "py", "so.lib", "so.o", "sh"]
+    @staticmethod
+    def remove_junk(d):
+        exts = [".pyc", ".py", ".so.lib", ".so.o", ".sh"]
         for root, dirnames, filenames in walk(d):
             for fn in filenames:
-                ext = fn.rsplit(".", 1)[-1]
-                if ext in exts:
+                if any([fn.endswith(ext) for ext in exts]):
                     unlink(join(root, fn))
 
     def install_python_package(self, name=None, env=None, is_dir=True):
