@@ -75,6 +75,11 @@ class HostpythonRecipe(Recipe):
         build_env = arch.get_env()
         build_dir = self.get_build_dir(arch.arch)
         build_env["PATH"] = os.environ["PATH"]
+        # Compiling sometimes looks for Python-ast.py in the 'Python' i.s.o.
+        # the 'hostpython' folder. Create a symlink to fix. See issue #201
+        shprint(sh.ln, "-s",
+                join(build_dir, "hostpython"),
+                join(build_dir, "Python"))
         shprint(sh.make,
                 "-C", build_dir,
                 "bininstall", "inclinstall",
