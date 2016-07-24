@@ -4,7 +4,7 @@ import sh
 
 
 class FFPyplayerRecipe(CythonRecipe):
-    version = "master"
+    version = "v3.2"
     url = "https://github.com/matham/ffpyplayer/archive/{version}.zip"
     library = "libffpyplayer.a"
     depends = ["python", "ffmpeg"]
