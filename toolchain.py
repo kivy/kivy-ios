@@ -1062,7 +1062,7 @@ if __name__ == "__main__":
 Available commands:
     build         Build a recipe (compile a library for the required target
                   architecture)
-    clean         Clean the build
+    clean         Clean the build of the specified recipe
     distclean     Clean the build and the result
     recipes       List all the available recipes
     status        List all the recipes and their build status
