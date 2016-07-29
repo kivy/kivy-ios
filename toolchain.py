@@ -122,6 +122,7 @@ class Arch(object):
     def __init__(self, ctx):
         super(Arch, self).__init__()
         self.ctx = ctx
+        self._ccsh = None
 
     def __str__(self):
         return self.arch
@@ -143,7 +144,33 @@ class Arch(object):
             for d in self.ctx.include_dirs]
 
         env = {}
-        env["CC"] = sh.xcrun("-find", "-sdk", self.sdk, "clang").strip()
+        ccache = sh.which('ccache')
+        cc = sh.xcrun("-find", "-sdk", self.sdk, "clang").strip()
+        if ccache:
+            ccache = ccache.strip()
+            use_ccache = environ.get("USE_CCACHE", "1")
+            if use_ccache != '1':
+                env["CC"] = cc
+            else:
+                if not self._ccsh:
+                    self._ccsh = ccsh = sh.mktemp().strip()
+                    with open(ccsh, 'w') as f:
+                        f.write('#!/bin/sh\n')
+                        f.write(ccache + ' ' + cc + ' "$@"\n')
+                    sh.chmod('+x', ccsh)
+                else:
+                    ccsh = self._ccsh
+                env["USE_CCACHE"] = '1'
+                env["CCACHE"] = ccache
+                env["CC"] = ccsh
+
+                env.update({k: v for k, v in environ.items() if k.startswith('CCACHE_')})
+                env.setdefault('CCACHE_MAXSIZE', '10G')
+                env.setdefault('CCACHE_HARDLINK', 'true')
+                env.setdefault('CCACHE_SLOPPINESS', ('file_macro,time_macros,'
+                    'include_file_mtime,include_file_ctime,file_stat_matches'))
+        else:
+            env["CC"] = cc
         env["AR"] = sh.xcrun("-find", "-sdk", self.sdk, "ar").strip()
         env["LD"] = sh.xcrun("-find", "-sdk", self.sdk, "ld").strip()
         env["OTHER_CFLAGS"] = " ".join(include_dirs)
@@ -418,6 +445,8 @@ class Recipe(object):
                 print('This is usually caused by a corrupt download. The file'
                       ' will be removed and re-downloaded on the next run.')
                 remove(filename)
+                return
+
             root = archive.next().path.split("/")
             return root[0]
         elif filename.endswith(".zip"):
@@ -544,7 +573,7 @@ class Recipe(object):
     def archive_root(self):
         key = "{}.archive_root".format(self.name)
         value = self.ctx.state.get(key)
-        if not key:
+        if not value:
             value = self.get_archive_rootdir(self.archive_fn)
             self.ctx.state[key] = value
         return value
@@ -781,11 +810,22 @@ class Recipe(object):
     def get_recipe(cls, name, ctx):
         if not hasattr(cls, "recipes"):
            cls.recipes = {}
+
+        if '==' in name:
+            name, version = name.split('==')
+        else:
+            version = None
+
         if name in cls.recipes:
-            return cls.recipes[name]
-        mod = importlib.import_module("recipes.{}".format(name))
-        recipe = mod.recipe
-        recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
+            recipe = cls.recipes[name]
+        else:
+            mod = importlib.import_module("recipes.{}".format(name))
+            recipe = mod.recipe
+            recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
+
+        if version:
+            recipe.version = version
+
         return recipe
 
 
@@ -795,12 +835,12 @@ class PythonRecipe(Recipe):
         self.install_python_package()
         self.reduce_python_package()
 
-    def remove_junk(self, d):
-        exts = ["pyc", "py", "so.lib", "so.o", "sh"]
+    @staticmethod
+    def remove_junk(d):
+        exts = [".pyc", ".py", ".so.lib", ".so.o", ".sh"]
         for root, dirnames, filenames in walk(d):
             for fn in filenames:
-                ext = fn.rsplit(".", 1)[-1]
-                if ext in exts:
+                if any([fn.endswith(ext) for ext in exts]):
                     unlink(join(root, fn))
 
     def install_python_package(self, name=None, env=None, is_dir=True):
@@ -1020,8 +1060,9 @@ if __name__ == "__main__":
                     usage="""toolchain <command> [<args>]
                     
 Available commands:
-    build         Build a specific recipe
-    clean         Clean the build
+    build         Build a recipe (compile a library for the required target
+                  architecture)
+    clean         Clean the build of the specified recipe
     distclean     Clean the build and the result
     recipes       List all the available recipes
     status        List all the recipes and their build status
@@ -1183,6 +1224,36 @@ Xcode:
             print("--")
             print("Project {} updated".format(filename))
 
+        def pip(self):
+            ctx = Context()
+            for recipe in Recipe.list_recipes():
+                key = "{}.build_all".format(recipe)
+                if key not in ctx.state:
+                    continue
+                recipe = Recipe.get_recipe(recipe, ctx)
+                recipe.init_with_ctx(ctx)
+            print(ctx.site_packages_dir)
+            if not hasattr(ctx, "site_packages_dir"):
+                print("ERROR: python must be compiled before using pip")
+                sys.exit(1)
+
+            pip_env = {
+                "CC": "/bin/false",
+                "CXX": "/bin/false",
+                "PYTHONPATH": ctx.site_packages_dir,
+                "PYTHONOPTIMIZE": "2",
+                "PIP_INSTALL_TARGET": ctx.site_packages_dir
+            }
+            print pip_env
+            pip_path = sh.which("pip")
+            args = [pip_path] + sys.argv[2:]
+            if not pip_path:
+                print("ERROR: pip not found")
+                sys.exit(1)
+            import os
+            print("-- execute pip with: {}".format(args)) 
+            os.execve(pip_path, args, pip_env)
+
         def launchimage(self):
             import xcassets
             self._xcassets("LaunchImage", xcassets.launchimage)
@@ -1190,6 +1261,21 @@ Xcode:
         def icon(self):
             import xcassets
             self._xcassets("Icon", xcassets.icon)
+
+        def xcode(self):
+            parser = argparse.ArgumentParser(description="Open the xcode project")
+            parser.add_argument("filename", help="Path to your project or xcodeproj")
+            args = parser.parse_args(sys.argv[2:])
+            filename = args.filename
+            if not filename.endswith(".xcodeproj"):
+                # try to find the xcodeproj
+                from glob import glob
+                xcodeproj = glob(join(filename, "*.xcodeproj"))
+                if not xcodeproj:
+                    print("ERROR: Unable to find a xcodeproj in {}".format(filename))
+                    sys.exit(1)
+                filename = xcodeproj[0]
+            sh.open(filename)
 
         def _xcassets(self, title, command):
             parser = argparse.ArgumentParser(

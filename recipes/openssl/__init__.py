@@ -10,7 +10,7 @@ arch_mapper = {'i386': 'darwin-i386-cc',
 
 
 class OpensslRecipe(Recipe):
-    version = "1.0.2d"
+    version = "1.0.2h"
     url = "http://www.openssl.org/source/openssl-{version}.tar.gz"
     libraries = ["libssl.a", "libcrypto.a"]
     include_dir = "include"

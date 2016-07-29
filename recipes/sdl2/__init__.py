@@ -19,9 +19,11 @@ class LibSDL2Recipe(Recipe):
         self.set_marker("patched")
 
     def build_arch(self, arch):
+        env = arch.get_env()
         shprint(sh.xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
+                "CC={}".format(env['CC']),
                 "-sdk", arch.sdk,
                 "-project", "Xcode-iOS/SDL/SDL.xcodeproj",
                 "-target", "libSDL",

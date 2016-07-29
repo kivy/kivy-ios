@@ -48,7 +48,8 @@ class HostpythonRecipe(Recipe):
     def build_x86_64(self):
         sdk_path = sh.xcrun("--sdk", "macosx", "--show-sdk-path").strip()
         build_env = self.ctx.env.copy()
-        build_env["CC"] = "clang -Qunused-arguments -fcolor-diagnostics"
+        ccache = (build_env["CCACHE"] + ' ') if 'CCACHE' in build_env else ''
+        build_env["CC"] = ccache + "clang -Qunused-arguments -fcolor-diagnostics"
         build_env["LDFLAGS"] = " ".join([
                 "-lsqlite3",
                 "-lffi",
@@ -64,9 +65,9 @@ class HostpythonRecipe(Recipe):
                 "--disable-toolbox-glue",
                 "--without-gcc",
                 _env=build_env)
-        shprint(sh.make, "-C", self.build_dir, "-j4", "python.exe", "Parser/pgen",
+        shprint(sh.make, "-C", self.build_dir, "-j4", "python", "Parser/pgen",
                 _env=build_env)
-        shutil.move("python.exe", "hostpython")
+        shutil.move("python", "hostpython")
         shutil.move("Parser/pgen", "Parser/hostpgen")
 
     def install(self):
@@ -74,6 +75,11 @@ class HostpythonRecipe(Recipe):
         build_env = arch.get_env()
         build_dir = self.get_build_dir(arch.arch)
         build_env["PATH"] = os.environ["PATH"]
+        # Compiling sometimes looks for Python-ast.py in the 'Python' i.s.o.
+        # the 'hostpython' folder. Create a symlink to fix. See issue #201
+        shprint(sh.ln, "-s",
+                join(build_dir, "hostpython"),
+                join(build_dir, "Python"))
         shprint(sh.make,
                 "-C", build_dir,
                 "bininstall", "inclinstall",
