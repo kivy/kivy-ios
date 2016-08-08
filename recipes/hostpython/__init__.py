@@ -9,6 +9,7 @@ class HostpythonRecipe(Recipe):
     version = "2.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
     depends = ["hostlibffi", ]
+    optional_depends = ["openssl"]
     archs = ["x86_64"]
 
     def init_with_ctx(self, ctx):
@@ -27,6 +28,9 @@ class HostpythonRecipe(Recipe):
         self.apply_patch("static-_sqlite3.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.set_marker("patched")
+
+        if "openssl.build_all" in self.ctx.state:
+            self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
 
     def postbuild_arch(self, arch):
         makefile_fn = join(self.build_dir, "Makefile")
@@ -59,6 +63,11 @@ class HostpythonRecipe(Recipe):
                 "--sysroot={}".format(sdk_path),
                 "-I{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "include"))
                 ])
+
+        if "openssl.build_all" in self.ctx.state:
+            build_env["CFLAGS"] += " -I{}".format(join(self.ctx.dist_dir, "include",
+                                                       "x86_64", "openssl"))
+
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
                 "--prefix={}".format(join(self.ctx.dist_dir, "hostpython")),
