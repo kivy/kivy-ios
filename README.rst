@@ -32,10 +32,10 @@ Currently, the toolchain requires a few tools for compilation. You will need:
     brew install autoconf automake libtool pkg-config
     brew link libtool
 
-#. Install Cython (0.21)::
+#. Install Cython (0.23)::
 
     # pip method if available (sudo might be needed.)
-    pip install cython==0.21
+    pip install cython==0.23
 
 
 Using the toolchain
