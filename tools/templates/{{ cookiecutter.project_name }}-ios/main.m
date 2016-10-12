@@ -83,12 +83,25 @@ int main(int argc, char *argv[]) {
     return ret;
 }
 
-// This method read available orientations from the Info.plist, and share them
-// in an environment variable. Kivy will automatically set the orientation
-// according to this environment value, if exist.
+// This method reads the available orientations from the Info.plist file and
+// shares them via an environment variable. Kivy will automatically set the
+// orientation according to this environment value, if it exists. To restrict
+// the allowed orientation, please see the comments inside.
 void export_orientation() {
     NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
     NSArray *orientations = [info objectForKey:@"UISupportedInterfaceOrientations"];
+    
+    // Orientation restrictions
+    // ========================
+    // Comment or uncomment blocks 1-3 in order the limit orientation support
+    
+    // 1. Landscape only
+    // NSString *result = [[NSString alloc] initWithString:@"KIVY_ORIENTATION=LandscapeLeft LandscapeRight"];
+    
+    // 2. Portrait only
+    // NSString *result = [[NSString alloc] initWithString:@"KIVY_ORIENTATION=Portrait PortraitUpsideDown"];
+    
+    // 3. All orientations
     NSString *result = [[NSString alloc] initWithString:@"KIVY_ORIENTATION="];
     for (int i = 0; i < [orientations count]; i++) {
         NSString *item = [orientations objectAtIndex:i];
@@ -97,6 +110,7 @@ void export_orientation() {
             result = [result stringByAppendingString:@" "];
         result = [result stringByAppendingString:item];
     }
+    // ========================
 
     putenv((char *)[result UTF8String]);
     NSLog(@"Available orientation: %@", result);

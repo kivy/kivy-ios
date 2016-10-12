@@ -70,6 +70,10 @@ You can build recipes at the same time by adding them as parameters::
 
     $ ./toolchain.py build openssl kivy
 
+Recipe builds can be removed via the clean command e.g.::
+
+    $ ./toolchain.py clean openssl
+
 The Kivy recipe depends on several others, like the sdl* and python recipes.
 These may in turn depend on others e.g. sdl2_ttf depends on freetype, etc.
 You can think of it as follows: the kivy recipe will compile everything
@@ -79,12 +83,16 @@ Don't grab a coffee, just do diner. Compiling all the libraries for the first
 time, 4x over (remember, 4 archs, 2 per platforms), will take time. (TODO:
 provide a way to not compile for the simulator.).
 
+For a complete list of available commands, type::
+
+    $ ./toolchain.py
+
 Create the Xcode project
 ------------------------
 
 The `toolchain.py` can create the initial Xcode project for you::
 
-    $ # ./toolchain.py create <title> <app_directory>
+    $ ./toolchain.py create <title> <app_directory>
     $ ./toolchain.py create Touchtracer ~/code/kivy/examples/demo/touchtracer
 
 Your app directory must contain a main.py. A directory named `<title>-ios`
@@ -95,11 +103,25 @@ You can open the Xcode project using::
 
 Then click on `Play`, and enjoy.
 
-.. notes::
+.. note::
 
     Everytime you press `Play`, your application directory will be synced to
     the `<title>-ios/YourApp` directory. Don't make changes in the -ios
     directory directly.
+
+Configuring your App
+--------------------
+
+When you first build your XCode project, a 'main.m' file is created in your
+XCode project folder. This file configures your environment variables and
+controls your application startup. You can edit this file to customize your
+launch environment.
+
+.. note::
+
+    If you wish to restrict your apps orientation, you should do this via
+    the 'export_orientation' function in 'main.m'. The XCode orientation
+    settings should be set to support all. 
 
 FAQ
 ---
@@ -107,8 +129,8 @@ FAQ
 Fatal error: "stdio.h" file not found
     You need to install the Command line tools: `xcode-select --install`
     
-You must rebuild it with bitcode enabled (Xcode setting ENABLE_BITCODE)...
-    We don't support bitcode. You need to go to the your project setting, and disable bitcode
+You must build with bitcode disabled (Xcode setting ENABLE_BITCODE should be No).
+    We don't support bitcode. You need to go to the project setting, and disable bitcode.
 
 Support
 -------

@@ -9,6 +9,7 @@ class NumpyRecipe(CythonRecipe):
     url = "http://pypi.python.org/packages/source/n/numpy/numpy-{version}.tar.gz"
     library = "libnumpy.a"
     libraries = ["libnpymath.a", "libnpysort.a"]
+    include_dir = "numpy/core/include"
     depends = ["python"]
     pbx_frameworks = ["Accelerate"]
     cythonize = False
@@ -51,5 +52,3 @@ class NumpyRecipe(CythonRecipe):
         shutil.rmtree(join(dest_dir, "tests"))
 
 recipe = NumpyRecipe()
-
-
