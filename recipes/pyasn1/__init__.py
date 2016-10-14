@@ -12,7 +12,7 @@ class Pyasn1Recipe(PythonRecipe):
         "377e3dd2e95f9020dbd0dfd3c47aaa7deebe3c68d3857a4e51917146ae8b/"
         "pyasn1-{version}.tar.gz"
     )
-    depends = ["python"]
+    depends = ["ipaddress"]
 
     def install(self):
         arch = list(self.filtered_archs)[0]

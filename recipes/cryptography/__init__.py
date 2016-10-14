@@ -10,13 +10,13 @@ class CryptographyRecipe(CythonRecipe):
         "60984cb85cc38c4ebdfca27b32a6df6f1914959d8790f5a349608c78be61/"
         "cryptography-{version}.tar.gz"
     )
-    depends = ["host_setuptools", "six", "idna", "pyasn1"]
+    depends = ["host_setuptools", "cffi", "six", "idna", "pyasn1", "enum34"]
     cythonize = False
 
-    def get_recipe_env(self, arch):
-        env = super(CryptographyRecipe, self).get_recipe_env(arch)
-        env["CC"] += " -I{}".format(
-            join(self.ctx.dist_dir, "include", arch.arch, "libffi"))
-        return env
+    #def get_recipe_env(self, arch):
+    #    env = super(CryptographyRecipe, self).get_recipe_env(arch)
+    #    env["CC"] += " -I{}".format(
+    #        join(self.ctx.dist_dir, "include", arch.arch, "libffi"))
+    #    return env
 
 recipe = CryptographyRecipe()

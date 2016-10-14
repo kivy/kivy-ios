@@ -12,7 +12,7 @@ class PyOpenSSLRecipe(PythonRecipe):
         "79c75db50e57350a7cefb70b110255757e9abd380a50ebdc0cfd853b7450/"
         "pyOpenSSL-{version}.tar.gz"
     )
-    depends = ["openssl", "six", "cryptography"]
+    depends = ["openssl", "cryptography"]
 
     def install(self):
         arch = list(self.filtered_archs)[0]

@@ -12,7 +12,7 @@ class TxaioRecipe(PythonRecipe):
         "f7d88767d65dbfc20d4b4aa0dad657dbbe8ca629ead2bef24da04630a12a/"
         "txaio-{version}.tar.gz"
     )
-    depends = ["six"]
+    depends = ["host_setuptools", "six"]
 
     def install(self):
         arch = list(self.filtered_archs)[0]

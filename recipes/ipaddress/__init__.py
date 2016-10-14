@@ -12,7 +12,7 @@ class IPAddressRecipe(PythonRecipe):
         "3b64955ff73f9e3155079b9ed31812afdfa5333b5c76387454d651ef593a/"
         "ipaddress-{version}.tar.gz"
     )
-    depends = ["python"]
+    depends = ["python", "host_setuptools"]
 
     def install(self):
         arch = list(self.filtered_archs)[0]

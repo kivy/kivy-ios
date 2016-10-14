@@ -12,7 +12,7 @@ class IdnaRecipe(PythonRecipe):
         "8c27516fbaa8147acd2e431086b473c453c428e24e8fb99a1d89ce381851/"
         "idna-{version}.tar.gz"
     )
-    depends = ["python"]
+    depends = ["python", "host_setuptools"]
 
     def install(self):
         arch = list(self.filtered_archs)[0]

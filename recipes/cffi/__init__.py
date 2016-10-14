@@ -9,7 +9,13 @@ class CffiRecipe(CythonRecipe):
         "686af8873b70028fccf67b15c78fd4e4667a3da995007afc71e786d61b0a/"
         "cffi-{version}.tar.gz"
     )
-    depends = ["libffi", "pycparser"]
+    depends = ["libffi", "host_setuptools", "pycparser"]
     cythonize = False
+
+    def get_recipe_env(self, arch):
+        env = super(CffiRecipe, self).get_recipe_env(arch)
+        env["CC"] += " -I{}".format(
+            join(self.ctx.dist_dir, "include", arch.arch, "libffi"))
+        return env
 
 recipe = CffiRecipe()
