@@ -8,7 +8,8 @@ import shutil
 class HostpythonRecipe(Recipe):
     version = "2.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
-    depends = ["hostlibffi", ]
+    depends = ["hostlibffi"]
+    optional_depends = ["openssl"]
     archs = ["x86_64"]
 
     def init_with_ctx(self, ctx):
@@ -19,13 +20,15 @@ class HostpythonRecipe(Recipe):
         print("Global: hostpgen located at {}".format(self.ctx.hostpgen))
 
     def prebuild_arch(self, arch):
-        if  self.has_marker("patched"):
+        if self.has_marker("patched"):
             return
         self.copy_file("_scproxy.py", "Lib/_scproxy.py")
         self.apply_patch("ssize-t-max.patch")
         self.apply_patch("dynload.patch")
         self.apply_patch("static-_sqlite3.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
+        if "openssl.build_all" in self.ctx.state:
+            self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
         self.set_marker("patched")
 
     def postbuild_arch(self, arch):
@@ -59,6 +62,11 @@ class HostpythonRecipe(Recipe):
                 "--sysroot={}".format(sdk_path),
                 "-I{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "include"))
                 ])
+
+        if "openssl.build_all" in self.ctx.state:
+            build_env["CFLAGS"] += " -I{}".format(join(self.ctx.dist_dir, "include",
+                                                       "x86_64", "openssl"))
+
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
                 "--prefix={}".format(join(self.ctx.dist_dir, "hostpython")),
