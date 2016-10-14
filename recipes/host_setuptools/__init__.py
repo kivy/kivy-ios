@@ -9,7 +9,7 @@ import shutil
 class HostSetuptools(Recipe):
     depends = ["hostpython"]
     archs = ["x86_64"]
-    url = ""
+    url = "setuptools"
 
     def prebuild_arch(self, arch):
         hostpython = sh.Command(self.ctx.hostpython)
