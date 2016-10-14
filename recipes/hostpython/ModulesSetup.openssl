@@ -1,0 +1,1 @@
+_ssl _ssl.c -DUSE_SSL -lssl -lcrypto
