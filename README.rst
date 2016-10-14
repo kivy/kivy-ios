@@ -87,6 +87,7 @@ For a complete list of available commands, type::
 
     $ ./toolchain.py
 
+
 Create the Xcode project
 ------------------------
 
@@ -109,6 +110,7 @@ Then click on `Play`, and enjoy.
     the `<title>-ios/YourApp` directory. Don't make changes in the -ios
     directory directly.
 
+
 Configuring your App
 --------------------
 
@@ -123,6 +125,7 @@ launch environment.
     the 'export_orientation' function in 'main.m'. The XCode orientation
     settings should be set to support all. 
 
+
 FAQ
 ---
 
@@ -131,6 +134,7 @@ Fatal error: "stdio.h" file not found
     
 You must build with bitcode disabled (Xcode setting ENABLE_BITCODE should be No).
     We don't support bitcode. You need to go to the project setting, and disable bitcode.
+
 
 Support
 -------
@@ -145,6 +149,7 @@ We also have an IRC channel:
 * Server  : irc.freenode.net
 * Port    : 6667, 6697 (SSL only)
 * Channel : #kivy
+
 
 Contributing
 ------------
@@ -164,6 +169,7 @@ IRC channel:
 * Server  : irc.freenode.net
 * Port    : 6667, 6697 (SSL only)
 * Channel : #kivy-dev
+
 
 License
 -------

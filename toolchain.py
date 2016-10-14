@@ -118,7 +118,9 @@ class JsonStore(object):
             with io.open(self.filename, 'w', encoding='utf-8') as fd:
                 fd.write(unicode(json.dumps(self.data, ensure_ascii=False)))
 
+
 class Arch(object):
+
     def __init__(self, ctx):
         super(Arch, self).__init__()
         self.ctx = ctx
@@ -134,7 +136,6 @@ class Arch(object):
                 self.ctx.include_dir,
                 d.format(arch=self))
             for d in self.ctx.include_dirs]
-
 
     def get_env(self):
         include_dirs = [
@@ -196,7 +197,6 @@ class Arch(object):
         return env
 
 
-
 class ArchSimulator(Arch):
     sdk = "iphonesimulator"
     arch = "i386"
@@ -227,7 +227,7 @@ class Arch64IOS(Arch):
     triple = "aarch64-apple-darwin13"
     version_min = "-miphoneos-version-min=7.0"
     sysroot = sh.xcrun("--sdk", "iphoneos", "--show-sdk-path").strip()
-    
+
 
 class Graph(object):
     # Taken from python-for-android/depsort
@@ -375,19 +375,60 @@ class Context(object):
 
 
 class Recipe(object):
-    version = None
+    """Base recipe for compiling and installing dependency libraries and
+    packages to kivy iOS build.
+    """
+
     url = None
+    """Either folder name relative to recipe or download URL.
+    """
+
+    version = None
+    """Gets formatted with ``url`` if download URL.
+    """
+
     archs = []
+    """Architectures this recipe applies, empty list means all.
+    """
+
     depends = []
+    """Dependency recipes.
+    """
+
     optional_depends = []
+    """???
+    """
+
     library = None
+    """???
+    """
+
     libraries = []
+    """???
+    """
+
     include_dir = None
+    """Include directory for compilation"""
+
     include_per_arch = False
+    """???
+    """
+
     frameworks = []
+    """OS X frameworks.
+    """
+
     sources = []
+    """???
+    """
+
     pbx_frameworks = []
+    """???
+    """
+
     pbx_libraries = []
+    """???
+    """
 
     # API available for recipes
     def download_file(self, url, filename, cwd=None):
@@ -396,6 +437,7 @@ class Recipe(object):
         """
         if not url:
             return
+
         def report_hook(index, blksize, size):
             if size <= 0:
                 progression = '{0} bytes'.format(index * blksize)
@@ -635,7 +677,7 @@ class Recipe(object):
                 shutil.copytree(src_dir, dest_dir)
                 return
             ensure_dir(build_dir)
-            self.extract_file(self.archive_fn, build_dir) 
+            self.extract_file(self.archive_fn, build_dir)
 
     @cache_execution
     def build(self, arch):
@@ -809,7 +851,7 @@ class Recipe(object):
     @classmethod
     def get_recipe(cls, name, ctx):
         if not hasattr(cls, "recipes"):
-           cls.recipes = {}
+            cls.recipes = {}
 
         if '==' in name:
             name, version = name.split('==')
@@ -847,7 +889,8 @@ class PythonRecipe(Recipe):
         """Automate the installation of a Python package into the target
         site-packages.
 
-        It will works with the first filtered_archs, and the name of the recipe.
+        It will works with the first filtered_archs, and the name of the
+        recipe.
         """
         arch = self.filtered_archs[0]
         if name is None:
@@ -1044,7 +1087,6 @@ def update_pbxproj(filename):
         fn = join(ctx.dist_dir, "sources", name)
         project.add_folder(fn, parent=g_classes)
 
-
     if project.modified:
         project.backup()
         project.save()
@@ -1052,13 +1094,13 @@ def update_pbxproj(filename):
 
 if __name__ == "__main__":
     import argparse
-    
+
     class ToolchainCL(object):
         def __init__(self):
             parser = argparse.ArgumentParser(
                     description="Tool for managing the iOS / Python toolchain",
                     usage="""toolchain <command> [<args>]
-                    
+
 Available commands:
     build         Build a recipe (compile a library for the required target
                   architecture)
@@ -1174,7 +1216,7 @@ Xcode:
             parser.add_argument("name", help="Name of your project")
             parser.add_argument("directory", help="Directory where your project live")
             args = parser.parse_args(sys.argv[2:])
-            
+
             from cookiecutter.main import cookiecutter
             ctx = Context()
             template_dir = join(curdir, "tools", "templates")
