@@ -7,18 +7,15 @@ import shutil
 
 
 class HostSetuptools(Recipe):
-    depends = ["hostpython"]
+    depends = ["openssl", "hostpython"]
     archs = ["x86_64"]
     url = "setuptools"
 
     def prebuild_arch(self, arch):
         hostpython = sh.Command(self.ctx.hostpython)
         sh.curl("-O",  "https://bootstrap.pypa.io/ez_setup.py")
-        #dest_dir = join(self.ctx.dist_dir, "root", "python")
-        #build_env = arch.get_env()
-        #build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
-        # shprint(hostpython, "./ez_setup.py", "--to-dir", dest_dir)
-        #shprint(hostpython, "./ez_setup.py", _env=build_env)
+        # Installed setuptools egg should be extracted in hostpython
+        # site-packages(v28.3.0)
         shprint(hostpython, "./ez_setup.py")
 
 recipe = HostSetuptools()
