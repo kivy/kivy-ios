@@ -1,3 +1,4 @@
+from os.path import join
 from toolchain import CythonRecipe
 
 
@@ -12,5 +13,10 @@ class CryptographyRecipe(CythonRecipe):
     depends = ["host_setuptools", "six", "idna", "pyasn1"]
     cythonize = False
 
+    def get_recipe_env(self, arch):
+        env = super(CryptographyRecipe, self).get_recipe_env(arch)
+        env["CC"] += " -I{}".format(
+            join(self.ctx.dist_dir, "include", arch.arch, "libffi"))
+        return env
 
 recipe = CryptographyRecipe()
