@@ -8,7 +8,8 @@ import shutil
 class HostpythonRecipe(Recipe):
     version = "2.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
-    depends = ["hostlibffi", ]
+    depends = ["hostlibffi"]
+    optional_depends = ["openssl"]
     archs = ["x86_64"]
 
     def init_with_ctx(self, ctx):
@@ -26,6 +27,8 @@ class HostpythonRecipe(Recipe):
         self.apply_patch("dynload.patch")
         self.apply_patch("static-_sqlite3.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
+        if "openssl.build_all" in self.ctx.state:
+            self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
         self.set_marker("patched")
 
     def postbuild_arch(self, arch):

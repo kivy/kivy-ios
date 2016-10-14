@@ -5,7 +5,7 @@ import sh, os
 class ZopeInterfaceRecipe(PythonRecipe):
     version = "4.3.2"
     url="https://github.com/zopefoundation/zope.interface/archive/{version}.zip"
-    depends = ["python", "hostsetuptools"]
+    depends = ["python", "host_setuptools"]
     include_per_arch = True
 
     def get_environ(self, arch):
@@ -18,18 +18,17 @@ class ZopeInterfaceRecipe(PythonRecipe):
         return build_env
 
     def build_arch(self, arch):
-        print '########### build arch: ' + arch.arch
         build_env = self.get_environ(arch)
         hostpython = sh.Command(self.ctx.hostpython)
         shprint(hostpython, "setup.py", "build_ext", _env=build_env)
 
     def install(self):
         arch = list(self.filtered_archs)[0]
-        print '########### install arch: ' + arch.arch
         build_dir = self.get_build_dir(arch.arch)
         os.chdir(build_dir)
         hostpython = sh.Command(self.ctx.hostpython)
         build_env = self.get_environ(arch)
+        del build_env["ARCH"]
         dest_dir = os.path.join(self.ctx.dist_dir, "root", "python")
         build_env['PYTHONPATH'] = os.path.join(
             dest_dir, 'lib', 'python2.7', 'site-packages')

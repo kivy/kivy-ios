@@ -7,7 +7,7 @@ import os
 class PythonRecipe(Recipe):
     version = "2.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
-    depends = ["hostpython", "libffi", ]
+    depends = ["hostpython", "libffi"]
     optional_depends = ["openssl"]
     library = "libpython2.7.a"
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
@@ -33,7 +33,6 @@ class PythonRecipe(Recipe):
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
         if "openssl.build_all" in self.ctx.state:
              self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
-
         self.set_marker("patched")
 
     def build_arch(self, arch):
