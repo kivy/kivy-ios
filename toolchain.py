@@ -49,7 +49,7 @@ command_logger = CommandLogger()
 
 
 def shprint(command, *args, **kwargs):
-    command_logger.log(*(command) + args, **kwargs)
+    command_logger.log(*(command,) + args, **kwargs)
     kwargs["_iter"] = True
     kwargs["_out_bufsize"] = 1
     kwargs["_err_to_out"] = True
