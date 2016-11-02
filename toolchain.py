@@ -32,7 +32,24 @@ import sh
 IS_PY3 = sys.version_info[0] >= 3
 
 
+class CommandLogger(object):
+
+    def __init__(self, filename='build.log'):
+        self.filename = filename
+
+    def log(self, *args, **kw):
+        msg = ', '.join(args)
+        for k, v in kw:
+            msg += '\n{}={}'.format(k, v)
+        with open(self.filename, 'a') as f:
+            f.write(msg)
+
+
+command_logger = CommandLogger()
+
+
 def shprint(command, *args, **kwargs):
+    command_logger.log(*[command] + args, **kwargs)
     kwargs["_iter"] = True
     kwargs["_out_bufsize"] = 1
     kwargs["_err_to_out"] = True
@@ -585,6 +602,7 @@ class Recipe(object):
         for library in self.libraries:
             static_fn = join(self.ctx.dist_dir, "lib", basename(library))
             libraries.append(static_fn)
+        command_logger.log(*['Recipe().dist_libraries'] + libraries)
         return libraries
 
     def get_build_dir(self, arch):
