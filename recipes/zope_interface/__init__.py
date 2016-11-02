@@ -4,9 +4,10 @@ from toolchain import CythonRecipe
 class ZopeInterfaceRecipe(CythonRecipe):
     name = "zope"
     version = "4.3.2"
-    url = "https://github.com/zopefoundation/zope.interface/archive/{version}.zip"
+    url = 'http://pypi.python.org/packages/source/z/zope.interface/zope.interface-{version}.tar.gz'
     depends = ["python", "host_setuptools"]
     cythonize = False
 
 
 recipe = ZopeInterfaceRecipe()
+

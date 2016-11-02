@@ -1,6 +1,6 @@
 '''Recipe for pycrypto on ios
 '''
-from toolchain import CythonRecipe, shprint, build_logger
+from toolchain import CythonRecipe, shprint
 from os.path import join, exists
 import sh
 import os
@@ -15,7 +15,6 @@ class PycryptoRecipe(CythonRecipe):
 
 
     def build_arch(self, arch):
-        build_logger.log('PycryptoRecipe.build_arch()')
         build_env = arch.get_env()
         build_logger.log(**build_env)
         self.apply_patch('hash_SHA2_template.c.patch', target_dir=self.build_dir + '/src')
@@ -34,19 +33,13 @@ class PycryptoRecipe(CythonRecipe):
         super(PycryptoRecipe, self).build_arch(arch)
 
     def install(self):
-        build_logger.log('PycryptoRecipe.install()')
         arch = list(self.filtered_archs)[0]
-        build_logger.log('arch:\n    ', arch)
         build_dir = self.get_build_dir(arch.arch)
-        build_logger.log('build_dir:\n    ', arch)
         os.chdir(build_dir)
         hostpython = sh.Command(self.ctx.hostpython)
-        build_logger.log('hostpython:\n    ', hostpython)
         build_env = arch.get_env()
         dest_dir = join(self.ctx.dist_dir, "root", "python")
-        build_logger.log('dest_dir:\n    ', dest_dir)
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
-        build_logger.log('build_env', **build_env)
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
 recipe = PycryptoRecipe()

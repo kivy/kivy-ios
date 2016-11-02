@@ -16,7 +16,6 @@ class CryptographyRecipe(CythonRecipe):
     cythonize = False
 
     def get_recipe_env(self, arch):
-        env = super(CryptographyRecipe, self).get_recipe_env(arch)
         #env['LN_FLAGS'] = "-lboost_thread-mt"
         #env['PKG_CONFIG_PATH'] = join(self.ctx.dist_dir, "include", arch.arch, "libffi")
         #env['PKG_CONFIG_PATH'] += ":" + join(self.ctx.dist_dir, "include", arch.arch, "openssl")
@@ -37,8 +36,8 @@ class CryptographyRecipe(CythonRecipe):
         #env["CFLAGS"] += " -I{}".format(
         #    join(self.ctx.dist_dir, "include", arch.arch, "openssl", "openssl"))
         """
-        dest_dir = join(self.ctx.dist_dir, "root", "python")
-        pythonpath = join(dest_dir, "lib", "python2.7", "site-packages")
+        #dest_dir = join(self.ctx.dist_dir, "root", "python")
+        #pythonpath = join(dest_dir, "lib", "python2.7", "site-packages")
         #env["PYTHONPATH"] = pythonpath
         #env["CC"] += " -I{}".format(
         #    join(self.ctx.dist_dir, "include", arch.arch, "libffi"))
@@ -46,20 +45,20 @@ class CryptographyRecipe(CythonRecipe):
         #    join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "lib"))
         #env["CFLAGS"] += "-I{}".format(
         #    join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "include"))
+        env = super(CryptographyRecipe, self).get_recipe_env(arch)
+        r = self.get_recipe('openssl', self.ctx)
+        openssl_dir = r.get_build_dir(arch.arch)
+        env['PYTHON_ROOT'] = join(self.ctx.dist_dir, 'root', 'python')
+        env['CFLAGS'] += ' -I' + env['PYTHON_ROOT'] + '/include/python2.7' + \
+                         ' -I' + join(openssl_dir, 'include')
+        # Set linker to use the correct gcc
+        env['LDSHARED'] = env['CC'] + ' -pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions'
+        env['LDFLAGS'] += ' -L' + env['PYTHON_ROOT'] + '/lib' + \
+                          ' -L' + openssl_dir + \
+                          ' -lpython2.7' + \
+                          ' -lssl' + r.version + \
+                          ' -lcrypto' + r.version
         return env
 
-    def install(self):
-        print 'INSTALL #####################################'
-        super(CryptographyRecipe, self).install()
-
-    def build_arch(self, arch):
-        print 'BUILD_ARCH ###################################'
-        build_env = self.get_recipe_env(arch)
-        print 'ENV #################'
-        for k, v in sorted(build_env.items()):
-            print k + ': ' + v
-        hostpython = sh.Command(self.ctx.hostpython)
-        shprint(hostpython, "setup.py", "build_ext", "-g", "-v", _env=build_env)
-        self.biglink()
-
 recipe = CryptographyRecipe()
+
