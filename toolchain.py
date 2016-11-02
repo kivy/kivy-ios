@@ -32,24 +32,29 @@ import sh
 IS_PY3 = sys.version_info[0] >= 3
 
 
-class CommandLogger(object):
+build_log_path = join(__file__[:__file__.rfind('/toolchain.py')], 'build.log')
 
-    def __init__(self, filename='build.log'):
+
+class BuildLogger(object):
+
+    def __init__(self, filename=build_log_path):
         self.filename = filename
 
     def log(self, *args, **kw):
-        msg = ', '.join([str(arg) for arg in args])
-        for k, v in kw:
-            msg += '\n{}={}'.format(k, str(v))
+        msg = ''
+        for arg in args:
+            msg += str(arg) + '\n'
+        for k, v in kw.items():
+            msg += '{}={}\n'.format(k, str(v))
         with open(self.filename, 'a') as f:
             f.write(msg)
 
 
-command_logger = CommandLogger()
+build_logger = BuildLogger()
 
 
 def shprint(command, *args, **kwargs):
-    command_logger.log(*(command,) + args, **kwargs)
+    build_logger.log(*(command,) + args, **kwargs)
     kwargs["_iter"] = True
     kwargs["_out_bufsize"] = 1
     kwargs["_err_to_out"] = True
@@ -602,7 +607,7 @@ class Recipe(object):
         for library in self.libraries:
             static_fn = join(self.ctx.dist_dir, "lib", basename(library))
             libraries.append(static_fn)
-        command_logger.log(*['Recipe().dist_libraries'] + libraries)
+        build_logger.log(*['Recipe().dist_libraries'] + libraries)
         return libraries
 
     def get_build_dir(self, arch):
