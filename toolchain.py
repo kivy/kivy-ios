@@ -38,9 +38,9 @@ class CommandLogger(object):
         self.filename = filename
 
     def log(self, *args, **kw):
-        msg = ', '.join(args)
+        msg = ', '.join([str(arg) for arg in args])
         for k, v in kw:
-            msg += '\n{}={}'.format(k, v)
+            msg += '\n{}={}'.format(k, str(v))
         with open(self.filename, 'a') as f:
             f.write(msg)
 
