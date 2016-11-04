@@ -13,6 +13,7 @@ class CffiRecipe(CythonRecipe):
         "686af8873b70028fccf67b15c78fd4e4667a3da995007afc71e786d61b0a/"
         "cffi-{version}.tar.gz"
     )
+    library = "libcffi.a"
     depends = ["libffi", "host_setuptools", "pycparser"]
     cythonize = False
 
