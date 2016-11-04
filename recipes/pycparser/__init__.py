@@ -29,5 +29,7 @@ class PycparserRecipe(PythonRecipe):
         build_env['PYTHONPATH'] = pythonpath
         args = [hostpython, "setup.py", "install", "--prefix", dest_dir]
         shprint(*args, _env=build_env)
+        args = [hostpython, "setup.py", "install"]
+        shprint(*args, _env=build_env)
 
 recipe = PycparserRecipe()
