@@ -121,13 +121,6 @@ void load_custom_builtin_importer() {
         "import sys, imp\n" \
         "from os import environ\n" \
         "from os.path import exists, join\n" \
-        "# Fake redirection when we run the app without xcode\n" \
-        "if 'CFLOG_FORCE_STDERR' not in environ:\n" \
-        "    class fakestd(object):\n" \
-        "        def write(self, *args, **kw): pass\n" \
-        "        def flush(self, *args, **kw): pass\n" \
-        "    sys.stdout = fakestd()\n" \
-        "    sys.stderr = fakestd()\n" \
         "# Custom builtin importer for precompiled modules\n" \
         "class CustomBuiltinImporter(object):\n" \
         "    def find_module(self, fullname, mpath=None):\n" \
