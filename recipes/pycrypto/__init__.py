@@ -16,7 +16,6 @@ class PycryptoRecipe(CythonRecipe):
 
     def build_arch(self, arch):
         build_env = arch.get_env()
-        build_logger.log(**build_env)
         self.apply_patch('hash_SHA2_template.c.patch', target_dir=self.build_dir + '/src')
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,

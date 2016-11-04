@@ -18,7 +18,6 @@ class HostSetuptools(Recipe):
         # LINKED SETUPTOOLS CAN CAUSE TROUBLES, UNCOMMENT RETURN IF INSTALLING
         # PYTHON PACKAGE FAILS. UNPACKED SETUPTOOLS RESULT IN BDIST_EGG COMMAND
         # NOT FOUND
-        return
         # Extract setuptools egg and remove .pth files. Otherwise subsequent
         # python package installations using setuptools will raise exceptions.
         # Setuptools version 28.3.0
@@ -32,7 +31,9 @@ class HostSetuptools(Recipe):
             shprint(unzip, setuptools_egg_path)
         os.remove(setuptools_egg_path)
         os.remove('setuptools.pth')
-        os.remove('easy-install.pth')
+        # XXX: setuptools egg is referenced in easy-install.pth, check removal
+        #      after unpacking setuptools if necessary
+        #os.remove('easy-install.pth')
         shutil.rmtree('EGG-INFO')
 
 recipe = HostSetuptools()
