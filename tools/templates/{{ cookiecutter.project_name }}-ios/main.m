@@ -121,6 +121,14 @@ void load_custom_builtin_importer() {
         "import sys, imp\n" \
         "from os import environ\n" \
         "from os.path import exists, join\n" \
+        "# Fake redirection to supress console output\n" \
+        "if environ.get('KIVY_NO_CONSOLE', '0') == '1':\n" \
+        "    print('Killing console. Remove me!')\n" \
+        "    class fakestd(object):\n" \
+        "        def write(self, *args, **kw): pass\n" \
+        "        def flush(self, *args, **kw): pass\n" \
+        "    sys.stdout = fakestd()\n" \
+        "    sys.stderr = fakestd()\n" \
         "# Custom builtin importer for precompiled modules\n" \
         "class CustomBuiltinImporter(object):\n" \
         "    def find_module(self, fullname, mpath=None):\n" \
