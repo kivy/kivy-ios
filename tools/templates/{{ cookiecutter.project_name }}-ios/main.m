@@ -123,7 +123,6 @@ void load_custom_builtin_importer() {
         "from os.path import exists, join\n" \
         "# Fake redirection to supress console output\n" \
         "if environ.get('KIVY_NO_CONSOLE', '0') == '1':\n" \
-        "    print('Killing console. Remove me!')\n" \
         "    class fakestd(object):\n" \
         "        def write(self, *args, **kw): pass\n" \
         "        def flush(self, *args, **kw): pass\n" \
