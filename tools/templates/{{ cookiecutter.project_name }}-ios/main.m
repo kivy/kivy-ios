@@ -121,8 +121,8 @@ void load_custom_builtin_importer() {
         "import sys, imp\n" \
         "from os import environ\n" \
         "from os.path import exists, join\n" \
-        "# Fake redirection when we run the app without xcode\n" \
-        "if 'CFLOG_FORCE_STDERR' not in environ:\n" \
+        "# Fake redirection to supress console output\n" \
+        "if environ.get('KIVY_NO_CONSOLE', '0') == '1':\n" \
         "    class fakestd(object):\n" \
         "        def write(self, *args, **kw): pass\n" \
         "        def flush(self, *args, **kw): pass\n" \
