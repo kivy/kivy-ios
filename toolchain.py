@@ -19,9 +19,9 @@ import shutil
 import fnmatch
 from datetime import datetime
 try:
-    from urllib.request import FancyURLopener
+    from urllib.request import FancyURLopener, urlcleanup
 except ImportError:
-    from urllib import FancyURLopener
+    from urllib import FancyURLopener, urlcleanup
 
 curdir = dirname(__file__)
 sys.path.insert(0, join(curdir, "tools", "external"))
@@ -409,6 +409,9 @@ class Recipe(object):
             filename = join(cwd, filename)
         if exists(filename):
             unlink(filename)
+
+        # Clean up temporary files just in case before downloading.
+        urlcleanup()
 
         print('Downloading {0}'.format(url))
         urlretrieve(url, filename, report_hook)
