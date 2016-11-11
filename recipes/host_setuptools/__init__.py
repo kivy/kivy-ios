@@ -15,9 +15,6 @@ class HostSetuptools(Recipe):
         hostpython = sh.Command(self.ctx.hostpython)
         sh.curl("-O",  "https://bootstrap.pypa.io/ez_setup.py")
         shprint(hostpython, "./ez_setup.py")
-        # LINKED SETUPTOOLS CAN CAUSE TROUBLES, UNCOMMENT RETURN IF INSTALLING
-        # PYTHON PACKAGE FAILS. UNPACKED SETUPTOOLS RESULT IN BDIST_EGG COMMAND
-        # NOT FOUND
         # Extract setuptools egg and remove .pth files. Otherwise subsequent
         # python package installations using setuptools will raise exceptions.
         # Setuptools version 28.3.0

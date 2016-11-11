@@ -10,7 +10,7 @@
 +	 * of trying to dlopen, directly do the dlsym.
 +	 * -- Mathieu
 +	 */
-+    return (dl_funcptr) dlsym(RTLD_MAIN_ONLY, funcname);
++    return (dl_funcptr) dlsym(RTLD_SELF, funcname);
 +
 +#if 0
      if (fp != NULL) {
