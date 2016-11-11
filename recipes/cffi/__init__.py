@@ -50,10 +50,11 @@ class CffiRecipe(CythonRecipe):
         #   File "/.../kivy-ios/dist/hostpython/lib/python2.7/site-packages/cffi/api.py", line 56, in __init__
         #     import _cffi_backend as backend
         # ImportError: dynamic module does not define init function (init_cffi_backend)
-        r = self.get_recipe('hostlibffi', self.ctx)
-        build_env = r.get_recipe_env(arch)
-        args = [hostpython, "setup.py", "install"]
-        shprint(*args, _env=build_env)
+        #
+        #r = self.get_recipe('hostlibffi', self.ctx)
+        #build_env = r.get_recipe_env(arch)
+        #args = [hostpython, "setup.py", "install"]
+        #shprint(*args, _env=build_env)
 
         # install cffi in root site packages
         build_env = arch.get_env()
