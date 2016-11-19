@@ -1145,7 +1145,7 @@ Xcode:
 
         def distclean(self):
             parser = argparse.ArgumentParser(
-                    description="Clean the build, download and dist")
+                    description="Clean the build, download, and dist")
             args = parser.parse_args(sys.argv[2:])
             ctx = Context()
             if exists(ctx.build_dir):
@@ -1175,7 +1175,7 @@ Xcode:
             parser = argparse.ArgumentParser(
                     description="Create a new xcode project")
             parser.add_argument("name", help="Name of your project")
-            parser.add_argument("directory", help="Directory where your project live")
+            parser.add_argument("directory", help="Directory where your project lives")
             args = parser.parse_args(sys.argv[2:])
             
             from cookiecutter.main import cookiecutter
