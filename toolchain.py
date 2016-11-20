@@ -1185,6 +1185,7 @@ Xcode:
                 "title": args.name,
                 "project_name": args.name.lower(),
                 "domain_name": "org.kivy.{}".format(args.name.lower()),
+                "kivy_dir": dirname(realpath(__file__)),
                 "project_dir": realpath(args.directory),
                 "version": "1.0.0",
                 "dist_dir": ctx.dist_dir,
