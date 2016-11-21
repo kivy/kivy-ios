@@ -5,8 +5,8 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#include "../dist/root/python/include/python2.7/Python.h"
-#include "../dist/include/common/sdl2/SDL_main.h"
+#include "{{ cookiecutter.kivy_dir }}/dist/root/python/include/python2.7/Python.h"
+#include "{{ cookiecutter.kivy_dir }}/dist/include/common/sdl2/SDL_main.h"
 #include <dlfcn.h>
 
 void export_orientation();
