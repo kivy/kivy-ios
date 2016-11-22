@@ -5,10 +5,8 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-//#include <python2.7/Python.h>
-//#include <Python.h>
-#include "../dist/root/python/include/python2.7/Python.h"
-#include "../dist/include/common/sdl2/SDL_main.h"
+#include "{{ cookiecutter.kivy_dir }}/dist/root/python/include/python2.7/Python.h"
+#include "{{ cookiecutter.kivy_dir }}/dist/include/common/sdl2/SDL_main.h"
 #include <dlfcn.h>
 
 void export_orientation();
@@ -23,14 +21,14 @@ int main(int argc, char *argv[]) {
     chdir("YourApp");
     
     // Special environment to prefer .pyo, and don't write bytecode if .py are found
-    // because the process will not have write attribute on the device.
+    // because the process will not have a write attribute on the device.
     putenv("PYTHONOPTIMIZE=2");
     putenv("PYTHONDONTWRITEBYTECODE=1");
     putenv("PYTHONNOUSERSITE=1");
     putenv("PYTHONPATH=.");
     //putenv("PYTHONVERBOSE=1");
     
-    // Kivy environment to prefer some implementation on ios platform
+    // Kivy environment to prefer some implementation on iOS platform
     putenv("KIVY_BUILD=ios");
     putenv("KIVY_NO_CONFIG=1");
     putenv("KIVY_NO_FILELOG=1");
@@ -52,7 +50,7 @@ int main(int argc, char *argv[]) {
     Py_Initialize();    
     PySys_SetArgv(argc, argv);
 
-    // If other modules are using thread, we need to initialize them before.
+    // If other modules are using the thread, we need to initialize them before.
     PyEval_InitThreads();
 
     // Add an importer for builtin modules
@@ -78,7 +76,7 @@ int main(int argc, char *argv[]) {
     
     [pool release];
     
-    // Look like the app still runn even when we leaved here.
+    // Look like the app still runs even when we left here.
     exit(ret);
     return ret;
 }
