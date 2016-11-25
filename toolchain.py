@@ -578,7 +578,8 @@ class Recipe(object):
         value = self.ctx.state.get(key)
         if not value:
             value = self.get_archive_rootdir(self.archive_fn)
-            self.ctx.state[key] = value
+            if value is not None:
+                self.ctx.state[key] = value
         return value
 
     def execute(self):
@@ -614,7 +615,9 @@ class Recipe(object):
             fn = self.archive_fn
             if not exists(fn):
                 self.download_file(self.url.format(version=self.version), fn)
-            self.ctx.state[key] = self.get_archive_rootdir(self.archive_fn)
+            status = self.get_archive_rootdir(self.archive_fn)
+            if status is not None:
+                self.ctx.state[key] = status
 
     @cache_execution
     def extract(self):
