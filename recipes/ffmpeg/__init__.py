@@ -4,11 +4,12 @@ import sh
 
 
 class FFMpegRecipe(Recipe):
-    version = "2.6.3"
+    version = "3.2.1"
     url = "http://www.ffmpeg.org/releases/ffmpeg-{version}.tar.bz2"
     include_per_arch = True
     include_dir = "dist/include"
     optional_depends = ["openssl"]
+    pbx_frameworks = ["VideoToolbox"]
     libraries = [
         "libavcodec/libavcodec.a",
         "libavdevice/libavdevice.a",
