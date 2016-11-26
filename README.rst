@@ -138,9 +138,9 @@ Using recipes
 
 Recipes are used to install and compile any libraries you may need to use. These
 recipes follow the same format as those used by the
-[Python-for-Android](https://github.com/kivy/python-for-android) project.
+`Python-for-Android <https://github.com/kivy/python-for-android>`_ project.
 Please refer to their
-[recipe documentation](https://python-for-android.readthedocs.io/en/latest/recipes/)
+`recipe documentation <https://python-for-android.readthedocs.io/en/latest/recipes/>`_
 for more details.
 
 Reducing the application size
