@@ -131,7 +131,16 @@ You can configure and customize your app in various ways:
 
     If you wish to restrict your apps orientation, you should do this via
     the 'export_orientation' function in 'main.m'. The XCode orientation
-    settings should be set to support all. 
+    settings should be set to support all.
+
+Using recipes
+-------------
+
+Recipes are used to install and compile any libraries you may need to use. These
+recipes follow the same format as those used by the [Python-for-Android]
+(https://github.com/kivy/python-for-android) project. Please refer to their
+[recipe documentation]
+(https://python-for-android.readthedocs.io/en/latest/recipes/) for more details.
 
 Reducing the application size
 -----------------------------
