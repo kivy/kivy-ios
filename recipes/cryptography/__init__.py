@@ -1,11 +1,11 @@
 from os.path import join
-from toolchain import CythonRecipe
+from toolchain import CythonRecipe, PythonRecipe
 from toolchain import shprint
 import os
 import sh
 
 
-class CryptographyRecipe(CythonRecipe):
+class CryptographyRecipe(PythonRecipe):
     name = "cryptography"
     version = "1.5.2"
     url = (
@@ -13,8 +13,9 @@ class CryptographyRecipe(CythonRecipe):
         "60984cb85cc38c4ebdfca27b32a6df6f1914959d8790f5a349608c78be61/"
         "cryptography-{version}.tar.gz"
     )
-    library = "libcryptography.a"
-    depends = ["host_setuptools", "cffi", "six", "idna", "pyasn1", "enum34"]
+    # library = "libcryptography.a"
+    depends = ["host_setuptools", "host_cffi", "cffi", "six", "idna", "pyasn1",
+            "enum34", "setuptools"]
     cythonize = False
 
     def get_recipe_env(self, arch):
@@ -38,10 +39,11 @@ class CryptographyRecipe(CythonRecipe):
         dest_dir = join(self.ctx.dist_dir, "root", "python")
         pythonpath = join(dest_dir, 'lib', 'python2.7', 'site-packages')
         build_env['PYTHONPATH'] = pythonpath
-        args = [hostpython, "setup.py", "install", "--prefix", dest_dir]
+        args = [hostpython, "setup.py", "install", "--prefix", dest_dir,
+        "--old-and-unmanageable"]
         shprint(*args, _env=build_env)
-        args = [hostpython, "setup.py", "install"]
-        shprint(*args, _env=build_env)
+        #args = [hostpython, "setup.py", "install"]
+        #shprint(*args, _env=build_env)
 
 recipe = CryptographyRecipe()
 

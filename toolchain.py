@@ -456,6 +456,7 @@ class Recipe(object):
         urlcleanup()
 
         print('Downloading {0}'.format(url))
+        print("filename", filename)
         urlretrieve(url, filename, report_hook)
         return filename
 
