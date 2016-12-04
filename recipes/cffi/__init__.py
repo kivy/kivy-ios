@@ -6,6 +6,7 @@ import sh
 
 
 class CffiRecipe(CythonRecipe):
+    depends = ["host_cffi"]
     name = "cffi"
     version = "1.8.3"
     url = (
