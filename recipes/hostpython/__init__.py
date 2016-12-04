@@ -24,7 +24,7 @@ class HostpythonRecipe(Recipe):
             return
         self.copy_file("_scproxy.py", "Lib/_scproxy.py")
         self.apply_patch("ssize-t-max.patch")
-        self.apply_patch("dynload.patch")
+        # self.apply_patch("dynload.patch")
         self.apply_patch("static-_sqlite3.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         if "openssl.build_all" in self.ctx.state:
