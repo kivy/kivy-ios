@@ -7,7 +7,7 @@ import os
 class pkg_resources(Recipe):
     depends = ["hostpython", "python"]
     archs = ['i386']
-    url = ""
+    url = "pkgr"
 
     def prebuild_arch(self, arch):
         sh.cp("pkg_resources.py", join(self.ctx.dist_dir, "root", "python", "lib", "python2.7", "site-packages", "pkg_resources.py"))
