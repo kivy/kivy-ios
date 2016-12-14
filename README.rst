@@ -80,8 +80,7 @@ You can think of it as follows: the kivy recipe will compile everything
 necessary for a minimal working version of Kivy.
 
 Don't grab a coffee, just do diner. Compiling all the libraries for the first
-time, 4x over (remember, 4 archs, 2 per platforms), will take time. (TODO:
-provide a way to not compile for the simulator.).
+time, 4x over (remember, 4 archs, 2 per platforms by default) will take time.
 
 For a complete list of available commands, type::
 
