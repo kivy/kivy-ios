@@ -6,7 +6,8 @@ class KivyRecipe(CythonRecipe):
     version = "1.9.1"
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
-    depends = ["python", "sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios"]
+    depends = ["python", "sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios",
+               "pyobjus"]
     pbx_frameworks = ["OpenGLES", "Accelerate"]
     pre_build_ext = True
 
