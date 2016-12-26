@@ -1,60 +1,94 @@
---- Pillow-2.7.0/setup.py	2014-12-31 20:42:56.000000000 +0530
-+++ Pillow-2.7.0/setup.py	2015-02-26 19:38:59.000000000 +0530
-@@ -20,7 +20,6 @@
- 
+--- Pillow-3.4.2/setup.py 2016-12-19 19:10:30.000000000 +0530
++++ Pillow-2.4.2/setup.py 2016-12-19 23:07:15.000000000 +0530
+@@ -6,7 +6,9 @@
+ # Final rating: 10/10
+ # Your cheese is so fresh most people think it's a cream: Mascarpone
+ # ------------------------------
++
+ from __future__ import print_function
++BUILD_IOS = True
+ import glob
+ import os
+ import platform as plat
+@@ -21,7 +23,8 @@
+
  # monkey patch import hook. Even though flake8 says it's not used, it is.
  # comment this out to disable multi threaded builds.
 -import mp_compile
- 
- _IMAGING = (
-     "decode", "encode", "map", "display", "outline", "path")
-@@ -83,7 +82,7 @@
++if not BUILD_IOS:
++    import mp_compile
+
+ _IMAGING = ("decode", "encode", "map", "display", "outline", "path")
+
+@@ -103,11 +106,13 @@
      return open(file, 'rb').read()
- 
- try:
+
+
+-try:
 -    import _tkinter
-+    _tkinter = None
- except (ImportError, OSError):
-     # pypy emits an oserror
-     _tkinter = None
-@@ -186,7 +185,7 @@
-                 for d in os.environ[k].split(os.path.pathsep):
+-except (ImportError, OSError):
+-    # pypy emits an oserror
+-    _tkinter = None
++_tkinter = None
++if not BUILD_IOS:
++    try:
++        import _tkinter
++    except (ImportError, OSError):
++        # pypy emits an oserror
++        pass
+
+ NAME = 'Pillow'
+ PILLOW_VERSION = '3.4.2'
+@@ -216,7 +221,7 @@
                      _add_directory(library_dirs, d)
- 
--        prefix = sysconfig.get_config_var("prefix")
-+        prefix = False
-         if prefix:
+
+         prefix = sysconfig.get_config_var("prefix")
+-        if prefix:
++        if not BUILD_IOS and prefix:
              _add_directory(library_dirs, os.path.join(prefix, "lib"))
              _add_directory(include_dirs, os.path.join(prefix, "include"))
-@@ -199,7 +198,9 @@
-             _add_directory(library_dirs, os.path.join(
-                 "/usr/lib", "python%s" % sys.version[:3], "config"))
- 
+
+@@ -232,7 +237,7 @@
+                            os.path.join("/usr/lib", "python%s" %
+                                         sys.version[:3], "config"))
+
 -        elif sys.platform == "darwin":
-+        elif True:
-+            pass
-+        if False:
++        elif not BUILD_IOS and sys.platform == "darwin":
              # attempt to make sure we pick freetype2 over other versions
              _add_directory(include_dirs, "/sw/include/freetype2")
              _add_directory(include_dirs, "/sw/lib/freetype2/include")
-@@ -346,11 +347,7 @@
-                 _add_directory(include_dirs, tcl_dir)
- 
+@@ -346,7 +351,7 @@
+         # FIXME: check /opt/stuff directories here?
+
          # standard locations
--        _add_directory(library_dirs, "/usr/local/lib")
--        _add_directory(include_dirs, "/usr/local/include")
- 
--        _add_directory(library_dirs, "/usr/lib")
--        _add_directory(include_dirs, "/usr/include")
- 
-         # on Windows, look for the OpenJPEG libraries in the location that
-         # the official installer puts them
-@@ -575,7 +572,7 @@
-             exts.append(Extension(
-                 "PIL._webp", ["_webp.c"], libraries=libs, define_macros=defs))
- 
--        if sys.platform == "darwin":
-+        if False:
-             # locate Tcl/Tk frameworks
-             frameworks = []
-             framework_roots = [
+-        if not self.disable_platform_guessing:
++        if not BUILD_IOS and not self.disable_platform_guessing:
+             _add_directory(library_dirs, "/usr/local/lib")
+             _add_directory(include_dirs, "/usr/local/include")
+
+@@ -389,7 +394,9 @@
+
+         if feature.want('zlib'):
+             _dbg('Looking for zlib')
+-            if _find_include_file(self, "zlib.h"):
++            if BUILD_IOS:
++                feature.zlib = 'z'
++            elif _find_include_file(self, "zlib.h"):
+                 if _find_library_file(self, "z"):
+                     feature.zlib = "z"
+                 elif (sys.platform == "win32" and
+@@ -592,10 +599,10 @@
+                                   define_macros=defs))
+
+         tk_libs = ['psapi'] if sys.platform == 'win32' else []
+-        exts.append(Extension("PIL._imagingtk",
+-                              ["_imagingtk.c", "Tk/tkImaging.c"],
+-                              include_dirs=['Tk'],
+-                              libraries=tk_libs))
++#        exts.append(Extension("PIL._imagingtk",
++#                              ["_imagingtk.c", "Tk/tkImaging.c"],
++#                              include_dirs=['Tk'],
++#                              libraries=tk_libs))
+
+         exts.append(Extension("PIL._imagingmath", ["_imagingmath.c"]))
+         exts.append(Extension("PIL._imagingmorph", ["_imagingmorph.c"]))
