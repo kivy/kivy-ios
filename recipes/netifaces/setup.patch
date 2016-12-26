@@ -1,0 +1,23 @@
+diff -r 14851185aa71 setup.py
+--- a/setup.py  Thu Apr 07 10:42:52 2016 +0200
++++ b/setup.py  Sat Apr 30 20:35:58 2016 +0200
+@@ -79,12 +79,17 @@
+                                                 include_dirs=include_dirs,
+                                                 debug=self.debug)
+                 if link:
++                    try:
++                        ld_flags = os.environ['LDFLAGS'].split()
++                    except KeyError:
++                        ld_flags = []
+                     self.compiler.link_executable(objects,
+                                                   'conftest',
+                                                   output_dir=self.build_temp,
+                                                   library_dirs=library_dirs,
+                                                   libraries=libraries,
+-                                                  debug=self.debug)
++                                                  debug=self.debug,
++                                                  extra_preargs=ld_flags)
+                     if execute:
+                         abspath = os.path.abspath(os.path.join(self.build_temp,
+                                                                'conftest'))
+
