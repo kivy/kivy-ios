@@ -6,8 +6,8 @@ import shutil
 
 
 class HostpythonRecipe(Recipe):
-    version = "2.7.1"
-    url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
+    version = "2.7.13"
+    url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
     depends = ["hostlibffi"]
     optional_depends = ["openssl"]
     archs = ["x86_64"]
@@ -66,6 +66,7 @@ class HostpythonRecipe(Recipe):
         if "openssl.build_all" in self.ctx.state:
             build_env["CFLAGS"] += " -I{}".format(join(self.ctx.dist_dir, "include",
                                                        "x86_64", "openssl"))
+            build_env["LDFLAGS"] += " -L{}".format(join(self.ctx.dist_dir, "lib"))
 
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
