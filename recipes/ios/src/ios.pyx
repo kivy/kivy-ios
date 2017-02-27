@@ -14,6 +14,7 @@ cdef extern from "ios_wrapper.h":
     int ios_send_email(char *subject, char *text, char *mimetype, char
             *filename, char *filename_alias, ios_send_email_cb cb, void *userdata)
     void ios_open_url(char *url)
+    void load_url_webview(char *url)
     float ios_uiscreen_get_scale()
     int ios_uiscreen_get_dpi()
 
@@ -22,6 +23,29 @@ cdef void _send_email_done(char *status, void *data):
     callback(status)
     Py_DECREF(callback)
 
+#
+#Support for iOS webview
+#
+class IOSWebView(object):
+    def open(self, url):
+        open_url_wbv(url)
+        
+
+def open_url_wbv(url):
+    '''
+    OPEN URL in webview
+
+    :Parameters:
+        `url`: str
+            URL string
+
+    Example for opening up a web page in UIWebview::
+
+        import ios
+        url = "http://www.google.com"
+        ios.IOSWebView().open(url)
+    '''
+    load_url_webview(url)
 
 #
 # Support for webbrowser module
