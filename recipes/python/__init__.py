@@ -60,11 +60,8 @@ class PythonRecipe(Recipe):
                 _env=build_env)
 
         self._patch_pyconfig()
-        if arch.arch == "armv7" or arch.arch == "arm64" :
-            self.apply_patch("random.patch")
+        self.apply_patch("random.patch")
         self.apply_patch("ctypes_duplicate.patch")
-        self.apply_patch("ctypes_duplicate_longdouble.patch")
-        self.apply_patch("more_duplicates.patch")
 
         shprint(sh.make, "-j4",
                 "CROSS_COMPILE_TARGET=yes",

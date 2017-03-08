@@ -234,7 +234,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "if [ $arch = \"arm64\" ]; then export local_arch=\"aarch64\"; else if [ $arch = \"armv7\" ]; then export local_arch=\"arm\"; else export local_arch=$arch; fi; export PYTHONPATH={{ cookiecutter.dist_dir }}/../build/python/$arch/Python-2.7.13/build/lib.darwin-$local_arch-2.7; {{ cookiecutter.dist_dir }}/hostpython/bin/python -OO -m compileall \"$PROJECT_DIR\"/YourApp";
+			shellScript = "if [ $arch = \"arm64\" ]; then export local_arch=\"aarch64\"; elif [ $arch = \"armv7\" ]; then export local_arch=\"arm\"; else export local_arch=$arch; fi; export PYTHONPATH={{ cookiecutter.dist_dir }}/../build/python/$arch/Python-2.7.13/build/lib.darwin-$local_arch-2.7; {{ cookiecutter.dist_dir }}/hostpython/bin/python -OO -m compileall \"$PROJECT_DIR\"/YourApp";
 		};
 /* End PBXShellScriptBuildPhase section */
 
