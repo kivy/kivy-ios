@@ -4,41 +4,21 @@ import os
 import sys
 import subprocess
 
-sofiles = [ ]
-
+sofiles = []
 for dir in sys.argv[2:]:
-
     for fn in os.listdir(dir):
-        fn = os.path.join(dir, fn)
+        if fn.endswith(".so"):
+            fn = os.path.join(dir, fn)
+            if os.path.exists(fn + ".o") and os.path.exists(fn + ".libs"):
+                sofiles.append(fn)
 
-        if not fn.endswith(".so"):
-            continue
-
-        if not os.path.exists(fn + ".o"):
-            continue
-        if not os.path.exists(fn + ".libs"):
-            continue
-
-        sofiles.append(fn)
-
-# The raw argument list.
-args = [ ]
-
+args = []  # The raw argument list.
 for fn in sofiles:
-    afn = fn + ".o"
-    libsfn = fn + ".libs"
+    args.append(fn + ".o")
+    args.extend(open(fn + ".libs").read().split(" "))
 
-    args.append(afn)
-    args.extend(open(libsfn).read().split(" "))
-
-unique_args = [ ]
-
-while args:
-    a = args.pop()
-    if a not in unique_args:
-        unique_args.insert(0, a)
-
-
-unique_args = ' '.join([ x for x in unique_args if x.endswith('.so.o') ])
+unique_args = ' '.join(x for x in sorted(set(args)) if x.endswith('.so.o'))
 print('Biglink create %s library' % sys.argv[1])
-subprocess.Popen(("ar -q %s " % sys.argv[1]) + unique_args, shell=True).communicate()
+cmd = "ar -q %s %s" % (sys.argv[1], unique_args)
+print(cmd)
+subprocess.Popen(cmd, shell=True).communicate()
