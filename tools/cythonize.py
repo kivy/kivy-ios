@@ -43,7 +43,7 @@ def do(fn):
             pat = fmt.format(modname)
             sub = fmt.format(pac_mod)
             print('{}: {} -> {}'.format(i + 1, pat, sub))
-            data.replace(pat, sub)
+            data = data.replace(pat, sub)
         print('rewrite', fn_c)
         with open(fn_c, 'w') as fd:
             fd.write(data)
