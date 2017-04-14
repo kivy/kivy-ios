@@ -19,8 +19,8 @@ def resolve_cython():
 
 def do(fn):
     print('cythonize:', fn)
+    assert(fn.endswith('.pyx'))
     parts = fn.split('/')
-    assert(parts[-1].endswith('.pyx'))
     if parts[0] == '.':
         parts.pop(0)
     modname = parts[-1][:-4]
@@ -37,24 +37,13 @@ def do(fn):
         with open(fn_c) as fd:
             data = fd.read()
         modname = modname.split('.')[-1]
-        pat1 = 'init{}(void)'.format(modname)
-        sub1 = 'init{}_{}(void)'.format(package, modname)
-        pat2 = 'PyInit_{}(void)'.format(modname)
-        sub2 = 'PyInit{}_{}(void)'.format(package, modname)
-        pat3 = 'Pyx_NAMESTR("{}")'.format(modname)
-        sub3 = 'Pyx_NAMESTR("{}_{}")'.format(package, modname)
-        pat4 = '"{}"'.format(modname)
-        sub4 = '"{}_{}"'.format(package, modname)
-
-        print('1: {} -> {}'.format(pat1, sub1))
-        print('2: {} -> {}'.format(pat2, sub2))
-        print('3: {} -> {}'.format(pat3, sub3))
-        print('4: {} -> {}'.format(pat4, sub4))
-        data = data.replace(pat1, sub1)
-        data = data.replace(pat2, sub2)
-        data = data.replace(pat3, sub3)
-        data = data.replace(pat4, sub4)
-
+        pac_mod = '{}_{}'.format(package, modname)
+        fmts = ('init{}(void)', 'PyInit_{}(void)', 'Pyx_NAMESTR("{}")', '"{}"')
+        for i, fmt in enumerate(fmts):
+            pat = fmt.format(modname)
+            sub = fmt.format(pac_mod)
+            print('{}: {} -> {}'.format(i + 1, pat, sub))
+            data.replace(pat, sub)
         print('rewrite', fn_c)
         with open(fn_c, 'w') as fd:
             fd.write(data)
