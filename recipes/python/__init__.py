@@ -86,7 +86,7 @@ class PythonRecipe(Recipe):
             for line in lines[:]:
                 if pattern in line:
                     lines.remove(line)
-        with open(pyconfig) as fd:
+        with open(pyconfig, "r") as fd:
             lines = fd.readlines()
         _remove_line(lines, "#define HAVE_BIND_TEXTDOMAIN_CODESET 1")
         _remove_line(lines, "#define HAVE_FINITE 1")
@@ -107,7 +107,7 @@ class PythonRecipe(Recipe):
         _remove_line(lines, "#define HAVE_TMPNAM_R 1")
         _remove_line(lines, "#define HAVE__GETPTY 1")
         lines.append("#define HAVE_GETHOSTBYNAME 1\n")
-        with open(pyconfig, "wb") as fd:
+        with open(pyconfig, "w") as fd:
             fd.writelines(lines)
 
     def reduce_python(self):

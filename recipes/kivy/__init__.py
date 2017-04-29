@@ -35,7 +35,7 @@ class KivyRecipe(CythonRecipe):
             lines = fd.readlines()
         _remove_line(lines, "flags['libraries'] = ['GLESv2']")
         #_remove_line(lines, "c_options['use_sdl'] = True")
-        with open(pyconfig, "wb") as fd:
+        with open(pyconfig, "w") as fd:
             fd.writelines(lines)
 
 
