@@ -34,7 +34,7 @@ class LibffiRecipe(Recipe):
         self.set_marker("patched")
 
     def build_arch(self, arch):
-        shprint(sh.xcodebuild,
+        shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
                 "-sdk", "macosx",

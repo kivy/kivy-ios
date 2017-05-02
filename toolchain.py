@@ -355,6 +355,15 @@ class Context(object):
         if not ok:
             sys.exit(1)
 
+        self.use_pigz = sh.which('pigz')
+        self.use_pbzip2 = sh.which('pbzip2')
+
+        try:
+            num_cores = int(sh.sysctl('-n', 'hw.ncpu'))
+        except Exception:
+            num_cores = None
+        self.num_cores = num_cores if num_cores else 4  # default to 4 if we can't detect
+
         ensure_dir(self.root_dir)
         ensure_dir(self.build_dir)
         ensure_dir(self.cache_dir)
@@ -372,6 +381,14 @@ class Context(object):
 
         # set the state
         self.state = JsonStore(join(self.dist_dir, "state.db"))
+
+    @property
+    def concurrent_make(self):
+        return "-j{}".format(self.num_cores)
+
+    @property
+    def concurrent_xcodebuild(self):
+        return "IDEBuildOperationMaxNumberOfConcurrentCompileTasks={}".format(self.num_cores)
 
 
 class Recipe(object):
@@ -425,16 +442,24 @@ class Recipe(object):
             return
         print("Extract {} into {}".format(filename, cwd))
         if filename.endswith(".tgz") or filename.endswith(".tar.gz"):
-            shprint(sh.tar, "-C", cwd, "-xvzf", filename)
+            if self.ctx.use_pigz:
+                comp = '--use-compress-program={}'.format(self.ctx.use_pigz)
+            else:
+                comp = '-z'
+            shprint(sh.tar, "-C", cwd, "-xv", comp, "-f", filename)
 
         elif filename.endswith(".tbz2") or filename.endswith(".tar.bz2"):
-            shprint(sh.tar, "-C", cwd, "-xvjf", filename)
+            if self.ctx.use_pbzip2:
+                comp = '--use-compress-program={}'.format(self.ctx.use_pbzip2)
+            else:
+                comp = '-j'
+            shprint(sh.tar, "-C", cwd, "-xv", comp, "-f", filename)
 
         elif filename.endswith(".zip"):
             shprint(sh.unzip, "-d", cwd, filename)
 
         else:
-            print("Error: cannot extract, unreconized extension for {}".format(
+            print("Error: cannot extract, unrecognized extension for {}".format(
                 filename))
             raise Exception()
 
@@ -1088,14 +1113,20 @@ Xcode:
             getattr(self, args.command)()
 
         def build(self):
+            ctx = Context()
             parser = argparse.ArgumentParser(
                     description="Build the toolchain")
             parser.add_argument("recipe", nargs="+", help="Recipe to compile")
             parser.add_argument("--arch", action="append",
                                 help="Restrict compilation to this arch")
+            parser.add_argument("--concurrency", type=int, default=ctx.num_cores,
+                                help="number of concurrent build processes (where supported)")
+            parser.add_argument("--no-pigz", action="store_true", default=not bool(ctx.use_pigz),
+                                help="do not use pigz for gzip decompression")
+            parser.add_argument("--no-pbzip2", action="store_true", default=not bool(ctx.use_pbzip2),
+                                help="do not use pbzip2 for bzip2 decompression")
             args = parser.parse_args(sys.argv[2:])
 
-            ctx = Context()
             if args.arch:
                 if len(args.arch) == 1:
                     archs = args.arch[0].split()
@@ -1109,6 +1140,17 @@ Xcode:
                         continue
                 ctx.archs = [arch for arch in ctx.archs if arch.arch in archs]
                 print("Architectures restricted to: {}".format(archs))
+            ctx.num_cores = args.concurrency
+            if args.no_pigz:
+                ctx.use_pigz = False
+            if args.no_pbzip2:
+                ctx.use_pbzip2 = False
+            ctx.use_pigz = ctx.use_pbzip2
+            print("Building with {} processes, where supported".format(ctx.num_cores))
+            if ctx.use_pigz:
+                print("Using pigz to decompress gzip data")
+            if ctx.use_pbzip2:
+                print("Using pbzip2 to decompress bzip2 data")
             build_recipes(args.recipe, ctx)
 
         def recipes(self):

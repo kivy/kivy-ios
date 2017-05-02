@@ -85,7 +85,7 @@ class FFMpegRecipe(Recipe):
                     "config.asm")
         """
         shprint(sh.make, "clean", _env=build_env)
-        shprint(sh.make, "-j4", _env=build_env)
+        shprint(sh.make, self.ctx.concurrent_make, _env=build_env)
         shprint(sh.make, "install")
 
 

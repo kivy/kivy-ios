@@ -28,7 +28,7 @@ class FreetypeRecipe(Recipe):
                 "--enable-static=yes",
                 "--enable-shared=no")
         shprint(sh.make, "clean")
-        shprint(sh.make)
+        shprint(sh.make, self.ctx.concurrent_make)
 
 
 recipe = FreetypeRecipe()

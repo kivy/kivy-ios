@@ -73,7 +73,7 @@ class HostpythonRecipe(Recipe):
                 "--disable-toolbox-glue",
                 "--without-gcc",
                 _env=build_env)
-        shprint(sh.make, "-C", self.build_dir, "-j4", "python", "Parser/pgen",
+        shprint(sh.make, "-C", self.build_dir, self.ctx.concurrent_make, "python", "Parser/pgen",
                 _env=build_env)
         shutil.move("python", "hostpython")
         shutil.move("Parser/pgen", "Parser/hostpgen")
@@ -88,7 +88,7 @@ class HostpythonRecipe(Recipe):
         shprint(sh.ln, "-s",
                 join(build_dir, "hostpython"),
                 join(build_dir, "Python"))
-        shprint(sh.make,
+        shprint(sh.make, self.ctx.concurrent_make,
                 "-C", build_dir,
                 "bininstall", "inclinstall",
                 _env=build_env)

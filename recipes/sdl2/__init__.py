@@ -20,7 +20,7 @@ class LibSDL2Recipe(Recipe):
 
     def build_arch(self, arch):
         env = arch.get_env()
-        shprint(sh.xcodebuild,
+        shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
                 "CC={}".format(env['CC']),

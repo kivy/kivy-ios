@@ -12,7 +12,7 @@ class LibSDL2MixerRecipe(Recipe):
     pbx_libraries = ["libc++"]
 
     def build_arch(self, arch):
-        shprint(sh.xcodebuild,
+        shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
                 "HEADER_SEARCH_PATHS=$HEADER_SEARCH_PATHS {}".format(" ".join(arch.include_dirs)),
