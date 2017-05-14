@@ -31,6 +31,7 @@ class PythonRecipe(Recipe):
         self.apply_patch("xcompile.patch")
         self.apply_patch("setuppath.patch")
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
+        self.apply_patch("ipv6.patch")
         if "openssl.build_all" in self.ctx.state:
              self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
 
@@ -50,6 +51,7 @@ class PythonRecipe(Recipe):
                 "--prefix=/python",
                 "--with-system-ffi",
                 "--without-doc-strings",
+                "--enable-ipv6",
                 _env=build_env)
 
         self._patch_pyconfig()
