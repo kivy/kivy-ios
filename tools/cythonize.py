@@ -38,7 +38,7 @@ def do(fn):
             data = fd.read()
         modname = modname.split('.')[-1]
         pac_mod = '{}_{}'.format(package, modname)
-        fmts = ('init{}(void)', 'PyInit_{}(void)', 'Pyx_NAMESTR("{}")', '"{}"')
+        fmts = ('init{}(void)', 'PyInit_{}(void)', 'Pyx_NAMESTR("{}")', '"{}",')
         for i, fmt in enumerate(fmts):
             pat = fmt.format(modname)
             sub = fmt.format(pac_mod)
