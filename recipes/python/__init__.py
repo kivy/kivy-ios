@@ -58,7 +58,7 @@ class PythonRecipe(Recipe):
         self.apply_patch("ctypes_duplicate.patch")
         self.apply_patch("ctypes_duplicate_longdouble.patch")
 
-        shprint(sh.make, "-j4",
+        shprint(sh.make, self.ctx.concurrent_make,
                 "CROSS_COMPILE_TARGET=yes",
                 "HOSTPYTHON={}".format(self.ctx.hostpython),
                 "HOSTPGEN={}".format(self.ctx.hostpgen))
@@ -68,7 +68,7 @@ class PythonRecipe(Recipe):
         build_env = arch.get_env()
         build_dir = self.get_build_dir(arch.arch)
         build_env["PATH"] = os.environ["PATH"]
-        shprint(sh.make,
+        shprint(sh.make, self.ctx.concurrent_make,
                 "-C", build_dir,
                 "install",
                 "CROSS_COMPILE_TARGET=yes",
