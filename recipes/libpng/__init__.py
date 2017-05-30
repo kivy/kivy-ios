@@ -21,6 +21,6 @@ class PngRecipe(Recipe):
                 "--host={}".format(arch.triple),
                 "--disable-shared")
         shprint(sh.make, "clean")
-        shprint(sh.make, _env=build_env)
+        shprint(sh.make, self.ctx.concurrent_make, _env=build_env)
 
 recipe = PngRecipe()
