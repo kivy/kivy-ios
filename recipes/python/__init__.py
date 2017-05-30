@@ -5,8 +5,8 @@ import os
 
 
 class PythonRecipe(Recipe):
-    version = "2.7.1"
-    url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
+    version = "2.7.13"
+    url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
     depends = ["hostpython", "libffi", ]
     optional_depends = ["openssl"]
     library = "libpython2.7.a"
@@ -41,23 +41,30 @@ class PythonRecipe(Recipe):
     def build_arch(self, arch):
         build_env = arch.get_env()
         configure = sh.Command(join(self.build_dir, "configure"))
+        local_arch = arch.arch
+        if arch.arch == "arm64" :
+            local_arch = "aarch64"
         shprint(configure,
                 "CC={}".format(build_env["CC"]),
                 "LD={}".format(build_env["LD"]),
                 "CFLAGS={}".format(build_env["CFLAGS"]),
                 "LDFLAGS={} -undefined dynamic_lookup".format(build_env["LDFLAGS"]),
+                "ac_cv_file__dev_ptmx=no",
+                "ac_cv_file__dev_ptc=no",
                 "--without-pymalloc",
                 "--disable-toolbox-glue",
-                "--host={}-apple-darwin".format(arch),
+                "--host={}-apple-darwin".format(local_arch),
+                "--build=x86_64-apple-darwin16.4.0",
                 "--prefix=/python",
+                "--enable-ipv6",
                 "--with-system-ffi",
                 "--without-doc-strings",
                 "--enable-ipv6",
                 _env=build_env)
 
         self._patch_pyconfig()
+        self.apply_patch("random.patch")
         self.apply_patch("ctypes_duplicate.patch")
-        self.apply_patch("ctypes_duplicate_longdouble.patch")
 
         shprint(sh.make, self.ctx.concurrent_make,
                 "CROSS_COMPILE_TARGET=yes",
