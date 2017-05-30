@@ -1103,6 +1103,7 @@ Xcode:
     update        Update an existing xcode project (frameworks, libraries..)
     launchimage   Create Launch images for your xcode project
     icon          Create Icons for your xcode project
+    pip           Install a pip dependency into the distribution
 """)
             parser.add_argument("command", help="Command to run")
             args = parser.parse_args(sys.argv[1:2])
