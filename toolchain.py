@@ -227,7 +227,7 @@ class Arch64IOS(Arch):
     triple = "aarch64-apple-darwin13"
     version_min = "-miphoneos-version-min=7.0"
     sysroot = sh.xcrun("--sdk", "iphoneos", "--show-sdk-path").strip()
-    
+
 
 class Graph(object):
     # Taken from python-for-android/depsort
@@ -641,7 +641,7 @@ class Recipe(object):
                 shutil.copytree(src_dir, dest_dir)
                 return
             ensure_dir(build_dir)
-            self.extract_file(self.archive_fn, build_dir) 
+            self.extract_file(self.archive_fn, build_dir)
 
     @cache_execution
     def build(self, arch):
@@ -1058,13 +1058,13 @@ def update_pbxproj(filename):
 
 if __name__ == "__main__":
     import argparse
-    
+
     class ToolchainCL(object):
         def __init__(self):
             parser = argparse.ArgumentParser(
                     description="Tool for managing the iOS / Python toolchain",
                     usage="""toolchain <command> [<args>]
-                    
+
 Available commands:
     build         Build a recipe (compile a library for the required target
                   architecture)
@@ -1180,7 +1180,7 @@ Xcode:
             parser.add_argument("name", help="Name of your project")
             parser.add_argument("directory", help="Directory where your project lives")
             args = parser.parse_args(sys.argv[2:])
-            
+
             from cookiecutter.main import cookiecutter
             ctx = Context()
             template_dir = join(curdir, "tools", "templates")
@@ -1239,7 +1239,6 @@ Xcode:
                     continue
                 recipe = Recipe.get_recipe(recipe, ctx)
                 recipe.init_with_ctx(ctx)
-            print(ctx.site_packages_dir)
             if not hasattr(ctx, "site_packages_dir"):
                 print("ERROR: python must be compiled before using pip")
                 sys.exit(1)
@@ -1249,16 +1248,21 @@ Xcode:
                 "CXX": "/bin/false",
                 "PYTHONPATH": ctx.site_packages_dir,
                 "PYTHONOPTIMIZE": "2",
-                "PIP_INSTALL_TARGET": ctx.site_packages_dir
+                # "PIP_INSTALL_TARGET": ctx.site_packages_dir
             }
-            print(pip_env)
-            pip_path = sh.which("pip")
-            args = [pip_path] + sys.argv[2:]
+            pip_path = sh.which("pip2")
+            pip_args = []
+            if len(sys.argv) > 2 and sys.argv[2] == "install":
+                pip_args = ["--isolated", "--prefix", ctx.python_prefix]
+                args = [pip_path] + [sys.argv[2]] + pip_args + sys.argv[3:]
+            else:
+                args = [pip_path] + pip_args + sys.argv[2:]
+
             if not pip_path:
                 print("ERROR: pip not found")
                 sys.exit(1)
             import os
-            print("-- execute pip with: {}".format(args)) 
+            print("-- execute pip with: {}".format(args))
             os.execve(pip_path, args, pip_env)
 
         def launchimage(self):

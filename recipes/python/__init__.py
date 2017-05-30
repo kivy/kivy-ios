@@ -15,6 +15,7 @@ class PythonRecipe(Recipe):
     def init_with_ctx(self, ctx):
         super(PythonRecipe, self).init_with_ctx(ctx)
         self.ctx.python_ver_dir = "python2.7"
+        self.ctx.python_prefix = join(ctx.dist_dir, "root", "python")
         self.ctx.site_packages_dir = join(
             ctx.dist_dir, "root", "python", "lib", ctx.python_ver_dir,
             "site-packages")
