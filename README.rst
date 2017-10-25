@@ -173,6 +173,30 @@ things you can do to achieve this:
    Note that these packages will not run in the iOS emulators, so use them
    only for deployment.
 
+Usage
+-----
+
+::
+
+   Usage:
+
+      ./toolchain.py <command> [<args>]
+
+   Available commands:
+       build         Build a recipe (compile a library for the required target
+                     architecture)
+       clean         Clean the build of the specified recipe
+       distclean     Clean the build and the result
+       recipes       List all the available recipes
+       status        List all the recipes and their build status
+
+   Xcode:
+       create        Create a new xcode project
+       update        Update an existing xcode project (frameworks, libraries..)
+       launchimage   Create Launch images for your xcode project
+       icon          Create Icons for your xcode project
+       pip           Install a pip dependency into the distribution
+
 FAQ
 ---
 
