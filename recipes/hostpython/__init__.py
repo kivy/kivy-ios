@@ -60,6 +60,8 @@ class HostpythonRecipe(Recipe):
                 ])
         build_env["CFLAGS"] = " ".join([
                 "--sysroot={}".format(sdk_path),
+                "-arch x86_64",
+                "-mmacosx-version-min=10.12",
                 "-I{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "include"))
                 ])
 
