@@ -35,6 +35,7 @@ class PythonRecipe(Recipe):
         self.apply_patch("ipv6.patch")
         if "openssl.build_all" in self.ctx.state:
              self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
+        self.apply_patch("posixmodule.patch")
 
         self.set_marker("patched")
 
