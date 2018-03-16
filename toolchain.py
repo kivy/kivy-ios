@@ -103,7 +103,7 @@ class JsonStore(object):
         return self.data.keys()
 
     def remove_all(self, prefix):
-        for key in self.data.keys()[:]:
+        for key in tuple(self.data.keys()):
             if not key.startswith(prefix):
                 continue
             del self.data[key]
