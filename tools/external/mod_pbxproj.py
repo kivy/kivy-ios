@@ -36,14 +36,28 @@ import datetime
 import json
 import ntpath
 import os
-import plistlib
 import re
 import shutil
 import subprocess
 import uuid
+import plistlib
 
-from UserDict import IterableUserDict
-from UserList import UserList
+try:
+    from UserDict import IterableUserDict
+    from UserList import UserList
+
+except:
+    # python 3 support
+    from collections import UserDict as IterableUserDict
+    from collections import UserList
+
+try:
+    from plistlib import PlistWriter
+
+except:
+    # python 3 support
+    from plistlib import _PlistWriter as PlistWriter
+    basestring = str
 
 regex = '[a-zA-Z0-9\\._/-]*'
 
@@ -127,7 +141,7 @@ class PBXType(PBXDict):
             if cls and issubclass(cls, PBXType):
                 return cls(o)
 
-            print 'warning: unknown PBX type: %s' % isa
+            print('warning: unknown PBX type: %s' % isa)
             return PBXDict(o)
         else:
             return o
@@ -203,8 +217,8 @@ class PBXFileReference(PBXType):
         self.build_phase = build_phase
 
         if f_type == '?' and not ignore_unknown_type:
-            print 'unknown file extension: %s' % ext
-            print 'please add extension and Xcode type to PBXFileReference.types'
+            print('unknown file extension: %s' % ext)
+            print('please add extension and Xcode type to PBXFileReference.types')
 
         return f_type
 
@@ -217,7 +231,7 @@ class PBXFileReference(PBXType):
     @classmethod
     def Create(cls, os_path, tree='SOURCE_ROOT', ignore_unknown_type=False):
         if tree not in cls.trees:
-            print 'Not a valid sourceTree type: %s' % tree
+            print('Not a valid sourceTree type: %s' % tree)
             return None
 
         fr = cls()
@@ -565,11 +579,18 @@ class XcodeProject(PBXDict):
             root_group_id = self.root_object.get('mainGroup')
             self.root_group = self.objects[root_group_id]
         else:
-            print "error: project has no root object"
+            print("error: project has no root object")
             self.root_object = None
             self.root_group = None
 
-        for k, v in self.objects.iteritems():
+        try:            
+            objectList = self.objects.iteritems()
+
+        except:
+            # python 3 support
+            objectList = self.objects.items()
+
+        for k, v in objectList:
             v.id = k
 
     def add_other_cflags(self, flags):
@@ -991,10 +1012,10 @@ class XcodeProject(PBXDict):
 
     def apply_patch(self, patch_path, xcode_path):
         if not os.path.isfile(patch_path) or not os.path.isdir(xcode_path):
-            print 'ERROR: couldn\'t apply "%s" to "%s"' % (patch_path, xcode_path)
+            print('ERROR: couldn\'t apply "%s" to "%s"' % (patch_path, xcode_path))
             return
 
-        print 'applying "%s" to "%s"' % (patch_path, xcode_path)
+        print('applying "%s" to "%s"' % (patch_path, xcode_path))
 
         return subprocess.call(['patch', '-p1', '--forward', '--directory=%s' % xcode_path, '--input=%s' % patch_path])
 
@@ -1269,14 +1290,31 @@ class XcodeProject(PBXDict):
                 else:
                     out.write(' ')
 
-            for key in sorted(root.iterkeys()):  # keep the same order as Apple.
+            try:
+                iterKeys = root.iterkeys()
+
+            except:
+                # python 3 support
+                iterkeys = root.keys()
+
+            for key in sorted(iterkeys):  # keep the same order as Apple.
                 if enters:
                     out.write('\t' + deep)
 
                 if re.match(regex, key).group(0) == key:
-                    out.write(key.encode("utf-8") + ' = ')
+                    try:
+                        out.write(key.encode("utf-8") + ' = ')
+
+                    except:
+                        # python 3 support
+                        out.write(key + ' = ')
                 else:
-                    out.write('"' + key.encode("utf-8") + '" = ')
+                    try:
+                        out.write('"' + key.encode("utf-8") + '" = ')
+
+                    except:
+                        # python 3 support
+                        out.write('"' + key + '" = ')
 
                 if key == 'objects':
                     out.write('{')  # open the objects section
@@ -1309,7 +1347,13 @@ class XcodeProject(PBXDict):
                             continue
 
                         out.write('\n/* Begin %s section */' % section[0].encode("utf-8"))
-                        self.sections.get(section[0]).sort(cmp=lambda x, y: cmp(x[0], y[0]))
+
+                        try:
+                            self.sections.get(section[0]).sort(cmp=lambda x, y: cmp(x[0], y[0]))
+
+                        except:
+                            # python 3 support
+                            self.sections.get(section[0]).sort(key=lambda elem: elem[0])
 
                         for pair in self.sections.get(section[0]):
                             key = pair[0]
@@ -1319,16 +1363,31 @@ class XcodeProject(PBXDict):
                             if enters:
                                 out.write('\t\t' + deep)
 
-                            out.write(key.encode("utf-8"))
+                            try:
+                                out.write(key.encode("utf-8"))
+
+                            except:
+                                # python 3 support
+                                out.write(key)
 
                             if key in self.uuids:
-                                out.write(" /* " + self.uuids[key].encode("utf-8") + " */")
+                                try:
+                                    out.write(" /* " + self.uuids[key].encode("utf-8") + " */")
+
+                                except:
+                                    # python 3 support
+                                    out.write(" /* " + self.uuids[key] + " */")
 
                             out.write(" = ")
                             self._printNewXCodeFormat(out, value, '\t\t' + deep, enters=section[1])
                             out.write(';')
 
-                        out.write('\n/* End %s section */\n' % section[0].encode("utf-8"))
+                        try:
+                            out.write('\n/* End %s section */\n' % section[0].encode("utf-8"))
+
+                        except:
+                            # python 3 support
+                            out.write('\n/* End %s section */\n' % section[0])
 
                     out.write(deep + '\t}')  # close of the objects section
                 else:
@@ -1371,12 +1430,28 @@ class XcodeProject(PBXDict):
 
         else:
             if len(root) > 0 and re.match(regex, root).group(0) == root:
-                out.write(root.encode("utf-8"))
+                try:                    
+                    out.write(root.encode("utf-8"))
+                
+                except:
+                    # python 3 support
+                    out.write(root)
+
             else:
-                out.write('"' + XcodeProject.addslashes(root.encode("utf-8")) + '"')
+                try:
+                    out.write('"' + XcodeProject.addslashes(root.encode("utf-8")) + '"')
+
+                except:
+                    # python 3 support
+                    out.write('"' + XcodeProject.addslashes(root) + '"')
 
             if root in self.uuids:
-                out.write(" /* " + self.uuids[root].encode("utf-8") + " */")
+                try:
+                    out.write(" /* " + self.uuids[root].encode("utf-8") + " */")
+
+                except:
+                    # python 3 support
+                    out.write(" /* " + self.uuids[root] + " */")
 
     @classmethod
     def Load(cls, path):
@@ -1391,10 +1466,15 @@ class XcodeProject(PBXDict):
 
         # If the plist was malformed, returncode will be non-zero
         if p.returncode != 0:
-            print stdout
+            print(stdout)
             return None
 
-        tree = plistlib.readPlistFromString(stdout)
+        try:
+            tree = plistlib.readPlistFromString(stdout)
+
+        except:
+            tree = plistlib.loads(stdout)
+
         return XcodeProject(tree, path)
 
     @classmethod
@@ -1405,12 +1485,12 @@ class XcodeProject(PBXDict):
 
 # The code below was adapted from plistlib.py.
 
-class PBXWriter(plistlib.PlistWriter):
+class PBXWriter(PlistWriter):
     def writeValue(self, value):
         if isinstance(value, (PBXList, PBXDict)):
-            plistlib.PlistWriter.writeValue(self, value.data)
+            PlistWriter.writeValue(self, value.data)
         else:
-            plistlib.PlistWriter.writeValue(self, value)
+            PlistWriter.writeValue(self, value)
 
     def simpleElement(self, element, value=None):
         """
