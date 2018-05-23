@@ -1,3 +1,8 @@
+"""
+Author: Lawrence Du
+E-mail: larrydu88@gmail.com
+"""
+
 from toolchain import CythonRecipe,shprint
 import os
 from os.path import join
