@@ -3,14 +3,14 @@ import sh
 
 
 class LibSDL2Recipe(Recipe):
-    #version = "2.0.3"
-    #url = "https://www.libsdl.org/release/SDL2-{version}.tar.gz"
-    version = "iOS-improvements"
-    url = "https://bitbucket.org/slime73/sdl-experiments/get/{version}.tar.gz"
+    version = "2.0.5"
+    url = "https://www.libsdl.org/release/SDL2-{version}.tar.gz"
+    #version = "iOS-improvements"
+    #url = "https://bitbucket.org/slime73/sdl-experiments/get/{version}.tar.gz"
     library = "Xcode-iOS/SDL/build/Release-{arch.sdk}/libSDL2.a"
     include_dir = "include"
     pbx_frameworks = ["OpenGLES", "AudioToolbox", "QuartzCore", "CoreGraphics",
-            "CoreMotion"]
+            "CoreMotion", "AVFoundation", "GameController"]
 
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):

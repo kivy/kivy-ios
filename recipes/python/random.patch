@@ -1,0 +1,31 @@
+--- Python-2.7.13/Python/random.c.orig	2017-02-19 13:55:43.000000000 +0000
++++ Python-2.7.13/Python/random.c	2017-02-19 13:56:29.000000000 +0000
+@@ -3,7 +3,7 @@
+ #include <windows.h>
+ #else
+ #include <fcntl.h>
+-#if defined(HAVE_GETRANDOM) || defined(HAVE_GETENTROPY)
++#if defined(HAVE_GETRANDOM)// || defined(HAVE_GETENTROPY)
+ #include <sys/random.h>
+ #endif
+ #endif
+@@ -114,7 +114,7 @@
+ 
+         if (!fatal) {
+             Py_BEGIN_ALLOW_THREADS
+-            res = getentropy(buffer, len);
++	     res = 0;
+             Py_END_ALLOW_THREADS
+ 
+             if (res < 0) {
+@@ -123,8 +123,8 @@
+             }
+         }
+         else {
+-            res = getentropy(buffer, len);
+-            if (res < 0)
++	     res = 0;
++	     if (res < 0)
+                 Py_FatalError("getentropy() failed");
+         }
+ 
