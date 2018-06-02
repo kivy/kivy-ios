@@ -52,3 +52,8 @@ pyexpat expat/xmlparse.c expat/xmlrole.c expat/xmltok.c pyexpat.c -I$(srcdir)/Mo
 # Future (used by numpy)
 future_builtins future_builtins.c
 
+# Ctypes
+_ctypes _ctypes/_ctypes.c _ctypes/callbacks.c _ctypes/callproc.c _ctypes/stgdict.c _ctypes/cfield.c -I$(srcdir)/../../build/include/ffi
+
+# scproxy
+# _scproxy -framework SystemConfiguration -framework CoreFoundation _scproxy.c

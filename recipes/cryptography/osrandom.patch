@@ -1,0 +1,16 @@
+--- cryptography-2.2.2/src/_cffi_src/openssl/src/osrandom_engine.h	2018-03-27 15:12:05.000000000 +0100
++++ cryptography-2.2.2-patch/src/_cffi_src/openssl/src/osrandom_engine.h	2018-06-02 05:06:04.000000000 +0100
+@@ -11,13 +11,6 @@
+     #include <sys/syscall.h>
+   #endif
+ 
+-  #ifdef __APPLE__
+-    #include <sys/random.h>
+-    /* To support weak linking we need to declare this as a weak import even if
+-     * it's not present in sys/random (e.g. macOS < 10.12). */
+-    extern int getentropy(void *buffer, size_t size) __attribute((weak_import));
+-  #endif
+-
+   #ifdef __linux__
+     /* for SYS_getrandom */
+     #include <sys/syscall.h>

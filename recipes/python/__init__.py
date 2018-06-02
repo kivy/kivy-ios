@@ -23,15 +23,14 @@ class PythonRecipe(Recipe):
         # common to all archs
         if  self.has_marker("patched"):
             return
+        self.copy_file("ModulesSetup", "Modules/Setup.local")
+        self.copy_file("_scproxy.py", "Lib/_scproxy.py")
         self.apply_patch("ssize-t-max.patch")
         self.apply_patch("dynload.patch")
         self.apply_patch("static-_sqlite3.patch")
-        self.copy_file("ModulesSetup", "Modules/Setup.local")
-        self.copy_file("_scproxy.py", "Lib/_scproxy.py")
         self.apply_patch("xcompile.patch")
         self.apply_patch("setuppath.patch")
         self.apply_patch("posixmodule.patch")
-        self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
         if "openssl.build_all" in self.ctx.state:
              self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
 
