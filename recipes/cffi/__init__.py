@@ -36,6 +36,13 @@ class CffiRecipe(CythonRecipe):
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
         shprint(hostpython, "setup.py", "build_ext", _env=build_env)
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
+        
+        # hack: copy _cffi_backend.so from hostpython
+        so_file = "_cffi_backend.so"
+        egg_name = "cffi-1.11.5-py2.7-macosx-10.4-x86_64.egg" # harded - needs to change
+        dest_dir = join(self.ctx.dist_dir, "root", "python", "lib", "python2.7", "site-packages", egg_name)
+        src_dir = join(self.ctx.dist_dir, "hostpython", "lib", "python2.7", "site-packages", egg_name)
+        sh.cp(join(src_dir, so_file), join(dest_dir, so_file))
 
 
 recipe = CffiRecipe()

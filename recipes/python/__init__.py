@@ -32,7 +32,13 @@ class PythonRecipe(Recipe):
         self.apply_patch("setuppath.patch")
         self.apply_patch("posixmodule.patch")
         if "openssl.build_all" in self.ctx.state:
-             self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
+             self.copy_file("ModulesSetup.openssl", "Modules/Setup.openssl")
+             r = Recipe.get_recipe('openssl', self.ctx)
+             openssl_build_dir = r.get_build_dir(arch.arch)
+             shprint(sh.sed, '-i.backup', 's#^SSL=.*#SSL={}#'.format(openssl_build_dir), "Modules/Setup.openssl")
+             shprint(sh.sed, '-i.backup', 's#^SSL_LIBS=.*#SSL_LIBS={}#'.format(join(self.ctx.dist_dir, "lib")), "Modules/Setup.openssl")
+             os.system('cat Modules/Setup.openssl >> Modules/Setup.local')
+             sh.rm("Modules/Setup.openssl")
 
         self.set_marker("patched")
 
@@ -42,6 +48,14 @@ class PythonRecipe(Recipe):
         local_arch = arch.arch
         if arch.arch == "arm64" :
             local_arch = "aarch64"
+        
+        if "openssl.build_all" in self.ctx.state:
+            r = Recipe.get_recipe('openssl', self.ctx)
+            openssl_build_dir = r.get_build_dir(arch.arch)
+            build_env['OPENSSL_VERSION'] = r.version
+            build_env['CFLAGS'] += ' -I%s' % join(openssl_build_dir, "include")
+            build_env['LDFLAGS'] += ' -L%s' % join(self.ctx.dist_dir, "lib")
+
         shprint(configure,
                 "CC={}".format(build_env["CC"]),
                 "LD={}".format(build_env["LD"]),
@@ -72,6 +86,7 @@ class PythonRecipe(Recipe):
         arch = list(self.filtered_archs)[0]
         build_env = arch.get_env()
         build_dir = self.get_build_dir(arch.arch)
+        build_env["LD_LIBRRAY_PATH"] = join(self.ctx.dist_dir, "lib")
         build_env["PATH"] = os.environ["PATH"]
         shprint(sh.make,
                 "-C", build_dir,
