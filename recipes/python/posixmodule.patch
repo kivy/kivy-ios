@@ -1,15 +1,9 @@
-Index: Python-2.7.1/Modules/posixmodule.c
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
---- Python-2.7.1/Modules/posixmodule.c	(date 1290868829000)
-+++ Python-2.7.1/Modules/posixmodule.c	(revision )
-@@ -2644,7 +2644,7 @@
- #endif
+--- Python-2.7.13/Modules/posixmodule.c	2016-12-17 21:05:07.000000000 +0100
++++ Python-2.7.13-patch/Modules/posixmodule.c	2018-05-31 20:13:42.000000000 +0100
+@@ -2828,6 +2828,7 @@
  }
  
--
+ 
 +#undef HAVE_SYSTEM
  #ifdef HAVE_SYSTEM
  PyDoc_STRVAR(posix_system__doc__,

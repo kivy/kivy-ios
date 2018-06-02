@@ -947,6 +947,7 @@ class CythonRecipe(PythonRecipe):
         env["LDSHARED"] = join(self.ctx.root_dir, "tools", "liblink")
         env["ARM_LD"] = env["LD"]
         env["ARCH"] = arch.arch
+        env["PYTHONPATH"] = dirname(realpath(__file__))
         return env
 
     def build_arch(self, arch):

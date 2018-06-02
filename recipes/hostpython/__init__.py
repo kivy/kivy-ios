@@ -6,10 +6,10 @@ import shutil
 
 
 class HostpythonRecipe(Recipe):
-    version = "2.7.1"
-    url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
+    version = "2.7.13"
+    url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
     depends = ["hostlibffi"]
-    optional_depends = ["openssl"]
+    optional_depends = ["hostopenssl", "openssl"]
     archs = ["x86_64"]
 
     def init_with_ctx(self, ctx):
@@ -22,11 +22,11 @@ class HostpythonRecipe(Recipe):
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
-        self.copy_file("_scproxy.py", "Lib/_scproxy.py")
         self.apply_patch("ssize-t-max.patch")
-        self.apply_patch("dynload.patch")
+        #self.apply_patch("dynload.patch")
         self.apply_patch("static-_sqlite3.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
+        self.copy_file(join(self.build_dir, "Mac/Modules/_scproxy.c"), "Modules/_scproxy.c")
         if "openssl.build_all" in self.ctx.state:
             self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
         self.set_marker("patched")
@@ -58,23 +58,25 @@ class HostpythonRecipe(Recipe):
                 "-lffi",
                 "-L{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "lib"))
                 ])
+        
         build_env["CFLAGS"] = " ".join([
                 "--sysroot={}".format(sdk_path),
                 "-arch x86_64",
                 "-mmacosx-version-min=10.12",
                 "-I{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "include"))
                 ])
-
+        
         if "openssl.build_all" in self.ctx.state:
-            build_env["CFLAGS"] += " -I{}".format(join(self.ctx.dist_dir, "include",
-                                                       "x86_64", "openssl"))
+            build_env["CFLAGS"] += " -I{}".format(join(self.ctx.dist_dir, "hostopenssl", "include"))
+            build_env["LDFLAGS"] += " -L{}".format(join(self.ctx.dist_dir, "hostopenssl", "lib"))
 
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
                 "--prefix={}".format(join(self.ctx.dist_dir, "hostpython")),
-                "--disable-toolbox-glue",
+                "--disable-toolbox-glue"
                 "--without-gcc",
                 _env=build_env)
+        shprint(sh.make, self.ctx.concurrent_make, _env=build_env)
         shprint(sh.make, "-C", self.build_dir, self.ctx.concurrent_make, "python", "Parser/pgen",
                 _env=build_env)
         shutil.move("python", "hostpython")
@@ -107,6 +109,12 @@ class HostpythonRecipe(Recipe):
         shutil.copy(
             join(build_dir, "Parser", "pgen"),
             join(self.ctx.dist_dir, "hostpython", "bin", "pgen"))
+        shutil.copy(
+            join(build_dir, "build", "lib.macosx-10.4-x86_64-2.7", "_sysconfigdata.py"),
+            join(pylib_dir, "_sysconfigdata.py"))
+        shutil.copy(
+            join(build_dir, "build", "lib.macosx-10.4-x86_64-2.7", "_sysconfigdata.pyc"),
+            join(pylib_dir, "_sysconfigdata.pyc"))
 
 
 recipe = HostpythonRecipe()
