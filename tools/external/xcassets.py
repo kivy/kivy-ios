@@ -258,6 +258,12 @@ appicon_json = {
       "idiom" : "mac",
       "filename" : "Icon1024.png",
       "scale" : "2x"
+    },
+    {
+      "size": "83.5x83.5",
+      "idiom": "ipad",
+      "filename": "Icon167.png",
+      "scale": "2x"
     }
   ],
   "info" : {
@@ -471,6 +477,11 @@ def icon(image_xcassets, image_fn):
         # 76pt 1x,2x
         ("152", None, "Icon152.png"),
         ("76", "Icon152.png", "Icon76.png"),
+
+        # iPad
+        # App iOS 9
+        # 83.5pt 2x
+        ("167", None, "Icon167.png"),
 
 
         # CarPlay

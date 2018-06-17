@@ -1,0 +1,63 @@
+--- Python-2.7.1.orig/configure.in	2017-05-14 19:54:10.000000000 +0200
++++ Python-2.7.1/configure.in	2017-05-14 19:56:01.000000000 +0200
+@@ -3111,17 +3111,17 @@
+
+ AC_MSG_RESULT($ac_cv_buggy_getaddrinfo)
+
+-if test $have_getaddrinfo = no -o "$ac_cv_buggy_getaddrinfo" = yes
+-then
+-	if test $ipv6 = yes
+-	then
+-		echo 'Fatal: You must get working getaddrinfo() function.'
+-		echo '       or you can specify "--disable-ipv6"'.
+-		exit 1
+-	fi
+-else
+-	AC_DEFINE(HAVE_GETADDRINFO, 1, [Define if you have the getaddrinfo function.])
+-fi
++# if test $have_getaddrinfo = no -o "$ac_cv_buggy_getaddrinfo" = yes
++# then
++# 	if test $ipv6 = yes
++# 	then
++# 		echo 'Fatal: You must get working getaddrinfo() function.'
++# 		echo '       or you can specify "--disable-ipv6"'.
++# 		exit 1
++# 	fi
++# else
++# 	AC_DEFINE(HAVE_GETADDRINFO, 1, [Define if you have the getaddrinfo function.])
++# fi
+
+ AC_CHECK_FUNCS(getnameinfo)
+
+--- Python-2.7.1.orig/configure	2017-05-14 20:22:04.000000000 +0200
++++ Python-2.7.1/configure	2017-05-14 20:22:03.000000000 +0200
+@@ -10802,19 +10802,19 @@
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_buggy_getaddrinfo" >&5
+ $as_echo "$ac_cv_buggy_getaddrinfo" >&6; }
+
+-if test $have_getaddrinfo = no -o "$ac_cv_buggy_getaddrinfo" = yes
+-then
+-	if test $ipv6 = yes
+-	then
+-		echo 'Fatal: You must get working getaddrinfo() function.'
+-		echo '       or you can specify "--disable-ipv6"'.
+-		exit 1
+-	fi
+-else
++# if test $have_getaddrinfo = no -o "$ac_cv_buggy_getaddrinfo" = yes
++# then
++# 	if test $ipv6 = yes
++# 	then
++# 		echo 'Fatal: You must get working getaddrinfo() function.'
++# 		echo '       or you can specify "--disable-ipv6"'.
++# 		exit 1
++# 	fi
++# else
+
+ $as_echo "#define HAVE_GETADDRINFO 1" >>confdefs.h
+
+-fi
++# fi
+
+ for ac_func in getnameinfo
+ do :

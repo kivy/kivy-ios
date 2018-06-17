@@ -29,7 +29,7 @@ class JpegRecipe(Recipe):
                 "--host={}".format(arch.triple),
                 "--disable-shared")
         shprint(sh.make, "clean")
-        shprint(sh.make)
+        shprint(sh.make, self.ctx.concurrent_make)
 
 recipe = JpegRecipe()
 

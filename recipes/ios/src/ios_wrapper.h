@@ -4,6 +4,7 @@
 float ios_uiscreen_get_scale(void);
 int ios_uiscreen_get_dpi(void);
 void ios_open_url(char *url);
+void load_url_webview(char *url, int width, int height);
 
 typedef void (*ios_send_email_cb)(char *, void *);
 

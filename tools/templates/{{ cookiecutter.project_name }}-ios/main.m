@@ -14,12 +14,12 @@ void load_custom_builtin_importer();
 
 int main(int argc, char *argv[]) {
     int ret = 0;
-    
+
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
     // Change the executing path to YourApp
     chdir("YourApp");
-    
+
     // Special environment to prefer .pyo, and don't write bytecode if .py are found
     // because the process will not have a write attribute on the device.
     putenv("PYTHONOPTIMIZE=2");
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     putenv("PYTHONNOUSERSITE=1");
     putenv("PYTHONPATH=.");
     //putenv("PYTHONVERBOSE=1");
-    
+
     // Kivy environment to prefer some implementation on iOS platform
     putenv("KIVY_BUILD=ios");
     putenv("KIVY_NO_CONFIG=1");
@@ -35,10 +35,11 @@ int main(int argc, char *argv[]) {
     putenv("KIVY_WINDOW=sdl2");
     putenv("KIVY_IMAGE=imageio,tex");
     putenv("KIVY_AUDIO=sdl2");
+    putenv("KIVY_GL_BACKEND=sdl2");
     #ifndef DEBUG
     putenv("KIVY_NO_CONSOLELOG=1");
     #endif
-    
+
     // Export orientation preferences for Kivy
     export_orientation();
 
@@ -47,7 +48,7 @@ int main(int argc, char *argv[]) {
     Py_SetPythonHome((char *)[resourcePath UTF8String]);
 
     NSLog(@"Initializing python");
-    Py_Initialize();    
+    Py_Initialize();
     PySys_SetArgv(argc, argv);
 
     // If other modules are using the thread, we need to initialize them before.
@@ -70,12 +71,12 @@ int main(int argc, char *argv[]) {
         if (ret != 0)
             NSLog(@"Application quit abnormally!");
     }
-    
+
     Py_Finalize();
     NSLog(@"Leaving");
-    
+
     [pool release];
-    
+
     // Look like the app still runs even when we left here.
     exit(ret);
     return ret;
@@ -88,17 +89,17 @@ int main(int argc, char *argv[]) {
 void export_orientation() {
     NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
     NSArray *orientations = [info objectForKey:@"UISupportedInterfaceOrientations"];
-    
+
     // Orientation restrictions
     // ========================
     // Comment or uncomment blocks 1-3 in order the limit orientation support
-    
+
     // 1. Landscape only
     // NSString *result = [[NSString alloc] initWithString:@"KIVY_ORIENTATION=LandscapeLeft LandscapeRight"];
-    
+
     // 2. Portrait only
     // NSString *result = [[NSString alloc] initWithString:@"KIVY_ORIENTATION=Portrait PortraitUpsideDown"];
-    
+
     // 3. All orientations
     NSString *result = [[NSString alloc] initWithString:@"KIVY_ORIENTATION="];
     for (int i = 0; i < [orientations count]; i++) {
@@ -142,12 +143,14 @@ void load_custom_builtin_importer() {
         "        f = fullname.replace('.', '_')\n" \
         "        mod = sys.modules.get(f)\n" \
         "        if mod is None:\n" \
-        "            #print 'LOAD DYNAMIC', f, sys.modules.keys()\n" \
+        "            # print 'LOAD DYNAMIC', f, sys.modules.keys()\n" \
         "            try:\n" \
         "                mod = imp.load_dynamic(f, f)\n" \
         "            except ImportError:\n" \
-        "                #print 'LOAD DYNAMIC FALLBACK', fullname\n" \
+        "                # import traceback; traceback.print_exc();\n" \
+        "                # print 'LOAD DYNAMIC FALLBACK', fullname\n" \
         "                mod = imp.load_dynamic(fullname, fullname)\n" \
+        "            sys.modules[fullname] = mod\n" \
         "            return mod\n" \
         "        return mod\n" \
         "sys.meta_path.append(CustomBuiltinImporter())";

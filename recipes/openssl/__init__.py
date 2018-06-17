@@ -43,6 +43,6 @@ class OpensslRecipe(Recipe):
             sh.sed("-ie", "s!^CFLAG=!CFLAG={} !".format(build_env['CFLAGS']),
                    "Makefile")
         shprint(sh.make, "clean")
-        shprint(sh.make, "-j4", "build_libs")
+        shprint(sh.make, self.ctx.concurrent_make, "build_libs")
 
 recipe = OpensslRecipe()

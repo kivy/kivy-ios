@@ -15,6 +15,7 @@ class PythonRecipe(Recipe):
     def init_with_ctx(self, ctx):
         super(PythonRecipe, self).init_with_ctx(ctx)
         self.ctx.python_ver_dir = "python2.7"
+        self.ctx.python_prefix = join(ctx.dist_dir, "root", "python")
         self.ctx.site_packages_dir = join(
             ctx.dist_dir, "root", "python", "lib", ctx.python_ver_dir,
             "site-packages")
@@ -31,8 +32,10 @@ class PythonRecipe(Recipe):
         self.apply_patch("xcompile.patch")
         self.apply_patch("setuppath.patch")
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
+        self.apply_patch("ipv6.patch")
         if "openssl.build_all" in self.ctx.state:
              self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
+        self.apply_patch("posixmodule.patch")
 
         self.set_marker("patched")
 
@@ -50,13 +53,14 @@ class PythonRecipe(Recipe):
                 "--prefix=/python",
                 "--with-system-ffi",
                 "--without-doc-strings",
+                "--enable-ipv6",
                 _env=build_env)
 
         self._patch_pyconfig()
         self.apply_patch("ctypes_duplicate.patch")
         self.apply_patch("ctypes_duplicate_longdouble.patch")
 
-        shprint(sh.make, "-j4",
+        shprint(sh.make, self.ctx.concurrent_make,
                 "CROSS_COMPILE_TARGET=yes",
                 "HOSTPYTHON={}".format(self.ctx.hostpython),
                 "HOSTPGEN={}".format(self.ctx.hostpgen))
@@ -66,7 +70,7 @@ class PythonRecipe(Recipe):
         build_env = arch.get_env()
         build_dir = self.get_build_dir(arch.arch)
         build_env["PATH"] = os.environ["PATH"]
-        shprint(sh.make,
+        shprint(sh.make, self.ctx.concurrent_make,
                 "-C", build_dir,
                 "install",
                 "CROSS_COMPILE_TARGET=yes",

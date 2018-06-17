@@ -11,3 +11,30 @@ void ios_open_url(char *url)
 	NSString *nsurl = [NSString stringWithCString:(char *)url encoding:NSUTF8StringEncoding];
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString: nsurl]];
 }
+
+/*
+ * Webview support
+ */
+void load_url_webview(char *url, int width, int height)
+{
+    NSString *nsurl = [NSString stringWithCString:(char *)url encoding:NSUTF8StringEncoding];
+    UIWebView *webView = [[UIWebView alloc] initWithFrame: CGRectMake(0, 0, width, height)];
+    UIWindow *window = [[UIApplication sharedApplication] keyWindow];
+    UIView *view = [window.rootViewController view];
+    [view addSubview:webView];
+    NSURL *ur = [[NSURL alloc] initWithString: nsurl];
+    NSURLRequest *req = [[NSURLRequest alloc] initWithURL: ur];
+    [webView loadRequest: req];
+    [req release];
+    [ur release];
+  
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [button setTitle:@"X" forState:UIControlStateNormal];
+    button.frame = CGRectMake(0.0, 0.0, 40, 40);
+    [button addTarget:webView
+         action:@selector(removeFromSuperview) forControlEvents:UIControlEventTouchDown];
+    [webView addSubview:button];
+    [button release];
+    [webView release];
+}
