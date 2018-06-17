@@ -1,0 +1,6 @@
+--- zbarlight-1.2/build/lib.macosx-10.13-x86_64-2.7/zbarlight/__init__.py
++++ zbarlight-1.2/build/lib.macosx-10.13-x86_64-2.7/zbarlight/__init__.py
+@@ -10,1 +10,1 @@
+-__version__ = pkg_resources.get_distribution('zbarlight').version
++__version__ = '1.2'
+

@@ -1,0 +1,31 @@
+--- kivy-1.10.0/kivy/core/camera/__init__.py
++++ kivy-1.10.0/kivy/core/camera/__init__.py
+@@ -139,1 +139,1 @@
+-if platform == 'macosx':
++if platform in ['macosx', 'ios']:
+
+
+--- kivy-1.10.0/kivy/core/camera/camera_avfoundation.pyx
++++ kivy-1.10.0/kivy/core/camera/camera_avfoundation.pyx
+@@ -65,1 +65,1 @@
+-            self._texture = Texture.create(self._resolution)
++            self._texture = Texture.create(self._resolution, colorfmt='rgba')
+
+
+--- kivy-1.10.0/kivy/core/camera/camera_avfoundation.pyx
++++ kivy-1.10.0/kivy/core/camera/camera_avfoundation.pyx
+@@ -69,1 +69,1 @@
+-        self._format = 'bgra'
++        self._format = 'rgba'
+
+--- kivy-1.10.0/setup.py
++++ kivy-1.10.0/setup.py
+@@ -810,1 +810,1 @@
+-    if mac_ver >= [10, 7]:
++    if mac_ver >= [10, 7] or platform == 'ios':
+
+--- kivy-1.10.0/setup.py
++++ kivy-1.10.0/setup.py
+@@ -161,1 +161,1 @@
+-c_options['use_avfoundation'] = platform == 'darwin'
++c_options['use_avfoundation'] = platform in ['darwin', 'ios']
