@@ -103,7 +103,7 @@ class JsonStore(object):
         return self.data.keys()
 
     def remove_all(self, prefix):
-        for key in self.data.keys()[:]:
+        for key in tuple(self.data.keys()):
             if not key.startswith(prefix):
                 continue
             del self.data[key]
@@ -1167,9 +1167,12 @@ Xcode:
             else:
                 ctx = Context()
                 for name in Recipe.list_recipes():
-                    recipe = Recipe.get_recipe(name, ctx)
-                    print("{recipe.name:<12} {recipe.version:<8}".format(
-                          recipe=recipe))
+                    try:
+                        recipe = Recipe.get_recipe(name, ctx)
+                        print("{recipe.name:<12} {recipe.version:<8}".format(recipe=recipe))
+
+                    except:
+                        pass
 
         def clean(self):
             parser = argparse.ArgumentParser(
