@@ -1291,7 +1291,7 @@ class XcodeProject(PBXDict):
                     out.write(' ')
 
             try:
-                iterKeys = root.iterkeys()
+                iterkeys = root.iterkeys()
 
             except:
                 # python 3 support
