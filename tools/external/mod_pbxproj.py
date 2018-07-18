@@ -1293,7 +1293,7 @@ class XcodeProject(PBXDict):
             try:
                 iterkeys = root.iterkeys()
 
-            except:
+            except AttributeError:
                 # python 3 support
                 iterkeys = root.keys()
 
