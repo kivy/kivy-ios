@@ -327,7 +327,7 @@ class Context(object):
         self.install_dir = "{}/dist/root".format(self.root_dir)
         self.include_dir = "{}/dist/include".format(self.root_dir)
         self.archs = (
-            ArchSimulator(self),
+            # ArchSimulator(self),
             Arch64Simulator(self),
             ArchIOS(self),
             Arch64IOS(self))
