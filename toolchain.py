@@ -847,7 +847,7 @@ class Recipe(object):
     @classmethod
     def list_recipes(cls):
         recipes_dir = join(dirname(__file__), "recipes")
-        for name in listdir(recipes_dir):
+        for name in sorted(listdir(recipes_dir)):
             fn = join(recipes_dir, name)
             if isdir(fn):
                 yield name
