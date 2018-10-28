@@ -178,6 +178,7 @@ class Arch(object):
                     sh.chmod('+x', cxxsh)
                 else:
                     ccsh = self._ccsh
+                    cxxsh = self._cxxsh
                 env["USE_CCACHE"] = '1'
                 env["CCACHE"] = ccache
                 env["CC"] = ccsh

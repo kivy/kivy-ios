@@ -66,6 +66,7 @@ class HostpythonRecipe(Recipe):
                 ])
 
         if "openssl.build_all" in self.ctx.state:
+            build_env["LDFLAGS"] += " -L{}".format(join(self.ctx.dist_dir, "lib"))
             build_env["CFLAGS"] += " -I{}".format(join(self.ctx.dist_dir, "include",
                                                        "x86_64", "openssl"))
 
