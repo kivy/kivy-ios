@@ -1,11 +1,10 @@
-language: python
+language: objective-c
 os: osx
 
 matrix:
     fast_finish: true
     include:
-        - language: python
-          python: 3.6
+        - language: objective-c
           osx_image: xcode10
 
 
