@@ -28,7 +28,7 @@ try:
 except ImportError:
     print("ERROR: pbxproj requirements is missing")
     print("To install: pip install -r requirements.txt")
-    sys.exit(0)
+    sys.exit(1)
 curdir = dirname(__file__)
 sys.path.insert(0, join(curdir, "tools", "external"))
 
