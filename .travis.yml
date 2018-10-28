@@ -5,7 +5,7 @@ os: osx
 matrix:
     fast_finish: true
     include:
-        - language: objective-c
+        - language: python
           osx_image: xcode10
 
 before_install:
@@ -13,8 +13,10 @@ before_install:
     - brew link libtool
     - python -V
     - pip -V
-    - pip install -r requirements.txt
-    - pip install Cython==0.26.1
+    - python3 -V
+    - pip3 -V
+    - pip3 install -r requirements.txt
+    - pip3 install Cython==0.26.1
     - git clone https://github.com/kivy/kivy
 
 script:
