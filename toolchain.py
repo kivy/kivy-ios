@@ -146,11 +146,24 @@ class Arch(object):
         env = {}
         ccache = sh.which('ccache')
         cc = sh.xcrun("-find", "-sdk", self.sdk, "clang").strip()
+        cxx = sh.xcrun("-find", "-sdk", self.sdk, "clang++").strip()
+
+        # we put the flags in CC / CXX as sometimes the ./configure test
+        # with the preprocessor (aka CC -E) without CFLAGS, which fails for
+        # cross compiled projects
+        flags = " ".join([
+            "--sysroot", self.sysroot,
+            "-arch", self.arch,
+            "-pipe", "-no-cpp-precomp",
+        ])
+        cc += " " + flags
+        cxx += " " + flags
         if ccache:
             ccache = ccache.strip()
             use_ccache = environ.get("USE_CCACHE", "1")
             if use_ccache != '1':
                 env["CC"] = cc
+                env["CXX"] = cxx
             else:
                 if not self._ccsh:
                     self._ccsh = ccsh = sh.mktemp().strip()
@@ -158,11 +171,17 @@ class Arch(object):
                         f.write('#!/bin/sh\n')
                         f.write(ccache + ' ' + cc + ' "$@"\n')
                     sh.chmod('+x', ccsh)
+                    self._cxxsh = cxxsh = sh.mktemp().strip()
+                    with open(cxxsh, 'w') as f:
+                        f.write('#!/bin/sh\n')
+                        f.write(ccache + ' ' + cxx + ' "$@"\n')
+                    sh.chmod('+x', cxxsh)
                 else:
                     ccsh = self._ccsh
                 env["USE_CCACHE"] = '1'
                 env["CCACHE"] = ccache
                 env["CC"] = ccsh
+                env["CXX"] = cxxsh
 
                 env.update({k: v for k, v in environ.items() if k.startswith('CCACHE_')})
                 env.setdefault('CCACHE_MAXSIZE', '10G')
@@ -171,6 +190,7 @@ class Arch(object):
                     'include_file_mtime,include_file_ctime,file_stat_matches'))
         else:
             env["CC"] = cc
+            env["CXX"] = cxx
         env["AR"] = sh.xcrun("-find", "-sdk", self.sdk, "ar").strip()
         env["LD"] = sh.xcrun("-find", "-sdk", self.sdk, "ld").strip()
         env["OTHER_CFLAGS"] = " ".join(include_dirs)
@@ -178,11 +198,6 @@ class Arch(object):
             "-L{}/{}".format(self.ctx.dist_dir, "lib"),
         ])
         env["CFLAGS"] = " ".join([
-            "-arch", self.arch,
-            "-pipe", "-no-cpp-precomp",
-            "--sysroot", self.sysroot,
-            #"-I{}/common".format(self.ctx.include_dir),
-            #"-I{}/{}".format(self.ctx.include_dir, self.arch),
             "-O3",
             self.version_min
         ] + include_dirs)
