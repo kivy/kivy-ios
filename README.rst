@@ -4,13 +4,12 @@ Kivy for iOS
 This toolchain is designed to compile the necessary libraries for iOS to run
 your application and manage the creation of the Xcode project.
 
-Currently, we do not provide any binary distributions of this toolchain, but we
-aim to. Until then, you do need to compile it at least once before creating
-your Xcode project.
+We do not provide any binary distributions of this toolchain.
+You do need to compile it at least once before creating your Xcode project.
 
 The toolchain supports:
 
-- iPhone Simulator (x86 and x86_64)
+- iPhone Simulator (x86_64)
 - iPhone / iOS (armv7 and arm64)
 
 These recipes are not ported to the new toolchain yet:
@@ -23,7 +22,11 @@ Requirements
 
 Currently, the toolchain requires a few tools for compilation. You will need:
 
-#. Xcode 6 or above, with an iOS SDK and command line tools installed::
+#. Ensure you have the right dependencies installed::
+
+    pip install -r requirements.txt
+
+#. Xcode 10 or above, with an iOS SDK and command line tools installed::
 
     xcode-select --install
 
@@ -32,10 +35,10 @@ Currently, the toolchain requires a few tools for compilation. You will need:
     brew install autoconf automake libtool pkg-config
     brew link libtool
 
-#. Install Cython (0.23)::
+#. Install Cython (0.25.2)::
 
     # pip method if available (sudo might be needed.)
-    pip install cython==0.23
+    pip install cython==0.25.2
 
 
 Using the toolchain
@@ -202,7 +205,7 @@ FAQ
 
 Fatal error: "stdio.h" file not found
     You need to install the Command line tools: `xcode-select --install`
-    
+
 You must build with bitcode disabled (Xcode setting ENABLE_BITCODE should be No).
     We don't support bitcode. You need to go to the project setting, and disable bitcode.
 
@@ -214,11 +217,10 @@ If you need assistance, you can ask for help on our mailing list:
 * User Group : https://groups.google.com/group/kivy-users
 * Email      : kivy-users@googlegroups.com
 
-We also have an IRC channel:
+We also have a Discord channel:
 
-* Server  : irc.freenode.net
-* Port    : 6667, 6697 (SSL only)
-* Channel : #kivy
+* Server     : https://chat.kivy.org
+* Channel    : #support
 
 Contributing
 ------------
@@ -233,11 +235,10 @@ discussions about developing the Kivy framework and its sister projects:
 * Dev Group : https://groups.google.com/group/kivy-dev
 * Email     : kivy-dev@googlegroups.com
 
-IRC channel:
+Discord channel:
 
-* Server  : irc.freenode.net
-* Port    : 6667, 6697 (SSL only)
-* Channel : #kivy-dev
+* Server     : https://chat.kivy.org
+* Channel    : #dev
 
 License
 -------
