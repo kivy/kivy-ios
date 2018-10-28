@@ -290,7 +290,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"{{ cookiecutter.dist_dir }}/lib"
+					"{{ cookiecutter.dist_dir }}/lib",
 				);
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "-all_load";
@@ -325,7 +325,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(PROJECT_DIR)/../build/lib\""
+					"\"$(PROJECT_DIR)/../build/lib\"",
 				);
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = {{ cookiecutter.project_name }};
@@ -344,6 +344,7 @@
 			buildSettings = {
 				DEAD_CODE_STRIPPING = NO;
 				USER_HEADER_SEARCH_PATHS = {{ cookiecutter.dist_dir }}/root/include/;
+				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
@@ -353,6 +354,7 @@
 				DEAD_CODE_STRIPPING = NO;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				USER_HEADER_SEARCH_PATHS = {{ cookiecutter.dist_dir }}/root/include/;
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};

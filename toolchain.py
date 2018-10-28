@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """
 Tool for compiling iOS toolchain
 ================================
@@ -22,7 +22,13 @@ try:
     from urllib.request import FancyURLopener, urlcleanup
 except ImportError:
     from urllib import FancyURLopener, urlcleanup
-
+try:
+    from pbxproj import XcodeProject
+    from pbxproj.pbxextensions.ProjectFiles import FileOptions
+except ImportError:
+    print("ERROR: pbxproj requirements is missing")
+    print("To install: pip install -r requirements.txt")
+    sys.exit(0)
 curdir = dirname(__file__)
 sys.path.insert(0, join(curdir, "tools", "external"))
 
@@ -1062,39 +1068,42 @@ def update_pbxproj(filename):
     print("-" * 70)
     print("Analysis of {}".format(filename))
 
-    from mod_pbxproj import XcodeProject
-    project = XcodeProject.Load(filename)
+    project = XcodeProject.load(filename)
     sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
 
     group = project.get_or_create_group("Frameworks")
     g_classes = project.get_or_create_group("Classes")
+    file_options = FileOptions(embed_framework=False, code_sign_on_copy=True)
     for framework in pbx_frameworks:
         framework_name = "{}.framework".format(framework)
         if framework_name in frameworks:
-            print("Ensure {} is in the project (local)".format(framework))
+            print("Ensure {} is in the project (pbx_frameworks, local)".format(framework))
             f_path = join(ctx.dist_dir, "frameworks", framework_name)
         else:
-            print("Ensure {} is in the project (system)".format(framework))
+            print("Ensure {} is in the project (pbx_frameworks, system)".format(framework))
             f_path = join(sysroot, "System", "Library", "Frameworks",
                           "{}.framework".format(framework))
-        project.add_file_if_doesnt_exist(f_path, parent=group, tree="DEVELOPER_DIR")
+        project.add_file(f_path, parent=group, tree="DEVELOPER_DIR",
+                         force=False, file_options=file_options)
     for library in pbx_libraries:
-        print("Ensure {} is in the project".format(library))
+        print("Ensure {} is in the project (pbx_libraries, dylib+tbd)".format(library))
         f_path = join(sysroot, "usr", "lib",
                       "{}.dylib".format(library))
-        project.add_file_if_doesnt_exist(f_path, parent=group, tree="DEVELOPER_DIR")
+        project.add_file(f_path, parent=group, tree="DEVELOPER_DIR", force=False)
+        f_path = join(sysroot, "usr", "lib",
+                      "{}.tbd".format(library))
+        project.add_file(f_path, parent=group, tree="DEVELOPER_DIR", force=False)
     for library in libraries:
-        print("Ensure {} is in the project".format(library))
-        project.add_file_if_doesnt_exist(library, parent=group)
+        print("Ensure {} is in the project (libraries)".format(library))
+        project.add_file(library, parent=group, force=False)
     for name in sources:
         print("Ensure {} sources are used".format(name))
         fn = join(ctx.dist_dir, "sources", name)
         project.add_folder(fn, parent=g_classes)
 
 
-    if project.modified:
-        project.backup()
-        project.save()
+    project.backup()
+    project.save()
 
 
 if __name__ == "__main__":
