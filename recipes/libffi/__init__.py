@@ -31,13 +31,15 @@ class LibffiRecipe(Recipe):
                 "_generate-darwin-source-and-headers.py")
             shprint(sh.touch, "generate-darwin-source-and-headers.py")
         shprint(sh.python2, "_generate-darwin-source-and-headers.py", "--only-ios")
+        quiet = ["-quiet"] if self.ctx.quiet else []
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
                 "-sdk", arch.sdk,
                 "-project", "libffi.xcodeproj",
                 "-target", "libffi-iOS",
-                "-configuration", "Release")
+                "-configuration", "Release",
+                *quiet)
 
 
 recipe = LibffiRecipe()

@@ -42,6 +42,7 @@ class PythonRecipe(Recipe):
     def build_arch(self, arch):
         build_env = arch.get_env()
         configure = sh.Command(join(self.build_dir, "configure"))
+        quiet = ["-quiet"] if self.ctx.quiet else []
         shprint(configure,
                 "CC={}".format(build_env["CC"]),
                 "LD={}".format(build_env["LD"]),
@@ -54,7 +55,7 @@ class PythonRecipe(Recipe):
                 "--with-system-ffi",
                 "--without-doc-strings",
                 "--enable-ipv6",
-                "--quiet" if self.ctx.quited else "",
+                *quiet,
                 _env=build_env)
 
         self._patch_pyconfig()
