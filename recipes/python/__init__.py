@@ -7,7 +7,7 @@ import os
 class PythonRecipe(Recipe):
     version = "2.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
-    depends = ["hostpython", "libffi", ]
+    depends = ["hostpython", "libffi"]
     optional_depends = ["openssl"]
     library = "libpython2.7.a"
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
@@ -54,6 +54,7 @@ class PythonRecipe(Recipe):
                 "--with-system-ffi",
                 "--without-doc-strings",
                 "--enable-ipv6",
+                "--quiet" if self.ctx.quited else "",
                 _env=build_env)
 
         self._patch_pyconfig()

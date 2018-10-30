@@ -26,10 +26,10 @@ class FreetypeRecipe(Recipe):
                 "--without-harfbuzz",
                 "--without-old-mac-fonts",
                 "--enable-static=yes",
-                "--enable-shared=no")
+                "--enable-shared=no",
+                "--quiet" if self.ctx.quiet else "")
         shprint(sh.make, "clean")
         shprint(sh.make, self.ctx.concurrent_make)
 
 
 recipe = FreetypeRecipe()
-

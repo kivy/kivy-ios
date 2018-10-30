@@ -453,7 +453,7 @@ class Recipe(object):
         urlcleanup()
 
         print('Downloading {0}'.format(url))
-        urlretrieve(url, filename, report_hook)
+        urlretrieve(url, filename) #, report_hook)
         return filename
 
     def extract_file(self, filename, cwd):
@@ -468,7 +468,7 @@ class Recipe(object):
                 comp = '--use-compress-program={}'.format(self.ctx.use_pigz)
             else:
                 comp = '-z'
-            shprint(sh.tar, "-C", cwd, "-xv", comp, "-f", filename)
+            shprint(sh.tar, "-C", cwd, "-x", comp, "-f", filename)
 
         elif filename.endswith(".tbz2") or filename.endswith(".tar.bz2"):
             if self.ctx.use_pbzip2:
@@ -1151,6 +1151,8 @@ Xcode:
                                 help="do not use pigz for gzip decompression")
             parser.add_argument("--no-pbzip2", action="store_true", default=not bool(ctx.use_pbzip2),
                                 help="do not use pbzip2 for bzip2 decompression")
+            parser.add_argument("--quiet", action="store_true", default=False,
+                                help="quiet compilation when possible")
             args = parser.parse_args(sys.argv[2:])
 
             if args.arch:
@@ -1172,6 +1174,7 @@ Xcode:
             if args.no_pbzip2:
                 ctx.use_pbzip2 = False
             ctx.use_pigz = ctx.use_pbzip2
+            ctx.quiet = args.quiet
             print("Building with {} processes, where supported".format(ctx.num_cores))
             if ctx.use_pigz:
                 print("Using pigz to decompress gzip data")
