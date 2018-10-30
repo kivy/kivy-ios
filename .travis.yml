@@ -18,5 +18,5 @@ before_install:
     - git clone https://github.com/kivy/kivy
 
 script:
-    - ./toolchain.py build --quiet --arch armv7 --arch arm64 openssl kivy
+    - ./toolchain.py build --quiet openssl kivy
     - ./toolchain.py create touchtracer $PWD/kivy/examples/touchtracer
