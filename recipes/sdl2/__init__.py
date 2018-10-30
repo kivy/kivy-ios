@@ -20,7 +20,6 @@ class LibSDL2Recipe(Recipe):
 
     def build_arch(self, arch):
         env = arch.get_env()
-        quiet = ["-quiet"] if self.ctx.quiet else []
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
@@ -28,8 +27,7 @@ class LibSDL2Recipe(Recipe):
                 "-sdk", arch.sdk,
                 "-project", "Xcode-iOS/SDL/SDL.xcodeproj",
                 "-target", "libSDL-iOS",
-                "-configuration", "Release",
-                *quiet)
+                "-configuration", "Release")
 
 
 recipe = LibSDL2Recipe()
