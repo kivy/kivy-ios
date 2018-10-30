@@ -475,7 +475,7 @@ class Recipe(object):
                 comp = '--use-compress-program={}'.format(self.ctx.use_pbzip2)
             else:
                 comp = '-j'
-            shprint(sh.tar, "-C", cwd, "-xv", comp, "-f", filename)
+            shprint(sh.tar, "-C", cwd, "-x", comp, "-f", filename)
 
         elif filename.endswith(".zip"):
             shprint(sh.unzip, "-d", cwd, filename)
