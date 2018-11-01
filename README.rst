@@ -22,9 +22,13 @@ Requirements
 
 Currently, the toolchain requires a few tools for compilation. You will need:
 
-#. Ensure you have the right dependencies installed::
+#. Ensure you have python3 installed - this is needed for toolchain.py::
 
-    pip install -r requirements.txt
+    brew install python
+
+#. Ensure you have the right dependencies installed for python3::
+
+    pip3 install -r requirements.txt
 
 #. Xcode 10 or above, with an iOS SDK and command line tools installed::
 
@@ -35,10 +39,10 @@ Currently, the toolchain requires a few tools for compilation. You will need:
     brew install autoconf automake libtool pkg-config
     brew link libtool
 
-#. Install Cython (0.25.2)::
+#. Install Cython (0.26.1)::
 
     # pip method if available (sudo might be needed.)
-    pip install cython==0.25.2
+    pip install cython==0.26.1
 
 
 Using the toolchain
