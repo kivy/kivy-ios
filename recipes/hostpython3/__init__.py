@@ -22,11 +22,11 @@ class Hostpython3Recipe(Recipe):
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
-        # self.copy_file("_scproxy.py", "Lib/_scproxy.py")
+        self.copy_file("ModulesSetup", "Modules/Setup.local")
         # self.apply_patch("ssize-t-max.patch")
         # self.apply_patch("dynload.patch")
         # self.apply_patch("static-_sqlite3.patch")
-        shutil.copy("Modules/Setup.dist", "Modules/Setup")
+        # shutil.copy("Modules/Setup.dist", "Modules/Setup")
         # if "openssl.build_all" in self.ctx.state:
         #     self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
         self.set_marker("patched")
@@ -99,21 +99,21 @@ class Hostpython3Recipe(Recipe):
         #         join(build_dir, "Python"))
         shprint(sh.make, self.ctx.concurrent_make,
                 "-C", build_dir,
-                "bininstall", "inclinstall",
+                "install",
                 _env=build_env)
-        pylib_dir = join(self.ctx.dist_dir, "hostpython3", "lib", "python3.7")
-        if exists(pylib_dir):
-            shutil.rmtree(pylib_dir)
-        shutil.copytree(
-            join(build_dir, "Lib"),
-            pylib_dir)
-        ensure_dir(join(pylib_dir, "config"))
-        shutil.copy(
-            join(build_dir, "Makefile"),
-            join(pylib_dir, "config", "Makefile"))
+        # pylib_dir = join(self.ctx.dist_dir, "hostpython3", "lib", "python3.7")
+        # if exists(pylib_dir):
+        #     shutil.rmtree(pylib_dir)
+        # shutil.copytree(
+        #     join(build_dir, "Lib"),
+        #     pylib_dir)
+        # ensure_dir(join(pylib_dir, "config"))
         # shutil.copy(
-        #     join(build_dir, "Parser", "pgen"),
-        #     join(self.ctx.dist_dir, "hostpython3", "bin", "pgen"))
+        #     join(build_dir, "Makefile"),
+        #     join(pylib_dir, "config", "Makefile"))
+        shutil.copy(
+            join(self.ctx.dist_dir, "hostpython3", "bin", "python3"),
+            join(self.ctx.dist_dir, "hostpython3", "bin", "python"))
 
 
 recipe = Hostpython3Recipe()

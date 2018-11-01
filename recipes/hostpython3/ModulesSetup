@@ -1,0 +1,1 @@
+zlib zlibmodule.c -I$(prefix)/include -lz
