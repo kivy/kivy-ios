@@ -9,8 +9,10 @@ class LibSDL2Recipe(Recipe):
     #url = "https://bitbucket.org/slime73/sdl-experiments/get/{version}.tar.gz"
     library = "Xcode-iOS/SDL/build/Release-{arch.sdk}/libSDL2.a"
     include_dir = "include"
-    pbx_frameworks = ["OpenGLES", "AudioToolbox", "QuartzCore", "CoreGraphics",
-            "CoreMotion", "GameController", "AVFoundation", "Metal"]
+    pbx_frameworks = [
+        "OpenGLES", "AudioToolbox", "QuartzCore", "CoreGraphics",
+        "CoreMotion", "GameController", "AVFoundation", "Metal",
+        "UIKit"]
 
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
