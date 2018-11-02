@@ -15,11 +15,11 @@ class Python3Recipe(Recipe):
 
     def init_with_ctx(self, ctx):
         super(Python3Recipe, self).init_with_ctx(ctx)
-        self.ctx.python_ver_dir = "python3.7"
-        self.ctx.python_prefix = join(ctx.dist_dir, "root", "python")
-        self.ctx.site_packages_dir = join(
-            ctx.dist_dir, "root", "python", "lib", ctx.python_ver_dir,
-            "site-packages")
+        self.set_python(self, 3.7)
+        ctx.python_ver_dir = "python3.7"
+        ctx.python_prefix = join(ctx.dist_dir, "root", "python3")
+        ctx.site_packages_dir = join(
+            ctx.python_prefix, "lib", ctx.python_ver_dir, "site-packages")
 
     def prebuild_arch(self, arch):
         # common to all archs

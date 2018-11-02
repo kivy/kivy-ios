@@ -18,8 +18,9 @@ class PyobjusRecipe(CythonRecipe):
 
     def cythonize_build(self):
         # don't use the cythonize, pyobjus don't support method rewriting
+        pyver = "-{}".format(self.ctx.python_major)
         shprint(sh.find, self.build_dir, "-iname", "*.pyx",
-                "-exec", "cython", "{}", ";")
+                "-exec", "cython", pyver, "{}", ";")
         # ffi is installed somewhere else, this include doesn't work
         # XXX ideally, we need to fix libffi installation...
         shprint(sh.sed,
@@ -28,5 +29,3 @@ class PyobjusRecipe(CythonRecipe):
                 "pyobjus/pyobjus.c")
 
 recipe = PyobjusRecipe()
-
-

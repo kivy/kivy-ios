@@ -5,7 +5,7 @@ import sh
 import shutil
 
 
-class HostpythonRecipe(Recipe):
+class Hostpython2Recipe(Recipe):
     version = "2.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
     depends = ["hostlibffi"]
@@ -13,7 +13,9 @@ class HostpythonRecipe(Recipe):
     archs = ["x86_64"]
 
     def init_with_ctx(self, ctx):
-        super(HostpythonRecipe, self).init_with_ctx(ctx)
+        super(Hostpython2Recipe, self).init_with_ctx(ctx)
+        self.set_hostpython(self, 2.7)
+        self.ctx.so_suffix = ".so"
         self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython", "bin", "python")
         self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython", "bin", "pgen")
         print("Global: hostpython located at {}".format(self.ctx.hostpython))
@@ -110,4 +112,4 @@ class HostpythonRecipe(Recipe):
             join(self.ctx.dist_dir, "hostpython", "bin", "pgen"))
 
 
-recipe = HostpythonRecipe()
+recipe = Hostpython2Recipe()

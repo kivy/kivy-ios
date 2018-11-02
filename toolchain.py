@@ -306,6 +306,7 @@ class Context(object):
     cython = None
     sdkver = None
     sdksimver = None
+    so_suffix = None  # set by one of the hostpython
 
     def __init__(self):
         super(Context, self).__init__()
@@ -413,20 +414,30 @@ class Context(object):
         return "IDEBuildOperationMaxNumberOfConcurrentCompileTasks={}".format(self.num_cores)
 
 
+
 class Recipe(object):
-    version = None
-    url = None
-    archs = []
-    depends = []
-    optional_depends = []
-    library = None
-    libraries = []
-    include_dir = None
-    include_per_arch = False
-    frameworks = []
-    sources = []
-    pbx_frameworks = []
-    pbx_libraries = []
+    props = {
+        "is_alias": False,
+        "version": None,
+        "url": None,
+        "archs": [],
+        "depends": [],
+        "optional_depends": [],
+        "library": None,
+        "libraries": [],
+        "include_dir": None,
+        "include_per_arch": False,
+        "frameworks": [],
+        "sources": [],
+        "pbx_frameworks": [],
+        "pbx_libraries": []
+    }
+
+    def __new__(cls):
+        for prop, value in cls.props.items():
+            if not hasattr(cls, prop):
+                setattr(cls, prop, value)
+        return super(Recipe, cls).__new__(cls)
 
     # API available for recipes
     def download_file(self, url, filename, cwd=None):
@@ -560,6 +571,12 @@ class Recipe(object):
         """
         return join(self.ctx.include_dir, "common", self.name)
 
+    def so_filename(self, name):
+        """Return the filename of a library with the appropriate so suffix
+        (.so for Python 2.7, .cpython-37m-darwin for Python 3.7)
+        """
+        return "{}{}".format(name, self.ctx.so_suffix)
+
     @property
     def name(self):
         modname = self.__class__.__module__
@@ -619,6 +636,37 @@ class Recipe(object):
             arch = self.filtered_archs[0]
         return arch.get_env()
 
+    def set_hostpython(self, instance, version):
+        state = self.ctx.state
+        hostpython = state.get("hostpython")
+        if hostpython is None:
+            state["hostpython"] = instance.name
+            state.sync()
+        elif hostpython != instance.name:
+            print("ERROR: Wanted to use {}".format(instance.name))
+            print("ERROR: but hostpython is already provided by {}.".format(
+                hostpython))
+            print("ERROR: You can have only one hostpython version compiled")
+            sys.exit(1)
+        self.ctx.python_major = int(version)
+        self.ctx.hostpython_ver = version
+        self.ctx.hostpython_recipe = instance
+
+    def set_python(self, instance, version):
+        state = self.ctx.state
+        python = state.get("python")
+        if python is None:
+            state["python"] = instance.name
+            state.sync()
+        elif python != instance.name:
+            print("ERROR: Wanted to use {}".format(instance.name))
+            print("ERROR: but python is already provided by {}.".format(
+                python))
+            print("ERROR: You can have only one python version compiled")
+            sys.exit(1)
+        self.ctx.python_ver = version
+        self.ctx.python_recipe = instance
+
     @property
     def archive_root(self):
         key = "{}.archive_root".format(self.name)
@@ -648,6 +696,12 @@ class Recipe(object):
         if not exists(d):
             raise ValueError("Invalid path passed into {}".format(envname))
         return d
+
+    def init_after_import(cls, ctx):
+        """This can be used to dynamically set some variables
+        depending of the state
+        """
+        pass
 
     @cache_execution
     def download(self):
@@ -875,6 +929,7 @@ class Recipe(object):
             mod = importlib.import_module("recipes.{}".format(name))
             recipe = mod.recipe
             recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
+            recipe.init_after_import(ctx)
 
         if version:
             recipe.version = version
@@ -916,7 +971,7 @@ class PythonRecipe(Recipe):
                 "--prefix", iosbuild,
                 _env=env)
         dest_dir = join(self.ctx.site_packages_dir, name)
-        self.remove_junk(iosbuild)
+        #self.remove_junk(iosbuild)
         if is_dir:
             if exists(dest_dir):
                 shutil.rmtree(dest_dir)
@@ -944,6 +999,7 @@ class CythonRecipe(PythonRecipe):
             filename = filename[len(self.build_dir) + 1:]
         print("Cythonize {}".format(filename))
         cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
+        hostpython = self.ctx.state.get("hostpython")
         shprint(cmd, filename)
 
     def cythonize_build(self):
@@ -1021,6 +1077,9 @@ def build_recipes(names, ctx):
     build_order = list(graph.find_order())
     print("Build order is {}".format(build_order))
     recipes = [Recipe.get_recipe(name, ctx) for name in build_order]
+    recipes = [recipe for recipe in recipes if not recipe.is_alias]
+    recipes_order = [recipe.name for recipe in recipes]
+    print("Recipe order is {}".format(recipes_order))
     for recipe in recipes:
         recipe.init_with_ctx(ctx)
     for recipe in recipes:
