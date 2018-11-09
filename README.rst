@@ -12,6 +12,9 @@ The toolchain supports:
 - iPhone Simulator (x86_64)
 - iPhone / iOS (armv7 and arm64)
 
+You can select between Python 2.7 or Python 3.7 by specifying the recipes
+`python2` or `python3` when building.
+
 These recipes are not ported to the new toolchain yet:
 
 - lxml
@@ -39,10 +42,10 @@ Currently, the toolchain requires a few tools for compilation. You will need:
     brew install autoconf automake libtool pkg-config
     brew link libtool
 
-#. Install Cython (0.26.1)::
+#. Install Cython (0.28.1)::
 
     # pip method if available (sudo might be needed.)
-    pip install cython==0.26.1
+    pip install cython==0.28.1
 
 
 Using the toolchain
@@ -56,26 +59,50 @@ contained in a `recipe`.
 You can list the available recipes and their versions with::
 
     $ ./toolchain.py recipes
+    audiostream  master
+    click        master
+    cymunk       master
+    distribute   0.7.3
+    ffmpeg       2.6.3
+    ffpyplayer   v3.2
+    flask        master
     freetype     2.5.5
-    hostpython   2.7.1
+    hostlibffi   3.2.1
+    hostpython2  2.7.1
+    hostpython3  3.7.1
     ios          master
-    kivy         ios-poly-arch
+    itsdangerous master
+    jinja2       master
+    kivy         1.10.1
     libffi       3.2.1
-    openssl      1.0.2e
+    libjpeg      v9a
+    libpng       1.6.26
+    markupsafe   master
+    moodstocks   4.1.5
+    numpy        1.9.1
+    openssl      1.0.2k
+    photolibrary master
+    pil          2.8.2
+    plyer        master
+    pycrypto     2.6.1
+    pykka        1.2.1
     pyobjus      master
-    python       2.7.1
-    sdl2         iOS-improvements
+    python2      2.7.1
+    python3      3.7.1
+    pyyaml       3.11
+    sdl2         2.0.8
     sdl2_image   2.0.0
     sdl2_mixer   2.0.0
     sdl2_ttf     2.0.12
+    werkzeug     master
 
 Then, start the compilation with::
 
-    $ ./toolchain.py build kivy
+    $ ./toolchain.py build python3 kivy
 
 You can build recipes at the same time by adding them as parameters::
 
-    $ ./toolchain.py build openssl kivy
+    $ ./toolchain.py build python3 openssl kivy
 
 Recipe builds can be removed via the clean command e.g.::
 
@@ -87,7 +114,7 @@ You can think of it as follows: the kivy recipe will compile everything
 necessary for a minimal working version of Kivy.
 
 Don't grab a coffee, just do diner. Compiling all the libraries for the first
-time, 4x over (remember, 4 archs, 2 per platforms by default) will take time.
+time, 3x over (remember, 3 archs, x86_64, armv7, arm64) will take time.
 
 For a complete list of available commands, type::
 
@@ -155,7 +182,7 @@ Reducing the application size
 If you would like to reduce the size of your distributed app, there are a few
 things you can do to achieve this:
 
-#. Minimize the `build/python/lib/python27.zip`: this contains all the python
+#. Minimize the `build/pythonX/lib/pythonXX.zip`: this contains all the python
    modules. You can edit the zip file and remove all the files you'll not use
    (reduce encodings, remove xml, email...)
 
@@ -164,18 +191,18 @@ things you can do to achieve this:
    Python dynamic modules and will remove needed symbols.
 
 #. By default, the iOS package compiles binaries for all processor
-   architectures, namely x86, x86_64, armv7 and arm64 as per the guidelines from
+   architectures, namely x86_64, armv7 and arm64 as per the guidelines from
    Apple. You can reduce the size of your ipa significantly by removing the
-   x86 and x86_64 architectures as they are usually used only for the emulator.
+   x86_64 architecture as they are used only for the emulator.
 
    The procedure is to first compile/build all the host recipes as is::
 
-       ./toolchain.py build hostpython
+       ./toolchain.py build hostpython3
 
    Then build all the rest of the recipes using --arch=armv7 --arch=arm64
    arguments as follows::
 
-       ./toolchain.py build kivy --arch=armv7 --arch=arm64
+       ./toolchain.py build python3 kivy --arch=armv7 --arch=arm64
 
    Note that these packages will not run in the iOS emulators, so use them
    only for deployment.
@@ -212,6 +239,11 @@ Fatal error: "stdio.h" file not found
 
 You must build with bitcode disabled (Xcode setting ENABLE_BITCODE should be No).
     We don't support bitcode. You need to go to the project setting, and disable bitcode.
+
+You don't have permissions to run
+    It is due to invalid archs, search for them and check it. Maybe you
+    targetted a simulator but have only armv7/arm64. Maybe you want to target
+    your iPad but it as only x86_64.
 
 Support
 -------
