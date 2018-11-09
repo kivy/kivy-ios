@@ -10,6 +10,7 @@ class LibffiRecipe(Recipe):
     library = "build/Release-{arch.sdk}/libffi.a"
     include_per_arch = True
     include_dir = "build_{arch.sdk}-{arch.arch}/include"
+    include_name = "ffi"
     archs = ["x86_64", "armv7", "arm64"]
 
     def prebuild_arch(self, arch):

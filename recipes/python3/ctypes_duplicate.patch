@@ -1,0 +1,17 @@
+--- Python-3.7.1/Modules/_ctypes/cfield.c-old	2018-11-03 13:47:40.000000000 +0100
++++ Python-3.7.1/Modules/_ctypes/cfield.c	2018-11-03 13:48:14.000000000 +0100
+@@ -1633,6 +1633,7 @@
+ } ffi_type;
+ */
+ 
++#if 0
+ /* align and size are bogus for void, but they must not be zero */
+ ffi_type ffi_type_void = { 1, 1, FFI_TYPE_VOID };
+ 
+@@ -1660,4 +1661,6 @@
+ 
+ ffi_type ffi_type_pointer = { sizeof(void *), VOID_P_ALIGN, FFI_TYPE_POINTER };
+ 
++#endif
++
+ /*---------------- EOF ----------------*/

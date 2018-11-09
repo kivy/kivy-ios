@@ -148,6 +148,8 @@ class Arch(object):
                 self.ctx.include_dir,
                 d.format(arch=self))
             for d in self.ctx.include_dirs]
+        include_dirs += ["-I{}".format(
+            join(self.ctx.dist_dir, "include", self.arch))]
 
         env = {}
         ccache = sh.which('ccache')
@@ -427,6 +429,7 @@ class Recipe(object):
         "libraries": [],
         "include_dir": None,
         "include_per_arch": False,
+        "include_name": None,
         "frameworks": [],
         "sources": [],
         "pbx_frameworks": [],
@@ -621,10 +624,11 @@ class Recipe(object):
         self.ctx = ctx
         include_dir = None
         if self.include_dir:
+            include_name = self.include_name or self.name
             if self.include_per_arch:
-                include_dir = join("{arch.arch}", self.name)
+                include_dir = join("{arch.arch}", include_name)
             else:
-                include_dir = join("common", self.name)
+                include_dir = join("common", include_name)
         if include_dir:
             print("Include dir added: {}".format(include_dir))
             self.ctx.include_dirs.append(include_dir)
@@ -880,7 +884,8 @@ class Recipe(object):
             arch_dir = "common"
             if self.include_per_arch:
                 arch_dir = arch.arch
-            dest_dir = join(self.ctx.include_dir, arch_dir, self.name)
+            include_name = self.include_name or self.name
+            dest_dir = join(self.ctx.include_dir, arch_dir, include_name)
             if exists(dest_dir):
                 shutil.rmtree(dest_dir)
             build_dir = self.get_build_dir(arch.arch)

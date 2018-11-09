@@ -8,8 +8,7 @@ import os
 class Python3Recipe(Recipe):
     version = "3.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
-    depends = ["hostpython3", "libffi", ]
-    optional_depends = ["openssl"]
+    depends = ["hostpython3", "libffi", "openssl"]
     library = "libpython3.7m.a"
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
 
@@ -25,19 +24,10 @@ class Python3Recipe(Recipe):
         # common to all archs
         if  self.has_marker("patched"):
             return
-        # self.apply_patch("ssize-t-max.patch")
-        # self.apply_patch("dynload.patch")
-        # self.apply_patch("static-_sqlite3.patch")
-        shutil.copy("Modules/Setup.dist", "Modules/Setup")
+        self.apply_patch("dynload.patch")
+        self.copy_file("ModulesSetup", "Modules/Setup.local")
+        self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
         self.apply_patch("xcompile.patch")
-        # self.copy_file("_scproxy.py", "Lib/_scproxy.py")
-        # self.apply_patch("xcompile.patch")
-        # self.apply_patch("setuppath.patch")
-        # self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
-        # self.apply_patch("ipv6.patch")
-        # if "openssl.build_all" in self.ctx.state:
-        #      self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
-        # self.apply_patch("posixmodule.patch")
         self.set_marker("patched")
 
     def get_build_env(self, arch):
@@ -55,14 +45,13 @@ class Python3Recipe(Recipe):
             py_arch = "arm"
         elif py_arch == "arm64":
             py_arch = "aarch64"
-        prefix = join(self.ctx.dist_dir, "python3")
+        prefix = join(self.ctx.dist_dir, "root", "python3")
         shprint(configure,
                 "CC={}".format(build_env["CC"]),
                 "LD={}".format(build_env["LD"]),
                 "CFLAGS={}".format(build_env["CFLAGS"]),
                 "LDFLAGS={} -undefined dynamic_lookup".format(build_env["LDFLAGS"]),
                 # "--without-pymalloc",
-                # "--disable-toolbox-glue",
                 "ac_cv_file__dev_ptmx=yes",
                 "ac_cv_file__dev_ptc=no",
                 "ac_cv_little_endian_double=yes",
@@ -93,20 +82,14 @@ class Python3Recipe(Recipe):
                 "--host={}-apple-ios".format(py_arch),
                 "--build=x86_64-apple-darwin",
                 "--prefix={}".format(prefix),
-                "--exec-prefix={}".format(prefix),
                 "--without-ensurepip",
-                # "--with-system-ffi",
+                "--with-system-ffi",
                 # "--without-doc-strings",
                 "--enable-ipv6",
                 _env=build_env)
 
-        # self._patch_pyconfig()
-        # self.apply_patch("ctypes_duplicate.patch")
-        # self.apply_patch("ctypes_duplicate_longdouble.patch")
+        self.apply_patch("ctypes_duplicate.patch")
         shprint(sh.make, self.ctx.concurrent_make)
-                # "HOSTPYTHON={}".format(self.ctx.hostpython),
-                # "HOSTPGEN={}".format(self.ctx.hostpgen))
-                # "CROSS_COMPILE_TARGET=yes",
 
     def install(self):
         arch = list(self.filtered_archs)[0]
@@ -117,6 +100,7 @@ class Python3Recipe(Recipe):
                 "install",
                 "prefix={}".format(join(self.ctx.dist_dir, "root", "python3")),
                 _env=build_env)
+        # os.execve("/bin/bash", ["/bin/bash"], os.environ)
         self.reduce_python()
 
     def reduce_python(self):
@@ -125,7 +109,10 @@ class Python3Recipe(Recipe):
         try:
             print("Remove files unlikely to be used")
             os.chdir(join(self.ctx.dist_dir, "root", "python3"))
-            sh.rm("-rf", "share")
+            # os.execve("/bin/bash", ["/bin/bash"], env=os.environ)
+            sh.rm("-rf", "bin", "share")
+
+            # platform binaries and configuration
             os.chdir(join(
                 self.ctx.dist_dir, "root", "python3", "lib",
                 "python3.7", "config-3.7m-darwin"))
@@ -134,15 +121,42 @@ class Python3Recipe(Recipe):
             sh.rm("config.c.in")
             sh.rm("makesetup")
             sh.rm("install-sh")
-            os.chdir(join(self.ctx.dist_dir, "root", "python3", "lib", "python3.7"))
-            # sh.find(".", "-iname", "*.pyc", "-exec", "rm", "{}", ";")
-            # sh.find(".", "-iname", "*.py", "-exec", "rm", "{}", ";")
-            #sh.find(".", "-iname", "test*", "-exec", "rm", "-rf", "{}", ";")
-            sh.rm("-rf", "wsgiref", "curses", "idlelib", "lib2to3")
 
-            # now create the zip.
-            print("Create a stdlib.zip")
-            sh.zip("-r", "../stdlib.zip", sh.glob("*"))
+            # cleanup pkgconfig and compiled lib
+            os.chdir(join(self.ctx.dist_dir, "root", "python3", "lib"))
+            sh.rm("-rf", "pkgconfig")
+            sh.rm("-f", "libpython3.7m.a")
+
+            # cleanup python libraries
+            os.chdir(join(
+                self.ctx.dist_dir, "root", "python3", "lib", "python3.7"))
+            sh.rm("-rf", "wsgiref", "curses", "idlelib", "lib2to3",
+                  "ensurepip", "turtledemo", "lib-dynload", "venv",
+                  "pydoc_data")
+            sh.find(".", "-path", "*/test*/*", "-delete")
+            sh.find(".", "-name", "*.exe", "-type", "f", "-delete")
+            sh.find(".", "-name", "test*", "-type", "d", "-delete")
+            sh.find(".", "-iname", "*.pyc", "-delete")
+            sh.find(".", "-path", "*/__pycache__/*", "-delete")
+            sh.find(".", "-name", "__pycache__", "-type", "d", "-delete")
+
+            # now precompile to Python bytecode
+            hostpython = sh.Command(self.ctx.hostpython)
+            shprint(hostpython, "-m", "compileall", "-f", "-b")
+            # sh.find(".", "-iname", "*.py", "-delete")
+
+            # some pycache are recreated after compileall
+            sh.find(".", "-path", "*/__pycache__/*", "-delete")
+            sh.find(".", "-name", "__pycache__", "-type", "d", "-delete")
+
+            # create the lib zip
+            print("Create a python3.7.zip")
+            sh.mv("config-3.7m-darwin", "..")
+            sh.mv("site-packages", "..")
+            sh.zip("-r", "../python37.zip", sh.glob("*"))
+            sh.rm("-rf", sh.glob("*"))
+            sh.mv("../config-3.7m-darwin", ".")
+            sh.mv("../site-packages", ".")
         finally:
             os.chdir(oldpwd)
 
