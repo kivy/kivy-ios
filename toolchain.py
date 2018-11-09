@@ -17,6 +17,7 @@ import io
 import json
 import shutil
 import fnmatch
+import tempfile
 from datetime import datetime
 try:
     from urllib.request import FancyURLopener, urlcleanup
@@ -152,7 +153,6 @@ class Arch(object):
             join(self.ctx.dist_dir, "include", self.arch))]
 
         env = {}
-        ccache = sh.which('ccache')
         cc = sh.xcrun("-find", "-sdk", self.sdk, "clang").strip()
         cxx = sh.xcrun("-find", "-sdk", self.sdk, "clang++").strip()
 
@@ -166,40 +166,45 @@ class Arch(object):
         ])
         cc += " " + flags
         cxx += " " + flags
+
+        use_ccache = environ.get("USE_CCACHE", "1")
+        ccache = None
+        if use_ccache == "1":
+            ccache = sh.which('ccache')
         if ccache:
             ccache = ccache.strip()
-            use_ccache = environ.get("USE_CCACHE", "1")
-            if use_ccache != '1':
-                env["CC"] = cc
-                env["CXX"] = cxx
-            else:
-                if not self._ccsh:
-                    self._ccsh = ccsh = sh.mktemp().strip()
-                    with open(ccsh, 'w') as f:
-                        f.write('#!/bin/sh\n')
-                        f.write(ccache + ' ' + cc + ' "$@"\n')
-                    sh.chmod('+x', ccsh)
-                    self._cxxsh = cxxsh = sh.mktemp().strip()
-                    with open(cxxsh, 'w') as f:
-                        f.write('#!/bin/sh\n')
-                        f.write(ccache + ' ' + cxx + ' "$@"\n')
-                    sh.chmod('+x', cxxsh)
-                else:
-                    ccsh = self._ccsh
-                    cxxsh = self._cxxsh
-                env["USE_CCACHE"] = '1'
-                env["CCACHE"] = ccache
-                env["CC"] = ccsh
-                env["CXX"] = cxxsh
+            env["USE_CCACHE"] = "1"
+            env["CCACHE"] = ccache
+            env.update({k: v for k, v in environ.items() if k.startswith('CCACHE_')})
+            env.setdefault('CCACHE_MAXSIZE', '10G')
+            env.setdefault('CCACHE_HARDLINK', 'true')
+            env.setdefault('CCACHE_SLOPPINESS', ('file_macro,time_macros,'
+                'include_file_mtime,include_file_ctime,file_stat_matches'))
 
-                env.update({k: v for k, v in environ.items() if k.startswith('CCACHE_')})
-                env.setdefault('CCACHE_MAXSIZE', '10G')
-                env.setdefault('CCACHE_HARDLINK', 'true')
-                env.setdefault('CCACHE_SLOPPINESS', ('file_macro,time_macros,'
-                    'include_file_mtime,include_file_ctime,file_stat_matches'))
-        else:
-            env["CC"] = cc
-            env["CXX"] = cxx
+        if not self._ccsh:
+            self._ccsh = tempfile.NamedTemporaryFile()
+            self._cxxsh = tempfile.NamedTemporaryFile()
+            sh.chmod("+x", self._ccsh.name)
+            sh.chmod("+x", self._cxxsh.name)
+            self._ccsh.write(b'#!/bin/sh\n')
+            self._cxxsh.write(b'#!/bin/sh\n')
+            if ccache:
+                print("CC and CXX will use ccache")
+                self._ccsh.write(
+                    (ccache + ' ' + cc + ' "$@"\n').encode("utf8"))
+                self._cxxsh.write(
+                    (ccache + ' ' + cxx + ' "$@"\n').encode("utf8"))
+            else:
+                print("CC and CXX will not use ccache")
+                self._ccsh.write(
+                    (cc + ' "$@"\n').encode("utf8"))
+                self._cxxsh.write(
+                    (cxx + ' "$@"\n').encode("utf8"))
+            self._ccsh.flush()
+            self._cxxsh.flush()
+
+        env["CC"] = self._ccsh.name
+        env["CXX"] = self._cxxsh.name
         env["AR"] = sh.xcrun("-find", "-sdk", self.sdk, "ar").strip()
         env["LD"] = sh.xcrun("-find", "-sdk", self.sdk, "ld").strip()
         env["OTHER_CFLAGS"] = " ".join(include_dirs)
