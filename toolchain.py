@@ -1051,6 +1051,7 @@ def build_recipes(names, ctx):
     # gather all the dependencies
     print("Want to build {}".format(names))
     graph = Graph()
+    ctx.wanted_recipes = names[:]
     recipe_to_load = names
     recipe_loaded = []
     while names:
