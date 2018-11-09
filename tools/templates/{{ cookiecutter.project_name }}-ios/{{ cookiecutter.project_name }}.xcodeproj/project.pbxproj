@@ -33,7 +33,7 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		2CB5F34517D5233A006187AB /* bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = SOURCE_ROOT; };
 		2CB5F34617D5233A006187AB /* bridge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = bridge.m; sourceTree = SOURCE_ROOT; };
-		59738AB41A8BB5D8001B2C0C /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = {{ cookiecutter.dist_dir }}/root/python/lib; sourceTree = "<group>"; };
+		59738AB41A8BB5D8001B2C0C /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lib; path = {{ cookiecutter.dist_dir }}/root/python{{ cookiecutter.python_major }}/lib; sourceTree = "<group>"; };
 		59738AB61A8BB71F001B2C0C /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = {{ cookiecutter.dist_dir }}/hostpython/include; sourceTree = "<group>"; };
 		59738ABA1A8E19AA001B2C0C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = {{ cookiecutter.project_name }}/Images.xcassets; sourceTree = "<group>"; };
 		59738AD01A8E62D6001B2C0C /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "LaunchImages/Default-568h@2x.png"; sourceTree = "<group>"; };
@@ -234,7 +234,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "{{ cookiecutter.dist_dir }}/hostpython/bin/python -OO -m compileall \"$PROJECT_DIR\"/YourApp";
+			{%- if cookiecutter.python_major == 2 %}
+			shellScript = "{{ cookiecutter.dist_dir }}/hostpython2/bin/python -OO -m compileall \"$PROJECT_DIR\"/YourApp";
+			{%- else %}
+			shellScript = "{{ cookiecutter.dist_dir }}/hostpython3/bin/python -m compileall -f -b \"$PROJECT_DIR\"/YourApp";
+			{%- endif %}
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -250,7 +254,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "find \"$PROJECT_DIR\"/YourApp/ -iname '*.py' -exec rm {} \\; -or -iname '*.pyc' -exec rm {} \\;";
+			{%- if cookiecutter.python_major == 2 %}
+			shellScript = "find \"$PROJECT_DIR\"/YourApp/ -regex '.*\\.py[c]*' -delete";
+			{%- else %}
+			shellScript = "find \"$PROJECT_DIR\"/YourApp/ -regex '.*\\.py' -delete";
+			{%- endif %}
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -343,8 +351,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEAD_CODE_STRIPPING = NO;
+				ENABLE_BITCODE = NO;
 				USER_HEADER_SEARCH_PATHS = {{ cookiecutter.dist_dir }}/root/include/;
-				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
@@ -352,9 +360,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEAD_CODE_STRIPPING = NO;
+				ENABLE_BITCODE = NO;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				USER_HEADER_SEARCH_PATHS = {{ cookiecutter.dist_dir }}/root/include/;
-				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};

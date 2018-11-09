@@ -106,10 +106,10 @@
  	fi
  	;;
  	hp*|HP*) DYNLOADFILE="dynload_hpux.o";;
-+	# Disable dynamic loading on iOS
-+	iOS/*) DYNLOADFILE="dynload_stub.o";;
-+	tvOS/*) DYNLOADFILE="dynload_stub.o";;
-+	watchOS/*) DYNLOADFILE="dynload_stub.o";;
++	# Dynamic loading on iOS
++	iOS/*) DYNLOADFILE="dynload_shlib.o";;
++	tvOS/*) DYNLOADFILE="dynload_shlib.o";;
++	watchOS/*) DYNLOADFILE="dynload_shlib.o";;
  	*)
  	# use dynload_shlib.c and dlopen() if we have it; otherwise stub
  	# out any dynamic loading

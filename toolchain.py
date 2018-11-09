@@ -1096,6 +1096,15 @@ def ensure_dir(filename):
         makedirs(filename)
 
 
+def ensure_recipes_loaded(ctx):
+    for recipe in Recipe.list_recipes():
+        key = "{}.build_all".format(recipe)
+        if key not in ctx.state:
+            continue
+        recipe = Recipe.get_recipe(recipe, ctx)
+        recipe.init_with_ctx(ctx)
+
+
 def update_pbxproj(filename):
     # list all the compiled recipes
     ctx = Context()
@@ -1318,6 +1327,7 @@ Xcode:
 
             from cookiecutter.main import cookiecutter
             ctx = Context()
+            ensure_recipes_loaded(ctx)
             template_dir = join(curdir, "tools", "templates")
             context = {
                 "title": args.name,
@@ -1327,6 +1337,8 @@ Xcode:
                 "project_dir": realpath(args.directory),
                 "version": "1.0.0",
                 "dist_dir": ctx.dist_dir,
+                "python_version": ctx.python_ver,
+                "python_major": ctx.python_major
             }
             cookiecutter(template_dir, no_input=True, extra_context=context)
             filename = join(
