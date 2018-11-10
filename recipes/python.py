@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 from toolchain import Recipe
 
 class PythonAliasRecipe(Recipe):
@@ -13,8 +14,12 @@ class PythonAliasRecipe(Recipe):
             elif "python3" in ctx.wanted_recipes:
                 python = "python3"
             else:
-                print("WARNING: no python set yet, so you need to specify")
-                print("WARNING: either python2 or python3 in your deps")
+                print("")
+                print("ERROR: No Python version set in the build.")
+                print("ERROR: Add python2 or python3 in your recipes:")
+                print("ERROR: ./toolchain.py build python3 ...")
+                print("")
+                sys.exit(1)
         if python:
             self.depends = [python]
 
