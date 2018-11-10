@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import sys
 from toolchain import Recipe
 
 class HostpythonAliasRecipe(Recipe):
@@ -13,9 +14,13 @@ class HostpythonAliasRecipe(Recipe):
             elif "hostpython3" in ctx.wanted_recipes:
                 hostpython = "hostpython3"
             else:
-                print("WARNING: no hostpython set yet, so you need to specify")
-                print("WARNING: either hostpython2 or hostpython3 in your deps")
-        if python:
+                print("")
+                print("ERROR: No hostpython version set in the build.")
+                print("ERROR: Add python2 or python3 in your recipes:")
+                print("ERROR: ./toolchain.py build python3 ...")
+                print("")
+                sys.exit(1)
+        if hostpython:
             self.depends = [hostpython]
 
 recipe = HostpythonAliasRecipe()
