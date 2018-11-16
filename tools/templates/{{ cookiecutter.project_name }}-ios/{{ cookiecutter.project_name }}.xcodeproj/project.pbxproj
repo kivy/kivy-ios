@@ -230,7 +230,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			{%- if cookiecutter.python_major == 2 %}
+			{%- if cookiecutter.python_major == "2" %}
 			shellScript = "{{ cookiecutter.dist_dir }}/hostpython2/bin/python -OO -m compileall \"$PROJECT_DIR\"/YourApp";
 			{%- else %}
 			shellScript = "{{ cookiecutter.dist_dir }}/hostpython3/bin/python -m compileall -f -b \"$PROJECT_DIR\"/YourApp";
@@ -250,7 +250,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			{%- if cookiecutter.python_major == 2 %}
+			{%- if cookiecutter.python_major == "2" %}
 			shellScript = "find \"$PROJECT_DIR\"/YourApp/ -regex '.*\\.py[c]*' -delete";
 			{%- else %}
 			shellScript = "find \"$PROJECT_DIR\"/YourApp/ -regex '.*\\.py' -delete";

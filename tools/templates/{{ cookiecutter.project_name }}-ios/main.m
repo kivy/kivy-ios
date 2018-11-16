@@ -5,7 +5,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-{%- if cookiecutter.python_major == 2 %}
+{%- if cookiecutter.python_major == "2" %}
 #include "{{ cookiecutter.kivy_dir }}/dist/root/python2/include/python2.7/Python.h"
 {%- else %}
 #include "{{ cookiecutter.kivy_dir }}/dist/root/python3/include/python3.7m/Python.h"
