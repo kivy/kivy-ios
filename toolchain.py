@@ -1334,6 +1334,13 @@ Xcode:
             from cookiecutter.main import cookiecutter
             ctx = Context()
             ensure_recipes_loaded(ctx)
+
+            if not hasattr(ctx, "python_ver"):
+                print("ERROR: No python recipes compiled!")
+                print("ERROR: You must have compiled at least python2 or")
+                print("ERROR: python3 recipes to be able to create a project.")
+                sys.exit(1)
+
             template_dir = join(curdir, "tools", "templates")
             context = {
                 "title": args.name,
