@@ -5,7 +5,7 @@ import sh
 import shutil
 
 
-class HostpythonRecipe(Recipe):
+class Hostpython2Recipe(Recipe):
     version = "2.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
     depends = ["hostlibffi"]
@@ -13,9 +13,11 @@ class HostpythonRecipe(Recipe):
     archs = ["x86_64"]
 
     def init_with_ctx(self, ctx):
-        super(HostpythonRecipe, self).init_with_ctx(ctx)
-        self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython", "bin", "python")
-        self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython", "bin", "pgen")
+        super(Hostpython2Recipe, self).init_with_ctx(ctx)
+        self.set_hostpython(self, 2.7)
+        self.ctx.so_suffix = ".so"
+        self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython2", "bin", "python")
+        self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython2", "bin", "pgen")
         print("Global: hostpython located at {}".format(self.ctx.hostpython))
         print("Global: hostpgen located at {}".format(self.ctx.hostpgen))
 
@@ -66,18 +68,19 @@ class HostpythonRecipe(Recipe):
                 ])
 
         if "openssl.build_all" in self.ctx.state:
+            build_env["LDFLAGS"] += " -L{}".format(join(self.ctx.dist_dir, "lib"))
             build_env["CFLAGS"] += " -I{}".format(join(self.ctx.dist_dir, "include",
                                                        "x86_64", "openssl"))
 
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
-                "--prefix={}".format(join(self.ctx.dist_dir, "hostpython")),
+                "--prefix={}".format(join(self.ctx.dist_dir, "hostpython2")),
                 "--disable-toolbox-glue",
                 "--without-gcc",
                 _env=build_env)
         shprint(sh.make, "-C", self.build_dir, self.ctx.concurrent_make, "python", "Parser/pgen",
                 _env=build_env)
-        shutil.move("python", "hostpython")
+        shutil.move("python", "hostpython2")
         shutil.move("Parser/pgen", "Parser/hostpgen")
 
     def install(self):
@@ -88,13 +91,13 @@ class HostpythonRecipe(Recipe):
         # Compiling sometimes looks for Python-ast.py in the 'Python' i.s.o.
         # the 'hostpython' folder. Create a symlink to fix. See issue #201
         shprint(sh.ln, "-s",
-                join(build_dir, "hostpython"),
+                join(build_dir, "hostpython2"),
                 join(build_dir, "Python"))
         shprint(sh.make, self.ctx.concurrent_make,
                 "-C", build_dir,
                 "bininstall", "inclinstall",
                 _env=build_env)
-        pylib_dir = join(self.ctx.dist_dir, "hostpython", "lib", "python2.7")
+        pylib_dir = join(self.ctx.dist_dir, "hostpython2", "lib", "python2.7")
         if exists(pylib_dir):
             shutil.rmtree(pylib_dir)
         shutil.copytree(
@@ -106,7 +109,7 @@ class HostpythonRecipe(Recipe):
             join(pylib_dir, "config", "Makefile"))
         shutil.copy(
             join(build_dir, "Parser", "pgen"),
-            join(self.ctx.dist_dir, "hostpython", "bin", "pgen"))
+            join(self.ctx.dist_dir, "hostpython2", "bin", "pgen"))
 
 
-recipe = HostpythonRecipe()
+recipe = Hostpython2Recipe()

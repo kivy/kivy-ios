@@ -4,21 +4,21 @@ import sh
 import os
 
 
-class PythonRecipe(Recipe):
+class Python2Recipe(Recipe):
     version = "2.7.1"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tar.bz2"
-    depends = ["hostpython", "libffi", ]
+    depends = ["hostpython2", "libffi"]
     optional_depends = ["openssl"]
     library = "libpython2.7.a"
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
 
     def init_with_ctx(self, ctx):
-        super(PythonRecipe, self).init_with_ctx(ctx)
-        self.ctx.python_ver_dir = "python2.7"
-        self.ctx.python_prefix = join(ctx.dist_dir, "root", "python")
-        self.ctx.site_packages_dir = join(
-            ctx.dist_dir, "root", "python", "lib", ctx.python_ver_dir,
-            "site-packages")
+        super(Python2Recipe, self).init_with_ctx(ctx)
+        self.set_python(self, 2.7)
+        ctx.python_ver_dir = "python2.7"
+        ctx.python_prefix = join(ctx.dist_dir, "root", "python")
+        ctx.site_packages_dir = join(
+            ctx.python_prefix, "lib", ctx.python_ver_dir, "site-packages")
 
     def prebuild_arch(self, arch):
         # common to all archs
@@ -149,4 +149,4 @@ class PythonRecipe(Recipe):
             os.chdir(oldpwd)
 
 
-recipe = PythonRecipe()
+recipe = Python2Recipe()

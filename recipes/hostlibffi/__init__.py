@@ -1,5 +1,6 @@
 from toolchain import Recipe, shprint
 import sh
+from os.path import exists
 
 
 class LibffiRecipe(Recipe):
@@ -31,22 +32,30 @@ class LibffiRecipe(Recipe):
         self.apply_patch("public_include.patch")
         self.apply_patch("staticlib.patch")
         self.apply_patch("staticlib2.patch")
+        self.apply_patch("libffi-xcode10.patch")
         self.set_marker("patched")
 
     def build_arch(self, arch):
-        shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
+        if exists("generate-darwin-source-and-headers.py"):
+            shprint(
+                sh.mv,
+                "generate-darwin-source-and-headers.py",
+                "_generate-darwin-source-and-headers.py")
+            shprint(sh.touch, "generate-darwin-source-and-headers.py")
+        python27 = sh.Command("python2.7")
+        shprint(python27, "_generate-darwin-source-and-headers.py", "--only-osx")
+        shprint(sh.xcodebuild,
+                self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
+                "DSTROOT={}/hostlibffi".format(self.ctx.dist_dir),
                 "-sdk", "macosx",
-                "install", "installhdrs",
+                "clean", "build", "installhdrs", "install",
                 "-project", "libffi.xcodeproj",
-                "-target", "libffi-Mac",
-                "-configuration", "Release",
-                "DSTROOT={}/hostlibffi".format(self.ctx.dist_dir))
-        
+                "-scheme", "libffi-Mac",
+                "-configuration", "Release")
 
     def postbuild_arch(self, arch):
         pass
 
 recipe = LibffiRecipe()
-
