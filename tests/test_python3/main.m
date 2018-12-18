@@ -1,16 +1,12 @@
 //
 //  main.m
-//  {{ cookiecutter.project_name }}
+//  test_python3
 //
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-{%- if cookiecutter.python_major == "2" %}
-#include "{{ cookiecutter.kivy_dir }}/dist/root/python2/include/python2.7/Python.h"
-{%- else %}
-#include "{{ cookiecutter.kivy_dir }}/dist/root/python3/include/python3.7m/Python.h"
-{%- endif %}
-#include "{{ cookiecutter.kivy_dir }}/dist/include/common/sdl2/SDL_main.h"
+#include "/Users/tito/code/kivy-ios/dist/root/python3/include/python3.7m/Python.h"
+#include "/Users/tito/code/kivy-ios/dist/include/common/sdl2/SDL_main.h"
 #include <dlfcn.h>
 
 void export_orientation();
@@ -26,12 +22,13 @@ int main(int argc, char *argv[]) {
 
     // Special environment to prefer .pyo, and don't write bytecode if .py are found
     // because the process will not have a write attribute on the device.
+//    putenv("PYTHONOPTIMIZE=2");
     putenv("PYTHONDONTWRITEBYTECODE=1");
     putenv("PYTHONNOUSERSITE=1");
     putenv("PYTHONPATH=.");
+//    putenv("PYTHONVERBOSE=1");
     putenv("PYTHONUNBUFFERED=1");
-    // putenv("PYTHONVERBOSE=1");
-    // putenv("PYOBJUS_DEBUG=1");
+//    putenv("PYOBJUS_DEBUG=1");
 
     // Kivy environment to prefer some implementation on iOS platform
     putenv("KIVY_BUILD=ios");
@@ -62,10 +59,10 @@ int main(int argc, char *argv[]) {
     NSString *tmp_path = [NSString stringWithFormat:@"TMP=%@/tmp", resourcePath, nil];
     putenv((char *)[tmp_path UTF8String]);
 #endif
-
+    
     NSLog(@"Initializing python");
     Py_Initialize();
-
+    
 #if PY_MAJOR_VERSION == 2
     PySys_SetArgv(argc, argv);
 #else
@@ -85,7 +82,7 @@ int main(int argc, char *argv[]) {
 #if PY_MAJOR_VERSION == 2
 #define MAIN_EXT @"pyo"
 #else
-#define MAIN_EXT @"pyc"
+#define MAIN_EXT @"py"
 #endif
 
     const char * prog = [

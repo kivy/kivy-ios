@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """
 Tool for compiling iOS toolchain
 ================================
@@ -17,12 +17,19 @@ import io
 import json
 import shutil
 import fnmatch
+import tempfile
 from datetime import datetime
 try:
     from urllib.request import FancyURLopener, urlcleanup
 except ImportError:
     from urllib import FancyURLopener, urlcleanup
-
+try:
+    from pbxproj import XcodeProject
+    from pbxproj.pbxextensions.ProjectFiles import FileOptions
+except ImportError:
+    print("ERROR: pbxproj requirements is missing")
+    print("To install: pip install -r requirements.txt")
+    sys.exit(0)
 curdir = dirname(__file__)
 sys.path.insert(0, join(curdir, "tools", "external"))
 
@@ -37,7 +44,7 @@ def shprint(command, *args, **kwargs):
     kwargs["_out_bufsize"] = 1
     kwargs["_err_to_out"] = True
     for line in command(*args, **kwargs):
-        stdout.write(line)
+        stdout.write(line.encode("ascii", "replace").decode())
 
 
 def cache_execution(f):
@@ -103,7 +110,7 @@ class JsonStore(object):
         return self.data.keys()
 
     def remove_all(self, prefix):
-        for key in self.data.keys()[:]:
+        for key in tuple(self.data.keys()):
             if not key.startswith(prefix):
                 continue
             del self.data[key]
@@ -142,35 +149,62 @@ class Arch(object):
                 self.ctx.include_dir,
                 d.format(arch=self))
             for d in self.ctx.include_dirs]
+        include_dirs += ["-I{}".format(
+            join(self.ctx.dist_dir, "include", self.arch))]
 
         env = {}
-        ccache = sh.which('ccache')
         cc = sh.xcrun("-find", "-sdk", self.sdk, "clang").strip()
+        cxx = sh.xcrun("-find", "-sdk", self.sdk, "clang++").strip()
+
+        # we put the flags in CC / CXX as sometimes the ./configure test
+        # with the preprocessor (aka CC -E) without CFLAGS, which fails for
+        # cross compiled projects
+        flags = " ".join([
+            "--sysroot", self.sysroot,
+            "-arch", self.arch,
+            "-pipe", "-no-cpp-precomp",
+        ])
+        cc += " " + flags
+        cxx += " " + flags
+
+        use_ccache = environ.get("USE_CCACHE", "1")
+        ccache = None
+        if use_ccache == "1":
+            ccache = sh.which('ccache')
         if ccache:
             ccache = ccache.strip()
-            use_ccache = environ.get("USE_CCACHE", "1")
-            if use_ccache != '1':
-                env["CC"] = cc
-            else:
-                if not self._ccsh:
-                    self._ccsh = ccsh = sh.mktemp().strip()
-                    with open(ccsh, 'w') as f:
-                        f.write('#!/bin/sh\n')
-                        f.write(ccache + ' ' + cc + ' "$@"\n')
-                    sh.chmod('+x', ccsh)
-                else:
-                    ccsh = self._ccsh
-                env["USE_CCACHE"] = '1'
-                env["CCACHE"] = ccache
-                env["CC"] = ccsh
+            env["USE_CCACHE"] = "1"
+            env["CCACHE"] = ccache
+            env.update({k: v for k, v in environ.items() if k.startswith('CCACHE_')})
+            env.setdefault('CCACHE_MAXSIZE', '10G')
+            env.setdefault('CCACHE_HARDLINK', 'true')
+            env.setdefault('CCACHE_SLOPPINESS', ('file_macro,time_macros,'
+                'include_file_mtime,include_file_ctime,file_stat_matches'))
 
-                env.update({k: v for k, v in environ.items() if k.startswith('CCACHE_')})
-                env.setdefault('CCACHE_MAXSIZE', '10G')
-                env.setdefault('CCACHE_HARDLINK', 'true')
-                env.setdefault('CCACHE_SLOPPINESS', ('file_macro,time_macros,'
-                    'include_file_mtime,include_file_ctime,file_stat_matches'))
-        else:
-            env["CC"] = cc
+        if not self._ccsh:
+            self._ccsh = tempfile.NamedTemporaryFile()
+            self._cxxsh = tempfile.NamedTemporaryFile()
+            sh.chmod("+x", self._ccsh.name)
+            sh.chmod("+x", self._cxxsh.name)
+            self._ccsh.write(b'#!/bin/sh\n')
+            self._cxxsh.write(b'#!/bin/sh\n')
+            if ccache:
+                print("CC and CXX will use ccache")
+                self._ccsh.write(
+                    (ccache + ' ' + cc + ' "$@"\n').encode("utf8"))
+                self._cxxsh.write(
+                    (ccache + ' ' + cxx + ' "$@"\n').encode("utf8"))
+            else:
+                print("CC and CXX will not use ccache")
+                self._ccsh.write(
+                    (cc + ' "$@"\n').encode("utf8"))
+                self._cxxsh.write(
+                    (cxx + ' "$@"\n').encode("utf8"))
+            self._ccsh.flush()
+            self._cxxsh.flush()
+
+        env["CC"] = self._ccsh.name
+        env["CXX"] = self._cxxsh.name
         env["AR"] = sh.xcrun("-find", "-sdk", self.sdk, "ar").strip()
         env["LD"] = sh.xcrun("-find", "-sdk", self.sdk, "ld").strip()
         env["OTHER_CFLAGS"] = " ".join(include_dirs)
@@ -178,11 +212,6 @@ class Arch(object):
             "-L{}/{}".format(self.ctx.dist_dir, "lib"),
         ])
         env["CFLAGS"] = " ".join([
-            "-arch", self.arch,
-            "-pipe", "-no-cpp-precomp",
-            "--sysroot", self.sysroot,
-            #"-I{}/common".format(self.ctx.include_dir),
-            #"-I{}/{}".format(self.ctx.include_dir, self.arch),
             "-O3",
             self.version_min
         ] + include_dirs)
@@ -284,6 +313,7 @@ class Context(object):
     cython = None
     sdkver = None
     sdksimver = None
+    so_suffix = None  # set by one of the hostpython
 
     def __init__(self):
         super(Context, self).__init__()
@@ -327,7 +357,7 @@ class Context(object):
         self.install_dir = "{}/dist/root".format(self.root_dir)
         self.include_dir = "{}/dist/include".format(self.root_dir)
         self.archs = (
-            ArchSimulator(self),
+            # ArchSimulator(self),
             Arch64Simulator(self),
             ArchIOS(self),
             Arch64IOS(self))
@@ -391,20 +421,31 @@ class Context(object):
         return "IDEBuildOperationMaxNumberOfConcurrentCompileTasks={}".format(self.num_cores)
 
 
+
 class Recipe(object):
-    version = None
-    url = None
-    archs = []
-    depends = []
-    optional_depends = []
-    library = None
-    libraries = []
-    include_dir = None
-    include_per_arch = False
-    frameworks = []
-    sources = []
-    pbx_frameworks = []
-    pbx_libraries = []
+    props = {
+        "is_alias": False,
+        "version": None,
+        "url": None,
+        "archs": [],
+        "depends": [],
+        "optional_depends": [],
+        "library": None,
+        "libraries": [],
+        "include_dir": None,
+        "include_per_arch": False,
+        "include_name": None,
+        "frameworks": [],
+        "sources": [],
+        "pbx_frameworks": [],
+        "pbx_libraries": []
+    }
+
+    def __new__(cls):
+        for prop, value in cls.props.items():
+            if not hasattr(cls, prop):
+                setattr(cls, prop, value)
+        return super(Recipe, cls).__new__(cls)
 
     # API available for recipes
     def download_file(self, url, filename, cwd=None):
@@ -538,6 +579,12 @@ class Recipe(object):
         """
         return join(self.ctx.include_dir, "common", self.name)
 
+    def so_filename(self, name):
+        """Return the filename of a library with the appropriate so suffix
+        (.so for Python 2.7, .cpython-37m-darwin for Python 3.7)
+        """
+        return "{}{}".format(name, self.ctx.so_suffix)
+
     @property
     def name(self):
         modname = self.__class__.__module__
@@ -582,10 +629,11 @@ class Recipe(object):
         self.ctx = ctx
         include_dir = None
         if self.include_dir:
+            include_name = self.include_name or self.name
             if self.include_per_arch:
-                include_dir = join("{arch.arch}", self.name)
+                include_dir = join("{arch.arch}", include_name)
             else:
-                include_dir = join("common", self.name)
+                include_dir = join("common", include_name)
         if include_dir:
             print("Include dir added: {}".format(include_dir))
             self.ctx.include_dirs.append(include_dir)
@@ -596,6 +644,37 @@ class Recipe(object):
         if arch is None:
             arch = self.filtered_archs[0]
         return arch.get_env()
+
+    def set_hostpython(self, instance, version):
+        state = self.ctx.state
+        hostpython = state.get("hostpython")
+        if hostpython is None:
+            state["hostpython"] = instance.name
+            state.sync()
+        elif hostpython != instance.name:
+            print("ERROR: Wanted to use {}".format(instance.name))
+            print("ERROR: but hostpython is already provided by {}.".format(
+                hostpython))
+            print("ERROR: You can have only one hostpython version compiled")
+            sys.exit(1)
+        self.ctx.python_major = int(version)
+        self.ctx.hostpython_ver = version
+        self.ctx.hostpython_recipe = instance
+
+    def set_python(self, instance, version):
+        state = self.ctx.state
+        python = state.get("python")
+        if python is None:
+            state["python"] = instance.name
+            state.sync()
+        elif python != instance.name:
+            print("ERROR: Wanted to use {}".format(instance.name))
+            print("ERROR: but python is already provided by {}.".format(
+                python))
+            print("ERROR: You can have only one python version compiled")
+            sys.exit(1)
+        self.ctx.python_ver = version
+        self.ctx.python_recipe = instance
 
     @property
     def archive_root(self):
@@ -626,6 +705,12 @@ class Recipe(object):
         if not exists(d):
             raise ValueError("Invalid path passed into {}".format(envname))
         return d
+
+    def init_after_import(cls, ctx):
+        """This can be used to dynamically set some variables
+        depending of the state
+        """
+        pass
 
     @cache_execution
     def download(self):
@@ -804,7 +889,8 @@ class Recipe(object):
             arch_dir = "common"
             if self.include_per_arch:
                 arch_dir = arch.arch
-            dest_dir = join(self.ctx.include_dir, arch_dir, self.name)
+            include_name = self.include_name or self.name
+            dest_dir = join(self.ctx.include_dir, arch_dir, include_name)
             if exists(dest_dir):
                 shutil.rmtree(dest_dir)
             build_dir = self.get_build_dir(arch.arch)
@@ -832,7 +918,7 @@ class Recipe(object):
     @classmethod
     def list_recipes(cls):
         recipes_dir = join(dirname(__file__), "recipes")
-        for name in listdir(recipes_dir):
+        for name in sorted(listdir(recipes_dir)):
             fn = join(recipes_dir, name)
             if isdir(fn):
                 yield name
@@ -853,6 +939,7 @@ class Recipe(object):
             mod = importlib.import_module("recipes.{}".format(name))
             recipe = mod.recipe
             recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
+            recipe.init_after_import(ctx)
 
         if version:
             recipe.version = version
@@ -894,7 +981,7 @@ class PythonRecipe(Recipe):
                 "--prefix", iosbuild,
                 _env=env)
         dest_dir = join(self.ctx.site_packages_dir, name)
-        self.remove_junk(iosbuild)
+        #self.remove_junk(iosbuild)
         if is_dir:
             if exists(dest_dir):
                 shutil.rmtree(dest_dir)
@@ -922,6 +1009,7 @@ class CythonRecipe(PythonRecipe):
             filename = filename[len(self.build_dir) + 1:]
         print("Cythonize {}".format(filename))
         cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
+        hostpython = self.ctx.state.get("hostpython")
         shprint(cmd, filename)
 
     def cythonize_build(self):
@@ -968,6 +1056,7 @@ def build_recipes(names, ctx):
     # gather all the dependencies
     print("Want to build {}".format(names))
     graph = Graph()
+    ctx.wanted_recipes = names[:]
     recipe_to_load = names
     recipe_loaded = []
     while names:
@@ -999,6 +1088,9 @@ def build_recipes(names, ctx):
     build_order = list(graph.find_order())
     print("Build order is {}".format(build_order))
     recipes = [Recipe.get_recipe(name, ctx) for name in build_order]
+    recipes = [recipe for recipe in recipes if not recipe.is_alias]
+    recipes_order = [recipe.name for recipe in recipes]
+    print("Recipe order is {}".format(recipes_order))
     for recipe in recipes:
         recipe.init_with_ctx(ctx)
     for recipe in recipes:
@@ -1008,6 +1100,15 @@ def build_recipes(names, ctx):
 def ensure_dir(filename):
     if not exists(filename):
         makedirs(filename)
+
+
+def ensure_recipes_loaded(ctx):
+    for recipe in Recipe.list_recipes():
+        key = "{}.build_all".format(recipe)
+        if key not in ctx.state:
+            continue
+        recipe = Recipe.get_recipe(recipe, ctx)
+        recipe.init_with_ctx(ctx)
 
 
 def update_pbxproj(filename):
@@ -1046,39 +1147,42 @@ def update_pbxproj(filename):
     print("-" * 70)
     print("Analysis of {}".format(filename))
 
-    from mod_pbxproj import XcodeProject
-    project = XcodeProject.Load(filename)
+    project = XcodeProject.load(filename)
     sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
 
     group = project.get_or_create_group("Frameworks")
     g_classes = project.get_or_create_group("Classes")
+    file_options = FileOptions(embed_framework=False, code_sign_on_copy=True)
     for framework in pbx_frameworks:
         framework_name = "{}.framework".format(framework)
         if framework_name in frameworks:
-            print("Ensure {} is in the project (local)".format(framework))
+            print("Ensure {} is in the project (pbx_frameworks, local)".format(framework))
             f_path = join(ctx.dist_dir, "frameworks", framework_name)
         else:
-            print("Ensure {} is in the project (system)".format(framework))
+            print("Ensure {} is in the project (pbx_frameworks, system)".format(framework))
             f_path = join(sysroot, "System", "Library", "Frameworks",
                           "{}.framework".format(framework))
-        project.add_file_if_doesnt_exist(f_path, parent=group, tree="DEVELOPER_DIR")
+        project.add_file(f_path, parent=group, tree="DEVELOPER_DIR",
+                         force=False, file_options=file_options)
     for library in pbx_libraries:
-        print("Ensure {} is in the project".format(library))
+        print("Ensure {} is in the project (pbx_libraries, dylib+tbd)".format(library))
         f_path = join(sysroot, "usr", "lib",
                       "{}.dylib".format(library))
-        project.add_file_if_doesnt_exist(f_path, parent=group, tree="DEVELOPER_DIR")
+        project.add_file(f_path, parent=group, tree="DEVELOPER_DIR", force=False)
+        f_path = join(sysroot, "usr", "lib",
+                      "{}.tbd".format(library))
+        project.add_file(f_path, parent=group, tree="DEVELOPER_DIR", force=False)
     for library in libraries:
-        print("Ensure {} is in the project".format(library))
-        project.add_file_if_doesnt_exist(library, parent=group)
+        print("Ensure {} is in the project (libraries)".format(library))
+        project.add_file(library, parent=group, force=False)
     for name in sources:
         print("Ensure {} sources are used".format(name))
         fn = join(ctx.dist_dir, "sources", name)
         project.add_folder(fn, parent=g_classes)
 
 
-    if project.modified:
-        project.backup()
-        project.save()
+    project.backup()
+    project.save()
 
 
 if __name__ == "__main__":
@@ -1167,9 +1271,12 @@ Xcode:
             else:
                 ctx = Context()
                 for name in Recipe.list_recipes():
-                    recipe = Recipe.get_recipe(name, ctx)
-                    print("{recipe.name:<12} {recipe.version:<8}".format(
-                          recipe=recipe))
+                    try:
+                        recipe = Recipe.get_recipe(name, ctx)
+                        print("{recipe.name:<12} {recipe.version:<8}".format(recipe=recipe))
+
+                    except:
+                        pass
 
         def clean(self):
             parser = argparse.ArgumentParser(
@@ -1226,6 +1333,14 @@ Xcode:
 
             from cookiecutter.main import cookiecutter
             ctx = Context()
+            ensure_recipes_loaded(ctx)
+
+            if not hasattr(ctx, "python_ver"):
+                print("ERROR: No python recipes compiled!")
+                print("ERROR: You must have compiled at least python2 or")
+                print("ERROR: python3 recipes to be able to create a project.")
+                sys.exit(1)
+
             template_dir = join(curdir, "tools", "templates")
             context = {
                 "title": args.name,
@@ -1235,6 +1350,8 @@ Xcode:
                 "project_dir": realpath(args.directory),
                 "version": "1.0.0",
                 "dist_dir": ctx.dist_dir,
+                "python_version": ctx.python_ver,
+                "python_major": ctx.python_major
             }
             cookiecutter(template_dir, no_input=True, extra_context=context)
             filename = join(

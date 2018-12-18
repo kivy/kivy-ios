@@ -29,7 +29,7 @@ cdef void _send_email_done(char *status, void *data):
 class IOSWebView(object):
     def open(self, url, width, height):
         open_url_wbv(url, width, height)
-        
+
 
 def open_url_wbv(url, width, height):
     '''
@@ -66,8 +66,12 @@ class IosBrowser(object):
         open_url(url)
 
 import webbrowser
-webbrowser.register('ios', IosBrowser, None, -1)
-
+try:
+    # python 2
+    webbrowser.register('ios', IosBrowser, None, -1)
+except:
+    # python 3
+    webbrowser.register('ios', IosBrowser, None, preferred=True)
 #
 # API
 #
@@ -119,7 +123,7 @@ def send_email(subject, text, mimetype=None, filename=None, filename_alias=None,
 
     Example for sending a simple hello world::
 
-        ios.send_email('This is my subject', 
+        ios.send_email('This is my subject',
             'Hello you!\n\nThis is an hello world.')
 
     Send a mail with an attachment::
@@ -222,7 +226,7 @@ class IOSKeyboard(object):
     def __init__(self, **kwargs):
         super(IOSKeyboard, self).__init__()
         NSNotificationCenter.defaultCenter().addObserver_selector_name_object_(self, selector("keyboardWillShow"), "UIKeyboardWillShowNotification", None)
-        NSNotificationCenter.defaultCenter().addObserver_selector_name_object_(self, selector("keyboardDidHide"), "UIKeyboardDidHideNotification", None)        
+        NSNotificationCenter.defaultCenter().addObserver_selector_name_object_(self, selector("keyboardDidHide"), "UIKeyboardDidHideNotification", None)
 
     @protocol('KeyboardDelegates')
     def keyboardWillShow(self, notification):
