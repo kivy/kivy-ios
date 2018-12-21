@@ -11,6 +11,12 @@ class KivyRecipe(CythonRecipe):
     pbx_frameworks = ["OpenGLES", "Accelerate"]
     pre_build_ext = True
 
+    def prebuild_arch(self, arch):
+        if self.has_marker("patched"):
+            return
+        self.apply_patch("kivy-0.10-ios-camera.patch")
+        self.set_marker("patched")
+
     def get_recipe_env(self, arch):
         env = super(KivyRecipe, self).get_recipe_env(arch)
         env["KIVY_SDL2_PATH"] = ":".join([
