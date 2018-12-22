@@ -1432,6 +1432,28 @@ Xcode:
             print("--")
             print("Project {} updated".format(filename))
 
+        def info(self):
+            ctx = Context()
+            print("Build Context")
+            print("-------------")
+            from pprint import pformat, pprint
+            for attr in dir(ctx):
+                if not attr.startswith("_"):
+                    if not callable(attr) and attr != 'archs':
+                        print(f"{attr}: {pformat(getattr(ctx, attr))}")
+            print("Architectures")
+            print("=============")
+            for arch in ctx.archs:
+                ul = '-' * (len(str(arch))+6)
+                print(f"{ul}\nArch: {str(arch)}\n{ul}")
+                for attr in dir(arch):
+                    if not attr.startswith("_"):
+                        if not callable(attr) and attr not in ['arch', 'ctx']:
+                            print(f"{attr}: {pformat(getattr(arch, attr))}")
+                print("env:")
+                pprint(arch.get_env())
+
+
         def pip(self):
             ctx = Context()
             for recipe in Recipe.list_recipes():
