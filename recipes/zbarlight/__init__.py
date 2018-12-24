@@ -13,11 +13,6 @@ class ZbarLightRecipe(Recipe):
     pbx_libraries = ["libz","libbz2",'libc++','libsqlite3','CoreMotion']
     include_per_arch = True
 
-    def prebuild_arch(self, arch):
-        if self.has_marker("patched"):
-            return
-        self.apply_patch("zbarlight_1_2.patch")
-        self.set_marker("patched")
 
     def get_zbar_env(self, arch):
         build_env = arch.get_env()
@@ -42,7 +37,7 @@ class ZbarLightRecipe(Recipe):
         hostpython = sh.Command(self.ctx.hostpython)
         shprint(hostpython, "setup.py", "build",
                 _env=build_env)
-#        self.apply_patch("zbarlight_1_2.patch")#Issue getting the version, hard coding for now
+        self.apply_patch("zbarlight_1_2.patch")#Issue getting the version, hard coding for now
         self.biglink()
 
     def install(self):
