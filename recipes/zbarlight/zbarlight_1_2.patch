@@ -1,6 +1,14 @@
 --- zbarlight-1.2/build/lib.macosx-10.13-x86_64-2.7/zbarlight/__init__.py
 +++ zbarlight-1.2/build/lib.macosx-10.13-x86_64-2.7/zbarlight/__init__.py
-@@ -10,1 +10,1 @@
+@@ -2,12 +2,11 @@
+ import warnings
+ 
+ from PIL import Image
+-import pkg_resources
+ 
+ from ._zbarlight import Symbologies, zbar_code_scanner
+ 
+ 
 -__version__ = pkg_resources.get_distribution('zbarlight').version
-+__version__ = '1.2'
-
++__version__ = "1.2"
+ __ALL__ = ['Symbologies', 'UnknownSymbologieError', 'scan_codes', 'qr_code_scanner']

@@ -13,6 +13,12 @@ class ZbarLightRecipe(Recipe):
     pbx_libraries = ["libz","libbz2",'libc++','libsqlite3','CoreMotion']
     include_per_arch = True
 
+    def prebuild_arch(self, arch):
+        if self.has_marker("patched"):
+            return
+        self.apply_patch("zbarlight_1_2.patch")
+        self.set_marker("patched")
+
     def get_zbar_env(self, arch):
         build_env = arch.get_env()
         dest_dir = join(self.ctx.dist_dir, "root", "python")
