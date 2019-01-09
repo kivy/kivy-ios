@@ -20,6 +20,11 @@ import fnmatch
 import tempfile
 from datetime import datetime
 try:
+    from urllib.request import FancyURLopener, urlcleanup
+except ImportError:
+    from urllib import FancyURLopener, urlcleanup
+
+try:
     import requests
     from pbxproj import XcodeProject
     from pbxproj.pbxextensions.ProjectFiles import FileOptions
@@ -61,6 +66,14 @@ def cache_execution(f):
         state[key] = True
         state[key_time] = str(datetime.utcnow())
     return _cache_execution
+
+class ChromeDownloader(FancyURLopener):
+    version = (
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+        '(KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36')
+
+urlretrieve = ChromeDownloader().retrieve
+
 
 class JsonStore(object):
     """Replacement of shelve using json, needed for support python 2 and 3.
@@ -456,15 +469,20 @@ class Recipe(object):
         if exists(filename):
             unlink(filename)
 
+        # Clean up temporary files just in case before downloading.
+        urlcleanup()
+
         print('Downloading {0}'.format(url))
         headers = {'User-agent': 'Mozilla/5.0 (X11; Linux x86_64) '
                    'AppleWebKit/537.36 (KHTML, like Gecko) '
                    'Chrome/28.0.1500.71 Safari/537.36'}
+        try:
+            urlretrieve(url, filename, report_hook)
+        except:
+            r = requests.get(url, headers=headers)
 
-        r = requests.get(url, headers=headers)
-
-        with open(filename, "wb") as fw:
-            fw.write(r.content)
+            with open(filename, "wb") as fw:
+                fw.write(r.content)
 
         return filename
 
