@@ -6,7 +6,7 @@ import shutil
 
 class NumpyRecipe(CythonRecipe):
     version = "1.9.1"
-    url = "http://pypi.python.org/packages/source/n/numpy/numpy-{version}.tar.gz"
+    url = "https://pypi.python.org/packages/source/n/numpy/numpy-{version}.tar.gz"
     library = "libnumpy.a"
     libraries = ["libnpymath.a", "libnpysort.a"]
     include_dir = "numpy/core/include"
