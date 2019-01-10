@@ -16,7 +16,7 @@ class Python2Recipe(Recipe):
         super(Python2Recipe, self).init_with_ctx(ctx)
         self.set_python(self, 2.7)
         ctx.python_ver_dir = "python2.7"
-        ctx.python_prefix = join(ctx.dist_dir, "root", "python")
+        ctx.python_prefix = join(ctx.dist_dir, "root", "python2")
         ctx.site_packages_dir = join(
             ctx.python_prefix, "lib", ctx.python_ver_dir, "site-packages")
 
@@ -75,7 +75,7 @@ class Python2Recipe(Recipe):
                 "install",
                 "CROSS_COMPILE_TARGET=yes",
                 "HOSTPYTHON={}".format(self.ctx.hostpython),
-                "prefix={}".format(join(self.ctx.dist_dir, "root", "python")),
+                "prefix={}".format(join(self.ctx.dist_dir, "root", "python2")),
                 _env=build_env)
         self.reduce_python()
 
@@ -119,13 +119,13 @@ class Python2Recipe(Recipe):
         oldpwd = os.getcwd()
         try:
             print("Remove files unlikely to be used")
-            os.chdir(join(self.ctx.dist_dir, "root", "python"))
+            os.chdir(join(self.ctx.dist_dir, "root", "python2"))
             sh.rm("-rf", "share")
             sh.rm("-rf", "bin")
-            os.chdir(join(self.ctx.dist_dir, "root", "python", "lib"))
+            os.chdir(join(self.ctx.dist_dir, "root", "python2", "lib"))
             sh.rm("-rf", "pkgconfig")
             sh.rm("libpython2.7.a")
-            os.chdir(join(self.ctx.dist_dir, "root", "python", "lib", "python2.7"))
+            os.chdir(join(self.ctx.dist_dir, "root", "python2", "lib", "python2.7"))
             sh.find(".", "-iname", "*.pyc", "-exec", "rm", "{}", ";")
             sh.find(".", "-iname", "*.py", "-exec", "rm", "{}", ";")
             #sh.find(".", "-iname", "test*", "-exec", "rm", "-rf", "{}", ";")

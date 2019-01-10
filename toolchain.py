@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 Tool for compiling iOS toolchain
 ================================
@@ -1410,7 +1410,7 @@ Xcode:
                 "PYTHONOPTIMIZE": "2",
                 # "PIP_INSTALL_TARGET": ctx.site_packages_dir
             }
-            pip_path = sh.which("pip2")
+            pip_path = sh.which("pip")
             pip_args = []
             if len(sys.argv) > 2 and sys.argv[2] == "install":
                 pip_args = ["--isolated", "--prefix", ctx.python_prefix]

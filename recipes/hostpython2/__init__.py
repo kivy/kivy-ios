@@ -16,8 +16,8 @@ class Hostpython2Recipe(Recipe):
         super(Hostpython2Recipe, self).init_with_ctx(ctx)
         self.set_hostpython(self, 2.7)
         self.ctx.so_suffix = ".so"
-        self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython", "bin", "python")
-        self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython", "bin", "pgen")
+        self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython2", "bin", "python")
+        self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython2", "bin", "pgen")
         print("Global: hostpython located at {}".format(self.ctx.hostpython))
         print("Global: hostpgen located at {}".format(self.ctx.hostpgen))
 
@@ -74,13 +74,13 @@ class Hostpython2Recipe(Recipe):
 
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
-                "--prefix={}".format(join(self.ctx.dist_dir, "hostpython")),
+                "--prefix={}".format(join(self.ctx.dist_dir, "hostpython2")),
                 "--disable-toolbox-glue",
                 "--without-gcc",
                 _env=build_env)
         shprint(sh.make, "-C", self.build_dir, self.ctx.concurrent_make, "python", "Parser/pgen",
                 _env=build_env)
-        shutil.move("python", "hostpython")
+        shutil.move("python", "hostpython2")
         shutil.move("Parser/pgen", "Parser/hostpgen")
 
     def install(self):
@@ -91,13 +91,13 @@ class Hostpython2Recipe(Recipe):
         # Compiling sometimes looks for Python-ast.py in the 'Python' i.s.o.
         # the 'hostpython' folder. Create a symlink to fix. See issue #201
         shprint(sh.ln, "-s",
-                join(build_dir, "hostpython"),
+                join(build_dir, "hostpython2"),
                 join(build_dir, "Python"))
         shprint(sh.make, self.ctx.concurrent_make,
                 "-C", build_dir,
                 "bininstall", "inclinstall",
                 _env=build_env)
-        pylib_dir = join(self.ctx.dist_dir, "hostpython", "lib", "python2.7")
+        pylib_dir = join(self.ctx.dist_dir, "hostpython2", "lib", "python2.7")
         if exists(pylib_dir):
             shutil.rmtree(pylib_dir)
         shutil.copytree(
@@ -109,7 +109,7 @@ class Hostpython2Recipe(Recipe):
             join(pylib_dir, "config", "Makefile"))
         shutil.copy(
             join(build_dir, "Parser", "pgen"),
-            join(self.ctx.dist_dir, "hostpython", "bin", "pgen"))
+            join(self.ctx.dist_dir, "hostpython2", "bin", "pgen"))
 
 
 recipe = Hostpython2Recipe()
