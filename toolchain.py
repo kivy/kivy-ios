@@ -18,6 +18,7 @@ import json
 import shutil
 import fnmatch
 import tempfile
+import time
 from datetime import datetime
 try:
     from urllib.request import FancyURLopener, urlcleanup
@@ -25,7 +26,6 @@ except ImportError:
     from urllib import FancyURLopener, urlcleanup
 
 try:
-    import requests
     from pbxproj import XcodeProject
     from pbxproj.pbxextensions.ProjectFiles import FileOptions
 except ImportError:
@@ -39,6 +39,7 @@ import sh
 
 
 IS_PY3 = sys.version_info[0] >= 3
+IS_PY2 = sys.version_info[0] == 2
 
 
 def shprint(command, *args, **kwargs):
@@ -473,16 +474,40 @@ class Recipe(object):
         urlcleanup()
 
         print('Downloading {0}'.format(url))
-        headers = {'User-agent': 'Mozilla/5.0 (X11; Linux x86_64) '
-                   'AppleWebKit/537.36 (KHTML, like Gecko) '
-                   'Chrome/28.0.1500.71 Safari/537.36'}
-        try:
-            urlretrieve(url, filename, report_hook)
-        except:
-            r = requests.get(url, headers=headers)
+        attempts = 0
+        while True:
+            try:
+                urlretrieve(url, filename, report_hook)
+            except AttributeError:
+                if IS_PY2:
+                    # This is caused by bug in python-future, causing occasional
+                    #     AttributeError: '_fileobject' object has no attribute 'readinto'
+                    # It can be removed if the upstream fix is accepted. See also:
+                    #   * https://github.com/kivy/kivy-ios/issues/322
+                    #   * https://github.com/PythonCharmers/python-future/pull/423
+                    import requests
 
-            with open(filename, "wb") as fw:
-                fw.write(r.content)
+                    print("Warning: urlretrieve failed. Falling back to request")
+
+                    headers = {'User-agent': 'Mozilla/5.0 (X11; Linux x86_64) '
+                               'AppleWebKit/537.36 (KHTML, like Gecko) '
+                               'Chrome/28.0.1500.71 Safari/537.36'}
+                    r = requests.get(url, headers=headers)
+
+                    with open(filename, "wb") as fw:
+                        fw.write(r.content)
+                    break
+                else:
+                    raise
+            except OSError as e:
+                attempts += 1
+                if attempts >= 5:
+                    print('Max download attempts reached: {}'.format(attempts))
+                    raise e
+                print('Download failed. Retrying in 1 second...')
+                time.sleep(1)
+                continue
+            break
 
         return filename
 
