@@ -37,6 +37,18 @@ sys.path.insert(0, join(curdir, "tools", "external"))
 
 import sh
 
+import logging
+
+logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(funcName)s():%(lineno)d] %(message)s',
+                    datefmt='%Y-%m-%d:%H:%M:%S',
+                    level=logging.DEBUG)
+
+# Quiet the loggers we don't care about
+sh_logging = logging.getLogger('sh')
+sh_logging.setLevel(logging.WARNING)
+
+logger = logging.getLogger(__name__)
+
 
 IS_PY3 = sys.version_info[0] >= 3
 IS_PY2 = sys.version_info[0] == 2
@@ -46,9 +58,12 @@ def shprint(command, *args, **kwargs):
     kwargs["_iter"] = True
     kwargs["_out_bufsize"] = 1
     kwargs["_err_to_out"] = True
-    for line in command(*args, **kwargs):
-        stdout.write(line.encode("ascii", "replace").decode())
-
+    logger.info("Running Shell: {} {} {}".format(str(command), args, kwargs))
+    cmd = command(*args, **kwargs)
+    for line in cmd:
+        # strip only last CR:
+        line_str = "\n".join(line.encode("ascii", "replace").decode().splitlines())
+        logger.debug(line_str)
 
 def cache_execution(f):
     def _cache_execution(self, *args, **kwargs):
@@ -59,9 +74,9 @@ def cache_execution(f):
             for arg in args:
                 key += ".{}".format(arg)
         if key in state and not force:
-            print("# (ignored) {} {}".format(f.__name__.capitalize(), self.name))
+            logger.debug("Cached result: {} {}. Ignoring".format(f.__name__.capitalize(), self.name))
             return
-        print("{} {}".format(f.__name__.capitalize(), self.name))
+        logger.info("{} {}".format(f.__name__.capitalize(), self.name))
         f(self, *args, **kwargs)
         self.update_state(key, True)
     return _cache_execution
@@ -87,7 +102,7 @@ class JsonStore(object):
                 with io.open(filename, encoding='utf-8') as fd:
                     self.data = json.load(fd)
             except ValueError:
-                print("Unable to read the state.db, content will be replaced.")
+                logger.warning("Unable to read the state.db, content will be replaced.")
 
     def __getitem__(self, key):
         return self.data[key]
@@ -189,13 +204,13 @@ class Arch(object):
             self._ccsh.write(b'#!/bin/sh\n')
             self._cxxsh.write(b'#!/bin/sh\n')
             if ccache:
-                print("CC and CXX will use ccache")
+                logger.info("CC and CXX will use ccache")
                 self._ccsh.write(
                     (ccache + ' ' + cc + ' "$@"\n').encode("utf8"))
                 self._cxxsh.write(
                     (ccache + ' ' + cxx + ' "$@"\n').encode("utf8"))
             else:
-                print("CC and CXX will not use ccache")
+                logger.info("CC and CXX will not use ccache")
                 self._ccsh.write(
                     (cc + ' "$@"\n').encode("utf8"))
                 self._cxxsh.write(
@@ -309,7 +324,7 @@ class Context(object):
         # get the latest iphoneos
         iphoneos = [x for x in sdks if "iphoneos" in x]
         if not iphoneos:
-            print("No iphone SDK installed")
+            logger.error("No iphone SDK installed")
             ok = False
         else:
             iphoneos = iphoneos[0].split()[-1].replace("iphoneos", "")
@@ -319,7 +334,7 @@ class Context(object):
         iphonesim = [x for x in sdks if "iphonesimulator" in x]
         if not iphonesim:
             ok = False
-            print("Error: No iphonesimulator SDK installed")
+            logger.error("Error: No iphonesimulator SDK installed")
         else:
             iphonesim = iphonesim[0].split()[-1].replace("iphonesimulator", "")
             self.sdksimver = iphonesim
@@ -355,12 +370,12 @@ class Context(object):
                 break
         if not self.cython:
             ok = False
-            print("Missing requirement: cython is not installed")
+            logger.error("Missing requirement: cython is not installed")
 
         # check the basic tools
         for tool in ("pkg-config", "autoconf", "automake", "libtool"):
             if not sh.which(tool):
-                print("Missing requirement: {} is not installed".format(
+                logger.error("Missing requirement: {} is not installed".format(
                     tool))
 
         if not ok:
@@ -452,7 +467,7 @@ class Recipe(object):
         # Clean up temporary files just in case before downloading.
         urlcleanup()
 
-        print('Downloading {0}'.format(url))
+        logger.info('Downloading {0}'.format(url))
         attempts = 0
         while True:
             try:
@@ -466,7 +481,7 @@ class Recipe(object):
                     #   * https://github.com/PythonCharmers/python-future/pull/423
                     import requests
 
-                    print("Warning: urlretrieve failed. Falling back to request")
+                    logger.warning("urlretrieve failed. Falling back to request")
 
                     headers = {'User-agent': 'Mozilla/5.0 (X11; Linux x86_64) '
                                'AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -481,9 +496,9 @@ class Recipe(object):
             except OSError as e:
                 attempts += 1
                 if attempts >= 5:
-                    print('Max download attempts reached: {}'.format(attempts))
+                    logger.error('Max download attempts reached: {}'.format(attempts))
                     raise e
-                print('Download failed. Retrying in 1 second...')
+                logger.warning('Download failed. Retrying in 1 second...')
                 time.sleep(1)
                 continue
             break
@@ -496,7 +511,7 @@ class Recipe(object):
         """
         if not filename:
             return
-        print("Extract {} into {}".format(filename, cwd))
+        logger.info("Extract {} into {}".format(filename, cwd))
         if filename.endswith(".tgz") or filename.endswith(".tar.gz"):
             if self.ctx.use_pigz:
                 comp = '--use-compress-program={}'.format(self.ctx.use_pigz)
@@ -515,7 +530,7 @@ class Recipe(object):
             shprint(sh.unzip, "-d", cwd, filename)
 
         else:
-            print("Error: cannot extract, unrecognized extension for {}".format(
+            logger.error("Cannot extract, unrecognized extension for {}".format(
                 filename))
             raise Exception()
 
@@ -525,10 +540,10 @@ class Recipe(object):
             try:
                 archive = tarfile.open(filename)
             except tarfile.ReadError:
-                print('Error extracting the archive {0}'.format(filename))
-                print('This is usually caused by a corrupt download. The file'
+                logger.warning('Error extracting the archive {0}'.format(filename))
+                logger.warning('This is usually caused by a corrupt download. The file'
                       ' will be removed and re-downloaded on the next run.')
-                remove(filename)
+                logger.warning(filename)
                 return
 
             root = archive.next().path.split("/")
@@ -537,8 +552,8 @@ class Recipe(object):
             with zipfile.ZipFile(filename) as zf:
                 return dirname(zf.namelist()[0])
         else:
-            print("Error: cannot detect root directory")
-            print("Unrecognized extension for {}".format(filename))
+            logger.error("Unrecognized extension for {}."
+                         " Cannot detect root directory".format(filename))
             raise Exception()
 
     def apply_patch(self, filename, target_dir=''):
@@ -547,18 +562,18 @@ class Recipe(object):
         build directory.
         """
         target_dir = target_dir or self.build_dir
-        print("Apply patch {}".format(filename))
+        logger.info("Apply patch {}".format(filename))
         filename = join(self.recipe_dir, filename)
         sh.patch("-t", "-d", target_dir, "-p1", "-i", filename)
 
     def copy_file(self, filename, dest):
-        print("Copy {} to {}".format(filename, dest))
+        logger.info("Copy {} to {}".format(filename, dest))
         filename = join(self.recipe_dir, filename)
         dest = join(self.build_dir, dest)
         shutil.copy(filename, dest)
 
     def append_file(self, filename, dest):
-        print("Append {} to {}".format(filename, dest))
+        logger.info("Append {} to {}".format(filename, dest))
         filename = join(self.recipe_dir, filename)
         dest = join(self.build_dir, dest)
         with open(filename, "rb") as fd:
@@ -650,7 +665,7 @@ class Recipe(object):
             else:
                 include_dir = join("common", include_name)
         if include_dir:
-            print("Include dir added: {}".format(include_dir))
+            logger.info("Include dir added: {}".format(include_dir))
             self.ctx.include_dirs.append(include_dir)
 
     def get_recipe_env(self, arch=None):
@@ -667,10 +682,10 @@ class Recipe(object):
             state["hostpython"] = instance.name
             state.sync()
         elif hostpython != instance.name:
-            print("ERROR: Wanted to use {}".format(instance.name))
-            print("ERROR: but hostpython is already provided by {}.".format(
+            logger.error("Wanted to use {}".format(instance.name))
+            logger.error("but hostpython is already provided by {}.".format(
                 hostpython))
-            print("ERROR: You can have only one hostpython version compiled")
+            logger.error("You can have only one hostpython version compiled")
             sys.exit(1)
         self.ctx.python_major = version.split('.')[0]
         self.ctx.hostpython_ver = version
@@ -683,10 +698,10 @@ class Recipe(object):
             state["python"] = instance.name
             state.sync()
         elif python != instance.name:
-            print("ERROR: Wanted to use {}".format(instance.name))
-            print("ERROR: but python is already provided by {}.".format(
+            logger.error("Wanted to use {}".format(instance.name))
+            logger.error("but python is already provided by {}.".format(
                 python))
-            print("ERROR: You can have only one python version compiled")
+            logger.error("You can have only one python version compiled")
             sys.exit(1)
         self.ctx.python_ver = version
         self.ctx.python_recipe = instance
@@ -748,7 +763,7 @@ class Recipe(object):
     def extract(self):
         # recipe tmp directory
         for arch in self.filtered_archs:
-            print("Extract {} for {}".format(self.name, arch.arch))
+            logger.info("Extract {} for {}".format(self.name, arch.arch))
             self.extract_arch(arch.arch)
 
     def extract_arch(self, arch):
@@ -772,24 +787,24 @@ class Recipe(object):
     def build(self, arch):
         self.build_dir = self.get_build_dir(arch.arch)
         if self.has_marker("building"):
-            print("Warning: {} build for {} has been incomplete".format(
+            logger.warning("{} build for {} has been incomplete".format(
                 self.name, arch.arch))
-            print("Warning: deleting the build and restarting.")
+            logger.warning("Warning: deleting the build and restarting.")
             shutil.rmtree(self.build_dir)
             self.extract_arch(arch.arch)
 
         if self.has_marker("build_done"):
-            print("Build python for {} already done.".format(arch.arch))
+            logger.info("Build python for {} already done.".format(arch.arch))
             return
 
         self.set_marker("building")
 
         chdir(self.build_dir)
-        print("Prebuild {} for {}".format(self.name, arch.arch))
+        logger.info("Prebuild {} for {}".format(self.name, arch.arch))
         self.prebuild_arch(arch)
-        print("Build {} for {}".format(self.name, arch.arch))
+        logger.info("Build {} for {}".format(self.name, arch.arch))
         self.build_arch(arch)
-        print("Postbuild {} for {}".format(self.name, arch.arch))
+        logger.info("Postbuild {} for {}".format(self.name, arch.arch))
         self.postbuild_arch(arch)
         self.delete_marker("building")
         self.set_marker("build_done")
@@ -810,7 +825,7 @@ class Recipe(object):
     @cache_execution
     def build_all(self):
         filtered_archs = self.filtered_archs
-        print("Build {} for {} (filtered)".format(
+        logger.info("Build {} for {} (filtered)".format(
             self.name,
             ", ".join([x.arch for x in filtered_archs])))
         for arch in self.filtered_archs:
@@ -818,41 +833,44 @@ class Recipe(object):
 
         name = self.name
         if self.library:
-            print("Create lipo library for {}".format(name))
+            logger.info("Create lipo library for {}".format(name))
             if not name.startswith("lib"):
                 name = "lib{}".format(name)
             static_fn = join(self.ctx.dist_dir, "lib", "{}.a".format(name))
             ensure_dir(dirname(static_fn))
-            print("Lipo {} to {}".format(self.name, static_fn))
+            logger.info("Lipo {} to {}".format(self.name, static_fn))
             self.make_lipo(static_fn)
         if self.libraries:
-            print("Create multiple lipo for {}".format(name))
+            logger.info("Create multiple lipo for {}".format(name))
             for library in self.libraries:
                 static_fn = join(self.ctx.dist_dir, "lib", basename(library))
                 ensure_dir(dirname(static_fn))
-                print("  - Lipo-ize {}".format(library))
+                logger.info("  - Lipo-ize {}".format(library))
                 self.make_lipo(static_fn, library)
-        print("Install include files for {}".format(self.name))
+        logger.info("Install include files for {}".format(self.name))
         self.install_include()
-        print("Install frameworks for {}".format(self.name))
+        logger.info("Install frameworks for {}".format(self.name))
         self.install_frameworks()
-        print("Install sources for {}".format(self.name))
+        logger.info("Install sources for {}".format(self.name))
         self.install_sources()
-        print("Install {}".format(self.name))
+        logger.info("Install {}".format(self.name))
         self.install()
 
     def prebuild_arch(self, arch):
         prebuild = "prebuild_{}".format(arch.arch)
+        logger.debug("Invoking {}".format(prebuild))
         if hasattr(self, prebuild):
             getattr(self, prebuild)()
 
     def build_arch(self, arch):
         build = "build_{}".format(arch.arch)
+        logger.debug("Invoking {}".format(build))
         if hasattr(self, build):
             getattr(self, build)()
 
     def postbuild_arch(self, arch):
         postbuild = "postbuild_{}".format(arch.arch)
+        logger.debug("Invoking {}".format(postbuild))
         if hasattr(self, postbuild):
             getattr(self, postbuild)()
 
@@ -886,7 +904,7 @@ class Recipe(object):
         arch = self.filtered_archs[0]
         build_dir = self.get_build_dir(arch.arch)
         for framework in self.frameworks:
-            print(" - Install {}".format(framework))
+            logger.info(" - Install {}".format(framework))
             src = join(build_dir, framework)
             dest = join(self.ctx.dist_dir, "frameworks", framework)
             ensure_dir(dirname(dest))
@@ -901,7 +919,7 @@ class Recipe(object):
         arch = self.filtered_archs[0]
         build_dir = self.get_build_dir(arch.arch)
         for source in self.sources:
-            print(" - Install {}".format(source))
+            logger.info(" - Install {}".format(source))
             src = join(build_dir, source)
             dest = join(self.ctx.dist_dir, "sources", self.name)
             ensure_dir(dirname(dest))
@@ -944,7 +962,7 @@ class Recipe(object):
                     shutil.copytree(src_dir, dest_dir)
                 else:
                     dest = join(dest_dir, dest_name)
-                    print("Copy {} to {}".format(src_dir, dest))
+                    logger.info("Copy {} to {}".format(src_dir, dest))
                     ensure_dir(dirname(dest))
                     shutil.copy(src_dir, dest)
 
@@ -1010,7 +1028,7 @@ class PythonRecipe(Recipe):
             name = self.name
         if env is None:
             env = self.get_recipe_env(arch)
-        print("Install {} into the site-packages".format(name))
+        logger.info("Install {} into the site-packages".format(name))
         build_dir = self.get_build_dir(arch.arch)
         chdir(build_dir)
         hostpython = sh.Command(self.ctx.hostpython)
@@ -1045,7 +1063,7 @@ class CythonRecipe(PythonRecipe):
     def cythonize_file(self, filename):
         if filename.startswith(self.build_dir):
             filename = filename[len(self.build_dir) + 1:]
-        print("Cythonize {}".format(filename))
+        logger.info("Cythonize {}".format(filename))
         cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
         hostpython = self.ctx.state.get("hostpython")
         shprint(cmd, filename)
@@ -1092,7 +1110,7 @@ class CythonRecipe(PythonRecipe):
 
 def build_recipes(names, ctx):
     # gather all the dependencies
-    print("Want to build {}".format(names))
+    logger.info("Want to build {}".format(names))
     graph = Graph()
     ctx.wanted_recipes = names[:]
     recipe_to_load = names
@@ -1104,10 +1122,10 @@ def build_recipes(names, ctx):
         try:
             recipe = Recipe.get_recipe(name, ctx)
         except ImportError:
-            print("ERROR: No recipe named {}".format(name))
+            logger.error("No recipe named {}".format(name))
             sys.exit(1)
         graph.add(name, name)
-        print("Loaded recipe {} (depends of {}, optional are {})".format(name,
+        logger.info("Loaded recipe {} (depends of {}, optional are {})".format(name,
             recipe.depends, recipe.optional_depends))
         for depend in recipe.depends:
             graph.add(name, depend)
@@ -1124,11 +1142,11 @@ def build_recipes(names, ctx):
         recipe_loaded.append(name)
 
     build_order = list(graph.find_order())
-    print("Build order is {}".format(build_order))
+    logger.info("Build order is {}".format(build_order))
     recipes = [Recipe.get_recipe(name, ctx) for name in build_order]
     recipes = [recipe for recipe in recipes if not recipe.is_alias]
     recipes_order = [recipe.name for recipe in recipes]
-    print("Recipe order is {}".format(recipes_order))
+    logger.info("Recipe order is {}".format(recipes_order))
     for recipe in recipes:
         recipe.init_with_ctx(ctx)
     for recipe in recipes:
@@ -1175,16 +1193,16 @@ def update_pbxproj(filename, pbx_frameworks=None):
     pbx_libraries = list(set(pbx_libraries))
     libraries = list(set(libraries))
 
-    print("-" * 70)
-    print("The project need to have:")
-    print("iOS Frameworks: {}".format(pbx_frameworks))
-    print("iOS Libraries: {}".format(pbx_libraries))
-    print("iOS local Frameworks: {}".format(frameworks))
-    print("Libraries: {}".format(libraries))
-    print("Sources to link: {}".format(sources))
+    logger.info("-" * 70)
+    logger.info("The project need to have:")
+    logger.info("iOS Frameworks: {}".format(pbx_frameworks))
+    logger.info("iOS Libraries: {}".format(pbx_libraries))
+    logger.info("iOS local Frameworks: {}".format(frameworks))
+    logger.info("Libraries: {}".format(libraries))
+    logger.info("Sources to link: {}".format(sources))
 
-    print("-" * 70)
-    print("Analysis of {}".format(filename))
+    logger.info("-" * 70)
+    logger.info("Analysis of {}".format(filename))
 
     project = XcodeProject.load(filename)
     sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
@@ -1195,16 +1213,16 @@ def update_pbxproj(filename, pbx_frameworks=None):
     for framework in pbx_frameworks:
         framework_name = "{}.framework".format(framework)
         if framework_name in frameworks:
-            print("Ensure {} is in the project (pbx_frameworks, local)".format(framework))
+            logger.info("Ensure {} is in the project (pbx_frameworks, local)".format(framework))
             f_path = join(ctx.dist_dir, "frameworks", framework_name)
         else:
-            print("Ensure {} is in the project (pbx_frameworks, system)".format(framework))
+            logger.info("Ensure {} is in the project (pbx_frameworks, system)".format(framework))
             f_path = join(sysroot, "System", "Library", "Frameworks",
                           "{}.framework".format(framework))
         project.add_file(f_path, parent=group, tree="DEVELOPER_DIR",
                          force=False, file_options=file_options)
     for library in pbx_libraries:
-        print("Ensure {} is in the project (pbx_libraries, dylib+tbd)".format(library))
+        logger.info("Ensure {} is in the project (pbx_libraries, dylib+tbd)".format(library))
         f_path = join(sysroot, "usr", "lib",
                       "{}.dylib".format(library))
         project.add_file(f_path, parent=group, tree="DEVELOPER_DIR", force=False)
@@ -1212,10 +1230,10 @@ def update_pbxproj(filename, pbx_frameworks=None):
                       "{}.tbd".format(library))
         project.add_file(f_path, parent=group, tree="DEVELOPER_DIR", force=False)
     for library in libraries:
-        print("Ensure {} is in the project (libraries)".format(library))
+        logger.info("Ensure {} is in the project (libraries)".format(library))
         project.add_file(library, parent=group, force=False)
     for name in sources:
-        print("Ensure {} sources are used".format(name))
+        logger.info("Ensure {} sources are used".format(name))
         fn = join(ctx.dist_dir, "sources", name)
         project.add_folder(fn, parent=g_classes)
 
@@ -1279,22 +1297,22 @@ Xcode:
                 available_archs = [arch.arch for arch in ctx.archs]
                 for arch in archs[:]:
                     if arch not in available_archs:
-                        print("ERROR: Architecture {} invalid".format(arch))
+                        logger.error("Architecture {} invalid".format(arch))
                         archs.remove(arch)
                         continue
                 ctx.archs = [arch for arch in ctx.archs if arch.arch in archs]
-                print("Architectures restricted to: {}".format(archs))
+                logger.info("Architectures restricted to: {}".format(archs))
             ctx.num_cores = args.concurrency
             if args.no_pigz:
                 ctx.use_pigz = False
             if args.no_pbzip2:
                 ctx.use_pbzip2 = False
             ctx.use_pigz = ctx.use_pbzip2
-            print("Building with {} processes, where supported".format(ctx.num_cores))
+            logger.info("Building with {} processes, where supported".format(ctx.num_cores))
             if ctx.use_pigz:
-                print("Using pigz to decompress gzip data")
+                logger.info("Using pigz to decompress gzip data")
             if ctx.use_pbzip2:
-                print("Using pbzip2 to decompress bzip2 data")
+                logger.info("Using pbzip2 to decompress bzip2 data")
             build_recipes(args.recipe, ctx)
 
         def recipes(self):
@@ -1325,13 +1343,13 @@ Xcode:
             ctx = Context()
             if args.recipe:
                 for recipe in args.recipe:
-                    print("Cleaning {} build".format(recipe))
+                    logger.info("Cleaning {} build".format(recipe))
                     ctx.state.remove_all("{}.".format(recipe))
                     build_dir = join(ctx.build_dir, recipe)
                     if exists(build_dir):
                         shutil.rmtree(build_dir)
             else:
-                print("Delete build directory")
+                logger.info("Delete build directory")
                 if exists(ctx.build_dir):
                     shutil.rmtree(ctx.build_dir)
 
@@ -1376,9 +1394,9 @@ Xcode:
             ensure_recipes_loaded(ctx)
 
             if not hasattr(ctx, "python_ver"):
-                print("ERROR: No python recipes compiled!")
-                print("ERROR: You must have compiled at least python2 or")
-                print("ERROR: python3 recipes to be able to create a project.")
+                logger.error("No python recipes compiled!")
+                logger.error("You must have compiled at least python2 or")
+                logger.error("python3 recipes to be able to create a project.")
                 sys.exit(1)
 
             template_dir = join(curdir, "tools", "templates")
@@ -1419,13 +1437,13 @@ Xcode:
                 from glob import glob
                 xcodeproj = glob(join(filename, "*.xcodeproj"))
                 if not xcodeproj:
-                    print("ERROR: Unable to find a xcodeproj in {}".format(filename))
+                    logger.error("Unable to find a xcodeproj in {}".format(filename))
                     sys.exit(1)
                 filename = xcodeproj[0]
 
             filename = join(filename, "project.pbxproj")
             if not exists(filename):
-                print("ERROR: {} not found".format(filename))
+                logger.error("{} not found".format(filename))
                 sys.exit(1)
 
             update_pbxproj(filename, pbx_frameworks=args.add_framework)
@@ -1441,7 +1459,7 @@ Xcode:
                 recipe = Recipe.get_recipe(recipe, ctx)
                 recipe.init_with_ctx(ctx)
             if not hasattr(ctx, "site_packages_dir"):
-                print("ERROR: python must be compiled before using pip")
+                logger.error("python must be compiled before using pip")
                 sys.exit(1)
 
             pip_env = {
@@ -1460,10 +1478,10 @@ Xcode:
                 args = [pip_path] + pip_args + sys.argv[2:]
 
             if not pip_path:
-                print("ERROR: pip not found")
+                logger.error("pip not found")
                 sys.exit(1)
             import os
-            print("-- execute pip with: {}".format(args))
+            logger.error("Executing pip with: {}".format(args))
             os.execve(pip_path, args, pip_env)
 
         def launchimage(self):
@@ -1484,7 +1502,7 @@ Xcode:
                 from glob import glob
                 xcodeproj = glob(join(filename, "*.xcodeproj"))
                 if not xcodeproj:
-                    print("ERROR: Unable to find a xcodeproj in {}".format(filename))
+                    logger.error("Unable to find a xcodeproj in {}".format(filename))
                     sys.exit(1)
                 filename = xcodeproj[0]
             sh.open(filename)
@@ -1497,7 +1515,7 @@ Xcode:
             args = parser.parse_args(sys.argv[2:])
 
             if not exists(args.image):
-                print("ERROR: image path does not exists.")
+                logger.error("image path does not exists.")
                 return
 
             filename = args.filename
@@ -1506,7 +1524,7 @@ Xcode:
                 from glob import glob
                 xcodeproj = glob(join(filename, "*.xcodeproj"))
                 if not xcodeproj:
-                    print("ERROR: Unable to find a xcodeproj in {}".format(filename))
+                    logger.error("Unable to find a xcodeproj in {}".format(filename))
                     sys.exit(1)
                 filename = xcodeproj[0]
 
@@ -1514,9 +1532,9 @@ Xcode:
             images_xcassets = realpath(join(filename, "..", project_name,
                 "Images.xcassets"))
             if not exists(images_xcassets):
-                print("WARNING: Images.xcassets not found, creating it.")
+                logger.warning("Images.xcassets not found, creating it.")
                 makedirs(images_xcassets)
-            print("Images.xcassets located at {}".format(images_xcassets))
+            logger.info("Images.xcassets located at {}".format(images_xcassets))
 
             command(images_xcassets, args.image)
 
