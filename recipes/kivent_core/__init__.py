@@ -5,7 +5,7 @@ E-mail: larrydu88@gmail.com
 
 from toolchain import CythonRecipe, shprint
 import sh
-from os.path import join 
+from os.path import join
 from os import environ, chdir
 
 
@@ -20,17 +20,17 @@ class KiventCoreRecipe(CythonRecipe):
     cythonize = True
     pbx_frameworks = ["OpenGLES"] #note: This line may be unnecessary
 
-    
+
     def get_recipe_env(self, arch):
         env = super(KiventCoreRecipe,self).get_recipe_env(arch)
         env['CYTHONPATH'] = self.get_recipe(
             'kivy', self.ctx).get_build_dir(arch.arch)
         return env
 
-    
+
     def get_build_dir(self,arch, sub=False):
         """
-        Call this to get the correct build_dir, where setup.py is located which is 
+        Call this to get the correct build_dir, where setup.py is located which is
         actually under modules/core/setup.py
         """
         builddir = super(KiventCoreRecipe, self).get_build_dir(str(arch))
@@ -45,21 +45,21 @@ class KiventCoreRecipe(CythonRecipe):
 
     def build_arch(self, arch):
         """
-        Override build.arch to avoid calling setup.py here (Call it in 
+        Override build.arch to avoid calling setup.py here (Call it in
         install() instead).
         """
-        
+
         self.subbuildir = True
         self.cythonize_build()
         self.biglink()
         self.subbuilddir=False
 
-        
+
     def install(self):
         """
-        This method simply builds the command line call for calling 
+        This method simply builds the command line call for calling
         kivent_core/modules/core/setup.py
-        
+
         This constructs the equivalent of the command
         "$python2.7 setup.py build_ext install"
         only with the environment variables altered for each different architecture
@@ -82,7 +82,7 @@ class KiventCoreRecipe(CythonRecipe):
 
         dest_dir = join (self.ctx.dist_dir, "root", "python")
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
-        
+
         #Add Architecture specific kivy path for 'import kivy' to PYTHONPATH
         arch_kivy_path = self.get_recipe('kivy', self.ctx).get_build_dir(arch.arch)
         build_env['PYTHONPATH'] = join( build_env['PYTHONPATH'],':',arch_kivy_path)
@@ -99,7 +99,7 @@ class KiventCoreRecipe(CythonRecipe):
         print "INCLUDE", self.ctx.include_dir
         print "DISTDIR", self.ctx.dist_dir
         print "ARCH KIVY LOC",self.get_recipe('kivy', self.ctx).get_build_dir(arch.arch)
-        
+
         shprint(hostpython, setup_path, "build_ext", "install", _env=build_env)
-        
+
 recipe = KiventCoreRecipe()
