@@ -916,11 +916,12 @@ class Recipe(object):
         pass
 
     @classmethod
-    def list_recipes(cls):
+    def list_recipes(cls, **kwargs):
+        skip_list = kwargs.pop("skip_list", ['__pycache__'])
         recipes_dir = join(dirname(__file__), "recipes")
         for name in sorted(listdir(recipes_dir)):
             fn = join(recipes_dir, name)
-            if isdir(fn):
+            if isdir(fn) and name not in skip_list:
                 yield name
 
     @classmethod
