@@ -55,7 +55,6 @@ def cache_execution(f):
         if args:
             for arg in args:
                 key += ".{}".format(arg)
-        key_time = "{}.at".format(key)
         if key in state and not force:
             print("# (ignored) {} {}".format(f.__name__.capitalize(), self.name))
             return
