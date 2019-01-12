@@ -75,5 +75,11 @@ f.close()
 
 print('Liblink redirect linking with', objects)
 ld = environ.get('ARM_LD')
-arch = environ.get('ARCH', 'armv7')
-subprocess.call([ld, '-r', '-o', output + '.o', '-ios_version_min', '7.0', '-arch', arch] + objects)
+arch = environ.get('ARCH', 'arm64')
+if 'arm' in arch:
+    min_version_flag = '-ios_version_min'
+else:
+    min_version_flag = '-ios_simulator_version_min'
+call = [ld, '-r', '-o', output + '.o', min_version_flag, '8.0', '-arch', arch] + objects
+print("Linking: {}".format(" ".join(call)))
+subprocess.call(call)

@@ -226,35 +226,35 @@ class Arch(object):
 
 
 
-class ArchSimulator(Arch):
-    sdk = "iphonesimulator"
-    arch = "i386"
-    triple = "i386-apple-darwin11"
-    version_min = "-miphoneos-version-min=6.0.0"
-    sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
+#class ArchSimulator(Arch):
+#    sdk = "iphonesimulator"
+#    arch = "i386"
+#    triple = "i386-apple-darwin11"
+#    version_min = "-miphoneos-version-min=6.0.0"
+#    sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
 
 
 class Arch64Simulator(Arch):
     sdk = "iphonesimulator"
     arch = "x86_64"
     triple = "x86_64-apple-darwin13"
-    version_min = "-miphoneos-version-min=7.0"
+    version_min = "-miphoneos-version-min=8.0"
     sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
 
 
-class ArchIOS(Arch):
-    sdk = "iphoneos"
-    arch = "armv7"
-    triple = "arm-apple-darwin11"
-    version_min = "-miphoneos-version-min=6.0.0"
-    sysroot = sh.xcrun("--sdk", "iphoneos", "--show-sdk-path").strip()
+#class ArchIOS(Arch):
+#    sdk = "iphoneos"
+#    arch = "armv7"
+#    triple = "arm-apple-darwin11"
+#    version_min = "-miphoneos-version-min=6.0.0"
+#    sysroot = sh.xcrun("--sdk", "iphoneos", "--show-sdk-path").strip()
 
 
 class Arch64IOS(Arch):
     sdk = "iphoneos"
     arch = "arm64"
     triple = "aarch64-apple-darwin13"
-    version_min = "-miphoneos-version-min=7.0"
+    version_min = "-miphoneos-version-min=8.0"
     sysroot = sh.xcrun("--sdk", "iphoneos", "--show-sdk-path").strip()
 
 
@@ -359,7 +359,7 @@ class Context(object):
         self.archs = (
             # ArchSimulator(self),
             Arch64Simulator(self),
-            ArchIOS(self),
+            # ArchIOS(self),
             Arch64IOS(self))
 
         # path to some tools
