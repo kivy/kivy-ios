@@ -14,7 +14,7 @@ class Hostpython2Recipe(Recipe):
 
     def init_with_ctx(self, ctx):
         super(Hostpython2Recipe, self).init_with_ctx(ctx)
-        self.set_hostpython(self, 2.7)
+        self.set_hostpython(self, "2.7")
         self.ctx.so_suffix = ".so"
         self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython2", "bin", "python")
         self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython2", "bin", "pgen")

@@ -14,7 +14,7 @@ class Python3Recipe(Recipe):
 
     def init_with_ctx(self, ctx):
         super(Python3Recipe, self).init_with_ctx(ctx)
-        self.set_python(self, 3.7)
+        self.set_python(self, "3.7")
         ctx.python_ver_dir = "python3.7"
         ctx.python_prefix = join(ctx.dist_dir, "root", "python3")
         ctx.site_packages_dir = join(
