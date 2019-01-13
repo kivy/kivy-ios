@@ -255,9 +255,9 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
 			{%- if cookiecutter.python_major == "2" %}
-			shellScript = "find \"$PROJECT_DIR\"/YourApp/ -regex '.*\\.py[c]*' -delete";
+			shellScript = "#find \"$PROJECT_DIR\"/YourApp/ -regex '.*\\.py[c]*' -delete";
 			{%- else %}
-			shellScript = "find \"$PROJECT_DIR\"/YourApp/ -regex '.*\\.py' -delete";
+			shellScript = "#find \"$PROJECT_DIR\"/YourApp/ -regex '.*\\.py' -delete";
 			{%- endif %}
 		};
 /* End PBXShellScriptBuildPhase section */
