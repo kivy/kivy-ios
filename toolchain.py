@@ -55,14 +55,12 @@ def cache_execution(f):
         if args:
             for arg in args:
                 key += ".{}".format(arg)
-        key_time = "{}.at".format(key)
         if key in state and not force:
             print("# (ignored) {} {}".format(f.__name__.capitalize(), self.name))
             return
         print("{} {}".format(f.__name__.capitalize(), self.name))
         f(self, *args, **kwargs)
-        state[key] = True
-        state[key_time] = str(datetime.utcnow())
+        self.update_state(key, True)
     return _cache_execution
 
 
@@ -779,6 +777,19 @@ class Recipe(object):
         self.delete_marker("building")
         self.set_marker("build_done")
 
+    def update_state(self, key, value):
+        """Update entry in state database
+
+        This is usually done in the @cache_execution decorator
+        to log an action and its time of occurrence,
+        but it needs to be done manually in recipes.
+
+        sets key = value, and key.at = current_datetime
+        """
+        key_time = "{}.at".format(key)
+        self.ctx.state[key] = value
+        self.ctx.state[key_time] = str(datetime.utcnow())
+
     @cache_execution
     def build_all(self):
         filtered_archs = self.filtered_archs
@@ -827,6 +838,15 @@ class Recipe(object):
         postbuild = "postbuild_{}".format(arch.arch)
         if hasattr(self, postbuild):
             getattr(self, postbuild)()
+
+    def update_state(self, key, value):
+        """Update entry in state database
+
+        Also adds the time of update
+        """
+        key_time = "{}.at".format(key)
+        self.ctx.state[key] = value
+        self.ctx.state[key_time] = str(datetime.utcnow())
 
     @cache_execution
     def make_lipo(self, filename, library=None):
@@ -916,11 +936,12 @@ class Recipe(object):
         pass
 
     @classmethod
-    def list_recipes(cls):
+    def list_recipes(cls, **kwargs):
+        skip_list = kwargs.pop("skip_list", ['__pycache__'])
         recipes_dir = join(dirname(__file__), "recipes")
         for name in sorted(listdir(recipes_dir)):
             fn = join(recipes_dir, name)
-            if isdir(fn):
+            if isdir(fn) and name not in skip_list:
                 yield name
 
     @classmethod

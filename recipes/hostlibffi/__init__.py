@@ -19,6 +19,9 @@ class LibffiRecipe(Recipe):
         for arch in self.filtered_archs:
             self.build(arch)
 
+        # since we don't run cache_execution, call this here for `status`
+        self.update_state("{}.build_all".format(self.name), True)
+
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
