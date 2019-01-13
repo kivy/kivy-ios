@@ -1132,11 +1132,12 @@ def ensure_recipes_loaded(ctx):
         recipe.init_with_ctx(ctx)
 
 
-def update_pbxproj(filename):
+def update_pbxproj(filename, pbx_frameworks=None):
     # list all the compiled recipes
     ctx = Context()
     pbx_libraries = []
-    pbx_frameworks = []
+    if pbx_frameworks is None:
+        pbx_frameworks = []
     frameworks = []
     libraries = []
     sources = []
@@ -1391,6 +1392,7 @@ Xcode:
             parser = argparse.ArgumentParser(
                     description="Update an existing xcode project")
             parser.add_argument("filename", help="Path to your project or xcodeproj")
+            parser.add_argument("--add-frameworks", nargs="*", help="Frameworks to add to this project")
             args = parser.parse_args(sys.argv[2:])
 
             filename = args.filename
@@ -1408,7 +1410,7 @@ Xcode:
                 print("ERROR: {} not found".format(filename))
                 sys.exit(1)
 
-            update_pbxproj(filename)
+            update_pbxproj(filename, pbx_frameworks=args.add_frameworks)
             print("--")
             print("Project {} updated".format(filename))
 
