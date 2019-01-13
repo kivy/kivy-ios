@@ -881,7 +881,9 @@ class Recipe(object):
         """
         key_time = "{}.at".format(key)
         self.ctx.state[key] = value
-        self.ctx.state[key_time] = str(datetime.utcnow())
+        now_str = str(datetime.utcnow())
+        self.ctx.state[key_time] = now_str
+        logger.debug("New State: {} at {}".format(key, now_str))
 
     @cache_execution
     def make_lipo(self, filename, library=None):
@@ -904,12 +906,13 @@ class Recipe(object):
         arch = self.filtered_archs[0]
         build_dir = self.get_build_dir(arch.arch)
         for framework in self.frameworks:
-            logger.info(" - Install {}".format(framework))
+            logger.info("Install Framework {}".format(framework))
             src = join(build_dir, framework)
             dest = join(self.ctx.dist_dir, "frameworks", framework)
             ensure_dir(dirname(dest))
             if exists(dest):
                 shutil.rmtree(dest)
+            logger.debug("Copy {} to {}".format(src, dest))
             shutil.copytree(src, dest)
 
     @cache_execution
@@ -919,12 +922,13 @@ class Recipe(object):
         arch = self.filtered_archs[0]
         build_dir = self.get_build_dir(arch.arch)
         for source in self.sources:
-            logger.info(" - Install {}".format(source))
+            logger.info("Install Sources{}".format(source))
             src = join(build_dir, source)
             dest = join(self.ctx.dist_dir, "sources", self.name)
             ensure_dir(dirname(dest))
             if exists(dest):
                 shutil.rmtree(dest)
+            logger.debug("Copy {} to {}".format(src, dest))
             shutil.copytree(src, dest)
 
     @cache_execution
@@ -962,7 +966,7 @@ class Recipe(object):
                     shutil.copytree(src_dir, dest_dir)
                 else:
                     dest = join(dest_dir, dest_name)
-                    logger.info("Copy {} to {}".format(src_dir, dest))
+                    logger.info("Copy Include {} to {}".format(src_dir, dest))
                     ensure_dir(dirname(dest))
                     shutil.copy(src_dir, dest)
 
