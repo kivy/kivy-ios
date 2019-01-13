@@ -655,7 +655,7 @@ class Recipe(object):
                 hostpython))
             print("ERROR: You can have only one hostpython version compiled")
             sys.exit(1)
-        self.ctx.python_major = int(version)
+        self.ctx.python_major = version.split('.')[0]
         self.ctx.hostpython_ver = version
         self.ctx.hostpython_recipe = instance
 
