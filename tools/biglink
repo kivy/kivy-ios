@@ -20,5 +20,5 @@ for fn in sofiles:
 unique_args = ' '.join(x for x in sorted(set(args)) if x.endswith('.so.o'))
 print('Biglink create %s library' % sys.argv[1])
 cmd = "ar -q %s %s" % (sys.argv[1], unique_args)
-print(cmd)
+print('Binlinking: {}'.format(cmd))
 subprocess.Popen(cmd, shell=True).communicate()
