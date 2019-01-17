@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
 
     // Special environment to prefer .pyo, and don't write bytecode if .py are found
     // because the process will not have a write attribute on the device.
+    putenv("PYTHONOPTIMIZE=2");
     putenv("PYTHONDONTWRITEBYTECODE=1");
     putenv("PYTHONNOUSERSITE=1");
     putenv("PYTHONPATH=.");
