@@ -1417,7 +1417,7 @@ Xcode:
             pip_path = sh.which("pip")
             pip_args = []
             if len(sys.argv) > 2 and sys.argv[2] == "install":
-                pip_args = ["--isolated", "--prefix", ctx.python_prefix]
+                pip_args = ["--isolated", "--ignore-installed", "--prefix", ctx.python_prefix]
                 args = [pip_path] + [sys.argv[2]] + pip_args + sys.argv[3:]
             else:
                 args = [pip_path] + pip_args + sys.argv[2:]
