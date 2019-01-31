@@ -1368,6 +1368,7 @@ Xcode:
                     description="Create a new xcode project")
             parser.add_argument("name", help="Name of your project")
             parser.add_argument("directory", help="Directory where your project lives")
+            parser.add_argument("--add-framework", action="append", help="Additional Frameworks to include with this project")
             args = parser.parse_args(sys.argv[2:])
 
             from cookiecutter.main import cookiecutter
@@ -1398,7 +1399,7 @@ Xcode:
                     "{}-ios".format(args.name.lower()),
                     "{}.xcodeproj".format(args.name.lower()),
                     "project.pbxproj")
-            update_pbxproj(filename)
+            update_pbxproj(filename, pbx_frameworks=args.add_framework)
             print("--")
             print("Project directory : {}-ios".format(
                 args.name.lower()))
@@ -1409,7 +1410,7 @@ Xcode:
             parser = argparse.ArgumentParser(
                     description="Update an existing xcode project")
             parser.add_argument("filename", help="Path to your project or xcodeproj")
-            parser.add_argument("--add-frameworks", nargs="*", help="Frameworks to add to this project")
+            parser.add_argument("--add-framework", action="append", help="Additional Frameworks to include with this project")
             args = parser.parse_args(sys.argv[2:])
 
             filename = args.filename
@@ -1427,7 +1428,7 @@ Xcode:
                 print("ERROR: {} not found".format(filename))
                 sys.exit(1)
 
-            update_pbxproj(filename, pbx_frameworks=args.add_frameworks)
+            update_pbxproj(filename, pbx_frameworks=args.add_framework)
             print("--")
             print("Project {} updated".format(filename))
 
