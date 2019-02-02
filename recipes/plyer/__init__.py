@@ -4,7 +4,7 @@ class PlyerRecipe(PythonRecipe):
     version = "master"
     url = "https://github.com/kivy/plyer/archive/{version}.zip"
     depends = ["python", "pyobjus"]
-    archs = ["x86_64"]
+    archs = ["x86_64", "arm64"]
 
 
 recipe = PlyerRecipe()
