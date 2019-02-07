@@ -20,6 +20,8 @@ import fnmatch
 import tempfile
 import time
 from datetime import datetime
+from pprint import pformat
+
 try:
     from urllib.request import FancyURLopener, urlcleanup
 except ImportError:
@@ -1240,6 +1242,7 @@ Available commands:
     distclean     Clean the build and the result
     recipes       List all the available recipes
     status        List all the recipes and their build status
+    build_info    Display the current build context and Architecture info
 
 Xcode:
     create        Create a new xcode project
@@ -1432,26 +1435,23 @@ Xcode:
             print("--")
             print("Project {} updated".format(filename))
 
-        def info(self):
+        def build_info(self):
             ctx = Context()
             print("Build Context")
             print("-------------")
-            from pprint import pformat, pprint
             for attr in dir(ctx):
                 if not attr.startswith("_"):
                     if not callable(attr) and attr != 'archs':
-                        print(f"{attr}: {pformat(getattr(ctx, attr))}")
-            print("Architectures")
-            print("=============")
+                        print("{}: {}".format(attr, pformat(getattr(ctx, attr))))
             for arch in ctx.archs:
                 ul = '-' * (len(str(arch))+6)
-                print(f"{ul}\nArch: {str(arch)}\n{ul}")
+                print("\narch: {}\n{}".format(str(arch), ul))
                 for attr in dir(arch):
                     if not attr.startswith("_"):
-                        if not callable(attr) and attr not in ['arch', 'ctx']:
-                            print(f"{attr}: {pformat(getattr(arch, attr))}")
-                print("env:")
-                pprint(arch.get_env())
+                        if not callable(attr) and attr not in ['arch', 'ctx', 'get_env']:
+                            print("{}: {}".format(attr, pformat(getattr(arch, attr))))
+                env = arch.get_env()
+                print("env ({}): {}".format(arch, pformat(env)))
 
 
         def pip(self):
