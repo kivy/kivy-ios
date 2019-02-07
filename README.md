@@ -107,6 +107,10 @@ You can build recipes at the same time by adding them as parameters:
 Recipe builds can be removed via the clean command e.g.:
 
     $ ./toolchain.py clean openssl
+    
+You can install package that don't require compilation with pip::
+
+    $ ./toolchain.py pip install plyer
 
 The Kivy recipe depends on several others, like the sdl* and python recipes.
 These may in turn depend on others e.g. sdl2_ttf depends on freetype, etc.
