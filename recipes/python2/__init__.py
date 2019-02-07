@@ -2,7 +2,9 @@ from toolchain import Recipe, shprint
 from os.path import join
 import sh
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Python2Recipe(Recipe):
     version = "2.7.1"
@@ -115,10 +117,10 @@ class Python2Recipe(Recipe):
             fd.writelines(lines)
 
     def reduce_python(self):
-        print("Reduce python")
+        logger.info("Reduce python")
         oldpwd = os.getcwd()
         try:
-            print("Remove files unlikely to be used")
+            logger.info("Remove files unlikely to be used")
             os.chdir(join(self.ctx.dist_dir, "root", "python2"))
             sh.rm("-rf", "share")
             sh.rm("-rf", "bin")
@@ -133,7 +135,7 @@ class Python2Recipe(Recipe):
             sh.rm("-rf", sh.glob("lib*"))
 
             # now create the zip.
-            print("Create a python27.zip")
+            logger.info("Create a python27.zip")
             sh.rm("config/libpython2.7.a")
             sh.rm("config/python.o")
             sh.rm("config/config.c.in")

@@ -7,7 +7,9 @@ from toolchain import CythonRecipe, shprint
 import sh
 from os.path import join
 from os import environ, chdir
+import logging
 
+logger = logging.getLogger(__name__)
 
 
 class KiventCoreRecipe(CythonRecipe):
@@ -36,10 +38,10 @@ class KiventCoreRecipe(CythonRecipe):
         builddir = super(KiventCoreRecipe, self).get_build_dir(str(arch))
         if sub or self.subbuilddir:
             core_build_dir = join (builddir, 'modules', 'core')
-            print "Core build directory is located at {}".format(core_build_dir)
+            logger.info("Core build directory is located at {}".format(core_build_dir))
             return core_build_dir
         else:
-            print "Building in {}".format(builddir)
+            logger.info("Building in {}".format(builddir))
             return builddir
 
 
@@ -72,7 +74,7 @@ class KiventCoreRecipe(CythonRecipe):
         arch = list(self.filtered_archs)[0]
 
         build_dir = self.get_build_dir(arch.arch,sub=True)
-        print "Building kivent_core {} in {}".format(arch.arch,build_dir)
+        logger.info("Building kivent_core {} in {}".format(arch.arch,build_dir))
         chdir(build_dir)
         hostpython = sh.Command(self.ctx.hostpython)
 
@@ -93,12 +95,12 @@ class KiventCoreRecipe(CythonRecipe):
 
 
         #Print out directories for sanity check
-        print "ENVS", build_env
-        print "ROOT",self.ctx.root_dir
-        print "BUILD",self.ctx.build_dir
-        print "INCLUDE", self.ctx.include_dir
-        print "DISTDIR", self.ctx.dist_dir
-        print "ARCH KIVY LOC",self.get_recipe('kivy', self.ctx).get_build_dir(arch.arch)
+        logger.info("ENVS", build_env)
+        logger.info("ROOT",self.ctx.root_dir)
+        logger.info("BUILD",self.ctx.build_dir)
+        logger.info("INCLUDE", self.ctx.include_dir)
+        logger.info("DISTDIR", self.ctx.dist_dir)
+        logger.info("ARCH KIVY LOC",self.get_recipe('kivy', self.ctx).get_build_dir(arch.arch))
 
         shprint(hostpython, setup_path, "build_ext", "install", _env=build_env)
 

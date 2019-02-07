@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import sys
 from toolchain import Recipe
+import logging
+
+logger = logging.getLogger(__name__)
 
 class PythonAliasRecipe(Recipe):
     is_alias = True
@@ -14,11 +17,9 @@ class PythonAliasRecipe(Recipe):
             elif "python3" in ctx.wanted_recipes:
                 python = "python3"
             else:
-                print("")
-                print("ERROR: No Python version set in the build.")
-                print("ERROR: Add python2 or python3 in your recipes:")
-                print("ERROR: ./toolchain.py build python3 ...")
-                print("")
+                logger.error("No Python version set in the build.")
+                logger.error("Add python2 or python3 in your recipes:")
+                logger.error("./toolchain.py build python3 ...")
                 sys.exit(1)
         if python:
             self.depends = [python]
