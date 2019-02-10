@@ -1,6 +1,6 @@
 """
-Author: Lawrence Du
-E-mail: larrydu88@gmail.com
+Author: Lawrence Du, Lukasz Mach
+E-mail: larrydu88@gmail.com, maho@pagema.net
 """
 
 from toolchain import CythonRecipe,shprint
@@ -16,7 +16,7 @@ class CymunkRecipe(CythonRecipe):
     pre_build_ext = True
     library = 'libcymunk.a'
 
-    depends = ['python3', 'hostpython']
+    depends = ['python', 'hostpython']
 
     def get_recipe_env(self, arch):
         ret = super(CymunkRecipe, self).get_recipe_env(arch)
