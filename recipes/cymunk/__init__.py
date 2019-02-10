@@ -16,7 +16,7 @@ class CymunkRecipe(CythonRecipe):
     pre_build_ext = True
     library = 'libcymunk.a'
 
-    depends = ['python', 'hostpython']
+    depends = ['python']
 
     def get_recipe_env(self, arch):
         ret = super(CymunkRecipe, self).get_recipe_env(arch)
