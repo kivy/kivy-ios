@@ -1,5 +1,5 @@
 import os
-from toolchain import Recipe,shprint
+from toolchain import Recipe
 from os.path import join
 import sh
 import fnmatch
