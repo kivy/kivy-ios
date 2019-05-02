@@ -1,9 +1,11 @@
-from toolchain import CythonRecipe
+from toolchain import CythonRecipe, shprint
 from os.path import join
+from os import chdir, listdir
+import sh
 
 
 class KivyRecipe(CythonRecipe):
-    version = "1.10.1"
+    version = "3538cfc587c1590b0560b4e3322ad404f025847c"
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
     depends = ["sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios",
@@ -37,6 +39,44 @@ class KivyRecipe(CythonRecipe):
         #_remove_line(lines, "c_options['use_sdl'] = True")
         with open(pyconfig, "w") as fd:
             fd.writelines(lines)
+
+    def install_python_package(self, name=None, env=None, is_dir=True):
+        """
+        Automate the installation of a Python package into the target
+        site-packages.
+        """
+        # arch = self.filtered_archs[0]
+        for arch in self.filtered_archs:
+            if name is None:
+                name = self.name
+            if env is None:
+                env = self.get_recipe_env(arch)
+            print("Install {} into the site-packages".format(name))
+            build_dir = self.get_build_dir(arch.arch)
+            chdir(build_dir)
+
+            hostpython = sh.Command(self.ctx.hostpython)
+            env["PYTHONPATH"] = self.ctx.site_packages_dir
+            shprint(
+                hostpython,
+                "setup.py",
+                "bdist_egg",
+                "--plat-name={}".format(arch.arch),
+                _env=env,
+            )
+            for file in listdir("./dist"):
+                if file.endswith(".egg"):
+                    egg_name = file
+            shprint(
+                hostpython,
+                "setup.py",
+                "easy_install",
+                "--no-deps",
+                "--install-dir",
+                self.ctx.site_packages_dir,
+                join("dist", egg_name),
+                _env=env,
+            )
 
 
 recipe = KivyRecipe()

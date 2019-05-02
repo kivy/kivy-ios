@@ -3,7 +3,7 @@ import sh
 
 
 class LibSDL2Recipe(Recipe):
-    version = "2.0.8"
+    version = "2.0.9"
     url = "https://www.libsdl.org/release/SDL2-{version}.tar.gz"
     #version = "iOS-improvements"
     #url = "https://bitbucket.org/slime73/sdl-experiments/get/{version}.tar.gz"
