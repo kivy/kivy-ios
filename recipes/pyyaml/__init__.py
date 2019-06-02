@@ -4,7 +4,7 @@ import sh
 from toolchain import PythonRecipe, shprint
 
 class PyYamlRecipe(PythonRecipe):
-    version = "3.11"
+    version = "3.12"
     url = "https://pypi.python.org/packages/source/P/PyYAML/PyYAML-{version}.tar.gz"
     depends = ["python"]
 

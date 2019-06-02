@@ -13,7 +13,6 @@ class PycryptoRecipe(CythonRecipe):
     include_per_arch = True
     library="libpycrypto.a"
 
-
     def build_arch(self, arch):
         build_env = arch.get_env()
         self.apply_patch('hash_SHA2_template.c.patch', target_dir=self.build_dir + '/src')
