@@ -5,7 +5,7 @@ import sh
 
 
 class KivyRecipe(CythonRecipe):
-    version = "3538cfc587c1590b0560b4e3322ad404f025847c"
+    version = "1.11.0"
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
     depends = ["sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios",
