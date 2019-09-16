@@ -1,6 +1,6 @@
 """
-Author: Lawrence Du
-E-mail: larrydu88@gmail.com
+Author: Lawrence Du, Lukasz Mach
+E-mail: larrydu88@gmail.com, maho@pagema.net
 """
 
 from toolchain import CythonRecipe,shprint
@@ -8,46 +8,20 @@ import os
 from os.path import join
 import sh
 
+
 class CymunkRecipe(CythonRecipe):
     version = 'master'
-    url = 'https://github.com/tito/cymunk/archive/{version}.zip'
+    url = 'https://github.com/kivy/cymunk/archive/{version}.zip'
     name = 'cymunk'
-    depends = ['hostpython']
-    cythonize = True
+    pre_build_ext = True
+    library = 'libcymunk.a'
 
-    def build_arch(self, arch):
-        """
-        Override build.arch to avoid calling setup.py here (Call it in 
-        install() instead).
-        """
-        self.cythonize_build()
-        self.biglink()
+    depends = ['python']
 
-        
-    def install(self):
-        """
-        Do the equivalent of
-        python setup.py build_ext install
-        while setting the proper environment variables
-        
-        """
-        arch = list(self.filtered_archs)[0]
-        build_env = self.get_recipe_env(arch)
-        hostpython = sh.Command(self.ctx.hostpython)
-        subdir_path = self.get_build_dir(arch.arch)
-        setup_path = join(subdir_path,"setup.py")
-        dest_dir = join (self.ctx.dist_dir, "root", "python")
-        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
+    def get_recipe_env(self, arch):
+        ret = super(CymunkRecipe, self).get_recipe_env(arch)
+        ret['CFLAGS'] += ' -Wno-implicit-function-declaration'
+        return ret
 
-        #Note: Throws error if PATH is not set. I am not sure if this will cause problems
-        # in other architectures.
-        build_env['PATH']= os.environ.get('PATH')
-        
-        shprint(hostpython,
-                setup_path,
-                "build_ext",
-                #"--compiler=mingw32", #note: throws clang error
-                "install",
-                _env=build_env)
-    
+
 recipe = CymunkRecipe()
