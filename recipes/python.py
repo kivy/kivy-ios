@@ -2,6 +2,7 @@
 import sys
 from toolchain import Recipe
 import logging
+from os.path import join
 
 logger = logging.getLogger(__name__)
 
@@ -23,5 +24,6 @@ class PythonAliasRecipe(Recipe):
                 sys.exit(1)
         if python:
             self.depends = [python]
+        self.recipe_dir = join(ctx.root_dir, "recipes", python)
 
 recipe = PythonAliasRecipe()
