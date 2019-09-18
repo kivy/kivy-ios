@@ -46,7 +46,7 @@ Currently, the toolchain requires a few tools for compilation. You will need:
 - Install Cython (0.28.1):
 
       # pip method if available (sudo might be needed.)
-      pip install cython==0.28.1
+      pip3 install cython==0.28.1
 
 
 ## Using the toolchain
@@ -58,7 +58,7 @@ contained in a `recipe`.
 
 You can list the available recipes and their versions with:
 
-    $ ./toolchain.py recipes
+    $ python3 toolchain.py recipes
     audiostream  master
     click        master
     cymunk       master
@@ -98,19 +98,19 @@ You can list the available recipes and their versions with:
 
 Then, start the compilation with:
 
-    $ ./toolchain.py build python3 kivy
+    $ python3 toolchain.py build python3 kivy
 
 You can build recipes at the same time by adding them as parameters:
 
-    $ ./toolchain.py build python3 openssl kivy
+    $ python3 toolchain.py build python3 openssl kivy
 
 Recipe builds can be removed via the clean command e.g.:
 
-    $ ./toolchain.py clean openssl
+    $ python3 toolchain.py clean openssl
     
 You can install package that don't require compilation with pip::
 
-    $ ./toolchain.py pip install plyer
+    $ python3 toolchain.py pip install plyer
 
 The Kivy recipe depends on several others, like the sdl* and python recipes.
 These may in turn depend on others e.g. sdl2_ttf depends on freetype, etc.
@@ -122,14 +122,14 @@ time, 3x over (remember, 3 archs, x86_64, armv7, arm64) will take time.
 
 For a complete list of available commands, type:
 
-    $ ./toolchain.py
+    $ python3 toolchain.py
 
 ## Create the Xcode project
 
 The `toolchain.py` can create the initial Xcode project for you::
 
-    $ ./toolchain.py create <title> <app_directory>
-    $ ./toolchain.py create Touchtracer ~/code/kivy/examples/demo/touchtracer
+    $ python3 toolchain.py create <title> <app_directory>
+    $ python3 toolchain.py create Touchtracer ~/code/kivy/examples/demo/touchtracer
 
 Your app directory must contain a main.py. A directory named `<title>-ios`
 will be created, with an Xcode project in it.
@@ -200,12 +200,12 @@ things you can do to achieve this:
 
    The procedure is to first compile/build all the host recipes as is:
 
-      ./toolchain.py build hostpython3
+      python3 toolchain.py build hostpython3
 
    Then build all the rest of the recipes using --arch=armv7 --arch=arm64
    arguments as follows:
 
-      ./toolchain.py build python3 kivy --arch=armv7 --arch=arm64
+      python3 toolchain.py build python3 kivy --arch=armv7 --arch=arm64
 
    Note that these packages will not run in the iOS emulators, so use them
    only for deployment.
@@ -213,7 +213,7 @@ things you can do to achieve this:
 ## Usage
 
 ```
-./toolchain.py <command> [<args>]
+python3 toolchain.py <command> [<args>]
 
 Available commands:
     build         Build a recipe (compile a library for the required target
