@@ -1477,8 +1477,10 @@ Xcode:
                 env = arch.get_env()
                 print("env ({}): {}".format(arch, pformat(env)))
 
+        def pip3(self):
+            self.pip(pip_version="pip3")
 
-        def pip(self):
+        def pip(self, pip_version="pip"):
             ctx = Context()
             for recipe in Recipe.list_recipes():
                 key = "{}.build_all".format(recipe)
@@ -1497,7 +1499,7 @@ Xcode:
                 "PYTHONOPTIMIZE": "2",
                 # "PIP_INSTALL_TARGET": ctx.site_packages_dir
             }
-            pip_path = sh.which("pip")
+            pip_path = sh.which(pip_version)
             pip_args = []
             if len(sys.argv) > 2 and sys.argv[2] == "install":
                 pip_args = ["--isolated", "--ignore-installed", "--prefix", ctx.python_prefix]

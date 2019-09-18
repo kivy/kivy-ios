@@ -229,6 +229,7 @@ Xcode:
     launchimage   Create Launch images for your xcode project
     icon          Create Icons for your xcode project
     pip           Install a pip dependency into the distribution
+    pip3          Install a pip dependency into the python 3 distribution
 ```
 
 ## FAQ
