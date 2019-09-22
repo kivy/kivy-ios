@@ -714,7 +714,7 @@ class Recipe(object):
     def archive_root(self):
         key = "{}.archive_root".format(self.name)
         value = self.ctx.state.get(key)
-        if not value:
+        if not value and self.url != "":
             value = self.get_archive_rootdir(self.archive_fn)
             if value is not None:
                 self.ctx.state[key] = value
