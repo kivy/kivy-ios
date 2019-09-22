@@ -15,6 +15,18 @@ from os import makedirs
 appicon_json = {
   "images" : [
     {
+      "idiom" : "iphone",
+      "size" : "20x20",
+      "scale" : "2x",
+      "filename": "Icon40.png"
+    },
+    {
+      "idiom" : "iphone",
+      "size" : "20x20",
+      "scale" : "3x",
+      "filename": "Icon60.png"
+    },
+    {
       "size" : "29x29",
       "idiom" : "iphone",
       "filename" : "Icon29.png",
@@ -67,6 +79,18 @@ appicon_json = {
       "idiom" : "iphone",
       "filename" : "Icon180.png",
       "scale" : "3x"
+    },
+    {
+      "idiom" : "ipad",
+      "size" : "20x20",
+      "filename" : "Icon20.png",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "ipad",
+      "size" : "20x20",
+      "filename" : "Icon40.png",
+      "scale" : "2x"
     },
     {
       "size" : "29x29",
@@ -192,12 +216,36 @@ appicon_json = {
       "subtype" : "38mm"
     },
     {
+      "size" : "44x44",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "filename" : "Icon88.png",
+      "role" : "appLauncher",
+      "subtype" : "40mm"
+    },
+    {
+      "size" : "50x50",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "filename" : "Icon100.png",
+      "role" : "appLauncher",
+      "subtype" : "44mm"
+    },
+    {
       "size" : "98x98",
       "idiom" : "watch",
       "scale" : "2x",
       "filename" : "Icon196.png",
       "role" : "quickLook",
       "subtype" : "42mm"
+    },
+    {
+      "size" : "108x108",
+      "idiom" : "watch",
+      "scale" : "2x",
+      "filename" : "Icon216.png",
+      "role" : "quickLook",
+      "subtype" : "44mm"
     },
     {
       "size" : "16x16",
@@ -264,7 +312,19 @@ appicon_json = {
       "idiom": "ipad",
       "filename": "Icon167.png",
       "scale": "2x"
-    }
+    },
+    {
+      "idiom" : "ios-marketing",
+      "size" : "1024x1024",
+      "scale" : "1x",
+      "filename": "Icon1024.png"
+    },
+    {
+      "idiom" : "watch-marketing",
+      "size" : "1024x1024",
+      "scale" : "1x",
+      "filename": "Icon1024.png"
+    },
   ],
   "info" : {
     "version" : 1,
@@ -403,7 +463,7 @@ launchimage_json = {
       "extent" : "full-screen",
       "filename" : "Default2048x1536.png",
       "scale" : "2x"
-    }
+    },
   ],
   "info" : {
     "version" : 1,
@@ -430,6 +490,11 @@ def icon(image_xcassets, image_fn):
         ("58", None, "Icon58.png"),
         ("29", "Icon58.png", "Icon29.png"),
 
+        # iPhone notification
+        # 20pt - 2x,3x
+        # ("40", None, "Icon40.png"),
+        ("60", None, "Icon60.png"),
+
         # iPhone
         # Spotlight - iOS 7-8
         # 40pt 2x,3x
@@ -448,6 +513,11 @@ def icon(image_xcassets, image_fn):
         ("180", None, "Icon180.png"),
         #("120", None, "Icon120.png # duplicate"),
 
+        # iPad
+        # Notifications
+        # 20pt 1x,2x
+        ("20", "Icon80.png", "Icon20.png"),
+        ("40", "Icon80.png", "Icon40.png"),
 
         # iPad
         # Settings iOS 5-8
@@ -513,9 +583,10 @@ def icon(image_xcassets, image_fn):
 
         # Apple Watch
         # Short Look
-        # 38mm, 42mm
+        # 38mm, 42mm, 44mm
         ("172", None, "Icon172.png"),
         ("196", None, "Icon196.png"),
+        ("216", None, "Icon216.png"),
 
 
         # OS X
@@ -603,5 +674,5 @@ def _generate(d, image_xcassets, image_fn, options, icon=False):
             "--out",
             join(image_xcassets, d, out_fn)
         ]
-        print "sips", " ".join(args)
+        print("sips", " ".join(args))
         sh.sips(*args)
