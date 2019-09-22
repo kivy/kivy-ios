@@ -1,7 +1,10 @@
 from toolchain import CythonRecipe, shprint
 from os.path import join
-from os import chdir, listdir
+from os import chdir, listdir, getcwd
 import sh
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class KivyRecipe(CythonRecipe):
@@ -45,38 +48,50 @@ class KivyRecipe(CythonRecipe):
         Automate the installation of a Python package into the target
         site-packages.
         """
-        # arch = self.filtered_archs[0]
-        for arch in self.filtered_archs:
-            if name is None:
-                name = self.name
-            if env is None:
-                env = self.get_recipe_env(arch)
-            print("Install {} into the site-packages".format(name))
-            build_dir = self.get_build_dir(arch.arch)
-            chdir(build_dir)
+        arch = self.filtered_archs[0]
+        if name is None:
+            name = self.name
+        if env is None:
+            env = self.get_recipe_env(arch)
+        print("Install {} into the site-packages".format(name))
+        build_dir = self.get_build_dir(arch.arch)
+        chdir(build_dir)
 
-            hostpython = sh.Command(self.ctx.hostpython)
-            env["PYTHONPATH"] = self.ctx.site_packages_dir
-            shprint(
-                hostpython,
-                "setup.py",
-                "bdist_egg",
-                "--plat-name={}".format(arch.arch),
-                _env=env,
-            )
-            for file in listdir("./dist"):
-                if file.endswith(".egg"):
-                    egg_name = file
-            shprint(
-                hostpython,
-                "setup.py",
-                "easy_install",
-                "--no-deps",
-                "--install-dir",
-                self.ctx.site_packages_dir,
-                join("dist", egg_name),
-                _env=env,
-            )
+        hostpython = sh.Command(self.ctx.hostpython)
+        env["PYTHONPATH"] = self.ctx.site_packages_dir
+        shprint(
+            hostpython,
+            "setup.py",
+            "bdist_egg",
+            "--exclude-source-files",
+            "--plat-name=",
+            # "--plat-name={}".format(arch.arch),
+            _env=env,
+        )
+        for file in listdir("./dist"):
+            if file.endswith(".egg"):
+                egg_name = file
+        shprint(
+            hostpython,
+            "setup.py",
+            "easy_install",
+            "--no-deps",
+            "--install-dir",
+            self.ctx.site_packages_dir,
+            join("dist", egg_name),
+            _env=env,
+        )
+
+        # clean
+        oldpwd = getcwd()
+        try:
+            logger.info("Remove files unlikely to be used")
+            chdir(join(self.ctx.site_packages_dir, egg_name))
+            sh.rm("-rf", "share")
+            sh.rm("-rf", "kivy/tools")
+            sh.rm("-rf", "kivy/tests")
+        finally:
+            chdir(oldpwd)
 
 
 recipe = KivyRecipe()
