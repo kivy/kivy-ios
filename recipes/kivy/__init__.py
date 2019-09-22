@@ -10,7 +10,7 @@ class KivyRecipe(CythonRecipe):
     library = "libkivy.a"
     depends = ["sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios",
                "pyobjus", "python"]
-    pbx_frameworks = ["OpenGLES", "Accelerate"]
+    pbx_frameworks = ["OpenGLES", "Accelerate", "CoreMedia", "CoreVideo"]
     pre_build_ext = True
 
     def get_recipe_env(self, arch):
