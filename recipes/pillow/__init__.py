@@ -38,7 +38,7 @@ class PillowRecipe(Recipe):
         hostpython3 = sh.Command(self.ctx.hostpython)
         #build_env["PYTHONHOME"] = hostpython
         # first try to generate .h
-        shprint(hostpython3, "setup.py", "build_ext", "-g", _env=build_env)
+        shprint(hostpython3, "setup.py", "build_ext", "--disable-tiff", "-g", _env=build_env)
         self.biglink()
 
     def install(self):
