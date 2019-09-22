@@ -45,7 +45,7 @@ def open_url_wbv(url, width, height):
         `width`: int
             Width of the window
 
-    Example for opening up a web page in UIWebview::
+    Example for opening up a web page in WKWebview::
 
         import ios
         url = "http://www.google.com"

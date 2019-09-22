@@ -4,6 +4,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#include <WebKit/WebKit.h>
 #include "ios_wrapper.h"
 
 void ios_open_url(char *url)
@@ -18,7 +19,7 @@ void ios_open_url(char *url)
 void load_url_webview(char *url, int width, int height)
 {
     NSString *nsurl = [NSString stringWithCString:(char *)url encoding:NSUTF8StringEncoding];
-    UIWebView *webView = [[UIWebView alloc] initWithFrame: CGRectMake(0, 0, width, height)];
+    WKWebView *webView = [[WKWebView alloc] initWithFrame: CGRectMake(0, 0, width, height)];
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
     UIView *view = [window.rootViewController view];
     [view addSubview:webView];
