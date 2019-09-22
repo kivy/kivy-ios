@@ -4,7 +4,7 @@ import sh
 
 
 class LibSDL2ImageRecipe(Recipe):
-    version = "2.0.0"
+    version = "2.0.4"
     url = "https://www.libsdl.org/projects/SDL_image/release/SDL2_image-{version}.tar.gz"
     library = "Xcode-iOS/build/Release-{arch.sdk}/libSDL2_image.a"
     include_dir = "SDL_image.h"
@@ -19,9 +19,8 @@ class LibSDL2ImageRecipe(Recipe):
                     join(self.ctx.include_dir, "common", "sdl2")),
                 "-sdk", arch.sdk,
                 "-project", "Xcode-iOS/SDL_image.xcodeproj",
-                "-target", "libSDL_image",
+                "-target", "libSDL_image-iOS",
                 "-configuration", "Release")
 
 
 recipe = LibSDL2ImageRecipe()
-
