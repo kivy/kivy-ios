@@ -156,6 +156,9 @@ void load_custom_builtin_importer() {
         "    import _imp\n" \
         "    EXTS = _imp.extension_suffixes()\n" \
         "    sys.modules['subprocess'] = types.ModuleType(name='subprocess')\n" \
+        "    sys.modules['subprocess'].PIPE = None\n" \
+        "    sys.modules['subprocess'].STDOUT = None\n" \
+        "    sys.modules['subprocess'].DEVNULL = None\n" \
         "except ImportError:\n" \
         "    EXTS = ['.so']\n"
         "# Fake redirection to supress console output\n" \
