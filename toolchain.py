@@ -1016,13 +1016,15 @@ class PythonRecipe(Recipe):
     def install(self):
         self.install_python_package()
         self.reduce_python_package()
+        self.remove_junk(self.ctx.site_packages_dir)
 
     @staticmethod
     def remove_junk(d):
-        exts = [".pyc", ".py", ".so.lib", ".so.o", ".sh"]
+        exts = [".so.lib", ".so.o", ".sh"]
         for root, dirnames, filenames in walk(d):
             for fn in filenames:
                 if any([fn.endswith(ext) for ext in exts]):
+                    print('Found junk {}/{}, removing'.format(root, fn))
                     unlink(join(root, fn))
 
     def install_python_package(self, name=None, env=None, is_dir=True):
@@ -1045,7 +1047,6 @@ class PythonRecipe(Recipe):
                 "--prefix", iosbuild,
                 _env=env)
         dest_dir = join(self.ctx.site_packages_dir, name)
-        #self.remove_junk(iosbuild)
         if is_dir:
             if exists(dest_dir):
                 shutil.rmtree(dest_dir)
