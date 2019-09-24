@@ -9,17 +9,6 @@
 -            self.parallel = mp_compile.MAX_PROCS
 +            # self.parallel = mp_compile.MAX_PROCS
 +            pass
-@@ -199,7 +198,9 @@
-             _add_directory(library_dirs, os.path.join(
-                 "/usr/lib", "python%s" % sys.version[:3], "config"))
- 
--        elif sys.platform == "darwin":
-+        elif True:
-+            pass
-+        if False:
-             # attempt to make sure we pick freetype2 over other versions
-             _add_directory(include_dirs, "/sw/include/freetype2")
-             _add_directory(include_dirs, "/sw/lib/freetype2/include")
 @@ -495,9 +95,1 @@
 -        # standard locations
 -        if not self.disable_platform_guessing:
