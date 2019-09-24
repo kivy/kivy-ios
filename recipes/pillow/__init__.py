@@ -27,17 +27,12 @@ class PillowRecipe(Recipe):
             " -I{}".format(join(self.ctx.dist_dir, "include", arch.arch, "libjpeg")) +
             " -arch {}".format(arch.arch)
             ])
-        # Richard added guesses
         build_env['PATH'] = os.environ['PATH']
         return build_env
 
     def build_arch(self, arch):
-        self.apply_patch('pillow_setup.patch')
         build_env = self.get_pil_env(arch)
-        #build_dir = self.get_build_dir(arch.arch)
         hostpython3 = sh.Command(self.ctx.hostpython)
-        #build_env["PYTHONHOME"] = hostpython
-        # first try to generate .h
         shprint(hostpython3, "setup.py", "build_ext", "--disable-tiff", "-g", _env=build_env)
         self.biglink()
 
