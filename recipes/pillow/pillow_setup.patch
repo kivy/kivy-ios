@@ -9,15 +9,6 @@
 -            self.parallel = mp_compile.MAX_PROCS
 +            # self.parallel = mp_compile.MAX_PROCS
 +            pass
-@@ -186,7 +185,7 @@
-                 for d in os.environ[k].split(os.path.pathsep):
-                     _add_directory(library_dirs, d)
- 
--        prefix = sysconfig.get_config_var("prefix")
-+        prefix = False
-         if prefix:
-             _add_directory(library_dirs, os.path.join(prefix, "lib"))
-             _add_directory(include_dirs, os.path.join(prefix, "include"))
 @@ -199,7 +198,9 @@
              _add_directory(library_dirs, os.path.join(
                  "/usr/lib", "python%s" % sys.version[:3], "config"))
