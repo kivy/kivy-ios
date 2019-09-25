@@ -48,7 +48,8 @@ class PillowRecipe(Recipe):
         # shprint(hostpython3, "-m", "easy_install",
         #         "--prefix", dest_dir, "-Z", "./",
         #         _env=build_env)
-        shprint(hostpython3, "setup.py", "install", _env=build_env)
+        shprint(hostpython3, "setup.py", "install", "--prefix", dest_dir,
+            _env=build_env)
 
     def biglink(self):
         dirs = []
