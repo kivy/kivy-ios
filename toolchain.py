@@ -1043,21 +1043,16 @@ class PythonRecipe(Recipe):
         build_dir = self.get_build_dir(arch.arch)
         chdir(build_dir)
         hostpython = sh.Command(self.ctx.hostpython)
-        iosbuild = join(build_dir, "iosbuild")
-        shprint(hostpython, "setup.py", "install", "-O2",
-                "--prefix", iosbuild,
-                _env=env)
-        dest_dir = join(self.ctx.site_packages_dir, name)
-        if is_dir:
-            if exists(dest_dir):
-                shutil.rmtree(dest_dir)
-            func = shutil.copytree
-        else:
-            func = shutil.copy
-        func(
-            join(iosbuild, "lib",
-                 self.ctx.python_ver_dir, "site-packages", name),
-            dest_dir)
+
+        shprint(
+            hostpython,
+            "setup.py",
+            "install",
+            "-O2",
+            "--root", self.ctx.python_prefix,
+            "--prefix", "",
+            _env=env,
+        )
 
     def reduce_python_package(self):
         """Feel free to remove things you don't want in the final
