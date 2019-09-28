@@ -1,12 +1,13 @@
-from toolchain import CythonRecipe
+from toolchain import CythonRecipe, shprint
 from os.path import join
+from os import chdir, listdir
 import sh
 import shutil
 
 
 class NumpyRecipe(CythonRecipe):
-    version = "1.9.1"
-    url = "https://pypi.python.org/packages/source/n/numpy/numpy-{version}.tar.gz"
+    version = "1.16.4"
+    url = "https://pypi.python.org/packages/source/n/numpy/numpy-{version}.zip"
     library = "libnumpy.a"
     libraries = ["libnpymath.a", "libnpysort.a"]
     include_dir = "numpy/core/include"
@@ -17,7 +18,7 @@ class NumpyRecipe(CythonRecipe):
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
-        self.apply_patch("numpy-1.9.1.patch")
+        self.apply_patch("numpy-1.16.4.patch")
         self.set_marker("patched")
 
     def get_recipe_env(self, arch):
@@ -50,5 +51,6 @@ class NumpyRecipe(CythonRecipe):
         shutil.rmtree(join(dest_dir, "polynomial", "tests"))
         shutil.rmtree(join(dest_dir, "random", "tests"))
         shutil.rmtree(join(dest_dir, "tests"))
+
 
 recipe = NumpyRecipe()
