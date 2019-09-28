@@ -79,7 +79,7 @@ You can list the available recipes and their versions with:
     libpng       1.6.26
     markupsafe   master
     moodstocks   4.1.5
-    numpy        1.9.1
+    numpy        1.16.4
     openssl      1.0.2k
     photolibrary master
     pil          2.8.2
