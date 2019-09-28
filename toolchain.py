@@ -398,6 +398,7 @@ class Context(object):
         ensure_dir(self.build_dir)
         ensure_dir(self.cache_dir)
         ensure_dir(self.dist_dir)
+        ensure_dir(join(self.dist_dir, "frameworks"))
         ensure_dir(self.install_dir)
         ensure_dir(self.include_dir)
         ensure_dir(join(self.include_dir, "common"))
