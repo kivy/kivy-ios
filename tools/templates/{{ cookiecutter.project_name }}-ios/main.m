@@ -191,7 +191,7 @@ void load_custom_builtin_importer() {
         "            try:\n" \
         "                mod = imp.load_dynamic(f, f)\n" \
         "            except ImportError:\n" \
-        "                import traceback; traceback.print_exc();\n" \
+        "                # import traceback; traceback.print_exc();\n" \
         "                # print('LOAD DYNAMIC FALLBACK', fullname)\n" \
         "                mod = imp.load_dynamic(fullname, fullname)\n" \
         "            sys.modules[fullname] = mod\n" \
