@@ -9,6 +9,7 @@ __all__ = ["launchimage"]
 
 import sh
 import json
+from PIL import Image
 from os.path import join, exists
 from os import makedirs
 
@@ -631,48 +632,66 @@ def launchimage(image_xcassets, image_fn):
         # iPhone 3.5" @2x
         ("640 960", None, "Default640x960.png"),
         # iPhone 3.5" @1x
-        ("320 480", "Default640x960.png", "Default320x480.png"),
+        ("320 480", None, "Default320x480.png"),
         # iPhone 4.0" @2x
         ("640 1136", None, "Default640x1136.png"),
         # iPhone 5.5" @3x - landscape
         ("2208 1242", None, "Default2208x1242.png"),
         # iPhone 5.5" @3x - portrait
-        ("1242 2208", "Default2208x1242.png", "Default1242x2208.png"),
+        ("1242 2208", None, "Default1242x2208.png"),
         # iPhone 4.7" @2x
         ("750 1334", None, "Default750x1334.png"),
         # iPad @2x - landscape
         ("2048 1536", None, "Default2048x1536.png"),
         # iPad @2x - portrait
-        ("1536 2048", "Default2048x1536.png", "Default1536x2048.png"),
+        ("1536 2048", None, "Default1536x2048.png"),
         # iPad @1x - landscape
-        ("1024 768", "Default2048x1536.png", "Default1024x768.png"),
+        ("1024 768", None, "Default1024x768.png"),
         # iPad @1x - portrait
-        ("768 1024", "Default1024x768.png", "Default768x1024.png"),
+        ("768 1024", None, "Default768x1024.png"),
     )
 
     _generate("LaunchImage.launchimage", image_xcassets, image_fn, options)
 
 
+def _buildimage(in_fn, out_fn, size, padcolor=None):
+    im = Image.open(in_fn)
+
+    # read the first left/bottom pixel
+    bgcolor = im.getpixel((0, 0))
+
+    # ensure the image fit in the destination size
+    if im.size[0] > size[0] or im.size[1] > size[1]:
+      f = max(im.size[0] / size[0], im.size[1] / size[1])
+      newsize = int(im.size[0] / f), int(im.size[1] / f)
+      im = im.resize(newsize)
+
+    # create final image
+    outim = Image.new("RGB", size, bgcolor[:3])
+    x = (size[0] - im.size[0]) // 2
+    y = (size[1] - im.size[1]) // 2
+    outim.paste(im, (x, y))
+
+    # save the image
+    outim.save(out_fn)
+
+
 def _generate(d, image_xcassets, image_fn, options, icon=False):
     for c, in_fn, out_fn in options:
         args = []
+        if in_fn is not None:
+            filename = join(image_xcassets, d, in_fn)
+        else:
+            filename = image_fn
+
         if icon:
             args += ["-Z", c]
+            args += [
+                "--out",
+                join(image_xcassets, d, out_fn)
+            ]
+            print("sips", " ".join(args))
+            sh.sips(*args)
         else:
-            # ensure one side will not be bigger than the other (ie, the image will
-            # fit to the screen)
-            args += ["-Z", str(min(map(int, c.split())))]
-            # if there is any left pixel, cover in black.
-            args += ["-p"] + c.split()
-            # and crop the image in necessary.
-            args += ["-c"] + c.split()[::-1]
-        if in_fn is not None:
-            args += [join(image_xcassets, d, in_fn)]
-        else:
-            args += [image_fn]
-        args += [
-            "--out",
-            join(image_xcassets, d, out_fn)
-        ]
-        print("sips", " ".join(args))
-        sh.sips(*args)
+            size = [int(x) for x in c.split()]
+            _buildimage(filename, join(image_xcassets, d, out_fn), size)
