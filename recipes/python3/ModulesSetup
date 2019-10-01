@@ -2,9 +2,11 @@
 # Static compilation instructions for all binary modules.
 #####################################################################
 
+*static*
 _asyncio _asynciomodule.c
 _bisect _bisectmodule.c
 _blake2 _blake2/blake2module.c _blake2/blake2b_impl.c _blake2/blake2s_impl.c
+_sqlite3 -I$(srcdir)/Modules/_sqlite -DMODULE_NAME='\"sqlite3\"' _sqlite/cache.c _sqlite/connection.c _sqlite/cursor.c _sqlite/microprotocols.c _sqlite/module.c _sqlite/prepare_protocol.c _sqlite/row.c _sqlite/statement.c _sqlite/util.c
 # _bz2 _bz2module.c -I$(srcdir)/../bzip2/include -L$(srcdir)/../Support/BZip2 -lbz2
 _codecs_cn cjkcodecs/_codecs_cn.c
 _codecs_hk cjkcodecs/_codecs_hk.c
@@ -37,16 +39,6 @@ _sha3 _sha3/sha3module.c
 _sha256 sha256module.c
 _sha512 sha512module.c
 _socket socketmodule.c
-_sqlite3 -I$(srcdir)/Modules/_sqlite -DMODULE_NAME='\"sqlite3\"' -DSQLITE_OMIT_LOAD_EXTENSION -lsqlite3 \
-    _sqlite/cache.c \
-    _sqlite/connection.c \
-    _sqlite/cursor.c \
-    _sqlite/microprotocols.c \
-    _sqlite/module.c \
-    _sqlite/prepare_protocol.c \
-    _sqlite/row.c \
-    _sqlite/statement.c \
-    _sqlite/util.c
 _ssl _ssl.c -lssl -DUSE_SSL
 _struct _struct.c
 array arraymodule.c
