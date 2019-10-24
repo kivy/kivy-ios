@@ -254,11 +254,11 @@ your iPad but it as only x86_64.
 The iOS application model does not currently support multi-processing in a
 cross-platform compatible way. The application design focuses on minizing
 processor usage (to minimize power consumption) and promotes an
-[alternative conurrency model](https://developer.apple.com/library/archive/documentation/General/Conceptual/ConcurrencyProgrammingGuide/Introduction/Introduction.html).
+[alternative concurrency model](https://developer.apple.com/library/archive/documentation/General/Conceptual/ConcurrencyProgrammingGuide/Introduction/Introduction.html).
 
 If you need to make use of threads or processes, you should consider using
-[PyObjus](https://github.com/kivy/pyobjus) to make use of native iOS
-functionality.
+[PyObjus](https://github.com/kivy/pyobjus) to leverage native iOS
+functionals for this.
 
 ## Support
 
