@@ -249,6 +249,16 @@ It is due to invalid archs, search for them and check it. Maybe you
 targetted a simulator but have only armv7/arm64. Maybe you want to target
 your iPad but it as only x86_64.
 
+### Why does the python multiprocess module/async call not work?
+
+The iOS application model does not currently support multi-processing in a
+cross-platform compatible way. The application design focuses on minizing
+processor usage (to minimize power consumption) and promtoes an
+[alternative conurrency model](https://developer.apple.com/library/archive/documentation/General/Conceptual/ConcurrencyProgrammingGuide/Introduction/Introduction.html).
+
+If you need to make use of threads or processes, you should consider using
+[PyObjus](https://github.com/kivy/pyobjus) to make use of native iOS
+functionality.
 
 ## Support
 
