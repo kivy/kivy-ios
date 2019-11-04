@@ -4,8 +4,8 @@ import sh
 
 
 class FFMpegRecipe(Recipe):
-    version = "2.6.3"
-    url = "http://www.ffmpeg.org/releases/ffmpeg-{version}.tar.bz2"
+    version = "n3.4.5"
+    url = "https://github.com/FFmpeg/FFmpeg/archive/{version}.zip"
     include_per_arch = True
     include_dir = "dist/include"
     optional_depends = ["openssl"]
@@ -17,16 +17,18 @@ class FFMpegRecipe(Recipe):
         "libavresample/libavresample.a",
         "libavutil/libavutil.a",
         "libswresample/libswresample.a",
-        "libswscale/libswscale.a"]
+        "libswscale/libswscale.a",
+    ]
+    pbx_frameworks = ["VideoToolbox"]
 
     def build_arch(self, arch):
         options = [
             "--disable-everything",
-            "--enable-parser=h264,aac",
-            "--enable-decoder=h263,h264,aac",
-            "--enable-filter=aresample,resample,crop",
-            "--enable-protocol=file,http",
-            "--enable-demuxer=sdp",
+            "--enable-parsers",
+            "--enable-decoders",
+            "--enable-demuxers",
+            "--enable-filter=aresample,resample,crop,scale",
+            "--enable-protocol=file,http,rtmp",
             "--enable-pic",
             "--enable-small",
             "--enable-hwaccels",
@@ -41,7 +43,6 @@ class FFMpegRecipe(Recipe):
             "--disable-vdpau",
             "--disable-vaapi",
             "--disable-dct",
-
             # disable binaries / doc
             "--enable-cross-compile",
             "--disable-debug",
@@ -67,6 +68,7 @@ class FFMpegRecipe(Recipe):
                 "--extra-cflags={}".format(build_env["CFLAGS"]),
                 "--extra-cxxflags={}".format(build_env["CFLAGS"]),
                 "--extra-ldflags={}".format(build_env["LDFLAGS"]),
+                "--disable-x86asm",
                 *options,
                 _env=build_env)
         """
@@ -90,4 +92,3 @@ class FFMpegRecipe(Recipe):
 
 
 recipe = FFMpegRecipe()
-

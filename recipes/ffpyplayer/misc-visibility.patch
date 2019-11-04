@@ -1,0 +1,41 @@
+diff --git a/ffpyplayer/clib/misc.c b/ffpyplayer/clib/misc.c
+index 55181d1..6011ffa 100644
+--- a/ffpyplayer/clib/misc.c
++++ b/ffpyplayer/clib/misc.c
+@@ -1,8 +1,7 @@
+-
+ #include "misc.h"
+
+ #define FLAGS (o->type == AV_OPT_TYPE_FLAGS) ? AV_DICT_APPEND : 0
+-void print_all_libs_info(int flags, int level)
++void __attribute__ ((visibility ("hidden"))) print_all_libs_info(int flags, int level)
+ {
+ #if CONFIG_AVUTIL
+     PRINT_LIB_INFO(avutil,   AVUTIL,   flags, level);
+@@ -30,7 +29,7 @@ void print_all_libs_info(int flags, int level)
+ #endif
+ }
+
+-const AVOption *opt_find(void *obj, const char *name, const char *unit,
++const AVOption __attribute__ ((visibility ("hidden"))) *opt_find(void *obj, const char *name, const char *unit,
+     int opt_flags, int search_flags)
+ {
+     const AVOption *o = av_opt_find(obj, name, unit, opt_flags, search_flags);
+@@ -40,7 +39,7 @@ const AVOption *opt_find(void *obj, const char *name, const char *unit,
+ }
+
+ #define FLAGS (o->type == AV_OPT_TYPE_FLAGS) ? AV_DICT_APPEND : 0
+-int opt_default(const char *opt, const char *arg,
++int __attribute__ ((visibility ("hidden"))) opt_default(const char *opt, const char *arg,
+     struct SwsContext *sws_opts, AVDictionary **sws_dict, AVDictionary **swr_opts,
+     AVDictionary **resample_opts, AVDictionary **format_opts, AVDictionary **codec_opts)
+ {
+@@ -140,7 +139,7 @@ int opt_default(const char *opt, const char *arg,
+     return AVERROR_OPTION_NOT_FOUND;
+ }
+
+-int get_plane_sizes(int size[4], int required_plane[4], enum AVPixelFormat pix_fmt,
++int __attribute__ ((visibility ("hidden"))) get_plane_sizes(int size[4], int required_plane[4], enum AVPixelFormat pix_fmt,
+     int height, const int linesizes[4])
+ {
+     int i, total_size;
