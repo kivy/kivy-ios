@@ -127,3 +127,20 @@ int ios_uiscreen_get_dpi() {
 	}
 	return dpi;
 }
+
+padding ios_get_safe_area() {
+	padding safearea;
+	if (@available(iOS 11.0, *)){
+		UIWindow *window = UIApplication.sharedApplication.windows[0];
+		safearea.top = window.safeAreaInsets.top;
+		safearea.bottom = window.safeAreaInsets.bottom;
+		safearea.left = window.safeAreaInsets.left;
+		safearea.right = window.safeAreaInsets.right;
+	} else {
+		safearea.top = 0;
+		safearea.bottom = 0;
+		safearea.left = 0;
+		safearea.right = 0;
+	}
+	return safearea;
+}
