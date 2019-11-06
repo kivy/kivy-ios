@@ -252,7 +252,7 @@ your iPad but it as only x86_64.
 ### Why does the python multiprocess/subprocess module not work?
 
 The iOS application model does not currently support multi-processing in a
-cross-platform compatible way. The application design focuses on minizing
+cross-platform compatible way. The application design focuses on minimizing
 processor usage (to minimize power consumption) and promotes an
 [alternative concurrency model](https://developer.apple.com/library/archive/documentation/General/Conceptual/ConcurrencyProgrammingGuide/Introduction/Introduction.html).
 
