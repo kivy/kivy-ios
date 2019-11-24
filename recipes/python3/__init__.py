@@ -32,12 +32,39 @@ class Python3Recipe(Recipe):
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
         self.apply_patch("xcompile.patch")
         self.set_marker("patched")
+    
+    def postbuild_arch(self, arch):
+        # include _sqlite module to .a
+        py_arch = arch.arch
+        if py_arch == "armv7":
+            py_arch = "arm"
+        elif py_arch == "arm64":
+            py_arch = "aarch64"
+        tmp_folder = "temp.ios-{}-3.7{}".format(py_arch, self.build_dir)
+        build_env = self.get_build_env(arch)
+        for o_file in [
+            "cache.o",
+            "cursor.o",
+            "module.o",
+            "row.o",
+            "util.o",
+            "connection.o",
+            "microprotocols.o",
+            "prepare_protocol.o",
+            "statement.o",
+        ]:
+            shprint(sh.Command(build_env['AR']),
+                    "-r",
+                    "{}/{}".format(self.build_dir, self.library),
+                    "{}/build/{}/Modules/_sqlite/{}".format(self.build_dir, tmp_folder, o_file))
+        print("Added _sqlite to archive")
 
     def get_build_env(self, arch):
         build_env = arch.get_env()
         build_env["PATH"] = "{}:{}".format(
             join(self.ctx.dist_dir, "hostpython3", "bin"),
             os.environ["PATH"])
+        build_env["CFLAGS"] += " --sysroot={}".format(arch.sysroot)
         return build_env
 
     def build_arch(self, arch):
@@ -105,7 +132,15 @@ class Python3Recipe(Recipe):
                 _env=build_env)
         # os.execve("/bin/bash", ["/bin/bash"], os.environ)
         self.reduce_python()
+        self.install_mock_modules()
 
+    def install_mock_modules(self):
+        logger.info("Install mock modules")
+        sqlite3_src = join(self.recipe_dir, 'mock_modules', '_sqlite3')
+        site_packages_folder = join(
+                self.ctx.dist_dir, "root", "python3", "lib", "python3.7", "site-packages", "_sqlite3")
+        shutil.copytree(sqlite3_src, site_packages_folder)
+    
     def reduce_python(self):
         logger.info("Reduce python")
         oldpwd = os.getcwd()
