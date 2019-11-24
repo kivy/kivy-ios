@@ -11,12 +11,18 @@ from os.path import basename
 
 cdef extern from "ios_wrapper.h":
     ctypedef void (*ios_send_email_cb)(char *, void *)
+    ctypedef struct padding:
+        float top
+        float bottom
+        float right
+        float left
     int ios_send_email(char *subject, char *text, char *mimetype, char
             *filename, char *filename_alias, ios_send_email_cb cb, void *userdata)
     void ios_open_url(char *url)
     void load_url_webview(char *url, int width, int height)
     float ios_uiscreen_get_scale()
     int ios_uiscreen_get_dpi()
+    padding ios_get_safe_area()
 
 cdef void _send_email_done(char *status, void *data):
     cdef object callback = <object>data
@@ -206,6 +212,10 @@ def get_dpi():
     '''
     return ios_uiscreen_get_dpi()
 
+def get_safe_area():
+    '''Return the safe area bounds
+    '''
+    return ios_get_safe_area()
 
 from pyobjus import autoclass, selector, protocol
 from pyobjus.protocols import protocols
