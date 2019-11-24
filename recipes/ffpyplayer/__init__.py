@@ -4,7 +4,7 @@ import sh
 
 
 class FFPyplayerRecipe(CythonRecipe):
-    version = "v3.2"
+    version = "4.2.0"
     url = "https://github.com/matham/ffpyplayer/archive/{version}.zip"
     library = "libffpyplayer.a"
     depends = ["python", "ffmpeg"]
@@ -24,6 +24,13 @@ class FFPyplayerRecipe(CythonRecipe):
             arch.arch, "ffmpeg")
         env["CONFIG_POSTPROC"] = "0"
         return env
+
+    def prebuild_arch(self, arch):
+        # common to all archs
+        if  self.has_marker("patched"):
+            return
+        self.apply_patch("misc-visibility.patch")
+        self.set_marker("patched")
 
 
 recipe = FFPyplayerRecipe()
