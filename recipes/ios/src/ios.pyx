@@ -19,7 +19,7 @@ cdef extern from "ios_wrapper.h":
     int ios_send_email(char *subject, char *text, char *mimetype, char
             *filename, char *filename_alias, ios_send_email_cb cb, void *userdata)
     void ios_open_url(char *url)
-    void load_url_webview(char *url, int width, int height)
+    void load_url_webview(char *url, int x, int y, int width, int height)
     float ios_uiscreen_get_scale()
     int ios_uiscreen_get_dpi()
     padding ios_get_safe_area()
@@ -33,11 +33,11 @@ cdef void _send_email_done(char *status, void *data):
 #Support for iOS webview
 #
 class IOSWebView(object):
-    def open(self, url, width, height):
-        open_url_wbv(url, width, height)
+    def open(self, url, x, y, width, height):
+        open_url_wbv(url, x, y, width, height)
 
 
-def open_url_wbv(url, width, height):
+def open_url_wbv(url, x, y, width, height):
     '''
     OPEN URL in webview
 
@@ -55,9 +55,9 @@ def open_url_wbv(url, width, height):
 
         import ios
         url = "http://www.google.com"
-        ios.IOSWebView().open(url, width, height)
+        ios.IOSWebView().open(url, x, y, width, height)
     '''
-    load_url_webview(url, width, height)
+    load_url_webview(url, x, y, width, height)
 
 #
 # Support for webbrowser module
@@ -216,6 +216,7 @@ def get_safe_area():
     '''Return the safe area bounds
     '''
     return ios_get_safe_area()
+
 
 from pyobjus import autoclass, selector, protocol
 from pyobjus.protocols import protocols

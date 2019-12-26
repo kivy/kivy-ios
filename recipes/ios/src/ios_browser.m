@@ -16,10 +16,10 @@ void ios_open_url(char *url)
 /*
  * Webview support
  */
-void load_url_webview(char *url, int width, int height)
+void load_url_webview(char *url, int x, int y, int width, int height)
 {
     NSString *nsurl = [NSString stringWithCString:(char *)url encoding:NSUTF8StringEncoding];
-    WKWebView *webView = [[WKWebView alloc] initWithFrame: CGRectMake(0, 0, width, height)];
+    WKWebView *webView = [[WKWebView alloc] initWithFrame: CGRectMake(x, y, width, height)];
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
     UIView *view = [window.rootViewController view];
     [view addSubview:webView];
