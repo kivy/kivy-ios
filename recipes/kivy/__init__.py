@@ -9,8 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 class KivyRecipe(CythonRecipe):
-    # post kivy 1.11.1, including Fbo depthbuffer fixes for iOS
-    version = "18f37ed6e29620ee53c2a7699e0e0894e06a7f91"
+    # post kivy 1.11.1, including statusbar/fullscreen fix
+    version = "38fcbd5b90c99a96d82682f14986836cde81412d"
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
     depends = ["sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios",
