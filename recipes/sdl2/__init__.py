@@ -3,10 +3,10 @@ import sh
 
 
 class LibSDL2Recipe(Recipe):
-    version = "2.0.9"
-    url = "https://www.libsdl.org/release/SDL2-{version}.tar.gz"
-    #version = "iOS-improvements"
-    #url = "https://bitbucket.org/slime73/sdl-experiments/get/{version}.tar.gz"
+    # version = "2.0.9"
+    # url = "https://www.libsdl.org/release/SDL2-{version}.tar.gz"
+    version = "7cc4fc886d9e"
+    url = "https://hg.libsdl.org/SDL/archive/{version}.tar.gz"
     library = "Xcode-iOS/SDL/build/Release-{arch.sdk}/libSDL2.a"
     include_dir = "include"
     pbx_frameworks = [
