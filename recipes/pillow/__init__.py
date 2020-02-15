@@ -11,7 +11,7 @@ class PillowRecipe(Recipe):
     library = "libpillow.a"
     depends = ["hostpython3", "host_setuptools3", "freetype", "libjpeg", "python3", "ios"]
     pbx_libraries = ["libz", "libbz2"]
-    include_per_arch = True
+    archs = ['arm64']
 
     def get_pil_env(self, arch):
         build_env = arch.get_env()
@@ -33,7 +33,7 @@ class PillowRecipe(Recipe):
     def build_arch(self, arch):
         build_env = self.get_pil_env(arch)
         hostpython3 = sh.Command(self.ctx.hostpython)
-        shprint(hostpython3, "setup.py", "build_ext", "--disable-tiff",
+        shprint(hostpython3, "setup.py", "build_ext", "--disable-tiff", "--disable-lcms",
             "--disable-webp", "-g", _env=build_env)
         self.biglink()
 
