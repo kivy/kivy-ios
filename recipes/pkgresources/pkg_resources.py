@@ -64,7 +64,7 @@ from os.path import isdir, split
 
 # Avoid try/except due to potential problems with delayed import mechanisms.
 if sys.version_info >= (3, 3) and sys.implementation.name == "cpython":
-    import importlib._bootstrap as importlib_bootstrap
+    import importlib._bootstrap_external as importlib_bootstrap
 else:
     importlib_bootstrap = None
 
