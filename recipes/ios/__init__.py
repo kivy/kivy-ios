@@ -6,7 +6,7 @@ class IosRecipe(CythonRecipe):
     url = "src"
     library = "libios.a"
     depends = ["python"]
-    pbx_frameworks = ["MessageUI", "CoreMotion", "UIKit", "WebKit"]
+    pbx_frameworks = ["MessageUI", "CoreMotion", "UIKit", "WebKit", "Photos"]
 
     def install(self):
         self.install_python_package(
