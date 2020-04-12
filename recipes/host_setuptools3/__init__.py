@@ -20,7 +20,7 @@ class HostSetuptools3(Recipe):
         # Setuptools version 28.3.0
         site_packages_path = join(
             self.ctx.dist_dir, 'hostpython3',
-            'lib', 'python3.7', 'site-packages')
+            'lib', 'python3.8', 'site-packages')
         os.chdir(site_packages_path)
         with open('setuptools.pth', 'r') as f:
             setuptools_egg_path = f.read().strip('./').strip('\n')

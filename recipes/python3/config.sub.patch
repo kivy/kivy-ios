@@ -1,0 +1,31 @@
+diff -Naur Python-3.8.2.orig/.building Python-3.8.2/.building
+--- Python-3.8.2.orig/.building	2020-04-11 23:53:30.000000000 +0200
++++ Python-3.8.2/.building	1970-01-01 01:00:00.000000000 +0100
+@@ -1 +0,0 @@
+-ok
+\ No newline at end of file
+diff -Naur Python-3.8.2.orig/config.sub Python-3.8.2/config.sub
+--- Python-3.8.2.orig/config.sub	2020-04-11 23:53:40.000000000 +0200
++++ Python-3.8.2/config.sub	2020-04-11 23:51:41.000000000 +0200
+@@ -249,7 +249,7 @@
+ 	| alpha64 | alpha64ev[4-8] | alpha64ev56 | alpha64ev6[78] | alpha64pca5[67] \
+ 	| am33_2.0 \
+ 	| arc | arceb \
+-	| arm | arm[bl]e | arme[lb] | armv[2-8] | armv[3-8][lb] | armv6m | armv[78][arm] \
++	| arm | arm[bl]e | arme[lb] | armv[2-8] | armv[3-8][lb] | armv6m | armv[78][armk] \
+ 	| avr | avr32 \
+ 	| ba \
+ 	| be32 | be64 \
+@@ -1524,7 +1524,11 @@
+ 		;;
+ 	-nacl*)
+ 		;;
+-	-ios)
++	-ios*)
++		;;
++	-tvos*)
++		;;
++	-watchos*)
+ 		;;
+ 	-none)
+ 		;;

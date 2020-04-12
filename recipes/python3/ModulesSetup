@@ -68,7 +68,7 @@ zlib zlibmodule.c -I$(prefix)/include -lz
 #####################################################################
 _ctypes_test _ctypes/_ctypes_test.c
 _testbuffer _testbuffer.c
-_testcapi  _testcapimodule.c
+_testinternalcapi  _testinternalcapi.c
 _testimportmultiple _testimportmultiple.c
 
 #####################################################################

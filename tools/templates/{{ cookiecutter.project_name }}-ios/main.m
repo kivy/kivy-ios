@@ -5,11 +5,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-{%- if cookiecutter.python_major == "2" %}
-#include "{{ cookiecutter.kivy_dir }}/dist/root/python2/include/python2.7/Python.h"
-{%- else %}
-#include "{{ cookiecutter.kivy_dir }}/dist/root/python3/include/python3.7m/Python.h"
-{%- endif %}
+#include "Python.h"
 #include "{{ cookiecutter.kivy_dir }}/dist/include/common/sdl2/SDL_main.h"
 #include <dlfcn.h>
 
@@ -31,6 +27,7 @@ int main(int argc, char *argv[]) {
     putenv("PYTHONNOUSERSITE=1");
     putenv("PYTHONPATH=.");
     putenv("PYTHONUNBUFFERED=1");
+    putenv("LC_CTYPE=UTF-8");
     // putenv("PYTHONVERBOSE=1");
     // putenv("PYOBJUS_DEBUG=1");
 
@@ -61,7 +58,7 @@ int main(int argc, char *argv[]) {
     NSString *python_home = [NSString stringWithFormat:@"PYTHONHOME=%@", resourcePath, nil];
     putenv((char *)[python_home UTF8String]);
 
-    NSString *python_path = [NSString stringWithFormat:@"PYTHONPATH=%@:%@/lib/python3.7/:%@/lib/python3.7/site-packages:.", resourcePath, resourcePath, resourcePath, nil];
+    NSString *python_path = [NSString stringWithFormat:@"PYTHONPATH=%@:%@/lib/python3.8/:%@/lib/python3.8/site-packages:.", resourcePath, resourcePath, resourcePath, nil];
     putenv((char *)[python_path UTF8String]);
 
     NSString *tmp_path = [NSString stringWithFormat:@"TMP=%@/tmp", resourcePath, nil];
@@ -163,6 +160,8 @@ void load_custom_builtin_importer() {
         "    sys.modules['subprocess'].PIPE = None\n" \
         "    sys.modules['subprocess'].STDOUT = None\n" \
         "    sys.modules['subprocess'].DEVNULL = None\n" \
+        "    sys.modules['subprocess'].CalledProcessError = Exception\n" \
+        "    sys.modules['subprocess'].check_output = None\n" \
         "except ImportError:\n" \
         "    EXTS = ['.so']\n"
         "# Fake redirection to supress console output\n" \

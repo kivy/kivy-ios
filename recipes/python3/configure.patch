@@ -1,0 +1,90 @@
+diff -Naur Python-3.8.2.orig/configure Python-3.8.2/configure
+--- Python-3.8.2.orig/configure	2020-04-12 00:00:42.000000000 +0200
++++ Python-3.8.2/configure	2020-04-12 00:08:45.000000000 +0200
+@@ -3271,6 +3271,15 @@
+ 	*-*-cygwin*)
+ 		ac_sys_system=Cygwin
+ 		;;
++  *-apple-ios)
++  	ac_sys_system=iOS
++  	;;
++  *-apple-tvos)
++  	ac_sys_system=tvOS
++  	;;
++  *-apple-watchos)
++  	ac_sys_system=watchOS
++  	;;
+ 	*-*-vxworks*)
+ 	    ac_sys_system=VxWorks
+ 	    ;;
+@@ -3318,6 +3327,15 @@
+ 			_host_cpu=$host_cpu
+ 		esac
+ 		;;
++  *-apple-*)
++      case "$host_cpu" in
++      arm*)
++          _host_cpu=arm
++          ;;
++      *)
++          _host_cpu=$host_cpu
++    esac
++    ;;
+ 	*-*-cygwin*)
+ 		_host_cpu=
+ 		;;
+@@ -3396,6 +3414,13 @@
+     define_xopen_source=no;;
+   Darwin/1[0-9].*)
+     define_xopen_source=no;;
++  # On iOS, defining _POSIX_C_SOURCE also disables platform specific features.
++  iOS/*)
++    define_xopen_source=no;;
++  tvOS/*)
++    define_xopen_source=no;;
++  watchOS/*)
++    define_xopen_source=no;;
+   # On AIX 4 and 5.1, mbstate_t is defined only when _XOPEN_SOURCE == 500 but
+   # used in wcsnrtombs() and mbsnrtowcs() even if _XOPEN_SOURCE is not defined
+   # or has another value. By not (re)defining it, the defaults come in place.
+@@ -6165,10 +6190,16 @@
+ fi
+ 
+ if test "$cross_compiling" = yes; then
+-    case "$READELF" in
+-	readelf|:)
+-	as_fn_error $? "readelf for the host is required for cross builds" "$LINENO" 5
+-	;;
++    case "$host" in
++    *-apple-*os)
++        # readelf not required for iOS cross builds.
++        ;;
++    *)
++        case "$READELF" in
++            readelf|:)
++            as_fn_error $? "readelf for the host is required for cross builds" "$LINENO" 5
++            ;;
++        esac
+     esac
+ fi
+ 
+@@ -6920,8 +6951,6 @@
+ # tweak BASECFLAGS based on compiler and platform
+ case $GCC in
+ yes)
+-    CFLAGS_NODIST="$CFLAGS_NODIST -std=c99"
+-
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -Wextra" >&5
+ $as_echo_n "checking for -Wextra... " >&6; }
+      ac_save_cc="$CC"
+@@ -11438,6 +11467,10 @@
+ 	;;
+ 	hp*|HP*) DYNLOADFILE="dynload_hpux.o";;
++  # Dynamic loading on iOS
++  iOS/*) DYNLOADFILE="dynload_shlib.o";;
++  tvOS/*) DYNLOADFILE="dynload_shlib.o";;
++  watchOS/*) DYNLOADFILE="dynload_shlib.o";;
+	*)
+ 	# use dynload_shlib.c and dlopen() if we have it; otherwise stub
+ 	# out any dynamic loading
+ 	if test "$ac_cv_func_dlopen" = yes
