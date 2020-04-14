@@ -3,6 +3,22 @@ name: kivy-ios
 on: [push, pull_request]
 
 jobs:
+  flake8:
+    name: Flake8 tests
+    runs-on: macos-latest
+    steps:
+    - name: Checkout kivy-ios
+      uses: actions/checkout@v2
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1.1.0
+      with:
+        python-version: 3.7
+    - name: Run flake8
+      run: |
+        python -m pip install --upgrade pip
+        pip install tox>=2.0
+        tox -e pep8
+
   build_updated_recipes:
     runs-on: macos-latest
     steps:
