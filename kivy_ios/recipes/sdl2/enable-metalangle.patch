@@ -1,0 +1,15 @@
+diff -Naur SDL-feature-ios-use-metalangle.orig/include/SDL_config_iphoneos.h SDL-feature-ios-use-metalangle/include/SDL_config_iphoneos.h
+--- SDL-feature-ios-use-metalangle.orig/include/SDL_config_iphoneos.h	2021-04-25 10:18:20.000000000 +0200
++++ SDL-feature-ios-use-metalangle/include/SDL_config_iphoneos.h	2021-04-25 10:20:06.000000000 +0200
+@@ -188,6 +188,11 @@
+ 
+ #if SDL_PLATFORM_SUPPORTS_METAL
+ #define SDL_VIDEO_RENDER_METAL  1
++#undef SDL_VIDEO_OPENGL_ES2
++#undef SDL_VIDEO_OPENGL_ES
++#undef SDL_VIDEO_RENDER_OGL_ES
++#undef SDL_VIDEO_RENDER_OGL_ES2
++#define SDL_VIDEO_METALANGLE  1
+ #endif
+ 
+ #if SDL_PLATFORM_SUPPORTS_METAL
