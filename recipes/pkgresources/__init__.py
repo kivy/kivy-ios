@@ -1,4 +1,4 @@
-from toolchain import Recipe, shprint
+from toolchain import Recipe
 from os.path import join
 import sh
 
@@ -10,7 +10,7 @@ class pkg_resources(Recipe):
 
     def prebuild_arch(self, arch):
         sh.cp("pkg_resources.py",
-            join(self.ctx.site_packages_dir, "pkg_resources.py"))
+              join(self.ctx.site_packages_dir, "pkg_resources.py"))
 
 
 recipe = pkg_resources()
