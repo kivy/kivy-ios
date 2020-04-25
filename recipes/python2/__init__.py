@@ -133,7 +133,6 @@ class Python2Recipe(Recipe):
             os.chdir(join(self.ctx.dist_dir, "root", "python2", "lib", "python2.7"))
             sh.find(".", "-iname", "*.pyc", "-exec", "rm", "{}", ";")
             sh.find(".", "-iname", "*.py", "-exec", "rm", "{}", ";")
-            # sh.find(".", "-iname", "test*", "-exec", "rm", "-rf", "{}", ";")
             sh.rm("-rf", "wsgiref", "bsddb", "curses", "idlelib", "hotshot")
             sh.rm("-rf", sh.glob("lib*"))
 
