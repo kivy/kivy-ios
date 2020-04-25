@@ -1,7 +1,6 @@
 from toolchain import Recipe, shprint
-from os.path import join, exists
+from os.path import join
 import sh
-import os
 
 
 class JpegRecipe(Recipe):
@@ -15,7 +14,6 @@ class JpegRecipe(Recipe):
         ("jmorecfg.h", ""),
         ]
     include_per_arch = True
-
 
     def build_arch(self, arch):
         build_env = arch.get_env()
@@ -31,6 +29,5 @@ class JpegRecipe(Recipe):
         shprint(sh.make, "clean")
         shprint(sh.make, self.ctx.concurrent_make)
 
+
 recipe = JpegRecipe()
-
-
