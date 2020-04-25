@@ -25,7 +25,7 @@ class Python3Recipe(Recipe):
 
     def prebuild_arch(self, arch):
         # common to all archs
-        if self.has_marker("patched"):
+        if  self.has_marker("patched"):
             return
         self.apply_patch("dynload.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
@@ -139,7 +139,7 @@ class Python3Recipe(Recipe):
         sqlite3_src = join(self.recipe_dir, 'mock_modules', '_sqlite3')
         site_packages_folder = join(
                 self.ctx.dist_dir, "root", "python3", "lib", "python3.7", "site-packages", "_sqlite3")
-        shutil.rmtree(site_packages_folder, ignore_errors=True)  # Needed in case of rebuild
+        shutil.rmtree(site_packages_folder, ignore_errors=True) # Needed in case of rebuild
         shutil.copytree(sqlite3_src, site_packages_folder)
 
     def reduce_python(self):
