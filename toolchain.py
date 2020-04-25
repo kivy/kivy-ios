@@ -9,7 +9,7 @@ This tool intend to replace all the previous tools/ in shell script.
 import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename
-from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk, remove
+from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
 import zipfile
 import tarfile
 import importlib
@@ -21,6 +21,7 @@ import tempfile
 import time
 from datetime import datetime
 from pprint import pformat
+import logging
 
 try:
     from urllib.request import FancyURLopener, urlcleanup
@@ -39,7 +40,6 @@ sys.path.insert(0, join(curdir, "tools", "external"))
 
 import sh
 
-import logging
 
 # For more detailed logging, use something like
 # format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(funcName)s():%(lineno)d] %(message)s'
@@ -54,10 +54,6 @@ sh_logging.setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
-IS_PY3 = sys.version_info[0] >= 3
-IS_PY2 = sys.version_info[0] == 2
-
-
 def shprint(command, *args, **kwargs):
     kwargs["_iter"] = True
     kwargs["_out_bufsize"] = 1
@@ -68,6 +64,7 @@ def shprint(command, *args, **kwargs):
         # strip only last CR:
         line_str = "\n".join(line.encode("ascii", "replace").decode().splitlines())
         logger.debug(line_str)
+
 
 def cache_execution(f):
     def _cache_execution(self, *args, **kwargs):
@@ -85,10 +82,12 @@ def cache_execution(f):
         self.update_state(key, True)
     return _cache_execution
 
+
 class ChromeDownloader(FancyURLopener):
     version = (
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
         '(KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36')
+
 
 urlretrieve = ChromeDownloader().retrieve
 
@@ -136,13 +135,11 @@ class JsonStore(object):
         self.sync()
 
     def sync(self):
-        # http://stackoverflow.com/questions/12309269/write-json-data-to-file-in-python/14870531#14870531
-        if IS_PY3:
-            with open(self.filename, 'w') as fd:
-                json.dump(self.data, fd, ensure_ascii=False)
-        else:
-            with io.open(self.filename, 'w', encoding='utf-8') as fd:
-                fd.write(unicode(json.dumps(self.data, ensure_ascii=False)))
+        # http://stackoverflow.com/questions/12309269/write-json-data-to-file
+        # -in-python/14870531#14870531
+        with open(self.filename, 'w') as fd:
+            json.dump(self.data, fd, ensure_ascii=False)
+
 
 class Arch(object):
     def __init__(self, ctx):
@@ -160,7 +157,6 @@ class Arch(object):
                 self.ctx.include_dir,
                 d.format(arch=self))
             for d in self.ctx.include_dirs]
-
 
     def get_env(self):
         include_dirs = [
@@ -197,8 +193,10 @@ class Arch(object):
             env.update({k: v for k, v in environ.items() if k.startswith('CCACHE_')})
             env.setdefault('CCACHE_MAXSIZE', '10G')
             env.setdefault('CCACHE_HARDLINK', 'true')
-            env.setdefault('CCACHE_SLOPPINESS', ('file_macro,time_macros,'
-                'include_file_mtime,include_file_ctime,file_stat_matches'))
+            env.setdefault(
+                'CCACHE_SLOPPINESS',
+                ('file_macro,time_macros,'
+                 'include_file_mtime,include_file_ctime,file_stat_matches'))
 
         if not self._ccsh:
             self._ccsh = tempfile.NamedTemporaryFile()
@@ -365,7 +363,7 @@ class Context(object):
         # path to some tools
         self.ccache = sh.which("ccache")
         if not self.ccache:
-            #print("ccache is missing, the build will not be optimized in the future.")
+            # ccache is missing, the build will not be optimized
             pass
         for cython_fn in ("cython-2.7", "cython"):
             cython = sh.which(cython_fn)
@@ -422,7 +420,6 @@ class Context(object):
         return "IDEBuildOperationMaxNumberOfConcurrentCompileTasks={}".format(self.num_cores)
 
 
-
 class Recipe(object):
     props = {
         "is_alias": False,
@@ -455,6 +452,7 @@ class Recipe(object):
         """
         if not url:
             return
+
         def report_hook(index, blksize, size):
             if size <= 0:
                 progression = '{0} bytes'.format(index * blksize)
@@ -478,26 +476,7 @@ class Recipe(object):
             try:
                 urlretrieve(url, filename, report_hook)
             except AttributeError:
-                if IS_PY2:
-                    # This is caused by bug in python-future, causing occasional
-                    #     AttributeError: '_fileobject' object has no attribute 'readinto'
-                    # It can be removed if the upstream fix is accepted. See also:
-                    #   * https://github.com/kivy/kivy-ios/issues/322
-                    #   * https://github.com/PythonCharmers/python-future/pull/423
-                    import requests
-
-                    logger.warning("urlretrieve failed. Falling back to request")
-
-                    headers = {'User-agent': 'Mozilla/5.0 (X11; Linux x86_64) '
-                               'AppleWebKit/537.36 (KHTML, like Gecko) '
-                               'Chrome/28.0.1500.71 Safari/537.36'}
-                    r = requests.get(url, headers=headers)
-
-                    with open(filename, "wb") as fw:
-                        fw.write(r.content)
-                    break
-                else:
-                    raise
+                raise
             except OSError as e:
                 attempts += 1
                 if attempts >= 5:
@@ -546,8 +525,9 @@ class Recipe(object):
                 archive = tarfile.open(filename)
             except tarfile.ReadError:
                 logger.warning('Error extracting the archive {0}'.format(filename))
-                logger.warning('This is usually caused by a corrupt download. The file'
-                      ' will be removed and re-downloaded on the next run.')
+                logger.warning(
+                    'This is usually caused by a corrupt download. The file'
+                    ' will be removed and re-downloaded on the next run.')
                 logger.warning(filename)
                 return
 
@@ -605,7 +585,7 @@ class Recipe(object):
         """
         try:
             unlink(join(self.build_dir, ".{}".format(marker)))
-        except:
+        except Exception:
             pass
 
     def get_include_dir(self):
@@ -814,19 +794,6 @@ class Recipe(object):
         self.delete_marker("building")
         self.set_marker("build_done")
 
-    def update_state(self, key, value):
-        """Update entry in state database
-
-        This is usually done in the @cache_execution decorator
-        to log an action and its time of occurrence,
-        but it needs to be done manually in recipes.
-
-        sets key = value, and key.at = current_datetime
-        """
-        key_time = "{}.at".format(key)
-        self.ctx.state[key] = value
-        self.ctx.state[key_time] = str(datetime.utcnow())
-
     @cache_execution
     def build_all(self):
         filtered_archs = self.filtered_archs
@@ -880,9 +847,10 @@ class Recipe(object):
             getattr(self, postbuild)()
 
     def update_state(self, key, value):
-        """Update entry in state database
-
-        Also adds the time of update
+        """
+        Update entry in state database. This is usually done in the
+        @cache_execution decorator to log an action and its time of occurrence,
+        but it needs to be done manually in recipes.
         """
         key_time = "{}.at".format(key)
         self.ctx.state[key] = value
@@ -991,7 +959,7 @@ class Recipe(object):
     @classmethod
     def get_recipe(cls, name, ctx):
         if not hasattr(cls, "recipes"):
-           cls.recipes = {}
+            cls.recipes = {}
 
         if '==' in name:
             name, version = name.split('==')
@@ -1070,7 +1038,6 @@ class CythonRecipe(PythonRecipe):
             filename = filename[len(self.build_dir) + 1:]
         logger.info("Cythonize {}".format(filename))
         cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
-        hostpython = self.ctx.state.get("hostpython")
         shprint(cmd, filename)
 
     def cythonize_build(self):
@@ -1106,7 +1073,7 @@ class CythonRecipe(PythonRecipe):
             try:
                 shprint(hostpython, "setup.py", "build_ext", "-g",
                         _env=build_env)
-            except:
+            except Exception:
                 pass
         self.cythonize_build()
         shprint(hostpython, "setup.py", "build_ext", "-g",
@@ -1131,8 +1098,8 @@ def build_recipes(names, ctx):
             logger.error("No recipe named {}".format(name))
             sys.exit(1)
         graph.add(name, name)
-        logger.info("Loaded recipe {} (depends of {}, optional are {})".format(name,
-            recipe.depends, recipe.optional_depends))
+        logger.info("Loaded recipe {} (depends of {}, optional are {})".format(
+            name, recipe.depends, recipe.optional_depends))
         for depend in recipe.depends:
             graph.add(name, depend)
             recipe_to_load += recipe.depends
@@ -1243,7 +1210,6 @@ def update_pbxproj(filename, pbx_frameworks=None):
         fn = join(ctx.dist_dir, "sources", name)
         project.add_folder(fn, parent=g_classes)
 
-
     project.backup()
     project.save()
 
@@ -1339,7 +1305,7 @@ Xcode:
                         recipe = Recipe.get_recipe(name, ctx)
                         print("{recipe.name:<12} {recipe.version:<8}".format(recipe=recipe))
 
-                    except:
+                    except Exception:
                         pass
 
         def clean(self):
@@ -1361,9 +1327,6 @@ Xcode:
                     shutil.rmtree(ctx.build_dir)
 
         def distclean(self):
-            parser = argparse.ArgumentParser(
-                    description="Clean the build, download, and dist")
-            args = parser.parse_args(sys.argv[2:])
             ctx = Context()
             if exists(ctx.build_dir):
                 shutil.rmtree(ctx.build_dir)
@@ -1373,9 +1336,6 @@ Xcode:
                 shutil.rmtree(ctx.cache_dir)
 
         def status(self):
-            parser = argparse.ArgumentParser(
-                    description="Give a status of the build")
-            args = parser.parse_args(sys.argv[2:])
             ctx = Context()
             for recipe in Recipe.list_recipes():
                 key = "{}.build_all".format(recipe)
@@ -1555,7 +1515,7 @@ Xcode:
 
             project_name = filename.split("/")[-1].replace(".xcodeproj", "")
             images_xcassets = realpath(join(filename, "..", project_name,
-                "Images.xcassets"))
+                                            "Images.xcassets"))
             if not exists(images_xcassets):
                 logger.warning("Images.xcassets not found, creating it.")
                 makedirs(images_xcassets)
