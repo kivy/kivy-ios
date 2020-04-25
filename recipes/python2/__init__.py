@@ -4,7 +4,9 @@ import sh
 import os
 import logging
 
+
 logger = logging.getLogger(__name__)
+
 
 class Python2Recipe(Recipe):
     version = "2.7.1"
@@ -24,7 +26,7 @@ class Python2Recipe(Recipe):
 
     def prebuild_arch(self, arch):
         # common to all archs
-        if  self.has_marker("patched"):
+        if self.has_marker("patched"):
             return
         self.apply_patch("ssize-t-max.patch")
         self.apply_patch("dynload.patch")
@@ -36,7 +38,7 @@ class Python2Recipe(Recipe):
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
         self.apply_patch("ipv6.patch")
         if "openssl.build_all" in self.ctx.state:
-             self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
+            self.append_file("ModulesSetup.openssl", "Modules/Setup.local")
         self.apply_patch("posixmodule.patch")
 
         self.set_marker("patched")
@@ -88,6 +90,7 @@ class Python2Recipe(Recipe):
         # architecture can lead to different pyconfig.h, we would need one patch
         # per arch. Instead, express here the line we don't want / we want.
         pyconfig = join(self.build_dir, "pyconfig.h")
+
         def _remove_line(lines, pattern):
             for line in lines[:]:
                 if pattern in line:
@@ -130,7 +133,7 @@ class Python2Recipe(Recipe):
             os.chdir(join(self.ctx.dist_dir, "root", "python2", "lib", "python2.7"))
             sh.find(".", "-iname", "*.pyc", "-exec", "rm", "{}", ";")
             sh.find(".", "-iname", "*.py", "-exec", "rm", "{}", ";")
-            #sh.find(".", "-iname", "test*", "-exec", "rm", "-rf", "{}", ";")
+            # sh.find(".", "-iname", "test*", "-exec", "rm", "-rf", "{}", ";")
             sh.rm("-rf", "wsgiref", "bsddb", "curses", "idlelib", "hotshot")
             sh.rm("-rf", sh.glob("lib*"))
 
