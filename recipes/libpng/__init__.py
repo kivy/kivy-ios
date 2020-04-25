@@ -3,6 +3,7 @@ from toolchain import Recipe, shprint
 from os.path import join
 import sh
 
+
 class PngRecipe(Recipe):
     version = '1.6.26'
     url = 'http://downloads.sourceforge.net/sourceforge/libpng/libpng-{version}.tar.gz'
@@ -22,5 +23,6 @@ class PngRecipe(Recipe):
                 "--disable-shared")
         shprint(sh.make, "clean")
         shprint(sh.make, self.ctx.concurrent_make, _env=build_env)
+
 
 recipe = PngRecipe()

@@ -6,6 +6,7 @@ from os.path import join
 
 logger = logging.getLogger(__name__)
 
+
 class PythonAliasRecipe(Recipe):
     is_alias = True
 
@@ -25,5 +26,6 @@ class PythonAliasRecipe(Recipe):
         if python:
             self.depends = [python]
         self.recipe_dir = join(ctx.root_dir, "recipes", python)
+
 
 recipe = PythonAliasRecipe()
