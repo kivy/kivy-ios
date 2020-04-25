@@ -1,5 +1,5 @@
-from toolchain import Recipe, shprint, ensure_dir
-from os.path import join, exists
+from toolchain import Recipe, shprint
+from os.path import join
 import os
 import sh
 import shutil
