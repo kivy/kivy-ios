@@ -9,7 +9,7 @@ This tool intend to replace all the previous tools/ in shell script.
 import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename
-from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
+from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk, remove
 import zipfile
 import tarfile
 import importlib
@@ -66,10 +66,8 @@ def shprint(command, *args, **kwargs):
     cmd = command(*args, **kwargs)
     for line in cmd:
         # strip only last CR:
-        line_str = "\n".join(line.encode(
-            "ascii", "replace").decode().splitlines())
+        line_str = "\n".join(line.encode("ascii", "replace").decode().splitlines())
         logger.debug(line_str)
-
 
 def cache_execution(f):
     def _cache_execution(self, *args, **kwargs):
@@ -80,20 +78,17 @@ def cache_execution(f):
             for arg in args:
                 key += ".{}".format(arg)
         if key in state and not force:
-            logger.debug("Cached result: {} {}. Ignoring".format(
-                f.__name__.capitalize(), self.name))
+            logger.debug("Cached result: {} {}. Ignoring".format(f.__name__.capitalize(), self.name))
             return
         logger.info("{} {}".format(f.__name__.capitalize(), self.name))
         f(self, *args, **kwargs)
         self.update_state(key, True)
     return _cache_execution
 
-
 class ChromeDownloader(FancyURLopener):
     version = (
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
         '(KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36')
-
 
 urlretrieve = ChromeDownloader().retrieve
 
@@ -111,8 +106,7 @@ class JsonStore(object):
                 with io.open(filename, encoding='utf-8') as fd:
                     self.data = json.load(fd)
             except ValueError:
-                logger.warning("Unable to read the state.db, "
-                               "content will be replaced.")
+                logger.warning("Unable to read the state.db, content will be replaced.")
 
     def __getitem__(self, key):
         return self.data[key]
@@ -142,15 +136,13 @@ class JsonStore(object):
         self.sync()
 
     def sync(self):
-        # http://stackoverflow.com/questions/12309269/write-json-data-to-file-
-        # in-python/14870531#14870531
+        # http://stackoverflow.com/questions/12309269/write-json-data-to-file-in-python/14870531#14870531
         if IS_PY3:
             with open(self.filename, 'w') as fd:
                 json.dump(self.data, fd, ensure_ascii=False)
         else:
             with io.open(self.filename, 'w', encoding='utf-8') as fd:
-                fd.write(json.dumps(self.data, ensure_ascii=False))
-
+                fd.write(unicode(json.dumps(self.data, ensure_ascii=False)))
 
 class Arch(object):
     def __init__(self, ctx):
@@ -168,6 +160,7 @@ class Arch(object):
                 self.ctx.include_dir,
                 d.format(arch=self))
             for d in self.ctx.include_dirs]
+
 
     def get_env(self):
         include_dirs = [
@@ -204,9 +197,8 @@ class Arch(object):
             env.update({k: v for k, v in environ.items() if k.startswith('CCACHE_')})
             env.setdefault('CCACHE_MAXSIZE', '10G')
             env.setdefault('CCACHE_HARDLINK', 'true')
-            env.setdefault('CCACHE_SLOPPINESS',
-                           ('file_macro,time_macros, include_file_mtime,'
-                            'include_file_ctime,file_stat_matches'))
+            env.setdefault('CCACHE_SLOPPINESS', ('file_macro,time_macros,'
+                'include_file_mtime,include_file_ctime,file_stat_matches'))
 
         if not self._ccsh:
             self._ccsh = tempfile.NamedTemporaryFile()
@@ -373,7 +365,7 @@ class Context(object):
         # path to some tools
         self.ccache = sh.which("ccache")
         if not self.ccache:
-            # print("ccache is missing, the build will not be optimized in the future.")
+            #print("ccache is missing, the build will not be optimized in the future.")
             pass
         for cython_fn in ("cython-2.7", "cython"):
             cython = sh.which(cython_fn)
@@ -430,6 +422,7 @@ class Context(object):
         return "IDEBuildOperationMaxNumberOfConcurrentCompileTasks={}".format(self.num_cores)
 
 
+
 class Recipe(object):
     props = {
         "is_alias": False,
@@ -462,7 +455,6 @@ class Recipe(object):
         """
         if not url:
             return
-
         def report_hook(index, blksize, size):
             if size <= 0:
                 progression = '{0} bytes'.format(index * blksize)
@@ -554,9 +546,8 @@ class Recipe(object):
                 archive = tarfile.open(filename)
             except tarfile.ReadError:
                 logger.warning('Error extracting the archive {0}'.format(filename))
-                logger.warning(
-                    'This is usually caused by a corrupt download. The file'
-                    ' will be removed and re-downloaded on the next run.')
+                logger.warning('This is usually caused by a corrupt download. The file'
+                      ' will be removed and re-downloaded on the next run.')
                 logger.warning(filename)
                 return
 
@@ -614,7 +605,7 @@ class Recipe(object):
         """
         try:
             unlink(join(self.build_dir, ".{}".format(marker)))
-        except Exception:
+        except:
             pass
 
     def get_include_dir(self):
@@ -823,6 +814,19 @@ class Recipe(object):
         self.delete_marker("building")
         self.set_marker("build_done")
 
+    def update_state(self, key, value):
+        """Update entry in state database
+
+        This is usually done in the @cache_execution decorator
+        to log an action and its time of occurrence,
+        but it needs to be done manually in recipes.
+
+        sets key = value, and key.at = current_datetime
+        """
+        key_time = "{}.at".format(key)
+        self.ctx.state[key] = value
+        self.ctx.state[key_time] = str(datetime.utcnow())
+
     @cache_execution
     def build_all(self):
         filtered_archs = self.filtered_archs
@@ -878,11 +882,7 @@ class Recipe(object):
     def update_state(self, key, value):
         """Update entry in state database
 
-        This is usually done in the @cache_execution decorator
-        to log an action and its time of occurrence,
-        but it needs to be done manually in recipes.
-
-        sets key = value, and key.at = current_datetime
+        Also adds the time of update
         """
         key_time = "{}.at".format(key)
         self.ctx.state[key] = value
@@ -991,7 +991,7 @@ class Recipe(object):
     @classmethod
     def get_recipe(cls, name, ctx):
         if not hasattr(cls, "recipes"):
-            cls.recipes = {}
+           cls.recipes = {}
 
         if '==' in name:
             name, version = name.split('==')
@@ -1070,6 +1070,7 @@ class CythonRecipe(PythonRecipe):
             filename = filename[len(self.build_dir) + 1:]
         logger.info("Cythonize {}".format(filename))
         cmd = sh.Command(join(self.ctx.root_dir, "tools", "cythonize.py"))
+        hostpython = self.ctx.state.get("hostpython")
         shprint(cmd, filename)
 
     def cythonize_build(self):
@@ -1104,7 +1105,7 @@ class CythonRecipe(PythonRecipe):
             try:
                 shprint(hostpython, "setup.py", "build_ext", "-g",
                         _env=build_env)
-            except Exception:
+            except:
                 pass
         self.cythonize_build()
         shprint(hostpython, "setup.py", "build_ext", "-g",
@@ -1129,8 +1130,8 @@ def build_recipes(names, ctx):
             logger.error("No recipe named {}".format(name))
             sys.exit(1)
         graph.add(name, name)
-        logger.info("Loaded recipe {} (depends of {}, optional are {})".format(
-            name, recipe.depends, recipe.optional_depends))
+        logger.info("Loaded recipe {} (depends of {}, optional are {})".format(name,
+            recipe.depends, recipe.optional_depends))
         for depend in recipe.depends:
             graph.add(name, depend)
             recipe_to_load += recipe.depends
@@ -1241,6 +1242,7 @@ def update_pbxproj(filename, pbx_frameworks=None):
         fn = join(ctx.dist_dir, "sources", name)
         project.add_folder(fn, parent=g_classes)
 
+
     project.backup()
     project.save()
 
@@ -1336,7 +1338,7 @@ Xcode:
                         recipe = Recipe.get_recipe(name, ctx)
                         print("{recipe.name:<12} {recipe.version:<8}".format(recipe=recipe))
 
-                    except Exception:
+                    except:
                         pass
 
         def clean(self):
@@ -1358,6 +1360,9 @@ Xcode:
                     shutil.rmtree(ctx.build_dir)
 
         def distclean(self):
+            parser = argparse.ArgumentParser(
+                    description="Clean the build, download, and dist")
+            args = parser.parse_args(sys.argv[2:])
             ctx = Context()
             if exists(ctx.build_dir):
                 shutil.rmtree(ctx.build_dir)
@@ -1367,6 +1372,9 @@ Xcode:
                 shutil.rmtree(ctx.cache_dir)
 
         def status(self):
+            parser = argparse.ArgumentParser(
+                    description="Give a status of the build")
+            args = parser.parse_args(sys.argv[2:])
             ctx = Context()
             for recipe in Recipe.list_recipes():
                 key = "{}.build_all".format(recipe)
@@ -1549,7 +1557,7 @@ Xcode:
 
             project_name = filename.split("/")[-1].replace(".xcodeproj", "")
             images_xcassets = realpath(join(filename, "..", project_name,
-                                            "Images.xcassets"))
+                "Images.xcassets"))
             if not exists(images_xcassets):
                 logger.warning("Images.xcassets not found, creating it.")
                 makedirs(images_xcassets)
