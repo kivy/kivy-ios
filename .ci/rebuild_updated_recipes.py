@@ -1,6 +1,6 @@
 import sh
-import shutil
 import subprocess
+
 
 def modified_recipes(branch='origin/master'):
     """
@@ -18,6 +18,7 @@ def modified_recipes(branch='origin/master'):
             recipe = file_path.split('/')[1]
             recipes.add(recipe)
     return recipes
+
 
 if __name__ == "__main__":
     updated_recipes = " ".join(modified_recipes())
