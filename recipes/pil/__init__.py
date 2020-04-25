@@ -8,7 +8,7 @@ import fnmatch
 class PillowRecipe(Recipe):
     version = "2.8.2"
     url = "https://pypi.python.org/packages/source/P/Pillow/Pillow-{version}.tar.gz"
-    #url = "https://github.com/python-pillow/Pillow/archive/{version}.tar.gz"
+    # url = "https://github.com/python-pillow/Pillow/archive/{version}.tar.gz"
     library = "libpil.a"
     depends = ["hostpython", "host_setuptools", "pkgresources", "freetype", "libjpeg", "python", "ios"]
     pbx_libraries = ["libz", "libbz2"]
@@ -33,9 +33,9 @@ class PillowRecipe(Recipe):
     def build_arch(self, arch):
         self.apply_patch('pil_setup.patch')
         build_env = self.get_pil_env(arch)
-        #build_dir = self.get_build_dir(arch.arch)
+        # build_dir = self.get_build_dir(arch.arch)
         hostpython = sh.Command(self.ctx.hostpython)
-        #build_env["PYTHONHOME"] = hostpython
+        # build_env["PYTHONHOME"] = hostpython
         # first try to generate .h
         shprint(hostpython, "setup.py", "build_ext", "-g",
                 _env=build_env)
@@ -61,5 +61,5 @@ class PillowRecipe(Recipe):
         cmd = sh.Command(join(self.ctx.root_dir, "tools", "biglink"))
         shprint(cmd, join(self.build_dir, "libpil.a"), *dirs)
 
-recipe = PillowRecipe()
 
+recipe = PillowRecipe()
