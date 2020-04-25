@@ -30,4 +30,5 @@ class LibSDL2TTFRecipe(Recipe):
                 join(self.get_build_dir(arch.arch), "SDL_ttf.h"),
                 join(self.ctx.include_dir, "common", "SDL2"))
 
+
 recipe = LibSDL2TTFRecipe()

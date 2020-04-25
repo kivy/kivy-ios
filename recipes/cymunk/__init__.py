@@ -3,10 +3,7 @@ Author: Lawrence Du, Lukasz Mach
 E-mail: larrydu88@gmail.com, maho@pagema.net
 """
 
-from toolchain import CythonRecipe,shprint
-import os
-from os.path import join
-import sh
+from toolchain import CythonRecipe
 
 
 class CymunkRecipe(CythonRecipe):
