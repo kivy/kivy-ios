@@ -1,5 +1,7 @@
-from toolchain import CythonRecipe
+from toolchain import CythonRecipe, shprint
 from os.path import join
+from os import chdir, listdir, getcwd
+import sh
 import logging
 import shutil
 
@@ -40,7 +42,7 @@ class KivyRecipe(CythonRecipe):
         with open(pyconfig) as fd:
             lines = fd.readlines()
         _remove_line(lines, "flags['libraries'] = ['GLESv2']")
-        # _remove_line(lines, "c_options['use_sdl'] = True")
+        #_remove_line(lines, "c_options['use_sdl'] = True")
         with open(pyconfig, "w") as fd:
             fd.writelines(lines)
 
