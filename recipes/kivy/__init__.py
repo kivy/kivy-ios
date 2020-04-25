@@ -34,7 +34,6 @@ class KivyRecipe(CythonRecipe):
     def _patch_setup(self):
         # patch setup to remove some functionnalities
         pyconfig = join(self.build_dir, "setup.py")
-
         def _remove_line(lines, pattern):
             for line in lines[:]:
                 if pattern in line:
