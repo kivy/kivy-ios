@@ -1,7 +1,5 @@
-from toolchain import CythonRecipe, shprint
+from toolchain import CythonRecipe
 from os.path import join
-from os import chdir, listdir, getcwd
-import sh
 import logging
 import shutil
 
@@ -34,6 +32,7 @@ class KivyRecipe(CythonRecipe):
     def _patch_setup(self):
         # patch setup to remove some functionnalities
         pyconfig = join(self.build_dir, "setup.py")
+
         def _remove_line(lines, pattern):
             for line in lines[:]:
                 if pattern in line:
@@ -41,7 +40,7 @@ class KivyRecipe(CythonRecipe):
         with open(pyconfig) as fd:
             lines = fd.readlines()
         _remove_line(lines, "flags['libraries'] = ['GLESv2']")
-        #_remove_line(lines, "c_options['use_sdl'] = True")
+        # _remove_line(lines, "c_options['use_sdl'] = True")
         with open(pyconfig, "w") as fd:
             fd.writelines(lines)
 
