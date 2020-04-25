@@ -1,8 +1,7 @@
 from toolchain import Recipe, shprint
-from os.path import join, exists
+from os.path import join
 import sh
 import os
-import fnmatch
 import shutil
 
 
@@ -13,7 +12,7 @@ class HostSetuptools3(Recipe):
 
     def prebuild_arch(self, arch):
         hostpython = sh.Command(self.ctx.hostpython)
-        sh.curl("-O",  "https://bootstrap.pypa.io/ez_setup.py")
+        sh.curl("-O", "https://bootstrap.pypa.io/ez_setup.py")
         shprint(hostpython, "./ez_setup.py")
         # Extract setuptools egg and remove .pth files. Otherwise subsequent
         # python package installations using setuptools will raise exceptions.
@@ -31,5 +30,6 @@ class HostSetuptools3(Recipe):
         os.remove('setuptools.pth')
         os.remove('easy-install.pth')
         shutil.rmtree('EGG-INFO')
+
 
 recipe = HostSetuptools3()
