@@ -16,7 +16,7 @@ def modified_recipes(branch='origin/master'):
     for file_path in git_diff:
         if 'recipes/' in file_path:
             recipe = file_path.split('/')[1]
-            if recipe not in ["python", "hostpython"]:  # alias recipes
+            if recipe not in ["python.py", "hostpython.py"]:  # alias recipes
                 recipes.add(recipe)
     return recipes
 
