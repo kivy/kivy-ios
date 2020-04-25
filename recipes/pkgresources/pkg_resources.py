@@ -1,4 +1,4 @@
-"""
+"""  # noqa E902
 Package resource API
 --------------------
 
@@ -10,7 +10,7 @@ names being passed into the API.
 
 The package resource API is designed to work with normal filesystem packages,
 .egg files, and unpacked .egg files.  It can also work in a limited way with
-.zip files and with custom PEP 302 loaders that support the ``get_data()``
+.zip files and with custom PEP 302 loaders that support the ``get_data()``.
 method.
 """
 
