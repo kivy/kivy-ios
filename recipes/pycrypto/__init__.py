@@ -1,7 +1,7 @@
 '''Recipe for pycrypto on ios
 '''
 from toolchain import CythonRecipe, shprint
-from os.path import join, exists
+from os.path import join
 import sh
 import os
 
@@ -11,8 +11,7 @@ class PycryptoRecipe(CythonRecipe):
     url = "https://ftp.dlitz.net/pub/dlitz/crypto/pycrypto/pycrypto-{version}.tar.gz"
     depends = ["python", "openssl"]
     include_per_arch = True
-    library="libpycrypto.a"
-
+    library = "libpycrypto.a"
 
     def build_arch(self, arch):
         build_env = arch.get_env()
@@ -26,9 +25,7 @@ class PycryptoRecipe(CythonRecipe):
                 "--prefix=/",
                 "--host={}".format(arch),
                 "ac_cv_func_malloc_0_nonnull=yes",
-                "ac_cv_func_realloc_0_nonnull=yes",
-               )     
-        hostpython = sh.Command(self.ctx.hostpython)
+                "ac_cv_func_realloc_0_nonnull=yes")
         super(PycryptoRecipe, self).build_arch(arch)
 
     def install(self):
@@ -41,5 +38,5 @@ class PycryptoRecipe(CythonRecipe):
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
-recipe = PycryptoRecipe()
 
+recipe = PycryptoRecipe()
