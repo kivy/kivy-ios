@@ -5,6 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class LibffiRecipe(Recipe):
     version = "3.2.1"
     url = "ftp://sourceware.org/pub/libffi/libffi-{version}.tar.gz"
@@ -29,7 +30,7 @@ class LibffiRecipe(Recipe):
             return
         # necessary as it doesn't compile with XCode 6.0. If we use 5.1.1, the
         # compiler for i386 is not working.
-        #shprint(sh.sed,
+        # shprint(sh.sed,
         #        "-i.bak",
         #        "s/-miphoneos-version-min=5.1.1/-miphoneos-version-min=6.0/g",
         #        "generate-darwin-source-and-headers.py")
@@ -62,5 +63,6 @@ class LibffiRecipe(Recipe):
 
     def postbuild_arch(self, arch):
         pass
+
 
 recipe = LibffiRecipe()
