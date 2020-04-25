@@ -1093,6 +1093,7 @@ class CythonRecipe(PythonRecipe):
         env = super(CythonRecipe, self).get_recipe_env(arch)
         env["KIVYIOSROOT"] = self.ctx.root_dir
         env["IOSSDKROOT"] = arch.sysroot
+        env["CUSTOMIZED_OSX_COMPILER"] = 'True'
         env["LDSHARED"] = join(self.ctx.root_dir, "tools", "liblink")
         env["ARM_LD"] = env["LD"]
         env["ARCH"] = arch.arch
@@ -1475,9 +1476,9 @@ Xcode:
                 print("env ({}): {}".format(arch, pformat(env)))
 
         def pip3(self):
-            self.pip(pip_version="pip3")
+            self.pip()
 
-        def pip(self, pip_version="pip"):
+        def pip(self):
             ctx = Context()
             for recipe in Recipe.list_recipes():
                 key = "{}.build_all".format(recipe)
@@ -1496,7 +1497,7 @@ Xcode:
                 "PYTHONOPTIMIZE": "2",
                 # "PIP_INSTALL_TARGET": ctx.site_packages_dir
             }
-            pip_path = sh.which(pip_version)
+            pip_path = join(ctx.dist_dir, 'hostpython3', 'bin', 'pip3')
             pip_args = []
             if len(sys.argv) > 2 and sys.argv[2] == "install":
                 pip_args = ["--isolated", "--ignore-installed", "--prefix", ctx.python_prefix]
@@ -1504,9 +1505,6 @@ Xcode:
             else:
                 args = [pip_path] + pip_args + sys.argv[2:]
 
-            if not pip_path:
-                logger.error("pip not found")
-                sys.exit(1)
             import os
             logger.error("Executing pip with: {}".format(args))
             os.execve(pip_path, args, pip_env)

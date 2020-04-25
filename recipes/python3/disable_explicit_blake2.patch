@@ -1,0 +1,12 @@
+diff -Naur Python-3.8.2.orig/Modules/_blake2/impl/blake2-impl.h Python-3.8.2/Modules/_blake2/impl/blake2-impl.h
+--- Python-3.8.2.orig/Modules/_blake2/impl/blake2-impl.h	2020-04-12 01:20:03.000000000 +0200
++++ Python-3.8.2/Modules/_blake2/impl/blake2-impl.h	2020-04-12 01:21:11.000000000 +0200
+@@ -26,6 +26,8 @@
+ #define BLAKE2_IMPL_EVAL(x,y)  BLAKE2_IMPL_CAT(x,y)
+ #define BLAKE2_IMPL_NAME(fun)  BLAKE2_IMPL_EVAL(fun, SUFFIX)
+ 
++#undef HAVE_EXPLICIT_BZERO
++#undef HAVE_EXPLICIT_MEMSET
+ static inline uint32_t load32( const void *src )
+ {
+ #if defined(NATIVE_LITTLE_ENDIAN)

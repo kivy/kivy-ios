@@ -9,30 +9,33 @@ logger = logging.getLogger(__name__)
 
 
 class Python3Recipe(Recipe):
-    version = "3.7.1"
+    version = "3.8.2"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
     depends = ["hostpython3", "libffi", "openssl"]
-    library = "libpython3.7m.a"
+    library = "libpython3.8.a"
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
 
     def init_with_ctx(self, ctx):
         super(Python3Recipe, self).init_with_ctx(ctx)
-        self.set_python(self, "3.7")
-        ctx.python_ver_dir = "python3.7"
+        self.set_python(self, "3.8")
+        ctx.python_ver_dir = "python3.8"
         ctx.python_prefix = join(ctx.dist_dir, "root", "python3")
         ctx.site_packages_dir = join(
             ctx.python_prefix, "lib", ctx.python_ver_dir, "site-packages")
 
     def prebuild_arch(self, arch):
         # common to all archs
-        if  self.has_marker("patched"):
+        if self.has_marker("patched"):
             return
-        self.apply_patch("dynload.patch")
+        self.apply_patch("config.sub.patch")
+        self.apply_patch("configure.patch")
+        self.apply_patch("posixmodule.patch")
+        self.apply_patch("dynload_shlib.patch")
+        self.apply_patch("disable_explicit_blake2.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
-        self.apply_patch("xcompile.patch")
         self.set_marker("patched")
-    
+
     def postbuild_arch(self, arch):
         # include _sqlite module to .a
         py_arch = arch.arch
@@ -40,7 +43,7 @@ class Python3Recipe(Recipe):
             py_arch = "arm"
         elif py_arch == "arm64":
             py_arch = "aarch64"
-        tmp_folder = "temp.ios-{}-3.7{}".format(py_arch, self.build_dir)
+        tmp_folder = "temp.ios-{}-3.8{}".format(py_arch, self.build_dir)
         build_env = self.get_build_env(arch)
         for o_file in [
             "cache.o",
@@ -81,7 +84,6 @@ class Python3Recipe(Recipe):
                 "LD={}".format(build_env["LD"]),
                 "CFLAGS={}".format(build_env["CFLAGS"]),
                 "LDFLAGS={} -undefined dynamic_lookup".format(build_env["LDFLAGS"]),
-                # "--without-pymalloc",
                 "ac_cv_file__dev_ptmx=yes",
                 "ac_cv_file__dev_ptc=no",
                 "ac_cv_little_endian_double=yes",
@@ -114,10 +116,13 @@ class Python3Recipe(Recipe):
                 "--prefix={}".format(prefix),
                 "--without-ensurepip",
                 "--with-system-ffi",
-                # "--without-doc-strings",
                 "--enable-ipv6",
+                "PYTHON_FOR_BUILD=_PYTHON_PROJECT_BASE=$(abs_builddir) \
+                    _PYTHON_HOST_PLATFORM=$(_PYTHON_HOST_PLATFORM) \
+                    PYTHONPATH=$(shell test -f pybuilddir.txt && echo $(abs_builddir)/`cat pybuilddir.txt`:)$(srcdir)/Lib\
+                    _PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata_$(ABIFLAGS)_$(MACHDEP)_$(MULTIARCH)\
+                    {}".format(sh.Command(self.ctx.hostpython)),
                 _env=build_env)
-
         self.apply_patch("ctypes_duplicate.patch")
         shprint(sh.make, self.ctx.concurrent_make)
 
@@ -130,7 +135,6 @@ class Python3Recipe(Recipe):
                 "install",
                 "prefix={}".format(join(self.ctx.dist_dir, "root", "python3")),
                 _env=build_env)
-        # os.execve("/bin/bash", ["/bin/bash"], os.environ)
         self.reduce_python()
         self.install_mock_modules()
 
@@ -138,24 +142,22 @@ class Python3Recipe(Recipe):
         logger.info("Install mock modules")
         sqlite3_src = join(self.recipe_dir, 'mock_modules', '_sqlite3')
         site_packages_folder = join(
-                self.ctx.dist_dir, "root", "python3", "lib", "python3.7", "site-packages", "_sqlite3")
-        shutil.rmtree(site_packages_folder, ignore_errors=True) # Needed in case of rebuild
+                self.ctx.dist_dir, "root", "python3", "lib", "python3.8", "site-packages", "_sqlite3")
+        shutil.rmtree(site_packages_folder, ignore_errors=True)  # Needed in case of rebuild
         shutil.copytree(sqlite3_src, site_packages_folder)
-    
+
     def reduce_python(self):
         logger.info("Reduce python")
         oldpwd = os.getcwd()
         try:
             logger.info("Remove files unlikely to be used")
             os.chdir(join(self.ctx.dist_dir, "root", "python3"))
-            # os.execve("/bin/bash", ["/bin/bash"], env=os.environ)
             sh.rm("-rf", "bin", "share")
-
             # platform binaries and configuration
             os.chdir(join(
                 self.ctx.dist_dir, "root", "python3", "lib",
-                "python3.7", "config-3.7m-darwin"))
-            sh.rm("libpython3.7m.a")
+                "python3.8", "config-3.8-darwin"))
+            sh.rm("libpython3.8.a")
             sh.rm("python.o")
             sh.rm("config.c.in")
             sh.rm("makesetup")
@@ -164,11 +166,11 @@ class Python3Recipe(Recipe):
             # cleanup pkgconfig and compiled lib
             os.chdir(join(self.ctx.dist_dir, "root", "python3", "lib"))
             sh.rm("-rf", "pkgconfig")
-            sh.rm("-f", "libpython3.7m.a")
+            sh.rm("-f", "libpython3.8.a")
 
             # cleanup python libraries
             os.chdir(join(
-                self.ctx.dist_dir, "root", "python3", "lib", "python3.7"))
+                self.ctx.dist_dir, "root", "python3", "lib", "python3.8"))
             sh.rm("-rf", "wsgiref", "curses", "idlelib", "lib2to3",
                   "ensurepip", "turtledemo", "lib-dynload", "venv",
                   "pydoc_data")
@@ -189,12 +191,12 @@ class Python3Recipe(Recipe):
             sh.find(".", "-name", "__pycache__", "-type", "d", "-delete")
 
             # create the lib zip
-            logger.info("Create a python3.7.zip")
-            sh.mv("config-3.7m-darwin", "..")
+            logger.info("Create a python3.8.zip")
+            sh.mv("config-3.8-darwin", "..")
             sh.mv("site-packages", "..")
-            sh.zip("-r", "../python37.zip", sh.glob("*"))
+            sh.zip("-r", "../python38.zip", sh.glob("*"))
             sh.rm("-rf", sh.glob("*"))
-            sh.mv("../config-3.7m-darwin", ".")
+            sh.mv("../config-3.8-darwin", ".")
             sh.mv("../site-packages", ".")
         finally:
             os.chdir(oldpwd)
