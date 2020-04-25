@@ -34,7 +34,7 @@ class PillowRecipe(Recipe):
         build_env = self.get_pil_env(arch)
         hostpython3 = sh.Command(self.ctx.hostpython)
         shprint(hostpython3, "setup.py", "build_ext", "--disable-tiff",
-            "--disable-webp", "-g", _env=build_env)
+                "--disable-webp", "-g", _env=build_env)
         self.biglink()
 
     def install(self):
@@ -46,7 +46,7 @@ class PillowRecipe(Recipe):
         dest_dir = join(self.ctx.dist_dir, "root", "python3")
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.7', 'site-packages')
         shprint(hostpython3, "setup.py", "install", "--prefix", dest_dir,
-            _env=build_env)
+                _env=build_env)
 
     def biglink(self):
         dirs = []
@@ -56,5 +56,5 @@ class PillowRecipe(Recipe):
         cmd = sh.Command(join(self.ctx.root_dir, "tools", "biglink"))
         shprint(cmd, join(self.build_dir, "libpillow.a"), *dirs)
 
-recipe = PillowRecipe()
 
+recipe = PillowRecipe()

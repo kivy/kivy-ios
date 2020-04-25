@@ -32,4 +32,3 @@ class FreetypeRecipe(Recipe):
 
 
 recipe = FreetypeRecipe()
-

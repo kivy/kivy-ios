@@ -1,5 +1,6 @@
 from toolchain import CythonRecipe
 
+
 class PyobjusRecipe(CythonRecipe):
     version = "master"
     url = "https://github.com/kivy/pyobjus/archive/{version}.zip"

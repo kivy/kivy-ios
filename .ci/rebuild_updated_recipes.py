@@ -1,6 +1,7 @@
 import sh
-import shutil
 import subprocess
+from fnmatch import fnmatch
+
 
 def modified_recipes(branch='origin/master'):
     """
@@ -14,10 +15,11 @@ def modified_recipes(branch='origin/master'):
     git_diff = sh.contrib.git.diff('--name-only', branch)
     recipes = set()
     for file_path in git_diff:
-        if 'recipes/' in file_path:
+        if fnmatch(file_path, "recipes/*/__init__.py\n"):
             recipe = file_path.split('/')[1]
             recipes.add(recipe)
     return recipes
+
 
 if __name__ == "__main__":
     updated_recipes = " ".join(modified_recipes())

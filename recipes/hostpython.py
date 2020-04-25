@@ -5,6 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class HostpythonAliasRecipe(Recipe):
     is_alias = True
 
@@ -23,5 +24,6 @@ class HostpythonAliasRecipe(Recipe):
                 sys.exit(1)
         if hostpython:
             self.depends = [hostpython]
+
 
 recipe = HostpythonAliasRecipe()
