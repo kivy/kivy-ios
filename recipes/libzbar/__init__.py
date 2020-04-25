@@ -1,7 +1,7 @@
-from toolchain import Recipe,shprint
+from toolchain import Recipe, shprint
 from os.path import join
 import sh
-import os
+
 
 class LibZBarRecipe(Recipe):
 
@@ -28,29 +28,31 @@ class LibZBarRecipe(Recipe):
         super(LibZBarRecipe, self).build_arch(arch)
         build_env = arch.get_env()
         build_env["CFLAGS"] = " ".join([
-            "-I{}".format(join(self.ctx.dist_dir, "build","libiconv",arch.arch)) +
-            " -arch {}".format(arch.arch),build_env['CFLAGS']
+            "-I{}".format(join(self.ctx.dist_dir, "build", "libiconv", arch.arch)) +
+            " -arch {}".format(arch.arch), build_env['CFLAGS']
             ])
-        shprint(sh.Command('autoreconf') ,'-vif')
-        shprint(sh.Command('./configure'),
-        "CC={}".format(build_env["CC"]),
-        "LD={}".format(build_env["LD"]),
-        "CFLAGS={}".format(build_env["CFLAGS"]),
-        "LDFLAGS={}".format(build_env["LDFLAGS"]),
-        "--host={}".format(arch.triple),
-        '--target={}'.format(arch.triple),
-        # Python bindings are compiled in a separated recipe
-        '--with-python=no',
-        '--with-gtk=no',
-        '--with-qt=no',
-        '--with-x=no',
-        '--with-jpeg=no',
-        '--with-imagemagick=no',
-        '--enable-pthread=no',
-        '--enable-video=no',
-        "--disable-shared",
-         _env=build_env)
+        shprint(sh.Command('autoreconf'), '-vif')
+        shprint(
+            sh.Command('./configure'),
+            "CC={}".format(build_env["CC"]),
+            "LD={}".format(build_env["LD"]),
+            "CFLAGS={}".format(build_env["CFLAGS"]),
+            "LDFLAGS={}".format(build_env["LDFLAGS"]),
+            "--host={}".format(arch.triple),
+            '--target={}'.format(arch.triple),
+            # Python bindings are compiled in a separated recipe
+            '--with-python=no',
+            '--with-gtk=no',
+            '--with-qt=no',
+            '--with-x=no',
+            '--with-jpeg=no',
+            '--with-imagemagick=no',
+            '--enable-pthread=no',
+            '--enable-video=no',
+            "--disable-shared",
+            _env=build_env)
         shprint(sh.make, 'clean')
         shprint(sh.make, _env=build_env)
+
 
 recipe = LibZBarRecipe()
