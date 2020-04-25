@@ -1,13 +1,15 @@
 # pure-python package, this can be removed when we'll support any python package
 from toolchain import PythonRecipe, shprint
 from os.path import join
-import sh, os
+import sh
+import os
+
 
 class FlaskRecipe(PythonRecipe):
     version = "master"
     url = "https://github.com/mitsuhiko/flask/archive/{version}.zip"
-    depends = ["python","jinja2","werkzeug","itsdangerous","click"]
-    
+    depends = ["python", "jinja2", "werkzeug", "itsdangerous", "click"]
+
     def install(self):
         arch = list(self.filtered_archs)[0]
         build_dir = self.get_build_dir(arch.arch)
@@ -20,5 +22,5 @@ class FlaskRecipe(PythonRecipe):
         shprint(cmd, "-i", "", "s/setuptools/distutils.core/g", "./setup.py", _env=build_env)
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
-recipe = FlaskRecipe()
 
+recipe = FlaskRecipe()
