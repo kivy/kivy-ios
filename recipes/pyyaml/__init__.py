@@ -3,6 +3,7 @@ import os
 import sh
 from toolchain import PythonRecipe, shprint
 
+
 class PyYamlRecipe(PythonRecipe):
     version = "3.11"
     url = "https://pypi.python.org/packages/source/P/PyYAML/PyYAML-{version}.tar.gz"
@@ -17,5 +18,6 @@ class PyYamlRecipe(PythonRecipe):
         dest_dir = os.path.join(self.ctx.dist_dir, "root", "python")
         build_env['PYTHONPATH'] = os.path.join(dest_dir, 'lib', 'python2.7', 'site-packages')
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
+
 
 recipe = PyYamlRecipe()

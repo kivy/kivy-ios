@@ -32,4 +32,5 @@ class OpensslRecipe(Recipe):
         shprint(sh.make, "clean")
         shprint(sh.make, self.ctx.concurrent_make, "build_libs")
 
+
 recipe = OpensslRecipe()

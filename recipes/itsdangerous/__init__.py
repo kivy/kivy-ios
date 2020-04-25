@@ -1,7 +1,9 @@
 # pure-python package, this can be removed when we'll support any python package
 from toolchain import PythonRecipe, shprint
 from os.path import join
-import sh, os
+import sh
+import os
+
 
 class ItsDangerousRecipe(PythonRecipe):
     version = "master"
@@ -20,5 +22,5 @@ class ItsDangerousRecipe(PythonRecipe):
         shprint(cmd, "-i", "", "s/setuptools/distutils.core/g", "./setup.py", _env=build_env)
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
-recipe = ItsDangerousRecipe()
 
+recipe = ItsDangerousRecipe()
