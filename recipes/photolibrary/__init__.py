@@ -11,6 +11,5 @@ class PhotoRecipe(CythonRecipe):
     def install(self):
         self.install_python_package(name="photolibrary.so", is_dir=False)
 
+
 recipe = PhotoRecipe()
-
-
