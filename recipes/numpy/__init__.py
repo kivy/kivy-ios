@@ -1,6 +1,5 @@
-from toolchain import CythonRecipe, shprint
+from toolchain import CythonRecipe
 from os.path import join
-from os import chdir, listdir
 import sh
 import shutil
 

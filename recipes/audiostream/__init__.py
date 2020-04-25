@@ -10,4 +10,3 @@ class AudiostreamRecipe(CythonRecipe):
 
 
 recipe = AudiostreamRecipe()
-
