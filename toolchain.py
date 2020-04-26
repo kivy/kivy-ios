@@ -139,8 +139,7 @@ class JsonStore(object):
         self.sync()
 
     def sync(self):
-        # http://stackoverflow.com/questions/12309269/write-json-data-to-file-
-        # in-python/14870531#14870531
+        # https://stackoverflow.com/a/14870531/185510
         if IS_PY3:
             with open(self.filename, 'w') as fd:
                 json.dump(self.data, fd, ensure_ascii=False)
