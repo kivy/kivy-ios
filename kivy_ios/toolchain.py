@@ -424,6 +424,7 @@ class Recipe:
         "archs": [],
         "depends": [],
         "optional_depends": [],
+        "python_depends": [],
         "library": None,
         "libraries": [],
         "include_dir": None,
@@ -814,6 +815,8 @@ class Recipe:
         self.install_frameworks()
         logger.info("Install sources for {}".format(self.name))
         self.install_sources()
+        logger.info("Install python deps for {}".format(self.name))
+        self.install_python_deps()
         logger.info("Install {}".format(self.name))
         self.install()
 
@@ -928,6 +931,11 @@ class Recipe:
                     logger.info("Copy Include {} to {}".format(src_dir, dest))
                     ensure_dir(dirname(dest))
                     shutil.copy(src_dir, dest)
+
+    @cache_execution
+    def install_python_deps(self):
+        for dep in self.python_depends:
+            _pip(["install", dep])
 
     @cache_execution
     def install(self):
@@ -1124,6 +1132,37 @@ def ensure_recipes_loaded(ctx):
             continue
         recipe = Recipe.get_recipe(recipe, ctx)
         recipe.init_with_ctx(ctx)
+
+
+def _pip(args):
+    ctx = Context()
+    for recipe in Recipe.list_recipes():
+        key = "{}.build_all".format(recipe)
+        if key not in ctx.state:
+            continue
+        recipe = Recipe.get_recipe(recipe, ctx)
+        recipe.init_with_ctx(ctx)
+    if not hasattr(ctx, "site_packages_dir"):
+        logger.error("python must be compiled before using pip")
+        sys.exit(1)
+
+    pip_env = {
+        "CC": "/bin/false",
+        "CXX": "/bin/false",
+        "PYTHONPATH": ctx.site_packages_dir,
+        "PYTHONOPTIMIZE": "2",
+        # "PIP_INSTALL_TARGET": ctx.site_packages_dir
+    }
+
+    pip_path = join(ctx.dist_dir, 'hostpython3', 'bin', 'pip3')
+
+    if len(args) > 1 and args[0] == "install":
+        pip_args = ["--isolated", "--ignore-installed", "--prefix", ctx.python_prefix]
+        args = ["install"] + pip_args + args[1:]
+
+    logger.error("Executing pip with: {}".format(args))
+    pip_cmd = sh.Command(pip_path)
+    shprint(pip_cmd, *args, _env=pip_env)
 
 
 def update_pbxproj(filename, pbx_frameworks=None):
@@ -1415,35 +1454,7 @@ pip           Install a pip dependency into the distribution
         self.pip()
 
     def pip(self):
-        ctx = Context()
-        for recipe in Recipe.list_recipes():
-            key = "{}.build_all".format(recipe)
-            if key not in ctx.state:
-                continue
-            recipe = Recipe.get_recipe(recipe, ctx)
-            recipe.init_with_ctx(ctx)
-        if not hasattr(ctx, "site_packages_dir"):
-            logger.error("python must be compiled before using pip")
-            sys.exit(1)
-
-        pip_env = {
-            "CC": "/bin/false",
-            "CXX": "/bin/false",
-            "PYTHONPATH": ctx.site_packages_dir,
-            "PYTHONOPTIMIZE": "2",
-            # "PIP_INSTALL_TARGET": ctx.site_packages_dir
-        }
-        pip_path = join(ctx.dist_dir, 'hostpython3', 'bin', 'pip3')
-        pip_args = []
-        if len(sys.argv) > 2 and sys.argv[2] == "install":
-            pip_args = ["--isolated", "--ignore-installed", "--prefix", ctx.python_prefix]
-            args = [pip_path] + [sys.argv[2]] + pip_args + sys.argv[3:]
-        else:
-            args = [pip_path] + pip_args + sys.argv[2:]
-
-        import os
-        logger.error("Executing pip with: {}".format(args))
-        os.execve(pip_path, args, pip_env)
+        _pip(sys.argv[2:])
 
     def launchimage(self):
         import xcassets
