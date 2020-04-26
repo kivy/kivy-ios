@@ -14,8 +14,7 @@ The toolchain supports:
 - iPhone Simulator (x86_64)
 - iPhone / iOS (armv7 and arm64)
 
-Currently, Python 3.8 builds are supported via specifying the recipes
-`python` or `python3`. 
+Currently, Python 3.8 builds are supported via specifying the `python` recipe. 
 
 *Note*:
     Python 2.7 is not longer supported. If you really want this, you can use
@@ -68,8 +67,7 @@ You can list the available recipes and their versions with:
     flask        master
     freetype     2.5.5
     hostlibffi   3.2.1
-    hostpython2  2.7.1
-    hostpython3  3.7.1
+    hostpython   3.8.2
     ios          master
     itsdangerous master
     jinja2       master
@@ -88,8 +86,7 @@ You can list the available recipes and their versions with:
     pycrypto     2.6.1
     pykka        1.2.1
     pyobjus      master
-    python2      2.7.1
-    python3      3.7.1
+    python       3.8.2
     pyyaml       3.11
     sdl2         2.0.8
     sdl2_image   2.0.0

@@ -578,23 +578,17 @@ class RunningCommand(object):
             Command._prepend_stack.pop()
 
     def __str__(self):
-        """ in python3, should return unicode.  in python2, should return a
-        string of bytes """
-        if IS_PY3:
-            return self.__unicode__()
-        else:
-            return unicode(self).encode(self.call_args["encoding"])
+        """ in python3, should return unicode."""
+        return self.__unicode__()
 
     def __unicode__(self):
-        """ a magic method defined for python2.  calling unicode() on a
-        RunningCommand object will call this """
+        """ a magic method defined for calling unicode() on a
+        RunningCommand object """
         if self.process and self.stdout:
             return self.stdout.decode(self.call_args["encoding"],
                 self.call_args["decode_errors"])
-        elif IS_PY3:
-            return ""
         else:
-            return unicode("")
+            return ""
 
     def __eq__(self, other):
         return unicode(self) == unicode(other)
