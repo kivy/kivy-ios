@@ -31,8 +31,8 @@ class LibffiRecipe(Recipe):
                 "generate-darwin-source-and-headers.py",
                 "_generate-darwin-source-and-headers.py")
             shprint(sh.touch, "generate-darwin-source-and-headers.py")
-        python38 = sh.Command("python3.8")
-        shprint(python38, "_generate-darwin-source-and-headers.py", "--only-ios")
+        python = sh.Command("python")
+        shprint(python, "_generate-darwin-source-and-headers.py", "--only-ios")
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
