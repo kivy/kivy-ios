@@ -475,8 +475,6 @@ class Recipe(object):
         while True:
             try:
                 urlretrieve(url, filename, report_hook)
-            except AttributeError:
-                raise
             except OSError as e:
                 attempts += 1
                 if attempts >= 5:
