@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
 from toolchain import Recipe
 import logging
 from os.path import join
