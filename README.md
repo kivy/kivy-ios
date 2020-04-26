@@ -15,12 +15,12 @@ The toolchain supports:
 - iPhone / iOS (armv7 and arm64)
 
 Currently, Python 3.8 builds are supported via specifying the recipes
-`python` or `python3`. Python 2.7 is not longer supported.
+`python` or `python3`. 
 
-These recipes are not ported to the new toolchain yet:
-
-- lxml
-
+*Note*:
+    Python 2.7 is not longer supported. If you really want this, you can use
+    the `python2` tag from the
+    [github repository](http://github.com/kivy/kivy-ios)
 
 ## Requirements
 
