@@ -14,8 +14,8 @@ The toolchain supports:
 - iPhone Simulator (x86_64)
 - iPhone / iOS (armv7 and arm64)
 
-This toolchain currently supports Python 3.8 by specifying the recipes
-`python` or `python3` when building. Python 2.7 is not longer supported.
+Currently, Python 3.8 builds are supported via specifying the recipes
+`python` or `python3`. Python 2.7 is not longer supported.
 
 These recipes are not ported to the new toolchain yet:
 
