@@ -96,11 +96,11 @@ You can list the available recipes and their versions with:
 
 Then, start the compilation with:
 
-    $ python3 toolchain.py build python3 kivy
+    $ python3 toolchain.py build python kivy
 
 You can build recipes at the same time by adding them as parameters:
 
-    $ python3 toolchain.py build python3 openssl kivy
+    $ python3 toolchain.py build python openssl kivy
 
 Recipe builds can be removed via the clean command e.g.:
 
@@ -198,12 +198,12 @@ things you can do to achieve this:
 
    The procedure is to first compile/build all the host recipes as is:
 
-      python3 toolchain.py build hostpython3
+      python3 toolchain.py build hostpython
 
    Then build all the rest of the recipes using --arch=armv7 --arch=arm64
    arguments as follows:
 
-      python3 toolchain.py build python3 kivy --arch=armv7 --arch=arm64
+      python3 toolchain.py build python kivy --arch=armv7 --arch=arm64
 
    Note that these packages will not run in the iOS emulators, so use them
    only for deployment.
