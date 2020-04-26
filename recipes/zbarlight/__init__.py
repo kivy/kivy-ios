@@ -10,7 +10,7 @@ class ZbarLightRecipe(Recipe):
     version = '1.2'
     url = 'https://github.com/Polyconseil/zbarlight/archive/{version}.tar.gz'
     library = "zbarlight.a"
-    depends = ['hostpython2', 'python2', 'libzbar']
+    depends = ['hostpython', 'python', 'libzbar']
     pbx_libraries = ["libz", "libbz2", 'libc++', 'libsqlite3', 'CoreMotion']
     include_per_arch = True
 
@@ -24,7 +24,7 @@ class ZbarLightRecipe(Recipe):
         build_env["ARCH"] = arch.arch
         build_env["C_INCLUDE_PATH"] = join(arch.sysroot, "usr", "include")
         build_env["LIBRARY_PATH"] = join(arch.sysroot, "usr", "lib")
-        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
+        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.8', 'site-packages')
         build_env["CFLAGS"] = " ".join([
             " -I{}".format(join(self.ctx.dist_dir, "include", arch.arch, "libzbar", 'zbar')) +
             " -arch {}".format(arch.arch)
@@ -44,15 +44,15 @@ class ZbarLightRecipe(Recipe):
         arch = list(self.filtered_archs)[0]
         build_dir = join(self.get_build_dir(arch.arch), 'build',
                          'lib.macosx-10.13-x86_64-2.7', 'zbarlight')
-        dist_dir = join(self.ctx.dist_dir, 'root', 'python2', 'lib',
-                        'python2.7', 'site-packages', 'zbarlight')
+        dist_dir = join(self.ctx.dist_dir, 'root', 'python3', 'lib',
+                        'python3.8', 'site-packages', 'zbarlight')
         # Patch before Copying
         # self.apply_patch("zbarlight_1_2.patch")#Issue getting the version, hard coding for now
         copy_tree(build_dir, dist_dir)
         os.remove(join(dist_dir, '_zbarlight.c'))
 
     def _patch__init__(self):
-        init = join(self.ctx.dist_dir, 'root', 'python2', 'lib', 'python2.7',
+        init = join(self.ctx.dist_dir, 'root', 'python3', 'lib', 'python3.8',
                     'site-packages', 'zbarlight', "__init__.py")
         shprint(  # noqa: F821
             sh.sed, "-i.bak",

@@ -48,7 +48,7 @@ class PillowRecipe(Recipe):
         hostpython = sh.Command(self.ctx.hostpython)
         build_env = self.get_pil_env(arch)
         dest_dir = join(self.ctx.dist_dir, "root", "python")
-        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
+        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.8', 'site-packages')
         shprint(hostpython, "-m", "easy_install",
                 "--prefix", dest_dir, "-Z", "./",
                 _env=build_env)

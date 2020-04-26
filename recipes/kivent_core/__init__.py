@@ -78,7 +78,7 @@ class KiventCoreRecipe(CythonRecipe):
         build_env = self.get_recipe_env(arch)
 
         dest_dir = join(self.ctx.dist_dir, "root", "python")
-        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
+        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.8', 'site-packages')
 
         # Add Architecture specific kivy path for 'import kivy' to PYTHONPATH
         arch_kivy_path = self.get_recipe('kivy', self.ctx).get_build_dir(arch.arch)
