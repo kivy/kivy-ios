@@ -19,3 +19,5 @@ src/ios/ios.c
 *.DS_Store*
 *-ios/
 __pycache__
+.tox
+venv
