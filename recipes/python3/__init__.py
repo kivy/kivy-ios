@@ -32,6 +32,7 @@ class Python3Recipe(Recipe):
         self.apply_patch("posixmodule.patch")
         self.apply_patch("dynload_shlib.patch")
         self.apply_patch("disable_explicit_blake2.patch")
+        self.apply_patch("pyconfig_detection.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
         self.set_marker("patched")

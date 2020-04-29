@@ -8,7 +8,7 @@ This tool intend to replace all the previous tools/ in shell script.
 
 import sys
 from sys import stdout
-from os.path import join, dirname, realpath, exists, isdir, basename
+from os.path import join, dirname, realpath, exists, isdir, basename, expanduser
 from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
 import zipfile
 import tarfile
@@ -19,6 +19,7 @@ import shutil
 import fnmatch
 import tempfile
 import time
+from contextlib import contextmanager
 from datetime import datetime
 from pprint import pformat
 import logging
@@ -56,6 +57,16 @@ logger = logging.getLogger(__name__)
 
 IS_PY3 = sys.version_info[0] >= 3
 IS_PY2 = sys.version_info[0] == 2
+
+
+@contextmanager
+def cd(newdir):
+    prevdir = getcwd()
+    chdir(expanduser(newdir))
+    try:
+        yield
+    finally:
+        chdir(prevdir)
 
 
 def shprint(command, *args, **kwargs):
