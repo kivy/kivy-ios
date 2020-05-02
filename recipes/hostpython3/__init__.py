@@ -1,4 +1,4 @@
-from toolchain import Recipe, shprint
+from toolchain import Recipe, cd, shprint
 from os.path import join
 import os
 import sh
@@ -14,6 +14,7 @@ class Hostpython3Recipe(Recipe):
     depends = ["hostlibffi", "hostopenssl"]
     optional_depends = []
     archs = ["x86_64"]
+    build_subdir = 'native-build'
 
     def init_with_ctx(self, ctx):
         super(Hostpython3Recipe, self).init_with_ctx(ctx)
@@ -24,9 +25,13 @@ class Hostpython3Recipe(Recipe):
         logger.info("Global: hostpython located at {}".format(self.ctx.hostpython))
         logger.info("Global: hostpgen located at {}".format(self.ctx.hostpgen))
 
+    def get_build_subdir(self, arch):
+        return join(self.get_build_dir(arch), self.build_subdir)
+
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
+        self.apply_patch("pyconfig_detection.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.set_marker("patched")
 
@@ -55,20 +60,24 @@ class Hostpython3Recipe(Recipe):
     def build_x86_64(self):
         build_env = self.get_build_env()
         configure = sh.Command(join(self.build_dir, "configure"))
-        shprint(configure,
-                "--prefix={}".format(join(self.ctx.dist_dir, "hostpython3")),
-                "--with-openssl={}".format(join(self.ctx.dist_dir, 'hostopenssl')),
-                _env=build_env)
-        shprint(sh.make, "-C", self.build_dir, self.ctx.concurrent_make,
+        arch = self.filtered_archs[0]
+        build_subdir = self.get_build_subdir(arch.arch)
+        os.makedirs(build_subdir, exist_ok=True)
+        with cd(build_subdir):
+            shprint(configure,
+                    "--prefix={}".format(join(self.ctx.dist_dir, "hostpython3")),
+                    "--with-openssl={}".format(join(self.ctx.dist_dir, 'hostopenssl')),
+                    _env=build_env)
+        shprint(sh.make, "-C", build_subdir, self.ctx.concurrent_make,
                 _env=build_env)
 
     def install(self):
         arch = list(self.filtered_archs)[0]
         build_env = self.get_build_env()
-        build_dir = self.get_build_dir(arch.arch)
+        build_subdir = self.get_build_subdir(arch.arch)
         build_env["PATH"] = os.environ["PATH"]
         shprint(sh.make, self.ctx.concurrent_make,
-                "-C", build_dir,
+                "-C", build_subdir,
                 "install",
                 _env=build_env)
         shutil.copy(

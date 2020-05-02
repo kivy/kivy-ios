@@ -1,35 +1,20 @@
-from toolchain import Recipe, shprint
-from os.path import join
+from toolchain import Recipe, shprint, cd, cache_execution
 import sh
-import os
-import shutil
 
 
 class HostSetuptools3(Recipe):
     depends = ["openssl", "hostpython3"]
     archs = ["x86_64"]
-    url = "setuptools"
+    version = '40.9.0'
+    url = 'https://pypi.python.org/packages/source/s/setuptools/setuptools-{version}.zip'
 
-    def prebuild_arch(self, arch):
+    @cache_execution
+    def install(self):
+        arch = self.filtered_archs[0]
+        build_dir = self.get_build_dir(arch.arch)
         hostpython = sh.Command(self.ctx.hostpython)
-        sh.curl("-O", "https://bootstrap.pypa.io/ez_setup.py")
-        shprint(hostpython, "./ez_setup.py")
-        # Extract setuptools egg and remove .pth files. Otherwise subsequent
-        # python package installations using setuptools will raise exceptions.
-        # Setuptools version 28.3.0
-        site_packages_path = join(
-            self.ctx.dist_dir, 'hostpython3',
-            'lib', 'python3.8', 'site-packages')
-        os.chdir(site_packages_path)
-        with open('setuptools.pth', 'r') as f:
-            setuptools_egg_path = f.read().strip('./').strip('\n')
-            print("setuptools_egg_path=", setuptools_egg_path)
-            unzip = sh.Command('unzip')
-            shprint(unzip, "-o", setuptools_egg_path)
-        os.remove(setuptools_egg_path)
-        os.remove('setuptools.pth')
-        os.remove('easy-install.pth')
-        shutil.rmtree('EGG-INFO')
+        with cd(build_dir):
+            shprint(hostpython, "setup.py", "install")
 
 
 recipe = HostSetuptools3()
