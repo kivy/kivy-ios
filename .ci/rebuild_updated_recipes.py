@@ -1,9 +1,19 @@
+#!/usr/bin/env python
+"""
+Continuous Integration helper script.
+Automatically detects recipes modified in a changeset (compares with master)
+and recompiles them.
+
+Current limitations:
+- will fail on conflicting requirements
+"""
 import sh
 import subprocess
 from fnmatch import fnmatch
+from constants import CORE_RECIPES, BROKEN_RECIPES
 
 
-def modified_recipes(branch='origin/master'):
+def modified_recipes(branch="origin/master"):
     """
     Returns a set of modified recipes between the current branch and the one
     in param.
@@ -12,18 +22,27 @@ def modified_recipes(branch='origin/master'):
     # with a bunch of fixes, e.g. disabled TTY, see:
     # https://stackoverflow.com/a/20128598/185510
     sh.contrib.git.fetch("origin", "master")
-    git_diff = sh.contrib.git.diff('--name-only', branch)
+    git_diff = sh.contrib.git.diff("--name-only", branch)
     recipes = set()
     for file_path in git_diff:
         if fnmatch(file_path, "recipes/*/__init__.py\n"):
-            recipe = file_path.split('/')[1]
+            recipe = file_path.split("/")[1]
             recipes.add(recipe)
     return recipes
 
 
-if __name__ == "__main__":
-    updated_recipes = " ".join(modified_recipes())
-    if updated_recipes != '':
-        subprocess.run(f"python3 toolchain.py build {updated_recipes}", shell=True, check=True)
+def main():
+    recipes = modified_recipes()
+    recipes -= CORE_RECIPES
+    recipes -= BROKEN_RECIPES
+    updated_recipes = " ".join(recipes)
+    if updated_recipes != "":
+        subprocess.run(
+            f"python3 toolchain.py build {updated_recipes}", shell=True, check=True
+        )
     else:
         print("Nothing to do. No updated recipes.")
+
+
+if __name__ == "__main__":
+    main()

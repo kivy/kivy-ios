@@ -6,7 +6,6 @@ import os
 
 class DistributeRecipe(PythonRecipe):
     version = "0.7.3"
-    # url = "https://github.com/mitsuhiko/click/archive/{version}.zip"
     url = "https://pypi.python.org/packages/source/d/distribute/distribute-{version}.zip"
     depends = ["python"]
 
