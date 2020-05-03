@@ -25,7 +25,7 @@ def modified_recipes(branch="origin/master"):
     git_diff = sh.contrib.git.diff("--name-only", branch)
     recipes = set()
     for file_path in git_diff:
-        if fnmatch(file_path, "recipes/*/__init__.py\n"):
+        if fnmatch(file_path, "kivy_ios/recipes/*/__init__.py\n"):
             recipe = file_path.split("/")[1]
             recipes.add(recipe)
     return recipes
