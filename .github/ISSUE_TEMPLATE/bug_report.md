@@ -31,14 +31,14 @@ Before opening a new issue, make sure you do the following:
 // REPLACE ME: A clear and concise description of what the bug is.
 
 **To Reproduce**
-// REPLACE ME: Add your `toolchain.py ....` command or a complete explaination of what you did so We can reproduce your error.
+// REPLACE ME: Add your `toolchain.py ....` command or a complete explanation of what you did so We can reproduce your error.
 
 **Expected behavior**
 // REPLACE ME: A clear and concise description of what you expected to happen.
 
 **Logs**
 ```
-// REPLACE ME: Paste the build ouput containing the error
+// REPLACE ME: Paste the build output containing the error
 ```
 
 **Screenshots**
