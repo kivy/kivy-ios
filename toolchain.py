@@ -62,10 +62,12 @@ IS_PY2 = sys.version_info[0] == 2
 @contextmanager
 def cd(newdir):
     prevdir = getcwd()
+    logger.info("cd {}".format(newdir))
     chdir(expanduser(newdir))
     try:
         yield
     finally:
+        logger.info("cd {}".format(prevdir))
         chdir(prevdir)
 
 
