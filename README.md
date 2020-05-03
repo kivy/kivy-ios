@@ -44,10 +44,10 @@ Currently, the toolchain requires a few tools for compilation. You will need:
       brew install autoconf automake libtool pkg-config
       brew link libtool
 
-- Install Cython (0.28.1):
+- Install Cython (0.29.17):
 
       # pip method if available (sudo might be needed.)
-      pip3 install cython==0.28.1
+      pip3 install Cython==0.29.17
 
 
 ## Using the toolchain
