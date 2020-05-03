@@ -68,6 +68,7 @@ jobs:
         pip install Cython==0.28.1
     - name: Build Python & Kivy
       run: |
+        . venv/bin/activate
         python toolchain.py build python3 kivy
 
   build_updated_recipes:
