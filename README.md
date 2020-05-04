@@ -23,17 +23,13 @@ These recipes are not ported to the new toolchain yet:
 - lxml
 
 
-## Requirements
+## Installation & requirements
 
-Currently, the toolchain requires a few tools for compilation. You will need:
+Install [Kivy for iOS from PyPI](https://pypi.org/project/kivy-ios) with pip like any Python package.
 
-- Ensure you have python3 installed - this is needed for toolchain.py:
+      pip3 install kivy-ios
 
-      brew install python
-
-- Ensure you have the right dependencies installed for python3:
-
-      pip3 install -r requirements.txt
+Additionally you would need few system dependencies and configuration.
 
 - Xcode 10 or above, with an iOS SDK and command line tools installed:
 
@@ -59,7 +55,7 @@ contained in a `recipe`.
 
 You can list the available recipes and their versions with:
 
-    $ python3 toolchain.py recipes
+    $ toolchain recipes
     audiostream  master
     click        master
     cymunk       master
@@ -100,21 +96,21 @@ You can list the available recipes and their versions with:
 
 Then, start the compilation with:
 
-    $ python3 toolchain.py build python3 kivy
+    $ toolchain build python3 kivy
 
 You can build recipes at the same time by adding them as parameters:
 
-    $ python3 toolchain.py build python3 openssl kivy
+    $ toolchain build python3 openssl kivy
 
 Recipe builds can be removed via the clean command e.g.:
 
-    $ python3 toolchain.py clean openssl
+    $ toolchain clean openssl
     
 You can install package that don't require compilation with pip::
 
-    $ python3 toolchain.py pip install plyer
+    $ toolchain pip install plyer
 
-The Kivy recipe depends on several others, like the sdl* and python recipes.
+The Kivy recipe depends on several others, like the sdl\* and python recipes.
 These may in turn depend on others e.g. sdl2_ttf depends on freetype, etc.
 You can think of it as follows: the kivy recipe will compile everything
 necessary for a minimal working version of Kivy.
@@ -124,14 +120,14 @@ time, 3x over (remember, 3 archs, x86_64, armv7, arm64) will take time.
 
 For a complete list of available commands, type:
 
-    $ python3 toolchain.py
+    $ toolchain
 
 ## Create the Xcode project
 
 The `toolchain.py` can create the initial Xcode project for you::
 
-    $ python3 toolchain.py create <title> <app_directory>
-    $ python3 toolchain.py create Touchtracer ~/code/kivy/examples/demo/touchtracer
+    $ toolchain create <title> <app_directory>
+    $ toolchain create Touchtracer ~/code/kivy/examples/demo/touchtracer
 
 Your app directory must contain a main.py. A directory named `<title>-ios`
 will be created, with an Xcode project in it.
@@ -202,12 +198,12 @@ things you can do to achieve this:
 
    The procedure is to first compile/build all the host recipes as is:
 
-      python3 toolchain.py build hostpython3
+      toolchain build hostpython3
 
    Then build all the rest of the recipes using --arch=armv7 --arch=arm64
    arguments as follows:
 
-      python3 toolchain.py build python3 kivy --arch=armv7 --arch=arm64
+      toolchain build python3 kivy --arch=armv7 --arch=arm64
 
    Note that these packages will not run in the iOS emulators, so use them
    only for deployment.
@@ -215,7 +211,7 @@ things you can do to achieve this:
 ## Usage
 
 ```
-python3 toolchain.py <command> [<args>]
+toolchain <command> [<args>]
 
 Available commands:
     build         Build a recipe (compile a library for the required target
@@ -233,6 +229,23 @@ Xcode:
     pip           Install a pip dependency into the distribution
     pip3          Install a pip dependency into the python 3 distribution
 ```
+
+## Development
+
+Alternatively, it's also possible to clone the repository and use all the
+described commands in the above sections.
+Clone and install it to your local virtual environment:
+
+    git clone https://github.com/kivy/kivy-ios.git
+    cd kivy-ios/
+    python3 -m venv venv
+    . venv/bin/activate
+    pip install -e .
+
+Then use the `toolchain.py` script:
+
+    python toolchain.py --help
+
 
 ## FAQ
 
