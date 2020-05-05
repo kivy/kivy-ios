@@ -6,6 +6,7 @@ Tool for compiling iOS toolchain
 This tool intend to replace all the previous tools/ in shell script.
 """
 
+import argparse
 import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename, expanduser
@@ -1248,310 +1249,309 @@ def update_pbxproj(filename, pbx_frameworks=None):
     project.save()
 
 
-def main():
-    import argparse
-
-    class ToolchainCL(object):
-        def __init__(self):
-            parser = argparse.ArgumentParser(
-                    description="Tool for managing the iOS / Python toolchain",
-                    usage="""toolchain <command> [<args>]
+class ToolchainCL(object):
+    def __init__(self):
+        parser = argparse.ArgumentParser(
+                description="Tool for managing the iOS / Python toolchain",
+                usage="""toolchain <command> [<args>]
 
 Available commands:
-    build         Build a recipe (compile a library for the required target
-                  architecture)
-    clean         Clean the build of the specified recipe
-    distclean     Clean the build and the result
-    recipes       List all the available recipes
-    status        List all the recipes and their build status
-    build_info    Display the current build context and Architecture info
+build         Build a recipe (compile a library for the required target
+              architecture)
+clean         Clean the build of the specified recipe
+distclean     Clean the build and the result
+recipes       List all the available recipes
+status        List all the recipes and their build status
+build_info    Display the current build context and Architecture info
 
 Xcode:
-    create        Create a new xcode project
-    update        Update an existing xcode project (frameworks, libraries..)
-    launchimage   Create Launch images for your xcode project
-    icon          Create Icons for your xcode project
-    pip           Install a pip dependency into the distribution
+create        Create a new xcode project
+update        Update an existing xcode project (frameworks, libraries..)
+launchimage   Create Launch images for your xcode project
+icon          Create Icons for your xcode project
+pip           Install a pip dependency into the distribution
 """)
-            parser.add_argument("command", help="Command to run")
-            args = parser.parse_args(sys.argv[1:2])
-            if not hasattr(self, args.command):
-                print('Unrecognized command')
-                parser.print_help()
-                exit(1)
-            getattr(self, args.command)()
+        parser.add_argument("command", help="Command to run")
+        args = parser.parse_args(sys.argv[1:2])
+        if not hasattr(self, args.command):
+            print('Unrecognized command')
+            parser.print_help()
+            exit(1)
+        getattr(self, args.command)()
 
-        def build(self):
-            ctx = Context()
-            parser = argparse.ArgumentParser(
-                    description="Build the toolchain")
-            parser.add_argument("recipe", nargs="+", help="Recipe to compile")
-            parser.add_argument("--arch", action="append",
-                                help="Restrict compilation to this arch")
-            parser.add_argument("--concurrency", type=int, default=ctx.num_cores,
-                                help="number of concurrent build processes (where supported)")
-            parser.add_argument("--no-pigz", action="store_true", default=not bool(ctx.use_pigz),
-                                help="do not use pigz for gzip decompression")
-            parser.add_argument("--no-pbzip2", action="store_true", default=not bool(ctx.use_pbzip2),
-                                help="do not use pbzip2 for bzip2 decompression")
-            args = parser.parse_args(sys.argv[2:])
+    def build(self):
+        ctx = Context()
+        parser = argparse.ArgumentParser(
+                description="Build the toolchain")
+        parser.add_argument("recipe", nargs="+", help="Recipe to compile")
+        parser.add_argument("--arch", action="append",
+                            help="Restrict compilation to this arch")
+        parser.add_argument("--concurrency", type=int, default=ctx.num_cores,
+                            help="number of concurrent build processes (where supported)")
+        parser.add_argument("--no-pigz", action="store_true", default=not bool(ctx.use_pigz),
+                            help="do not use pigz for gzip decompression")
+        parser.add_argument("--no-pbzip2", action="store_true", default=not bool(ctx.use_pbzip2),
+                            help="do not use pbzip2 for bzip2 decompression")
+        args = parser.parse_args(sys.argv[2:])
 
-            if args.arch:
-                if len(args.arch) == 1:
-                    archs = args.arch[0].split()
-                else:
-                    archs = args.arch
-                available_archs = [arch.arch for arch in ctx.archs]
-                for arch in archs[:]:
-                    if arch not in available_archs:
-                        logger.error("Architecture {} invalid".format(arch))
-                        archs.remove(arch)
-                        continue
-                ctx.archs = [arch for arch in ctx.archs if arch.arch in archs]
-                logger.info("Architectures restricted to: {}".format(archs))
-            ctx.num_cores = args.concurrency
-            if args.no_pigz:
-                ctx.use_pigz = False
-            if args.no_pbzip2:
-                ctx.use_pbzip2 = False
-            ctx.use_pigz = ctx.use_pbzip2
-            logger.info("Building with {} processes, where supported".format(ctx.num_cores))
-            if ctx.use_pigz:
-                logger.info("Using pigz to decompress gzip data")
-            if ctx.use_pbzip2:
-                logger.info("Using pbzip2 to decompress bzip2 data")
-            build_recipes(args.recipe, ctx)
-
-        def recipes(self):
-            parser = argparse.ArgumentParser(
-                    description="List all the available recipes")
-            parser.add_argument(
-                    "--compact", action="store_true",
-                    help="Produce a compact list suitable for scripting")
-            args = parser.parse_args(sys.argv[2:])
-
-            if args.compact:
-                print(" ".join(list(Recipe.list_recipes())))
+        if args.arch:
+            if len(args.arch) == 1:
+                archs = args.arch[0].split()
             else:
-                ctx = Context()
-                for name in Recipe.list_recipes():
-                    try:
-                        recipe = Recipe.get_recipe(name, ctx)
-                        print("{recipe.name:<12} {recipe.version:<8}".format(recipe=recipe))
-
-                    except Exception:
-                        pass
-
-        def clean(self):
-            parser = argparse.ArgumentParser(
-                    description="Clean the build")
-            parser.add_argument("recipe", nargs="*", help="Recipe to clean")
-            args = parser.parse_args(sys.argv[2:])
-            ctx = Context()
-            if args.recipe:
-                for recipe in args.recipe:
-                    logger.info("Cleaning {} build".format(recipe))
-                    ctx.state.remove_all("{}.".format(recipe))
-                    build_dir = join(ctx.build_dir, recipe)
-                    shutil.rmtree(build_dir, ignore_errors=True)
-            else:
-                logger.info("Delete build directory")
-                shutil.rmtree(ctx.build_dir, ignore_errors=True)
-
-        def distclean(self):
-            ctx = Context()
-            shutil.rmtree(ctx.build_dir, ignore_errors=True)
-            shutil.rmtree(ctx.dist_dir, ignore_errors=True)
-            shutil.rmtree(ctx.cache_dir, ignore_errors=True)
-
-        def status(self):
-            ctx = Context()
-            for recipe in Recipe.list_recipes():
-                key = "{}.build_all".format(recipe)
-                keytime = "{}.build_all.at".format(recipe)
-
-                if key in ctx.state:
-                    status = "Build OK (built at {})".format(ctx.state[keytime])
-                else:
-                    status = "Not built"
-                print("{:<12} - {}".format(
-                    recipe, status))
-
-        def create(self):
-            parser = argparse.ArgumentParser(
-                    description="Create a new xcode project")
-            parser.add_argument("name", help="Name of your project")
-            parser.add_argument("directory", help="Directory where your project lives")
-            parser.add_argument("--add-framework", action="append", help="Additional Frameworks to include with this project")
-            args = parser.parse_args(sys.argv[2:])
-
-            from cookiecutter.main import cookiecutter
-            ctx = Context()
-            ensure_recipes_loaded(ctx)
-
-            if not hasattr(ctx, "python_ver"):
-                logger.error("No python recipes compiled!")
-                logger.error("You must have compiled at least python2 or")
-                logger.error("python3 recipes to be able to create a project.")
-                sys.exit(1)
-
-            template_dir = join(curdir, "tools", "templates")
-            context = {
-                "title": args.name,
-                "project_name": args.name.lower(),
-                "domain_name": "org.kivy.{}".format(args.name.lower()),
-                "kivy_dir": dirname(dirname(realpath(__file__))),
-                "project_dir": realpath(args.directory),
-                "version": "1.0.0",
-                "dist_dir": ctx.dist_dir,
-                "python_version": ctx.python_ver,
-                "python_major": ctx.python_major
-            }
-            cookiecutter(template_dir, no_input=True, extra_context=context)
-            filename = join(
-                    getcwd(),
-                    "{}-ios".format(args.name.lower()),
-                    "{}.xcodeproj".format(args.name.lower()),
-                    "project.pbxproj")
-            update_pbxproj(filename, pbx_frameworks=args.add_framework)
-            print("--")
-            print("Project directory : {}-ios".format(
-                args.name.lower()))
-            print("XCode project     : {0}-ios/{0}.xcodeproj".format(
-                args.name.lower()))
-
-        def update(self):
-            parser = argparse.ArgumentParser(
-                    description="Update an existing xcode project")
-            parser.add_argument("filename", help="Path to your project or xcodeproj")
-            parser.add_argument("--add-framework", action="append", help="Additional Frameworks to include with this project")
-            args = parser.parse_args(sys.argv[2:])
-
-            filename = args.filename
-            if not filename.endswith(".xcodeproj"):
-                # try to find the xcodeproj
-                from glob import glob
-                xcodeproj = glob(join(filename, "*.xcodeproj"))
-                if not xcodeproj:
-                    logger.error("Unable to find a xcodeproj in {}".format(filename))
-                    sys.exit(1)
-                filename = xcodeproj[0]
-
-            filename = join(filename, "project.pbxproj")
-            if not exists(filename):
-                logger.error("{} not found".format(filename))
-                sys.exit(1)
-
-            update_pbxproj(filename, pbx_frameworks=args.add_framework)
-            print("--")
-            print("Project {} updated".format(filename))
-
-        def build_info(self):
-            ctx = Context()
-            print("Build Context")
-            print("-------------")
-            for attr in dir(ctx):
-                if not attr.startswith("_"):
-                    if not callable(attr) and attr != 'archs':
-                        print("{}: {}".format(attr, pformat(getattr(ctx, attr))))
-            for arch in ctx.archs:
-                ul = '-' * (len(str(arch))+6)
-                print("\narch: {}\n{}".format(str(arch), ul))
-                for attr in dir(arch):
-                    if not attr.startswith("_"):
-                        if not callable(attr) and attr not in ['arch', 'ctx', 'get_env']:
-                            print("{}: {}".format(attr, pformat(getattr(arch, attr))))
-                env = arch.get_env()
-                print("env ({}): {}".format(arch, pformat(env)))
-
-        def pip3(self):
-            self.pip()
-
-        def pip(self):
-            ctx = Context()
-            for recipe in Recipe.list_recipes():
-                key = "{}.build_all".format(recipe)
-                if key not in ctx.state:
+                archs = args.arch
+            available_archs = [arch.arch for arch in ctx.archs]
+            for arch in archs[:]:
+                if arch not in available_archs:
+                    logger.error("Architecture {} invalid".format(arch))
+                    archs.remove(arch)
                     continue
-                recipe = Recipe.get_recipe(recipe, ctx)
-                recipe.init_with_ctx(ctx)
-            if not hasattr(ctx, "site_packages_dir"):
-                logger.error("python must be compiled before using pip")
-                sys.exit(1)
+            ctx.archs = [arch for arch in ctx.archs if arch.arch in archs]
+            logger.info("Architectures restricted to: {}".format(archs))
+        ctx.num_cores = args.concurrency
+        if args.no_pigz:
+            ctx.use_pigz = False
+        if args.no_pbzip2:
+            ctx.use_pbzip2 = False
+        ctx.use_pigz = ctx.use_pbzip2
+        logger.info("Building with {} processes, where supported".format(ctx.num_cores))
+        if ctx.use_pigz:
+            logger.info("Using pigz to decompress gzip data")
+        if ctx.use_pbzip2:
+            logger.info("Using pbzip2 to decompress bzip2 data")
+        build_recipes(args.recipe, ctx)
 
-            pip_env = {
-                "CC": "/bin/false",
-                "CXX": "/bin/false",
-                "PYTHONPATH": ctx.site_packages_dir,
-                "PYTHONOPTIMIZE": "2",
-                # "PIP_INSTALL_TARGET": ctx.site_packages_dir
-            }
-            pip_path = join(ctx.dist_dir, 'hostpython3', 'bin', 'pip3')
-            pip_args = []
-            if len(sys.argv) > 2 and sys.argv[2] == "install":
-                pip_args = ["--isolated", "--ignore-installed", "--prefix", ctx.python_prefix]
-                args = [pip_path] + [sys.argv[2]] + pip_args + sys.argv[3:]
+    def recipes(self):
+        parser = argparse.ArgumentParser(
+                description="List all the available recipes")
+        parser.add_argument(
+                "--compact", action="store_true",
+                help="Produce a compact list suitable for scripting")
+        args = parser.parse_args(sys.argv[2:])
+
+        if args.compact:
+            print(" ".join(list(Recipe.list_recipes())))
+        else:
+            ctx = Context()
+            for name in Recipe.list_recipes():
+                try:
+                    recipe = Recipe.get_recipe(name, ctx)
+                    print("{recipe.name:<12} {recipe.version:<8}".format(recipe=recipe))
+
+                except Exception:
+                    pass
+
+    def clean(self):
+        parser = argparse.ArgumentParser(
+                description="Clean the build")
+        parser.add_argument("recipe", nargs="*", help="Recipe to clean")
+        args = parser.parse_args(sys.argv[2:])
+        ctx = Context()
+        if args.recipe:
+            for recipe in args.recipe:
+                logger.info("Cleaning {} build".format(recipe))
+                ctx.state.remove_all("{}.".format(recipe))
+                build_dir = join(ctx.build_dir, recipe)
+                shutil.rmtree(build_dir, ignore_errors=True)
+        else:
+            logger.info("Delete build directory")
+            shutil.rmtree(ctx.build_dir, ignore_errors=True)
+
+    def distclean(self):
+        ctx = Context()
+        shutil.rmtree(ctx.build_dir, ignore_errors=True)
+        shutil.rmtree(ctx.dist_dir, ignore_errors=True)
+        shutil.rmtree(ctx.cache_dir, ignore_errors=True)
+
+    def status(self):
+        ctx = Context()
+        for recipe in Recipe.list_recipes():
+            key = "{}.build_all".format(recipe)
+            keytime = "{}.build_all.at".format(recipe)
+
+            if key in ctx.state:
+                status = "Build OK (built at {})".format(ctx.state[keytime])
             else:
-                args = [pip_path] + pip_args + sys.argv[2:]
+                status = "Not built"
+            print("{:<12} - {}".format(
+                recipe, status))
 
-            import os
-            logger.error("Executing pip with: {}".format(args))
-            os.execve(pip_path, args, pip_env)
+    def create(self):
+        parser = argparse.ArgumentParser(
+                description="Create a new xcode project")
+        parser.add_argument("name", help="Name of your project")
+        parser.add_argument("directory", help="Directory where your project lives")
+        parser.add_argument("--add-framework", action="append", help="Additional Frameworks to include with this project")
+        args = parser.parse_args(sys.argv[2:])
 
-        def launchimage(self):
-            import xcassets
-            self._xcassets("LaunchImage", xcassets.launchimage)
+        from cookiecutter.main import cookiecutter
+        ctx = Context()
+        ensure_recipes_loaded(ctx)
 
-        def icon(self):
-            import xcassets
-            self._xcassets("Icon", xcassets.icon)
+        if not hasattr(ctx, "python_ver"):
+            logger.error("No python recipes compiled!")
+            logger.error("You must have compiled at least python2 or")
+            logger.error("python3 recipes to be able to create a project.")
+            sys.exit(1)
 
-        def xcode(self):
-            parser = argparse.ArgumentParser(description="Open the xcode project")
-            parser.add_argument("filename", help="Path to your project or xcodeproj")
-            args = parser.parse_args(sys.argv[2:])
-            filename = args.filename
-            if not filename.endswith(".xcodeproj"):
-                # try to find the xcodeproj
-                from glob import glob
-                xcodeproj = glob(join(filename, "*.xcodeproj"))
-                if not xcodeproj:
-                    logger.error("Unable to find a xcodeproj in {}".format(filename))
-                    sys.exit(1)
-                filename = xcodeproj[0]
-            sh.open(filename)
+        template_dir = join(curdir, "tools", "templates")
+        context = {
+            "title": args.name,
+            "project_name": args.name.lower(),
+            "domain_name": "org.kivy.{}".format(args.name.lower()),
+            "kivy_dir": dirname(dirname(realpath(__file__))),
+            "project_dir": realpath(args.directory),
+            "version": "1.0.0",
+            "dist_dir": ctx.dist_dir,
+            "python_version": ctx.python_ver,
+            "python_major": ctx.python_major
+        }
+        cookiecutter(template_dir, no_input=True, extra_context=context)
+        filename = join(
+                getcwd(),
+                "{}-ios".format(args.name.lower()),
+                "{}.xcodeproj".format(args.name.lower()),
+                "project.pbxproj")
+        update_pbxproj(filename, pbx_frameworks=args.add_framework)
+        print("--")
+        print("Project directory : {}-ios".format(
+            args.name.lower()))
+        print("XCode project     : {0}-ios/{0}.xcodeproj".format(
+            args.name.lower()))
 
-        def _xcassets(self, title, command):
-            parser = argparse.ArgumentParser(
-                    description="Generate {} for your project".format(title))
-            parser.add_argument("filename", help="Path to your project or xcodeproj")
-            parser.add_argument("image", help="Path to your initial {}.png".format(title.lower()))
-            args = parser.parse_args(sys.argv[2:])
+    def update(self):
+        parser = argparse.ArgumentParser(
+                description="Update an existing xcode project")
+        parser.add_argument("filename", help="Path to your project or xcodeproj")
+        parser.add_argument("--add-framework", action="append", help="Additional Frameworks to include with this project")
+        args = parser.parse_args(sys.argv[2:])
 
-            if not exists(args.image):
-                logger.error("image path does not exists.")
-                return
+        filename = args.filename
+        if not filename.endswith(".xcodeproj"):
+            # try to find the xcodeproj
+            from glob import glob
+            xcodeproj = glob(join(filename, "*.xcodeproj"))
+            if not xcodeproj:
+                logger.error("Unable to find a xcodeproj in {}".format(filename))
+                sys.exit(1)
+            filename = xcodeproj[0]
 
-            filename = args.filename
-            if not filename.endswith(".xcodeproj"):
-                # try to find the xcodeproj
-                from glob import glob
-                xcodeproj = glob(join(filename, "*.xcodeproj"))
-                if not xcodeproj:
-                    logger.error("Unable to find a xcodeproj in {}".format(filename))
-                    sys.exit(1)
-                filename = xcodeproj[0]
+        filename = join(filename, "project.pbxproj")
+        if not exists(filename):
+            logger.error("{} not found".format(filename))
+            sys.exit(1)
 
-            project_name = filename.split("/")[-1].replace(".xcodeproj", "")
-            images_xcassets = realpath(join(filename, "..", project_name,
-                                            "Images.xcassets"))
-            if not exists(images_xcassets):
-                logger.warning("Images.xcassets not found, creating it.")
-                makedirs(images_xcassets)
-            logger.info("Images.xcassets located at {}".format(images_xcassets))
+        update_pbxproj(filename, pbx_frameworks=args.add_framework)
+        print("--")
+        print("Project {} updated".format(filename))
 
-            command(images_xcassets, args.image)
+    def build_info(self):
+        ctx = Context()
+        print("Build Context")
+        print("-------------")
+        for attr in dir(ctx):
+            if not attr.startswith("_"):
+                if not callable(attr) and attr != 'archs':
+                    print("{}: {}".format(attr, pformat(getattr(ctx, attr))))
+        for arch in ctx.archs:
+            ul = '-' * (len(str(arch))+6)
+            print("\narch: {}\n{}".format(str(arch), ul))
+            for attr in dir(arch):
+                if not attr.startswith("_"):
+                    if not callable(attr) and attr not in ['arch', 'ctx', 'get_env']:
+                        print("{}: {}".format(attr, pformat(getattr(arch, attr))))
+            env = arch.get_env()
+            print("env ({}): {}".format(arch, pformat(env)))
 
+    def pip3(self):
+        self.pip()
+
+    def pip(self):
+        ctx = Context()
+        for recipe in Recipe.list_recipes():
+            key = "{}.build_all".format(recipe)
+            if key not in ctx.state:
+                continue
+            recipe = Recipe.get_recipe(recipe, ctx)
+            recipe.init_with_ctx(ctx)
+        if not hasattr(ctx, "site_packages_dir"):
+            logger.error("python must be compiled before using pip")
+            sys.exit(1)
+
+        pip_env = {
+            "CC": "/bin/false",
+            "CXX": "/bin/false",
+            "PYTHONPATH": ctx.site_packages_dir,
+            "PYTHONOPTIMIZE": "2",
+            # "PIP_INSTALL_TARGET": ctx.site_packages_dir
+        }
+        pip_path = join(ctx.dist_dir, 'hostpython3', 'bin', 'pip3')
+        pip_args = []
+        if len(sys.argv) > 2 and sys.argv[2] == "install":
+            pip_args = ["--isolated", "--ignore-installed", "--prefix", ctx.python_prefix]
+            args = [pip_path] + [sys.argv[2]] + pip_args + sys.argv[3:]
+        else:
+            args = [pip_path] + pip_args + sys.argv[2:]
+
+        import os
+        logger.error("Executing pip with: {}".format(args))
+        os.execve(pip_path, args, pip_env)
+
+    def launchimage(self):
+        import xcassets
+        self._xcassets("LaunchImage", xcassets.launchimage)
+
+    def icon(self):
+        import xcassets
+        self._xcassets("Icon", xcassets.icon)
+
+    def xcode(self):
+        parser = argparse.ArgumentParser(description="Open the xcode project")
+        parser.add_argument("filename", help="Path to your project or xcodeproj")
+        args = parser.parse_args(sys.argv[2:])
+        filename = args.filename
+        if not filename.endswith(".xcodeproj"):
+            # try to find the xcodeproj
+            from glob import glob
+            xcodeproj = glob(join(filename, "*.xcodeproj"))
+            if not xcodeproj:
+                logger.error("Unable to find a xcodeproj in {}".format(filename))
+                sys.exit(1)
+            filename = xcodeproj[0]
+        sh.open(filename)
+
+    def _xcassets(self, title, command):
+        parser = argparse.ArgumentParser(
+                description="Generate {} for your project".format(title))
+        parser.add_argument("filename", help="Path to your project or xcodeproj")
+        parser.add_argument("image", help="Path to your initial {}.png".format(title.lower()))
+        args = parser.parse_args(sys.argv[2:])
+
+        if not exists(args.image):
+            logger.error("image path does not exists.")
+            return
+
+        filename = args.filename
+        if not filename.endswith(".xcodeproj"):
+            # try to find the xcodeproj
+            from glob import glob
+            xcodeproj = glob(join(filename, "*.xcodeproj"))
+            if not xcodeproj:
+                logger.error("Unable to find a xcodeproj in {}".format(filename))
+                sys.exit(1)
+            filename = xcodeproj[0]
+
+        project_name = filename.split("/")[-1].replace(".xcodeproj", "")
+        images_xcassets = realpath(join(filename, "..", project_name,
+                                        "Images.xcassets"))
+        if not exists(images_xcassets):
+            logger.warning("Images.xcassets not found, creating it.")
+            makedirs(images_xcassets)
+        logger.info("Images.xcassets located at {}".format(images_xcassets))
+
+        command(images_xcassets, args.image)
+
+
+def main():
     ToolchainCL()
 
 
