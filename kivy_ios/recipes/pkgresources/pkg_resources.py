@@ -140,7 +140,7 @@ def get_supported_platform():
     return plat
 
 
-__all__ = [
+__all__ = [  # noqa: F822 undefined name
     # Basic resource access and distribution/entry point discovery
     'require', 'run_script', 'get_provider', 'get_distribution',
     'load_entry_point', 'get_entry_map', 'get_entry_info',
@@ -1492,7 +1492,14 @@ class NullProvider:
     def _get(self, path):
         if hasattr(self.loader, 'get_data'):
             return self.loader.get_data(path)
-        raise NotImplementedError(  # noqa: F821
+        raise NotImplementedError(
+            "Can't perform this operation for loaders without 'get_data()'"
+        )
+
+
+register_loader_type(object, NullProvider)
+
+
 class EggProvider(NullProvider):
     """Provider based on a virtual filesystem"""
 
@@ -1545,8 +1552,8 @@ class EmptyProvider(NullProvider):
     """Provider that returns nothing for all requests"""
 
     _isdir = _has = lambda self, path: False
-    _get = lambda self, path: ''  # noqqa: E731
-    _listdir = lambda self, path: []  # noqq: E731
+    _get = lambda self, path: ''  # noqa: E731
+    _listdir = lambda self, path: []  # noqa: E731
     module_path = None
 
     def __init__(self):
