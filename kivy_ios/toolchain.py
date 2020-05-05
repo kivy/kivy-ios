@@ -10,6 +10,7 @@ import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename, expanduser
 from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
+import sh
 import zipfile
 import tarfile
 import importlib
@@ -37,8 +38,6 @@ except ImportError:
     print("To install: pip install -r requirements.txt")
     sys.exit(1)
 curdir = dirname(__file__)
-
-import sh
 
 
 # For more detailed logging, use something like
@@ -163,7 +162,6 @@ class JsonStore(object):
 
 class Arch(object):
     def __init__(self, ctx):
-        super(Arch, self).__init__()
         self.ctx = ctx
         self._ccsh = None
 
@@ -535,14 +533,14 @@ class Recipe(object):
         if not filename:
             return
         logger.info("Extract {} into {}".format(filename, cwd))
-        if filename.endswith(".tgz") or filename.endswith(".tar.gz"):
+        if filename.endswith((".tgz", ".tar.gz")):
             if self.ctx.use_pigz:
                 comp = '--use-compress-program={}'.format(self.ctx.use_pigz)
             else:
                 comp = '-z'
             shprint(sh.tar, "-C", cwd, "-xv", comp, "-f", filename)
 
-        elif filename.endswith(".tbz2") or filename.endswith(".tar.bz2"):
+        elif filename.endswith((".tbz2", ".tar.bz2")):
             if self.ctx.use_pbzip2:
                 comp = '--use-compress-program={}'.format(self.ctx.use_pbzip2)
             else:
@@ -558,8 +556,7 @@ class Recipe(object):
             raise Exception()
 
     def get_archive_rootdir(self, filename):
-        if filename.endswith(".tgz") or filename.endswith(".tar.gz") or \
-                filename.endswith(".tbz2") or filename.endswith(".tar.bz2"):
+        if filename.endswith((".tgz", ".tar.gz", ".tbz2", ".tar.bz2")):
             try:
                 archive = tarfile.open(filename)
             except tarfile.ReadError:
@@ -794,8 +791,7 @@ class Recipe(object):
         build_dir = join(self.ctx.build_dir, self.name, arch)
         dest_dir = join(build_dir, self.archive_root)
         if self.custom_dir:
-            if exists(dest_dir):
-                shutil.rmtree(dest_dir)
+            shutil.rmtree(dest_dir, ignore_errors=True)
             shutil.copytree(self.custom_dir, dest_dir)
         else:
             if exists(dest_dir):
@@ -814,7 +810,7 @@ class Recipe(object):
             logger.warning("{} build for {} has been incomplete".format(
                 self.name, arch.arch))
             logger.warning("Warning: deleting the build and restarting.")
-            shutil.rmtree(self.build_dir)
+            shutil.rmtree(self.build_dir, ignore_errors=True)
             self.extract_arch(arch.arch)
 
         if self.has_marker("build_done"):
@@ -922,8 +918,7 @@ class Recipe(object):
             src = join(build_dir, framework)
             dest = join(self.ctx.dist_dir, "frameworks", framework)
             ensure_dir(dirname(dest))
-            if exists(dest):
-                shutil.rmtree(dest)
+            shutil.rmtree(dest, ignore_errors=True)
             logger.debug("Copy {} to {}".format(src, dest))
             shutil.copytree(src, dest)
 
@@ -938,8 +933,7 @@ class Recipe(object):
             src = join(build_dir, source)
             dest = join(self.ctx.dist_dir, "sources", self.name)
             ensure_dir(dirname(dest))
-            if exists(dest):
-                shutil.rmtree(dest)
+            shutil.rmtree(dest, ignore_errors=True)
             logger.debug("Copy {} to {}".format(src, dest))
             shutil.copytree(src, dest)
 
@@ -962,8 +956,7 @@ class Recipe(object):
                 arch_dir = arch.arch
             include_name = self.include_name or self.name
             dest_dir = join(self.ctx.include_dir, arch_dir, include_name)
-            if exists(dest_dir):
-                shutil.rmtree(dest_dir)
+            shutil.rmtree(dest_dir, ignore_errors=True)
             build_dir = self.get_build_dir(arch.arch)
 
             for include_dir in include_dirs:
@@ -1028,10 +1021,10 @@ class PythonRecipe(Recipe):
 
     @staticmethod
     def remove_junk(d):
-        exts = [".so.lib", ".so.o", ".sh"]
+        exts = (".so.lib", ".so.o", ".sh")
         for root, dirnames, filenames in walk(d):
             for fn in filenames:
-                if any([fn.endswith(ext) for ext in exts]):
+                if fn.endswith(exts):
                     print('Found junk {}/{}, removing'.format(root, fn))
                     unlink(join(root, fn))
 
@@ -1169,8 +1162,7 @@ def build_recipes(names, ctx):
 
 
 def ensure_dir(filename):
-    if not exists(filename):
-        makedirs(filename)
+    makedirs(filename, exist_ok=True)
 
 
 def ensure_recipes_loaded(ctx):
@@ -1361,21 +1353,16 @@ Xcode:
                     logger.info("Cleaning {} build".format(recipe))
                     ctx.state.remove_all("{}.".format(recipe))
                     build_dir = join(ctx.build_dir, recipe)
-                    if exists(build_dir):
-                        shutil.rmtree(build_dir)
+                    shutil.rmtree(build_dir, ignore_errors=True)
             else:
                 logger.info("Delete build directory")
-                if exists(ctx.build_dir):
-                    shutil.rmtree(ctx.build_dir)
+                shutil.rmtree(ctx.build_dir, ignore_errors=True)
 
         def distclean(self):
             ctx = Context()
-            if exists(ctx.build_dir):
-                shutil.rmtree(ctx.build_dir)
-            if exists(ctx.dist_dir):
-                shutil.rmtree(ctx.dist_dir)
-            if exists(ctx.cache_dir):
-                shutil.rmtree(ctx.cache_dir)
+            shutil.rmtree(ctx.build_dir, ignore_errors=True)
+            shutil.rmtree(ctx.dist_dir, ignore_errors=True)
+            shutil.rmtree(ctx.cache_dir, ignore_errors=True)
 
         def status(self):
             ctx = Context()
