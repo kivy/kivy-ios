@@ -7,16 +7,16 @@ logger = logging.getLogger(__name__)
 
 
 class PythonAliasRecipe(Recipe):
+    """
+    Note this recipe was created to handle both python2 and python3.
+    As python2 support was dropped, this could probably be simplified.
+    """
     is_alias = True
 
     def init_after_import(self, ctx):
         python = ctx.state.get("python")
         if not python:
-            # search in wanted_recipes if it's the first time
-            if "python2" in ctx.wanted_recipes:
-                python = "python2"
-            else:
-                python = "python3"
+            python = "python3"
         self.depends = [python]
         self.recipe_dir = join(ctx.root_dir, "recipes", python)
 

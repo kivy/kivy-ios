@@ -15,7 +15,7 @@ class ItsDangerousRecipe(PythonRecipe):
         hostpython = sh.Command(self.ctx.hostpython)
         build_env = arch.get_env()
         dest_dir = join(self.ctx.dist_dir, "root", "python")
-        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
+        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.7', 'site-packages')
         cmd = sh.Command("sed")
         with cd(build_dir):
             shprint(cmd, "-i", "", "s/setuptools/distutils.core/g", "./setup.py", _env=build_env)

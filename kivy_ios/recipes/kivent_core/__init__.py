@@ -58,7 +58,7 @@ class KiventCoreRecipe(CythonRecipe):
         kivent_core/modules/core/setup.py
 
         This constructs the equivalent of the command
-        "$python2.7 setup.py build_ext install"
+        "$python setup.py build_ext install"
         only with the environment variables altered for each different architecture
         The appropriate version of kivy also needs to be added to the path, and this
         differs for each architecture (i386, x86_64, armv7, etc)
@@ -78,7 +78,7 @@ class KiventCoreRecipe(CythonRecipe):
         build_env = self.get_recipe_env(arch)
 
         dest_dir = join(self.ctx.dist_dir, "root", "python")
-        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
+        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.7', 'site-packages')
 
         # Add Architecture specific kivy path for 'import kivy' to PYTHONPATH
         arch_kivy_path = self.get_recipe('kivy', self.ctx).get_build_dir(arch.arch)

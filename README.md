@@ -16,9 +16,6 @@ The toolchain supports:
 - iPhone Simulator (x86_64)
 - iPhone / iOS (armv7 and arm64)
 
-You can select between Python 2.7 or Python 3.7 by specifying the recipes
-`python2` or `python3` when building.
-
 These recipes are not ported to the new toolchain yet:
 
 - lxml
@@ -66,7 +63,6 @@ You can list the available recipes and their versions with:
     flask        master
     freetype     2.5.5
     hostlibffi   3.2.1
-    hostpython2  2.7.1
     hostpython3  3.7.1
     ios          master
     itsdangerous master
@@ -86,7 +82,6 @@ You can list the available recipes and their versions with:
     pycrypto     2.6.1
     pykka        1.2.1
     pyobjus      master
-    python2      2.7.1
     python3      3.7.1
     pyyaml       3.11
     sdl2         2.0.8

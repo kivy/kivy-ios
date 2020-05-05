@@ -9,7 +9,7 @@ class LibZBarRecipe(Recipe):
 
     url = 'https://github.com/ZBar/ZBar/archive/{version}.zip'
 
-    depends = ['hostpython2']
+    depends = ['hostpython3']
 
     library = 'zbar/.libs/libzbar.a'
 
