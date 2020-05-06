@@ -17,7 +17,7 @@ class Hostpython3Recipe(Recipe):
     build_subdir = 'native-build'
 
     def init_with_ctx(self, ctx):
-        super(Hostpython3Recipe, self).init_with_ctx(ctx)
+        super().init_with_ctx(ctx)
         self.set_hostpython(self, "3.8")
         self.ctx.so_suffix = ".cpython-38m-darwin.so"
         self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython3", "bin", "python")
