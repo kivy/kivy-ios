@@ -16,7 +16,7 @@ class Python3Recipe(Recipe):
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
 
     def init_with_ctx(self, ctx):
-        super(Python3Recipe, self).init_with_ctx(ctx)
+        super().init_with_ctx(ctx)
         self.set_python(self, "3.8")
         ctx.python_ver_dir = "python3.8"
         ctx.python_prefix = join(ctx.dist_dir, "root", "python3")

@@ -21,7 +21,7 @@ class NumpyRecipe(CythonRecipe):
         self.set_marker("patched")
 
     def get_recipe_env(self, arch):
-        env = super(NumpyRecipe, self).get_recipe_env(arch)
+        env = super().get_recipe_env(arch)
         # CC must have the CFLAGS with arm arch, because numpy tries first to
         # compile and execute an empty C to see if the compiler works. This is
         # obviously not working when crosscompiling
@@ -32,7 +32,7 @@ class NumpyRecipe(CythonRecipe):
         return env
 
     def build_arch(self, arch):
-        super(NumpyRecipe, self).build_arch(arch)
+        super().build_arch(arch)
         sh.cp(sh.glob(join(self.build_dir, "build", "temp.*", "libnpy*.a")),
               self.build_dir)
 

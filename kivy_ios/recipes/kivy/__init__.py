@@ -22,7 +22,7 @@ class KivyRecipe(CythonRecipe):
     pre_build_ext = True
 
     def get_recipe_env(self, arch):
-        env = super(KivyRecipe, self).get_recipe_env(arch)
+        env = super().get_recipe_env(arch)
         env["KIVY_SDL2_PATH"] = ":".join([
             join(self.ctx.dist_dir, "include", "common", "sdl2"),
             join(self.ctx.dist_dir, "include", "common", "sdl2_image"),
@@ -32,7 +32,7 @@ class KivyRecipe(CythonRecipe):
 
     def build_arch(self, arch):
         self._patch_setup()
-        super(KivyRecipe, self).build_arch(arch)
+        super().build_arch(arch)
 
     def _patch_setup(self):
         # patch setup to remove some functionnalities

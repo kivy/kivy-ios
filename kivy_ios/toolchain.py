@@ -25,11 +25,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from pprint import pformat
 import logging
-
-try:
-    from urllib.request import FancyURLopener, urlcleanup
-except ImportError:
-    from urllib import FancyURLopener, urlcleanup
+from urllib.request import FancyURLopener, urlcleanup
 
 try:
     from pbxproj import XcodeProject
@@ -52,10 +48,6 @@ sh_logging = logging.getLogger('sh')
 sh_logging.setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
-
-
-IS_PY3 = sys.version_info[0] >= 3
-IS_PY2 = sys.version_info[0] == 2
 
 
 @contextmanager
@@ -108,12 +100,11 @@ class ChromeDownloader(FancyURLopener):
 urlretrieve = ChromeDownloader().retrieve
 
 
-class JsonStore(object):
+class JsonStore:
     """Replacement of shelve using json, needed for support python 2 and 3.
     """
 
     def __init__(self, filename):
-        super(JsonStore, self).__init__()
         self.filename = filename
         self.data = {}
         if exists(filename):
@@ -151,17 +142,11 @@ class JsonStore(object):
         self.sync()
 
     def sync(self):
-        # https://stackoverflow.com/a/14870531/185510
-        if IS_PY3:
-            with open(self.filename, 'w') as fd:
-                json.dump(self.data, fd, ensure_ascii=False)
-        else:
-            with io.open(self.filename, 'w', encoding='utf-8') as fd:
-                fd.write(unicode(  # noqa: F821
-                    json.dumps(self.data, ensure_ascii=False)))
+        with open(self.filename, 'w') as fd:
+            json.dump(self.data, fd, ensure_ascii=False)
 
 
-class Arch(object):
+class Arch:
     def __init__(self, ctx):
         self.ctx = ctx
         self._ccsh = None
@@ -277,7 +262,7 @@ class Arch64IOS(Arch):
     sysroot = sh.xcrun("--sdk", "iphoneos", "--show-sdk-path").strip()
 
 
-class Graph(object):
+class Graph:
     # Taken from python-for-android/depsort
     def __init__(self):
         # `graph`: dict that maps each package to a set of its dependencies.
@@ -321,7 +306,7 @@ class Graph(object):
                     bset.discard(result)
 
 
-class Context(object):
+class Context:
     env = environ.copy()
     root_dir = None
     cache_dir = None
@@ -335,7 +320,6 @@ class Context(object):
     so_suffix = None  # set by one of the hostpython
 
     def __init__(self):
-        super(Context, self).__init__()
         self.include_dirs = []
 
         ok = True
@@ -439,7 +423,7 @@ class Context(object):
         return "IDEBuildOperationMaxNumberOfConcurrentCompileTasks={}".format(self.num_cores)
 
 
-class Recipe(object):
+class Recipe:
     props = {
         "is_alias": False,
         "version": None,
@@ -462,7 +446,7 @@ class Recipe(object):
         for prop, value in cls.props.items():
             if not hasattr(cls, prop):
                 setattr(cls, prop, value)
-        return super(Recipe, cls).__new__(cls)
+        return super().__new__(cls)
 
     # API available for recipes
     def download_file(self, url, filename, cwd=None):
@@ -494,32 +478,11 @@ class Recipe(object):
         while True:
             try:
                 urlretrieve(url, filename, report_hook)
-            except AttributeError:
-                if IS_PY2:
-                    # This is caused by bug in python-future, causing occasional
-                    #     AttributeError: '_fileobject' object has no attribute 'readinto'
-                    # It can be removed if the upstream fix is accepted. See also:
-                    #   * https://github.com/kivy/kivy-ios/issues/322
-                    #   * https://github.com/PythonCharmers/python-future/pull/423
-                    import requests
-
-                    logger.warning("urlretrieve failed. Falling back to request")
-
-                    headers = {'User-agent': 'Mozilla/5.0 (X11; Linux x86_64) '
-                               'AppleWebKit/537.36 (KHTML, like Gecko) '
-                               'Chrome/28.0.1500.71 Safari/537.36'}
-                    r = requests.get(url, headers=headers)
-
-                    with open(filename, "wb") as fw:
-                        fw.write(r.content)
-                    break
-                else:
-                    raise
-            except OSError as e:
+            except OSError:
                 attempts += 1
                 if attempts >= 5:
                     logger.error('Max download attempts reached: {}'.format(attempts))
-                    raise e
+                    raise
                 logger.warning('Download failed. Retrying in 1 second...')
                 time.sleep(1)
                 continue
@@ -1092,7 +1055,7 @@ class CythonRecipe(PythonRecipe):
         shprint(cmd, join(self.build_dir, "lib{}.a".format(self.name)), *dirs)
 
     def get_recipe_env(self, arch):
-        env = super(CythonRecipe, self).get_recipe_env(arch)
+        env = super().get_recipe_env(arch)
         env["KIVYIOSROOT"] = self.ctx.root_dir
         env["IOSSDKROOT"] = arch.sysroot
         env["CUSTOMIZED_OSX_COMPILER"] = 'True'
@@ -1248,7 +1211,7 @@ def update_pbxproj(filename, pbx_frameworks=None):
     project.save()
 
 
-class ToolchainCL(object):
+class ToolchainCL:
     def __init__(self):
         parser = argparse.ArgumentParser(
                 description="Tool for managing the iOS / Python toolchain",
