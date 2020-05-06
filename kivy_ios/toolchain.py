@@ -21,7 +21,7 @@ import shutil
 import fnmatch
 import tempfile
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from datetime import datetime
 from pprint import pformat
 import logging
@@ -360,9 +360,6 @@ class Context:
 
         # path to some tools
         self.ccache = sh.which("ccache")
-        if not self.ccache:
-            # ccache is missing, the build will not be optimized
-            pass
         for cython_fn in ("cython-2.7", "cython"):
             cython = sh.which(cython_fn)
             if cython:
@@ -462,7 +459,7 @@ class Recipe:
 
         if cwd:
             filename = join(cwd, filename)
-        if exists(filename):
+        with suppress(FileNotFoundError):
             unlink(filename)
 
         # Clean up temporary files just in case before downloading.
@@ -578,10 +575,8 @@ class Recipe:
         """
         Delete a specific marker
         """
-        try:
+        with suppress(FileNotFoundError):
             unlink(join(self.build_dir, ".{}".format(marker)))
-        except Exception:
-            pass
 
     def get_include_dir(self):
         """
@@ -1063,11 +1058,9 @@ class CythonRecipe(PythonRecipe):
         build_env = self.get_recipe_env(arch)
         hostpython = sh.Command(self.ctx.hostpython)
         if self.pre_build_ext:
-            try:
+            with suppress(Exception):
                 shprint(hostpython, "setup.py", "build_ext", "-g",
                         _env=build_env)
-            except Exception:
-                pass
         self.cythonize_build()
         shprint(hostpython, "setup.py", "build_ext", "-g",
                 _env=build_env)
@@ -1302,12 +1295,9 @@ pip           Install a pip dependency into the distribution
         else:
             ctx = Context()
             for name in Recipe.list_recipes():
-                try:
+                with suppress(Exception):
                     recipe = Recipe.get_recipe(name, ctx)
                     print("{recipe.name:<12} {recipe.version:<8}".format(recipe=recipe))
-
-                except Exception:
-                    pass
 
     def clean(self):
         parser = argparse.ArgumentParser(
