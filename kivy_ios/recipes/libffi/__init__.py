@@ -22,6 +22,7 @@ class LibffiRecipe(Recipe):
                 "s/-miphoneos-version-min=5.1.1/-miphoneos-version-min=8.0/g",
                 "generate-darwin-source-and-headers.py")
         self.apply_patch("fix-win32-unreferenced-symbol.patch")
+        self.apply_patch("generate-darwin-source-and-headers-python3-items.patch")
         self.set_marker("patched")
 
     def build_arch(self, arch):
@@ -31,8 +32,8 @@ class LibffiRecipe(Recipe):
                 "generate-darwin-source-and-headers.py",
                 "_generate-darwin-source-and-headers.py")
             shprint(sh.touch, "generate-darwin-source-and-headers.py")
-        python27 = sh.Command("python2.7")
-        shprint(python27, "_generate-darwin-source-and-headers.py", "--only-ios")
+        python3 = sh.Command("python3")
+        shprint(python3, "_generate-darwin-source-and-headers.py", "--only-ios")
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
