@@ -709,7 +709,6 @@ class Recipe(object):
                 hostpython))
             logger.error("You can have only one hostpython version compiled")
             sys.exit(1)
-        self.ctx.python_major = version.split('.')[0]
         self.ctx.hostpython_ver = version
         self.ctx.hostpython_recipe = instance
 
@@ -1388,9 +1387,9 @@ pip           Install a pip dependency into the distribution
         ensure_recipes_loaded(ctx)
 
         if not hasattr(ctx, "python_ver"):
-            logger.error("No python recipes compiled!")
-            logger.error("You must have compiled at least python2 or")
-            logger.error("python3 recipes to be able to create a project.")
+            logger.error("No python recipe compiled!")
+            logger.error("You must have compiled at least python3")
+            logger.error("recipe to be able to create a project.")
             sys.exit(1)
 
         template_dir = join(curdir, "tools", "templates")
@@ -1402,8 +1401,6 @@ pip           Install a pip dependency into the distribution
             "project_dir": realpath(args.directory),
             "version": "1.0.0",
             "dist_dir": ctx.dist_dir,
-            "python_version": ctx.python_ver,
-            "python_major": ctx.python_major
         }
         cookiecutter(template_dir, no_input=True, extra_context=context)
         filename = join(
