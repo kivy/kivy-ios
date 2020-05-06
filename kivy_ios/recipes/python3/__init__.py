@@ -1,4 +1,4 @@
-from kivy_ios.toolchain import Recipe, shprint
+from kivy_ios.toolchain import Recipe, shprint, cd
 from os.path import join
 import sh
 import shutil
@@ -149,29 +149,28 @@ class Python3Recipe(Recipe):
 
     def reduce_python(self):
         logger.info("Reduce python")
-        oldpwd = os.getcwd()
-        try:
-            logger.info("Remove files unlikely to be used")
-            os.chdir(join(self.ctx.dist_dir, "root", "python3"))
+        logger.info("Remove files unlikely to be used")
+        with cd(join(self.ctx.dist_dir, "root", "python3")):
             sh.rm("-rf", "bin", "share")
-            # platform binaries and configuration
-            os.chdir(join(
+        # platform binaries and configuration
+        with cd(join(
                 self.ctx.dist_dir, "root", "python3", "lib",
-                "python3.8", "config-3.8-darwin"))
-            sh.rm("libpython3.8.a")
-            sh.rm("python.o")
-            sh.rm("config.c.in")
-            sh.rm("makesetup")
-            sh.rm("install-sh")
+                "python3.8", "config-3.8-darwin")):
+            sh.rm(
+                "libpython3.8.a",
+                "python.o",
+                "config.c.in",
+                "makesetup",
+                "install-sh",
+            )
 
-            # cleanup pkgconfig and compiled lib
-            os.chdir(join(self.ctx.dist_dir, "root", "python3", "lib"))
-            sh.rm("-rf", "pkgconfig")
-            sh.rm("-f", "libpython3.8.a")
+        # cleanup pkgconfig and compiled lib
+        with cd(join(self.ctx.dist_dir, "root", "python3", "lib")):
+            sh.rm("-rf", "pkgconfig", "libpython3.8.a")
 
-            # cleanup python libraries
-            os.chdir(join(
-                self.ctx.dist_dir, "root", "python3", "lib", "python3.8"))
+        # cleanup python libraries
+        with cd(join(
+                self.ctx.dist_dir, "root", "python3", "lib", "python3.8")):
             sh.rm("-rf", "wsgiref", "curses", "idlelib", "lib2to3",
                   "ensurepip", "turtledemo", "lib-dynload", "venv",
                   "pydoc_data")
@@ -199,8 +198,6 @@ class Python3Recipe(Recipe):
             sh.rm("-rf", sh.glob("*"))
             sh.mv("../config-3.8-darwin", ".")
             sh.mv("../site-packages", ".")
-        finally:
-            os.chdir(oldpwd)
 
 
 recipe = Python3Recipe()
