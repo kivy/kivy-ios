@@ -26,14 +26,9 @@ from datetime import datetime
 from pprint import pformat
 import logging
 from urllib.request import FancyURLopener, urlcleanup
+from pbxproj import XcodeProject
+from pbxproj.pbxextensions.ProjectFiles import FileOptions
 
-try:
-    from pbxproj import XcodeProject
-    from pbxproj.pbxextensions.ProjectFiles import FileOptions
-except ImportError:
-    print("ERROR: Python requirements are missing")
-    print("To install: pip install -r requirements.txt")
-    sys.exit(1)
 curdir = dirname(__file__)
 
 
@@ -1241,6 +1236,18 @@ pip           Install a pip dependency into the distribution
             exit(1)
         getattr(self, args.command)()
 
+    @staticmethod
+    def find_xcodeproj(filename):
+        if not filename.endswith(".xcodeproj"):
+            # try to find the xcodeproj
+            from glob import glob
+            xcodeproj = glob(join(filename, "*.xcodeproj"))
+            if not xcodeproj:
+                logger.error("Unable to find a xcodeproj in {}".format(filename))
+                sys.exit(1)
+            filename = xcodeproj[0]
+        return filename
+
     def build(self):
         ctx = Context()
         parser = argparse.ArgumentParser(
@@ -1385,16 +1392,7 @@ pip           Install a pip dependency into the distribution
         parser.add_argument("--add-framework", action="append", help="Additional Frameworks to include with this project")
         args = parser.parse_args(sys.argv[2:])
 
-        filename = args.filename
-        if not filename.endswith(".xcodeproj"):
-            # try to find the xcodeproj
-            from glob import glob
-            xcodeproj = glob(join(filename, "*.xcodeproj"))
-            if not xcodeproj:
-                logger.error("Unable to find a xcodeproj in {}".format(filename))
-                sys.exit(1)
-            filename = xcodeproj[0]
-
+        filename = self.find_xcodeproj(args.filename)
         filename = join(filename, "project.pbxproj")
         if not exists(filename):
             logger.error("{} not found".format(filename))
@@ -1468,15 +1466,7 @@ pip           Install a pip dependency into the distribution
         parser = argparse.ArgumentParser(description="Open the xcode project")
         parser.add_argument("filename", help="Path to your project or xcodeproj")
         args = parser.parse_args(sys.argv[2:])
-        filename = args.filename
-        if not filename.endswith(".xcodeproj"):
-            # try to find the xcodeproj
-            from glob import glob
-            xcodeproj = glob(join(filename, "*.xcodeproj"))
-            if not xcodeproj:
-                logger.error("Unable to find a xcodeproj in {}".format(filename))
-                sys.exit(1)
-            filename = xcodeproj[0]
+        filename = self.find_xcodeproj(args.filename)
         sh.open(filename)
 
     def _xcassets(self, title, command):
@@ -1490,16 +1480,7 @@ pip           Install a pip dependency into the distribution
             logger.error("image path does not exists.")
             return
 
-        filename = args.filename
-        if not filename.endswith(".xcodeproj"):
-            # try to find the xcodeproj
-            from glob import glob
-            xcodeproj = glob(join(filename, "*.xcodeproj"))
-            if not xcodeproj:
-                logger.error("Unable to find a xcodeproj in {}".format(filename))
-                sys.exit(1)
-            filename = xcodeproj[0]
-
+        filename = self.find_xcodeproj(args.filename)
         project_name = filename.split("/")[-1].replace(".xcodeproj", "")
         images_xcassets = realpath(join(filename, "..", project_name,
                                         "Images.xcassets"))
