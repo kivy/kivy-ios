@@ -6,16 +6,10 @@ from kivy_ios.toolchain import CythonRecipe, cd, shprint
 
 
 class NetifacesRecipe(CythonRecipe):
-    """
-    Also requires `setuptools to be installed on target (for pkg_resources):
-    ```sh
-    python toolchain.py pip install setuptools
-    ```
-    """
-
     version = "0.10.9"
     url = "https://pypi.io/packages/source/n/netifaces/netifaces-{version}.tar.gz"
     depends = ["python3", "host_setuptools3"]
+    python_depends = ["setuptools"]
     library = "libnetifaces.a"
     cythonize = False
 
