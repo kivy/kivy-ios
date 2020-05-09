@@ -31,6 +31,7 @@ from pbxproj.pbxextensions.ProjectFiles import FileOptions
 
 curdir = dirname(__file__)
 
+initial_working_directory = getcwd()
 
 # For more detailed logging, use something like
 # format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(funcName)s():%(lineno)d] %(message)s'
@@ -349,11 +350,11 @@ class Context:
 
         # root of the toolchain
         self.root_dir = realpath(dirname(__file__))
-        self.build_dir = "{}/build".format(getcwd())
-        self.cache_dir = "{}/.cache".format(getcwd())
-        self.dist_dir = "{}/dist".format(getcwd())
-        self.install_dir = "{}/dist/root".format(getcwd())
-        self.include_dir = "{}/dist/include".format(getcwd())
+        self.build_dir = "{}/build".format(initial_working_directory)
+        self.cache_dir = "{}/.cache".format(initial_working_directory)
+        self.dist_dir = "{}/dist".format(initial_working_directory)
+        self.install_dir = "{}/dist/root".format(initial_working_directory)
+        self.include_dir = "{}/dist/include".format(initial_working_directory)
         self.archs = (
             Arch64Simulator(self),
             Arch64IOS(self))
@@ -1364,7 +1365,7 @@ pip           Install a pip dependency into the distribution
         }
         cookiecutter(template_dir, no_input=True, extra_context=context)
         filename = join(
-                getcwd(),
+                initial_working_directory,
                 "{}-ios".format(args.name.lower()),
                 "{}.xcodeproj".format(args.name.lower()),
                 "project.pbxproj")
