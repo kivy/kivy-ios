@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.1] - 2020-05-11
+### Added
+- Add python depends [\#455](https://github.com/kivy/kivy-ios/issues/455) ([misl6](https://github.com/misl6))
+
+### Removed
+- Removed Python 2 support [\#482](https://github.com/kivy/kivy-ios/issues/482) ([AndreMiras](https://github.com/AndreMiras))
+
+### Fixed
+- Adds initial\_working\_directory [\#489](https://github.com/kivy/kivy-ios/issues/489) ([misl6](https://github.com/misl6))
+- Adds netifaces recipe, closes #239 [\#488](https://github.com/kivy/kivy-ios/issues/488) ([AndreMiras](https://github.com/AndreMiras))
+- Uses contextlib.suppress to ignore exceptions [\#487](https://github.com/kivy/kivy-ios/issues/487) ([AndreMiras](https://github.com/AndreMiras))
+- DRY via the find\_xcodeproj() helper method [\#486](https://github.com/kivy/kivy-ios/issues/486) ([AndreMiras](https://github.com/AndreMiras))
+- Uses cd context manager in Python3Recipe.reduce\_python() [\#485](https://github.com/kivy/kivy-ios/issues/485) ([AndreMiras](https://github.com/AndreMiras))
+- Uses Python 3 syntax [\#484](https://github.com/kivy/kivy-ios/issues/484) ([AndreMiras](https://github.com/AndreMiras))
+- Also lints the tools/ folder [\#483](https://github.com/kivy/kivy-ios/issues/483) ([AndreMiras](https://github.com/AndreMiras))
+- Migrates libffi build to Python 3 [\#481](https://github.com/kivy/kivy-ios/issues/481) ([AndreMiras](https://github.com/AndreMiras))
+- Uses a couple of syntax shortcuts [\#479](https://github.com/kivy/kivy-ios/issues/479) ([AndreMiras](https://github.com/AndreMiras))
+- Takes ToolchainCL definition outside the main [\#478](https://github.com/kivy/kivy-ios/issues/478) ([AndreMiras](https://github.com/AndreMiras))
 
 ## [1.1.0] - 2020-05-05
 ### Added
