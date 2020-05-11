@@ -23,6 +23,11 @@ These recipes are not ported to the new toolchain yet:
 
 ## Installation & requirements
 
+Before we start, we strongly advise to use a Python virtual environment to install Python packages.
+
+      python3 -m venv venv
+      . venv/bin/activate
+
 Install [Kivy for iOS from PyPI](https://pypi.org/project/kivy-ios) with pip like any Python package.
 
       pip3 install kivy-ios
