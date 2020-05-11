@@ -69,6 +69,15 @@ jobs:
       run: |
         . venv/bin/activate
         python toolchain.py build python3 kivy
+    - name: Checkout kivy for tests apps
+      uses: actions/checkout@v2
+      with:
+        repository: kivy/kivy
+        path: kivy-ci-clone
+    - name: Create & Build test project
+      run: |
+        . venv/bin/activate
+        .ci/test_project.sh
 
   build_updated_recipes:
     needs: flake8
