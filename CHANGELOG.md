@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.2] - 2020-05-11
+### Fixed
+- Fixes (venv build) reference to SDL\_main.h [\#493](https://github.com/kivy/kivy-ios/issues/493) ([AndreMiras](https://github.com/AndreMiras))
+
 ## [1.1.1] - 2020-05-11
 ### Added
 - Add python depends [\#455](https://github.com/kivy/kivy-ios/issues/455) ([misl6](https://github.com/misl6))
