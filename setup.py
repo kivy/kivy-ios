@@ -16,7 +16,7 @@ def recursive_include(module):
 
 setup(
     name="kivy-ios",
-    version="1.1.2",
+    version="1.1.2.dev0",
     description="Kivy for iOS",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
