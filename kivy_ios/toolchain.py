@@ -289,7 +289,7 @@ class Graph:
         graph = dict((k, set(v)) for k, v in self.graph.items())
         while graph:
             # Find all items without a parent
-            leftmost = [l for l, s in graph.items() if not s]
+            leftmost = [name for name, dep in graph.items() if not dep]
             if not leftmost:
                 raise ValueError('Dependency cycle detected! %s' % graph)
             # If there is more than one, sort them for predictable order

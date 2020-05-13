@@ -4,6 +4,7 @@ Icon and LaunchImage generator for iOS
 
 .. author:: Mathieu Virbel <mat@meltingrocks.com>
 """
+# flake8: noqa (E121 mainly)
 
 __all__ = ["launchimage"]
 
@@ -14,7 +15,7 @@ from os.path import join, exists
 from os import makedirs
 
 appicon_json = {
-  "images": [  # noqa: E121
+  "images": [
     {
       "idiom": "iphone",
       "size": "20x20",
@@ -338,7 +339,7 @@ appicon_json = {
 
 
 launchimage_json = {
-  "images": [  # noqa: E121
+  "images": [
     {
       "extent": "full-screen",
       "idiom": "iphone",
