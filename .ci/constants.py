@@ -9,9 +9,6 @@ BROKEN_RECIPES = set(
         # depends on markupsafe
         # https://github.com/kivy/kivy-ios/issues/466
         "jinja2",
-        # bad install directory or PYTHONPATH
-        # https://github.com/kivy/kivy-ios/issues/468
-        "werkzeug",
     ]
 )
 
