@@ -388,6 +388,7 @@ class Context:
             num_cores = None
         self.num_cores = num_cores if num_cores else 4  # default to 4 if we can't detect
 
+        self.custom_recipes_paths = []
         ensure_dir(self.root_dir)
         ensure_dir(self.build_dir)
         ensure_dir(self.cache_dir)
@@ -963,9 +964,24 @@ class Recipe:
         if name in cls.recipes:
             recipe = cls.recipes[name]
         else:
-            mod = importlib.import_module("kivy_ios.recipes.{}".format(name))
-            recipe = mod.recipe
-            recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
+            try:
+                mod = importlib.import_module("kivy_ios.recipes.{}".format(name))
+                recipe = mod.recipe
+                recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
+            except ImportError:
+                logger.info("Looking for recipe '{}' in custom recipes paths (if provided)".format(name))
+                for custom_recipe_path in ctx.custom_recipes_paths:
+                    if custom_recipe_path.split('/')[-1] == name:
+                        spec = importlib.util.spec_from_file_location(name,
+                                                                      join(custom_recipe_path, '__init__.py'))
+                        mod = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(mod)
+                        recipe = mod.recipe
+                        recipe.recipe_dir = custom_recipe_path
+                        logger.info("Custom recipe '{}' found in folder {}".format(name, custom_recipe_path))
+                        break
+                else:
+                    raise
             recipe.init_after_import(ctx)
 
         if version:
@@ -1294,6 +1310,8 @@ pip           Install a pip dependency into the distribution
                             help="do not use pigz for gzip decompression")
         parser.add_argument("--no-pbzip2", action="store_true", default=not bool(ctx.use_pbzip2),
                             help="do not use pbzip2 for bzip2 decompression")
+        parser.add_argument("--add-custom-recipe", action="append", default=[],
+                            help="Path to custom recipe")
         args = parser.parse_args(sys.argv[2:])
 
         if args.arch:
@@ -1320,6 +1338,12 @@ pip           Install a pip dependency into the distribution
             logger.info("Using pigz to decompress gzip data")
         if ctx.use_pbzip2:
             logger.info("Using pbzip2 to decompress bzip2 data")
+        for custom_recipe_path in args.add_custom_recipe:
+            if exists(custom_recipe_path):
+                logger.info(f"Adding {custom_recipe_path} to custom recipes paths")
+                ctx.custom_recipes_paths.append(custom_recipe_path)
+            else:
+                logger.error(f"{custom_recipe_path} isn't a valid path")
         build_recipes(args.recipe, ctx)
 
     def recipes(self):
