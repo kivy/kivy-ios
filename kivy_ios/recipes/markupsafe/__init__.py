@@ -24,4 +24,5 @@ class MarkupSafeRecipe(PythonRecipe):
         shprint(cmd, "-i", "", "s/features\['speedups'\].*=.*speedups/pass/g", "./setup.py", _env=build_env)  # noqa: W605
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
+
 recipe = MarkupSafeRecipe()
