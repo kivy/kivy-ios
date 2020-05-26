@@ -18,7 +18,6 @@ class Jinja2Recipe(PythonRecipe):
         build_env = arch.get_env()
         dest_dir = join(self.ctx.dist_dir, "root", "python3")
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.8', 'site-packages')
-        cmd = sh.Command("sed")
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
 
