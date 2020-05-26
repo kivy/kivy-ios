@@ -20,8 +20,6 @@ class MarkupSafeRecipe(PythonRecipe):
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.8', 'site-packages')
         cmd = sh.Command("sed")
         shprint(cmd, "-i", "", "s/,.*Feature//g", "./setup.py", _env=build_env)
-        shprint(cmd, "-i", "", "s/setuptools import Extension/distutils.extension import Extension/g", "./setup.py", _env=build_env)
-        shprint(cmd, "-i", "", "s/setuptools import setup/distutils.core import setup/g", "./setup.py", _env=build_env)
         shprint(cmd, "-i", "", "/^speedups = Feature/,/^)$/s/.*//g", "./setup.py", _env=build_env)
         shprint(cmd, "-i", "", "s/features\['speedups'\].*=.*speedups/pass/g", "./setup.py", _env=build_env)  # noqa: W605
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
