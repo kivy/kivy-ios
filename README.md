@@ -62,7 +62,6 @@ You can list the available recipes and their versions with:
     audiostream  master
     click        master
     cymunk       master
-    distribute   0.7.3
     ffmpeg       2.6.3
     ffpyplayer   v3.2
     flask        master
