@@ -6,7 +6,7 @@ import os
 
 
 class MarkupSafeRecipe(PythonRecipe):
-    version = "master"
+    version = "1.1.1"
     url = "https://github.com/mitsuhiko/markupsafe/archive/{version}.zip"
     depends = ["python"]
 

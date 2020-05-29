@@ -60,22 +60,22 @@ You can list the available recipes and their versions with:
 
     $ toolchain recipes
     audiostream  master
-    click        master
+    click        7.1.2
     cymunk       master
     ffmpeg       2.6.3
     ffpyplayer   v3.2
-    flask        master
+    flask        1.1.2
     freetype     2.5.5
     hostlibffi   3.2.1
     hostpython3  3.7.1
     ios          master
-    itsdangerous master
-    jinja2       master
+    itsdangerous 1.1.0
+    jinja2       2.11.2
     kivy         1.10.1
     libffi       3.2.1
     libjpeg      v9a
     libpng       1.6.26
-    markupsafe   master
+    markupsafe   1.1.1
     moodstocks   4.1.5
     numpy        1.16.4
     openssl      1.0.2k
@@ -92,7 +92,7 @@ You can list the available recipes and their versions with:
     sdl2_image   2.0.0
     sdl2_mixer   2.0.0
     sdl2_ttf     2.0.12
-    werkzeug     master
+    werkzeug     1.0.1
 
 Then, start the compilation with:
 

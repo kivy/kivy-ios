@@ -6,7 +6,7 @@ import os
 
 
 class Jinja2Recipe(PythonRecipe):
-    version = "master"
+    version = "2.11.2"
     url = "https://github.com/mitsuhiko/jinja2/archive/{version}.zip"
     depends = ["python", "markupsafe"]
 

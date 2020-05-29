@@ -6,7 +6,7 @@ import os
 
 
 class WerkzeugRecipe(PythonRecipe):
-    version = "master"
+    version = "1.0.1"
     url = "https://github.com/mitsuhiko/werkzeug/archive/{version}.zip"
     depends = ["python", "openssl"]
 
