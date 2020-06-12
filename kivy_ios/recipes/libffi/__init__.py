@@ -5,8 +5,7 @@ from os.path import exists
 
 class LibffiRecipe(Recipe):
     version = "3.2.1"
-    # url = "ftp://sourceware.org/pub/libffi/libffi-{version}.tar.gz"
-    url = "https://www.mirrorservice.org/sites/sourceware.org/pub/libffi/libffi-{version}.tar.gz"
+    url = "https://sourceware.org/pub/libffi/libffi-{version}.tar.gz"
     library = "build/Release-{arch.sdk}/libffi.a"
     include_per_arch = True
     include_dir = "build_{arch.sdk}-{arch.arch}/include"
