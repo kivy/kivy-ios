@@ -1173,7 +1173,7 @@ def _pip(args):
     pip_path = join(ctx.dist_dir, 'hostpython3', 'bin', 'pip3')
 
     if len(args) > 1 and args[0] == "install":
-        pip_args = ["--isolated", "--ignore-installed", "--prefix", ctx.python_prefix]
+        pip_args = ["--isolated", "--prefix", ctx.python_prefix]
         args = ["install"] + pip_args + args[1:]
 
     logger.error("Executing pip with: {}".format(args))
