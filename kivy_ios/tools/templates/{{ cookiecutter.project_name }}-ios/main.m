@@ -51,10 +51,6 @@ int main(int argc, char *argv[]) {
     export_orientation();
 
     NSString * resourcePath = [[NSBundle mainBundle] resourcePath];
-#if PY_MAJOR_VERSION == 2
-    NSLog(@"PythonHome is: %s", (char *)[resourcePath UTF8String]);
-    Py_SetPythonHome((char *)[resourcePath UTF8String]);
-#else
     NSString *python_home = [NSString stringWithFormat:@"PYTHONHOME=%@", resourcePath, nil];
     putenv((char *)[python_home UTF8String]);
 
@@ -63,19 +59,14 @@ int main(int argc, char *argv[]) {
 
     NSString *tmp_path = [NSString stringWithFormat:@"TMP=%@/tmp", resourcePath, nil];
     putenv((char *)[tmp_path UTF8String]);
-#endif
 
     NSLog(@"Initializing python");
     Py_Initialize();
 
-#if PY_MAJOR_VERSION == 2
-    PySys_SetArgv(argc, argv);
-#else
     wchar_t** python_argv = PyMem_RawMalloc(sizeof(wchar_t *) *argc);
     for (int i = 0; i < argc; i++)
         python_argv[i] = Py_DecodeLocale(argv[i], NULL);
     PySys_SetArgv(argc, python_argv);
-#endif
 
     // If other modules are using the thread, we need to initialize them before.
     PyEval_InitThreads();
@@ -84,11 +75,7 @@ int main(int argc, char *argv[]) {
     load_custom_builtin_importer();
 
     // Search and start main.py
-#if PY_MAJOR_VERSION == 2
-#define MAIN_EXT @"pyo"
-#else
 #define MAIN_EXT @"pyc"
-#endif
 
     const char * prog = [
         [[NSBundle mainBundle] pathForResource:@"YourApp/main" ofType:MAIN_EXT] cStringUsingEncoding:
