@@ -87,6 +87,16 @@ def cache_execution(f):
     return _cache_execution
 
 
+def remove_junk(d):
+    """ Remove unused build artifacts. """
+    exts = (".so.lib", ".so.o", ".sh")
+    for root, dirnames, filenames in walk(d):
+        for fn in filenames:
+            if fn.endswith(exts):
+                print('Found junk {}/{}, removing'.format(root, fn))
+                unlink(join(root, fn))
+
+
 class ChromeDownloader(FancyURLopener):
     version = (
         'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
@@ -838,6 +848,7 @@ class Recipe:
         logger.debug("Invoking {}".format(postbuild))
         if hasattr(self, postbuild):
             getattr(self, postbuild)()
+        remove_junk(self.build_dir)
 
     def update_state(self, key, value):
         """
@@ -995,16 +1006,7 @@ class PythonRecipe(Recipe):
     def install(self):
         self.install_python_package()
         self.reduce_python_package()
-        self.remove_junk(self.ctx.site_packages_dir)
-
-    @staticmethod
-    def remove_junk(d):
-        exts = (".so.lib", ".so.o", ".sh")
-        for root, dirnames, filenames in walk(d):
-            for fn in filenames:
-                if fn.endswith(exts):
-                    print('Found junk {}/{}, removing'.format(root, fn))
-                    unlink(join(root, fn))
+        remove_junk(self.ctx.site_packages_dir)
 
     def install_python_package(self, name=None, env=None, is_dir=True):
         """Automate the installation of a Python package into the target
