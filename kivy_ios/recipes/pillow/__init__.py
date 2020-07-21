@@ -9,7 +9,8 @@ class PillowRecipe(Recipe):
     version = "7.2.0"
     url = "https://pypi.python.org/packages/source/P/Pillow/Pillow-{version}.tar.gz"
     library = "libpillow.a"
-    depends = ["hostpython3", "host_setuptools3", "freetype", "libjpeg", "python3", "ios"]
+    depends = ["hostpython3", "host_setuptools3", "freetype", "libjpeg", "python3", "ios",
+               "pkgresources"]
     python_depends = ["setuptools"]
     pbx_libraries = ["libz", "libbz2"]
     include_per_arch = True
