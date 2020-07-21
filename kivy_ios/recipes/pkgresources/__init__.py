@@ -9,8 +9,8 @@ class pkg_resources(Recipe):
     url = ""
 
     def prebuild_arch(self, arch):
-        sh.cp("pkg_resources.py",
-              join(self.ctx.site_packages_dir, "pkg_resources.py"))
+        sh.cp("-R", "pkg_resources/",
+              join(self.ctx.site_packages_dir, "pkg_resources"))
 
 
 recipe = pkg_resources()
