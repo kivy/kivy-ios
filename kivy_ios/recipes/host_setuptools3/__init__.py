@@ -1,9 +1,10 @@
 from kivy_ios.toolchain import Recipe, shprint, cd, cache_execution
 import sh
+from os.path import join
 
 
 class HostSetuptools3(Recipe):
-    depends = ["openssl", "hostpython3"]
+    depends = ["openssl", "hostpython3", "python3"]
     archs = ["x86_64"]
     version = '40.9.0'
     url = 'https://pypi.python.org/packages/source/s/setuptools/setuptools-{version}.zip'
@@ -16,5 +17,8 @@ class HostSetuptools3(Recipe):
         with cd(build_dir):
             shprint(hostpython, "setup.py", "install")
 
+            # Copy in pkg_resources folder as it's otherwise not found
+            sh.cp("-R", "pkg_resources/",
+                  join(self.ctx.site_packages_dir, "pkg_resources"))
 
 recipe = HostSetuptools3()
