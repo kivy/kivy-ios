@@ -6,7 +6,7 @@ from os.path import join
 class HostSetuptools3(Recipe):
     depends = ["openssl", "hostpython3", "python3"]
     archs = ["x86_64"]
-    version = '40.9.0'
+    version = '49.2.0'
     url = 'https://pypi.python.org/packages/source/s/setuptools/setuptools-{version}.zip'
 
     @cache_execution
