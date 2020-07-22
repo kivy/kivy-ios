@@ -6,7 +6,7 @@ import fnmatch
 
 
 class PillowRecipe(Recipe):
-    version = "6.1.0"
+    version = "7.2.0"
     url = "https://pypi.python.org/packages/source/P/Pillow/Pillow-{version}.tar.gz"
     library = "libpillow.a"
     depends = ["hostpython3", "host_setuptools3", "freetype", "libjpeg", "python3", "ios"]

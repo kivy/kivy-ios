@@ -80,7 +80,7 @@ You can list the available recipes and their versions with:
     numpy        1.16.4
     openssl      1.0.2k
     photolibrary master
-    pillow       6.1.0
+    pillow       7.2.0
     plyer        master
     pycrypto     2.6.1
     pykka        1.2.1
