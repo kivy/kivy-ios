@@ -23,4 +23,5 @@ class HostSetuptools3(Recipe):
             sh.touch(join(self.ctx.site_packages_dir, "pkg_resources",
                      "py31compat.py"))
 
+
 recipe = HostSetuptools3()
