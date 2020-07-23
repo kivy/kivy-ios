@@ -20,5 +20,7 @@ class HostSetuptools3(Recipe):
             # Copy in pkg_resources folder as it's otherwise not found
             sh.cp("-R", "pkg_resources/",
                   join(self.ctx.site_packages_dir, "pkg_resources"))
+            sh.touch(join(self.ctx.site_packages_dir, "pkg_resources",
+                     "py31compat.py"))
 
 recipe = HostSetuptools3()
