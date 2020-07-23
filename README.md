@@ -43,12 +43,6 @@ Additionally you would need few system dependencies and configuration.
       brew install autoconf automake libtool pkg-config
       brew link libtool
 
-- Install Cython (0.29.17):
-
-      # pip method if available (sudo might be needed.)
-      pip3 install Cython==0.29.17
-
-
 ## Using the toolchain
 
 Any Python extensions or C/C++ library must be compiled: you need to have what
