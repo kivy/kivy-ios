@@ -57,6 +57,19 @@ def cd(newdir):
         logger.info("cd {}".format(prevdir))
         chdir(prevdir)
 
+@contextmanager
+def python_path(newdir):
+    prevdir = environ.get("PYTHONPATH")
+    logger.debug("Setting PYTHONPATH to {}".format(newdir))
+    environ["PYTHONPATH"] = newdir
+    try:
+        yield
+    finally:
+        logger.debug("Setting PYTHONPATH to {}".format(prevdir))
+        if prevdir is None:
+            environ.pop("PYTHONPATH")
+        else:
+            environ["PYTHONPATH"] = prevdir
 
 def shprint(command, *args, **kwargs):
     kwargs["_iter"] = True
