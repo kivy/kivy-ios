@@ -9,7 +9,7 @@ This tool intend to replace all the previous tools/ in shell script.
 import argparse
 import sys
 from sys import stdout
-from os.path import join, dirname, realpath, exists, isdir, basename, expanduser
+from os.path import join, dirname, realpath, exists, isdir, basename
 from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
 import sh
 import zipfile
