@@ -21,7 +21,7 @@ import shutil
 import fnmatch
 import tempfile
 import time
-from contextlib import contextmanager, suppress
+from contextlib import suppress
 from datetime import datetime
 from pprint import pformat
 import logging
@@ -45,31 +45,6 @@ sh_logging.setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-
-@contextmanager
-def cd(newdir):
-    prevdir = getcwd()
-    logger.info("cd {}".format(newdir))
-    chdir(expanduser(newdir))
-    try:
-        yield
-    finally:
-        logger.info("cd {}".format(prevdir))
-        chdir(prevdir)
-
-@contextmanager
-def python_path(newdir):
-    prevdir = environ.get("PYTHONPATH")
-    logger.debug("Setting PYTHONPATH to {}".format(newdir))
-    environ["PYTHONPATH"] = newdir
-    try:
-        yield
-    finally:
-        logger.debug("Setting PYTHONPATH to {}".format(prevdir))
-        if prevdir is None:
-            environ.pop("PYTHONPATH")
-        else:
-            environ["PYTHONPATH"] = prevdir
 
 def shprint(command, *args, **kwargs):
     kwargs["_iter"] = True

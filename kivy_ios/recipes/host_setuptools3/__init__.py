@@ -1,4 +1,5 @@
-from kivy_ios.toolchain import Recipe, shprint, cd, cache_execution, python_path
+from kivy_ios.toolchain import Recipe, shprint, cache_execution
+from kivy_ios.context_managers import cd, python_path
 import sh
 
 

@@ -1,4 +1,5 @@
-from kivy_ios.toolchain import Recipe, shprint, cd
+from kivy_ios.toolchain import Recipe, shprint
+from kivy_ios.context_managers import cd
 from os.path import join
 import sh
 import shutil
