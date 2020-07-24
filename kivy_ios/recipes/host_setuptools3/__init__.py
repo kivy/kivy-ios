@@ -18,7 +18,7 @@ class HostSetuptools3(Recipe):
         with python_path(self.ctx.site_packages_dir):
             with cd(build_dir):
                 shprint(hostpython, "setup.py", "install",
-                        f"--prefix={self.ctx.install_dir}/python3")
+                        f"--prefix={self.ctx.python_prefix}")
 
 
 recipe = HostSetuptools3()
