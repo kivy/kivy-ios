@@ -1,5 +1,5 @@
 """
-This module houses context managers to assist in the managing state during
+This module houses context managers to assist in the managing of state during
 kivy-ios builds.
 """
 from logging import getLogger
