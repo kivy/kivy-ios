@@ -1,9 +1,11 @@
-from kivy_ios.toolchain import Recipe, cd, shprint
+from kivy_ios.toolchain import Recipe, shprint
 from os.path import join
 import os
 import sh
 import shutil
 import logging
+from kivy_ios.context_managers import cd
+
 
 logger = logging.getLogger(__name__)
 

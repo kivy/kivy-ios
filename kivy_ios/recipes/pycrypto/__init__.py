@@ -1,6 +1,7 @@
 '''Recipe for pycrypto on ios
 '''
-from kivy_ios.toolchain import CythonRecipe, shprint, cd
+from kivy_ios.toolchain import CythonRecipe, shprint
+from kivy_ios.context_managers import cd
 from os.path import join
 import sh
 

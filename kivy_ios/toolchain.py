@@ -9,7 +9,7 @@ This tool intend to replace all the previous tools/ in shell script.
 import argparse
 import sys
 from sys import stdout
-from os.path import join, dirname, realpath, exists, isdir, basename, expanduser
+from os.path import join, dirname, realpath, exists, isdir, basename
 from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
 import sh
 import zipfile
@@ -21,7 +21,7 @@ import shutil
 import fnmatch
 import tempfile
 import time
-from contextlib import contextmanager, suppress
+from contextlib import suppress
 from datetime import datetime
 from pprint import pformat
 import logging
@@ -44,18 +44,6 @@ sh_logging = logging.getLogger('sh')
 sh_logging.setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
-
-
-@contextmanager
-def cd(newdir):
-    prevdir = getcwd()
-    logger.info("cd {}".format(newdir))
-    chdir(expanduser(newdir))
-    try:
-        yield
-    finally:
-        logger.info("cd {}".format(prevdir))
-        chdir(prevdir)
 
 
 def shprint(command, *args, **kwargs):

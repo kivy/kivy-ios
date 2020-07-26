@@ -2,7 +2,8 @@ import sh
 
 from os.path import join
 
-from kivy_ios.toolchain import CythonRecipe, cd, shprint
+from kivy_ios.toolchain import CythonRecipe, shprint
+from kivy_ios.context_managers import cd
 
 
 class NetifacesRecipe(CythonRecipe):
