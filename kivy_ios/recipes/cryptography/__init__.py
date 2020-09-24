@@ -1,6 +1,6 @@
 from os.path import join
-from toolchain import CythonRecipe, PythonRecipe, Recipe
-from toolchain import shprint
+from kivy_ios.toolchain import CythonRecipe, PythonRecipe, Recipe
+from kivy_ios.toolchain import shprint
 import os
 import sh
 
@@ -52,7 +52,7 @@ class CryptographyRecipe(CythonRecipe):
         hostpython = sh.Command(self.ctx.hostpython)
         build_env = arch.get_env()
         dest_dir = join(self.ctx.dist_dir, "root", "python")
-        pythonpath = join(dest_dir, 'lib', 'python2.7', 'site-packages')
+        pythonpath = join(dest_dir, 'lib', 'python3.8', 'site-packages')
         build_env['PYTHONPATH'] = pythonpath
         args = [hostpython, "setup.py", "install", "--prefix", dest_dir]
         shprint(*args, _env=build_env)

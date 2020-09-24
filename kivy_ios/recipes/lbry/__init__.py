@@ -1,41 +1,35 @@
-from toolchain import PythonRecipe, shprint
+from kivy_ios.toolchain import PythonRecipe, shprint
 from os.path import join
 import sh, os
 
 class LbryRecipe(PythonRecipe):
-    version = "v0.20.0rc10"
+    version = "v0.81.0"
     url = "https://github.com/lbryio/lbry/archive/{version}.tar.gz"
     depends = [
         "python",
         "setuptools",
-        "twisted",
-        "cryptography",
+        "aiohttp",
+        "aioupnp",
         "appdirs",
         "argparse",
-        "docopt",
+        "async_timeout",
         "base58",
+        "chardet",
+        "coincurve",
         "colorama",
-        "dnspython",
+        "cryptography",
+        "defusedxml"
+        "docopt",
         "ecdsa",
-        "envparse",
-        "jsonrpc",
-        "jsonrpclib",
+        "hachoir",
         "keyring",
-        "lbryschema",
-        "lbryum",
-        "miniupnpc",
+        "mock",
+        "msgpack",
         "pbkdf2",
+        "prometheus_client"
+        "pylru",
         "pyyaml",
-        "pygithub",
-        "qrcode",
-        "requests",
-        "service_identity",
         "six",
-        "slowaes",
-        "txjson-rpc",
-        "wsgiref",
-        "zope_interface",
-        "treq"
     ]
     
     def install(self):
@@ -45,7 +39,7 @@ class LbryRecipe(PythonRecipe):
         hostpython = sh.Command(self.ctx.hostpython)
         build_env = arch.get_env()
         dest_dir = join(self.ctx.dist_dir, "root", "python")
-        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python2.7', 'site-packages')
+        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.8', 'site-packages')
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
 recipe = LbryRecipe()

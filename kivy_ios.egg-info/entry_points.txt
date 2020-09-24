@@ -1,0 +1,3 @@
+[console_scripts]
+toolchain = kivy_ios.toolchain:main
+

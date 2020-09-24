@@ -1,4 +1,4 @@
-from toolchain import CythonRecipe
+from kivy_ios.toolchain import CythonRecipe
 
 
 class SetuptoolsRecipe(CythonRecipe):
@@ -10,7 +10,7 @@ class SetuptoolsRecipe(CythonRecipe):
 
     def get_recipe_env(self, arch):
         env = super(SetuptoolsRecipe, self).get_recipe_env(arch)
-        env["PYTHONPATH"] = self.get_build_dir(arch.arch) + "/iosbuild/lib/python2.7/site-packages"
+        env["PYTHONPATH"] = self.get_build_dir(arch.arch) + "/iosbuild/lib/python3.8/site-packages"
         return env
 
     def install(self):
