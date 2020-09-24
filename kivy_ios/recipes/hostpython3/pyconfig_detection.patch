@@ -1,0 +1,25 @@
+diff -Nru Python-3.8.2/Lib/site.py Python-3.8.2-new/Lib/site.py
+--- Python-3.8.2/Lib/site.py	2020-02-24 22:36:25.000000000 +0100
++++ Python-3.8.2-new/Lib/site.py	2020-05-01 17:10:43.000000000 +0200
+@@ -458,9 +458,8 @@
+ 
+     env = os.environ
+     if sys.platform == 'darwin' and '__PYVENV_LAUNCHER__' in env:
+-        executable = sys._base_executable = os.environ['__PYVENV_LAUNCHER__']
+-    else:
+-        executable = sys.executable
++        print("Ignoring __PYVENV_LAUNCHER__")
++    executable = sys.executable
+     exe_dir, _ = os.path.split(os.path.abspath(executable))
+     site_prefix = os.path.dirname(exe_dir)
+     sys._home = None
+@@ -487,7 +486,8 @@
+                     if key == 'include-system-site-packages':
+                         system_site = value.lower()
+                     elif key == 'home':
+-                        sys._home = value
++                        # this is breaking pyconfig.h path detection with venv
++                        print('Ignoring "sys._home = value" override')
+ 
+         sys.prefix = sys.exec_prefix = site_prefix
+ 

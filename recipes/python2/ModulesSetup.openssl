@@ -1,8 +1,0 @@
-SSL=
-SSL_LIBS=
-_ssl _ssl.c \
-  -DUSE_SSL -I$(SSL)/include -I$(SSL)/include/openssl \
-  -L$(SSL_LIBS) -lssl -lcrypto
-_hashlib _hashopenssl.c \
-  -I$(SSL)/include -I$(SSL)/include/openssl \
-  -L$(SSL_LIBS) -lssl -lcrypto

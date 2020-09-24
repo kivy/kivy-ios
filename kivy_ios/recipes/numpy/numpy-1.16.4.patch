@@ -1,0 +1,128 @@
+diff --git a/numpy/core/setup.py b/numpy/core/setup.py
+index aad0aae43..407e64fe3 100644
+--- a/numpy/core/setup.py
++++ b/numpy/core/setup.py
+@@ -757,7 +757,9 @@ def configuration(parent_package='',top_path=None):
+             join('src', 'common', 'numpyos.c'),
+             ]
+ 
+-    blas_info = get_info('blas_opt', 0)
++    # XXX IOS, no blas available
++    # blas_info = get_info('blas_opt', 0)
++    blas_info = None
+     if blas_info and ('HAVE_CBLAS', None) in blas_info.get('define_macros', []):
+         extra_info = blas_info
+         # These files are also in MANIFEST.in so that they are always in
+@@ -822,7 +824,10 @@ def configuration(parent_package='',top_path=None):
+             join('include', 'numpy', 'npy_1_7_deprecated_api.h'),
+             # add library sources as distuils does not consider libraries
+             # dependencies
+-            ] + npysort_sources + npymath_sources
++
++            # XXX This breaks for iOS, it results on duplicate symbols
++            # ] + npysort_sources + npymath_sources
++            ] #+ npysort_sources + npymath_sources
+ 
+     multiarray_src = [
+             join('src', 'multiarray', 'alloc.c'),
+@@ -921,7 +926,7 @@ def configuration(parent_package='',top_path=None):
+ 
+     config.add_extension('_multiarray_umath',
+                          sources=multiarray_src + umath_src +
+-                                 npymath_sources + common_src +
++                                 common_src +
+                                  [generate_config_h,
+                                   generate_numpyconfig_h,
+                                   generate_numpy_api,
+diff --git a/numpy/linalg/lapack_lite/python_xerbla.c b/numpy/linalg/lapack_lite/python_xerbla.c
+index dfc195556..7110d1fc3 100644
+--- a/numpy/linalg/lapack_lite/python_xerbla.c
++++ b/numpy/linalg/lapack_lite/python_xerbla.c
+@@ -20,7 +20,7 @@
+   info: Number of the invalid parameter.
+ */
+ 
+-int xerbla_(char *srname, integer *info)
++int custom_xerbla_(char *srname, integer *info)
+ {
+         static const char format[] = "On entry to %.*s" \
+                 " parameter number %d had an illegal value";
+diff --git a/numpy/linalg/lapack_litemodule.c b/numpy/linalg/lapack_litemodule.c
+index 696a6d874..d187ad2d1 100644
+--- a/numpy/linalg/lapack_litemodule.c
++++ b/numpy/linalg/lapack_litemodule.c
+@@ -45,7 +45,7 @@ extern int FNAME(zungqr)(int *m, int *n, int *k, f2c_doublecomplex a[],
+                           int *lda, f2c_doublecomplex tau[],
+                           f2c_doublecomplex work[], int *lwork, int *info);
+ 
+-extern int FNAME(xerbla)(char *srname, int *info);
++extern int FNAME(custom_xerbla)(char *srname, int *info);
+ 
+ static PyObject *LapackError;
+ 
+@@ -291,7 +291,7 @@ lapack_lite_xerbla(PyObject *NPY_UNUSED(self), PyObject *args)
+ 
+     NPY_BEGIN_THREADS_DEF;
+     NPY_BEGIN_THREADS;
+-    FNAME(xerbla)("test", &info);
++    FNAME(custom_xerbla)("test", &info);
+     NPY_END_THREADS;
+ 
+     if (PyErr_Occurred()) {
+diff --git a/numpy/linalg/setup.py b/numpy/linalg/setup.py
+index 66c07c9e1..6f81243be 100644
+--- a/numpy/linalg/setup.py
++++ b/numpy/linalg/setup.py
+@@ -48,7 +48,7 @@ def configuration(parent_package='', top_path=None):
+     # umath_linalg module
+     config.add_extension(
+         '_umath_linalg',
+-        sources=['umath_linalg.c.src', get_lapack_lite_sources],
++        sources=['umath_linalg.c.src', lambda e, b: []],
+         depends=['lapack_lite/f2c.h'],
+         extra_info=lapack_info,
+         libraries=['npymath'],
+diff --git a/numpy/linalg/umath_linalg.c.src b/numpy/linalg/umath_linalg.c.src
+index 9fc68a7aa..270c9bc32 100644
+--- a/numpy/linalg/umath_linalg.c.src
++++ b/numpy/linalg/umath_linalg.c.src
+@@ -68,6 +68,8 @@ dbg_stack_trace()
+ # define FNAME(x) x##_
+ #endif
+ 
++# define FNAME_APPLE(x) cblas_##x
++
+ typedef struct { float r, i; } f2c_complex;
+ typedef struct { double r, i; } f2c_doublecomplex;
+ /* typedef long int (*L_fp)(); */
+@@ -284,21 +286,25 @@ FNAME(zpotri)(char *uplo, int *n,
+               int *info);
+ 
+ extern int
+-FNAME(scopy)(int *n,
++FNAME_APPLE(scopy)(int *n,
+              float *sx, int *incx,
+              float *sy, int *incy);
++#define scopy_ FNAME_APPLE(scopy)
+ extern int
+-FNAME(dcopy)(int *n,
++FNAME_APPLE(dcopy)(int *n,
+              double *sx, int *incx,
+              double *sy, int *incy);
++#define dcopy_ FNAME_APPLE(dcopy)
+ extern int
+-FNAME(ccopy)(int *n,
++FNAME_APPLE(ccopy)(int *n,
+              f2c_complex *sx, int *incx,
+              f2c_complex *sy, int *incy);
++#define ccopy_ FNAME_APPLE(ccopy)
+ extern int
+-FNAME(zcopy)(int *n,
++FNAME_APPLE(zcopy)(int *n,
+              f2c_doublecomplex *sx, int *incx,
+-             f2c_doublecomplex *sy, int *incy);
++             f2c_doublecomplex *sy, int *incy); 
++#define zcopy_ FNAME_APPLE(zcopy)
+ 
+ extern float
+ FNAME(sdot)(int *n,

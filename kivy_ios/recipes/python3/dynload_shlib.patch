@@ -1,0 +1,25 @@
+diff -Naur Python-3.8.2.orig/Python/dynload_shlib.c Python-3.8.2/Python/dynload_shlib.c
+--- Python-3.8.2.orig/Python/dynload_shlib.c	2020-04-12 00:17:24.000000000 +0200
++++ Python-3.8.2/Python/dynload_shlib.c	2020-04-12 00:20:10.000000000 +0200
+@@ -74,6 +74,15 @@
+ 
+     PyOS_snprintf(funcname, sizeof(funcname),
+                   LEAD_UNDERSCORE "%.20s_%.200s", prefix, shortname);
++    /* On IOS, dlopen crash as soon as we try to open one of our library.
++     * Instead, we have done a redirection of linking to convert our .so into a
++     * .a.  Then the main executable is linked with theses symbol. So, instead
++     * of trying to dlopen, directly do the dlsym.
++     * -- Mathieu
++     */
++    return (dl_funcptr) dlsym(RTLD_SELF, funcname);
++
++    #if 0
+ 
+     if (fp != NULL) {
+         int i;
+@@ -129,4 +138,5 @@
+         handles[nhandles++].handle = handle;
+     p = (dl_funcptr) dlsym(handle, funcname);
+     return p;
++    #endif
+ }
