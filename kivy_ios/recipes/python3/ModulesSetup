@@ -28,7 +28,7 @@ _lsprof _lsprof.o rotatingtree.c
 # _lzma _lzmamodule.c -I$(srcdir)/../xz/include -L$(srcdir)/../Support/XZ -llzma
 _md5 md5module.c
 _multibytecodec cjkcodecs/multibytecodec.c
-# _multiprocessing _multiprocessing/multiprocessing.c _multiprocessing/semaphore.c
+#multiprocessing _multiprocessing/multiprocessing.c _multiprocessing/semaphore.c
 _opcode _opcode.c
 _queue _queuemodule.c
 _pickle _pickle.c
@@ -48,7 +48,7 @@ cmath cmathmodule.c _math.c
 fcntl fcntlmodule.c
 grp grpmodule.c
 math mathmodule.c
-# mmap mmapmodule.c
+mmap mmapmodule.c -I/usr/include
 parser parsermodule.c
 pyexpat expat/xmlparse.c \
     expat/xmlrole.c \

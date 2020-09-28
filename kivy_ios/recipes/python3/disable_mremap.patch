@@ -1,0 +1,34 @@
+--- a/Modules/mmapmodule.c	2020-09-28 21:41:42.000000000 +0100
++++ b/Modules/mmapmodule.c	2020-09-28 21:42:35.000000000 +0100
+@@ -527,11 +527,11 @@
+ #endif /* MS_WINDOWS */
+ 
+ #ifdef UNIX
+-#ifndef HAVE_MREMAP
++//#ifndef HAVE_MREMAP
+         PyErr_SetString(PyExc_SystemError,
+                         "mmap: resizing not available--no mremap()");
+         return NULL;
+-#else
++/*#else
+         void *newmap;
+ 
+         if (self->fd != -1 && ftruncate(self->fd, self->offset + new_size) == -1) {
+@@ -546,7 +546,7 @@
+         newmap = mremap(self->data, self->size, self->data, new_size, 0);
+ #else
+         newmap = mremap(self->data, self->size, new_size, 0);
+-#endif /* __NetBSD__ */
++#endif 
+ #endif
+         if (newmap == (void *)-1)
+         {
+@@ -556,7 +556,7 @@
+         self->data = newmap;
+         self->size = new_size;
+         Py_RETURN_NONE;
+-#endif /* HAVE_MREMAP */
++#endif */
+ #endif /* UNIX */
+     }
+ }

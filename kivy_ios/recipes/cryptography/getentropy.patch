@@ -1,6 +1,6 @@
---- cryptography-2.2.2/src/_cffi_src/openssl/src/osrandom_engine.c	2018-03-27 15:12:05.000000000 +0100
-+++ cryptography-2.2.2-patch/src/_cffi_src/openssl/src/osrandom_engine.c	2018-06-02 05:21:49.000000000 +0100
-@@ -205,14 +205,10 @@
+--- a/src/_cffi_src/openssl/src/osrandom_engine.c	2019-01-22 17:41:49.000000000 +0100
++++ b/src/_cffi_src/openssl/src/osrandom_engine.c	2019-08-12 11:47:03.000000000 +0100
+@@ -243,14 +243,10 @@
  #if !defined(__APPLE__)
      getentropy_works = CRYPTOGRAPHY_OSRANDOM_GETENTROPY_WORKS;
  #else
@@ -19,14 +19,14 @@
      }
  #endif
      return 1;
-@@ -228,22 +224,7 @@
+@@ -266,22 +262,7 @@
          return dev_urandom_read(buffer, size);
  #endif
      case CRYPTOGRAPHY_OSRANDOM_GETENTROPY_WORKS:
 -        while (size > 0) {
 -            /* OpenBSD and macOS restrict maximum buffer size to 256. */
--            len = size > 256 ? 256 : (size_t)size;
--            res = getentropy(buffer, len);
+-            len = size > 256 ? 256 : size;
+-            res = getentropy(buffer, (size_t)len);
 -            if (res < 0) {
 -                ERR_Cryptography_OSRandom_error(
 -                    CRYPTOGRAPHY_OSRANDOM_F_RAND_BYTES,

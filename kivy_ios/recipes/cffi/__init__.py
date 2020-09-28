@@ -6,10 +6,10 @@ import sh
 
 class CffiRecipe(CythonRecipe):
     name = "cffi"
-    version = "1.11.5"
+    version = "1.14.3"
     url = "https://pypi.python.org/packages/source/c/cffi/cffi-{version}.tar.gz"
     library = "libcffi.a"
-    depends = ["host_cffi", "libffi", "setuptools", "pycparser"]
+    depends = ["host_cffi", "libffi", "pycparser"]
     cythonize = False
 
     def get_recipe_env(self, arch):
@@ -26,23 +26,26 @@ class CffiRecipe(CythonRecipe):
         os.chdir(build_dir)
         
          # manually create expected directory in build directory
-        scripts_dir = join("build", "scripts-2.7")
+        scripts_dir = join("build", "scripts-3.8")
         if not os.path.exists(scripts_dir):
             os.makedirs(scripts_dir)
         
         hostpython = sh.Command(self.ctx.hostpython)
         build_env = arch.get_env()
-        dest_dir = join(self.ctx.dist_dir, "root", "python")
+        dest_dir = join(self.ctx.dist_dir, "root", "python3")
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.8', 'site-packages')
         shprint(hostpython, "setup.py", "build_ext", _env=build_env)
         shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
         
         # hack: copy _cffi_backend.so from hostpython
-        so_file = "_cffi_backend.so"
-        egg_name = "cffi-1.11.5-py2.7-macosx-10.4-x86_64.egg" # harded - needs to change
-        dest_dir = join(self.ctx.dist_dir, "root", "python", "lib", "python2.7", "site-packages", egg_name)
-        src_dir = join(self.ctx.dist_dir, "hostpython", "lib", "python2.7", "site-packages", egg_name)
+        so_file = "_cffi_backend.cpython-38-darwin.so"
+        egg_name = "cffi-1.14.3-py3.8-macosx-10.15-x86_64.egg" # harded - needs to change
+        dest_dir = join(self.ctx.dist_dir, "root", "python3", "lib", "python3.8", "site-packages", egg_name)
+        dest_dir_main = join(self.ctx.dist_dir, "root", "python3", "lib", "python3.8", "site-packages")
+        
+        src_dir = join(self.ctx.dist_dir, "hostpython3", "lib", "python3.8", "site-packages", egg_name)
         sh.cp(join(src_dir, so_file), join(dest_dir, so_file))
+        sh.cp(join(src_dir, so_file), join(dest_dir_main, so_file))
 
 
 recipe = CffiRecipe()

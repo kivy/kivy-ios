@@ -1,0 +1,10 @@
+--- a/setup.py	2020-09-28 10:20:48.000000000 +0100
++++ b/setup.py	2020-09-28 10:21:12.000000000 +0100
+@@ -36,7 +36,6 @@
+     packages=find_packages(exclude=('tests',)),
+     entry_points={'console_scripts': console_scripts},
+     install_requires=[
+-        'netifaces',
+         'defusedxml'
+     ]
+ )

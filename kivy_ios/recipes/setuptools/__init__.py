@@ -1,31 +1,23 @@
-from kivy_ios.toolchain import CythonRecipe
+# pure-python package, this can be removed when we'll support any python package
+import os
+import sh
+from kivy_ios.toolchain import PythonRecipe, shprint
 
 
-class SetuptoolsRecipe(CythonRecipe):
-    name = "setuptools"
-    version = "18.5"
-    url = "https://pypi.python.org/packages/source/s/setuptools/setuptools-{version}.tar.gz"
-    depends = ["python", "host_setuptools"]
-    cythonize = False
-
-    def get_recipe_env(self, arch):
-        env = super(SetuptoolsRecipe, self).get_recipe_env(arch)
-        env["PYTHONPATH"] = self.get_build_dir(arch.arch) + "/iosbuild/lib/python3.8/site-packages"
-        return env
+class SetuptoolsRecipe(PythonRecipe):
+    version = "41.0.0"
+    url = "https://pypi.python.org/packages/source/s/setuptools/setuptools-{version}.zip"
+    depends = ["python"]
 
     def install(self):
-        import sh
-        from toolchain import shprint
-        from os import chdir
-        arch = self.filtered_archs[0]
-        
-        build_env = arch.get_env()
-        
+        arch = list(self.filtered_archs)[0]
         build_dir = self.get_build_dir(arch.arch)
-        chdir(build_dir)
+        os.chdir(build_dir)
         hostpython = sh.Command(self.ctx.hostpython)
-        shprint(hostpython, "setup.py", "install", "--prefix", self.ctx.install_dir, "--old-and-unmanageable")
-        # "--single-version-externally-managed", "--root", "/", "-O2")
+        build_env = arch.get_env()
+        dest_dir = os.path.join(self.ctx.dist_dir, "root", "python3")
+        build_env['PYTHONPATH'] = os.path.join(dest_dir, 'lib', 'python3.8', 'site-packages')
+        shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
 
 
-recipe = SetuptoolsRecipe()
+recipe = ChardetRecipe()

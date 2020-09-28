@@ -33,6 +33,7 @@ class Python3Recipe(Recipe):
         self.apply_patch("posixmodule.patch")
         self.apply_patch("dynload_shlib.patch")
         self.apply_patch("disable_explicit_blake2.patch")
+        self.apply_patch("disable_mremap.patch")
         self.apply_patch("pyconfig_detection.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
@@ -172,7 +173,7 @@ class Python3Recipe(Recipe):
         # cleanup python libraries
         with cd(join(
                 self.ctx.dist_dir, "root", "python3", "lib", "python3.8")):
-            sh.rm("-rf", "wsgiref", "curses", "idlelib", "lib2to3",
+            sh.rm("-rf", "curses", "idlelib", "lib2to3",
                   "ensurepip", "turtledemo", "lib-dynload", "venv",
                   "pydoc_data")
             sh.find(".", "-path", "*/test*/*", "-delete")

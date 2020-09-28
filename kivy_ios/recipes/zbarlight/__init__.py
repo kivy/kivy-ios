@@ -16,7 +16,7 @@ class ZbarLightRecipe(Recipe):
 
     def get_zbar_env(self, arch):
         build_env = arch.get_env()
-        dest_dir = join(self.ctx.dist_dir, "root", "python")
+        dest_dir = join(self.ctx.dist_dir, "root", "python3")
         build_env["IOSROOT"] = self.ctx.root_dir
         build_env["IOSSDKROOT"] = arch.sysroot
         build_env["LDSHARED"] = join(self.ctx.root_dir, "tools", "liblink")

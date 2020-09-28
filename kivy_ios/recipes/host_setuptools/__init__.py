@@ -18,13 +18,13 @@ class HostSetuptools(Recipe):
         # python package installations using setuptools will raise exceptions.
         # Setuptools version 28.3.0
         site_packages_path = join(
-            self.ctx.dist_dir, 'hostpython',
-            'lib', 'python3.7', 'site-packages')
+            self.ctx.dist_dir, 'hostpython3',
+            'lib', 'python3.8', 'site-packages')
         os.chdir(site_packages_path)
         with open('setuptools.pth', 'r') as f:
             setuptools_egg_path = f.read().strip('./').strip('\n')
             unzip = sh.Command('unzip')
-            shprint(unzip, setuptools_egg_path)
+            shprint(unzip, '-o', setuptools_egg_path)
         os.remove(setuptools_egg_path)
         os.remove('setuptools.pth')
         os.remove('easy-install.pth')

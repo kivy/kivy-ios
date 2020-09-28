@@ -1,0 +1,16 @@
+--- a/aioupnp/interfaces.py	2020-09-28 10:23:40.000000000 +0100
++++ b/aioupnp/interfaces.py	2020-09-28 10:23:56.000000000 +0100
+@@ -1,12 +1,11 @@
+ import socket
+ from collections import OrderedDict
+ import typing
+-import netifaces
+ from aioupnp.fault import UPnPError
+ 
+ 
+ def get_netifaces():
+-    return netifaces
++    return None
+ 
+ 
+ def ifaddresses(iface: str) -> typing.Dict[int, typing.List[typing.Dict[str, str]]]:

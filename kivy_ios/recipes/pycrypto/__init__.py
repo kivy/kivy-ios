@@ -33,7 +33,7 @@ class PycryptoRecipe(CythonRecipe):
         build_dir = self.get_build_dir(arch.arch)
         hostpython = sh.Command(self.ctx.hostpython)
         build_env = arch.get_env()
-        dest_dir = join(self.ctx.dist_dir, "root", "python")
+        dest_dir = join(self.ctx.dist_dir, "root", "python3")
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.7', 'site-packages')
         with cd(build_dir):
             shprint(hostpython, "setup.py", "install", "--prefix", dest_dir, _env=build_env)
