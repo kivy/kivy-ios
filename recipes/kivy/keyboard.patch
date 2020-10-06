@@ -1,0 +1,5 @@
+--- kivy-38fcbd5b90c99a96d82682f14986836cde81412d/kivy/lib/sdl2.pxi
++++ kivy-38fcbd5b90c99a96d82682f14986836cde81412d/kivy/lib/sdl2.pxi
+@@ -622,1 +622,1 @@
+-    cdef void SDL_StartTextInput()
++    cdef void SDL_StartTextInput(int keyboard_type)
