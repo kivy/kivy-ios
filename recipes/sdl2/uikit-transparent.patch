@@ -1,3 +1,109 @@
+--- slime73-sdl-experiments-618662dc9e82/src/video/uikit/SDL_uikitviewcontroller.m
++++ slime73-sdl-experiments-618662dc9e82/src/video/uikit/SDL_uikitviewcontroller.m
+@@ -332,1 +332,1 @@
+-        [self showKeyboard];
++        [self showKeyboard:textField.keyboardType];
+@@ -370,1 +370,1 @@
+-- (void)showKeyboard
++- (void)showKeyboard:(NSInteger)UIKeyboardType
+@@ -373,3 +373,5 @@
+     if (textField.window) {
+         showingKeyboard = YES;
++        [textField setKeyboardType:UIKeyboardType];
++        [textField reloadInputViews];
+         [textField becomeFirstResponder];
+@@ -545,1 +545,1 @@
+-UIKit_ShowScreenKeyboard(_THIS, SDL_Window *window)
++UIKit_ShowScreenKeyboard(_THIS, SDL_Window *window, int UIKeyboardType)
+@@ -549,1 +549,2 @@
+-        [vc showKeyboard];
++        NSInteger _UIKeyboardType = (NSInteger) UIKeyboardType;
++        [vc showKeyboard:_UIKeyboardType];
+
+--- slime73-sdl-experiments-618662dc9e82/src/video/uikit/SDL_uikitviewcontroller.h
++++ slime73-sdl-experiments-618662dc9e82/src/video/uikit/SDL_uikitviewcontroller.h
+@@ -68,1 +68,1 @@
+-- (void)showKeyboard;
++- (void)showKeyboard:(NSInteger)UIKeyboardType;
+@@ -87,1 +87,1 @@
+-void UIKit_ShowScreenKeyboard(_THIS, SDL_Window *window);
++void UIKit_ShowScreenKeyboard(_THIS, SDL_Window *window, int UIKeyboardType);
+
+--- slime73-sdl-experiments-618662dc9e82/src/video/SDL_video.c
++++ slime73-sdl-experiments-618662dc9e82/src/video/SDL_video.c
+@@ -568,1 +568,2 @@
+-        SDL_StartTextInput();
++        int keyboard_type = 0;
++        SDL_StartTextInput(keyboard_type);
+@@ -3764,1 +3764,1 @@
+-SDL_StartTextInput(void)
++SDL_StartTextInput(int keyboard_type)
+@@ -3774,2 +3774,2 @@
+-    if (window && _this && _this->ShowScreenKeyboard) {
++    if (window && _this && _this->ShowScreenKeyboard) {
+-        _this->ShowScreenKeyboard(_this, window);
++        _this->ShowScreenKeyboard(_this, window, keyboard_type);
+@@ -3781,2 +3781,2 @@
+-    if (_this && _this->StartTextInput) {
++    if (_this && _this->StartTextInput) {
+-        _this->StartTextInput(_this);
++        _this->StartTextInput(_this, keyboard_type);
+
+--- slime73-sdl-experiments-618662dc9e82/src/video/SDL_sysvideo.h
++++ slime73-sdl-experiments-618662dc9e82/src/video/SDL_sysvideo.h
+@@ -295,7 +295,7 @@
+-    void (*StartTextInput) (_THIS);
++    void (*StartTextInput) (_THIS, int keyboard_type);
+     void (*StopTextInput) (_THIS);
+     void (*SetTextInputRect) (_THIS, SDL_Rect *rect);
+
+     /* Screen keyboard */
+     SDL_bool (*HasScreenKeyboardSupport) (_THIS);
+-    void (*ShowScreenKeyboard) (_THIS, SDL_Window *window);
++    void (*ShowScreenKeyboard) (_THIS, SDL_Window *window, int keyboard_type);
+
+--- slime73-sdl-experiments-618662dc9e82/src/video/winrt/SDL_winrtevents_c.h
++++ slime73-sdl-experiments-618662dc9e82/src/video/winrt/SDL_winrtevents_c.h
+@@ -72,1 +72,1 @@
+-extern void WINRT_ShowScreenKeyboard(_THIS, SDL_Window *window);
++extern void WINRT_ShowScreenKeyboard(_THIS, SDL_Window *window, int keyboard_type);
+
+--- slime73-sdl-experiments-618662dc9e82/src/video/winrt/SDL_winrtkeyboard.cpp
++++ slime73-sdl-experiments-618662dc9e82/src/video/winrt/SDL_winrtkeyboard.cpp
+@@ -394,1 +394,1 @@
+-void WINRT_ShowScreenKeyboard(_THIS, SDL_Window *window)
++void WINRT_ShowScreenKeyboard(_THIS, SDL_Window *window, int keyboard_type)
+
+--- slime73-sdl-experiments-618662dc9e82/src/video/psp/SDL_pspvideo.h
++++ slime73-sdl-experiments-618662dc9e82/src/video/psp/SDL_pspvideo.h
+@@ -96,1 +96,1 @@
+-void PSP_ShowScreenKeyboard(_THIS, SDL_Window *window);
++void PSP_ShowScreenKeyboard(_THIS, SDL_Window *window, int keyboard_type);
+
+--- slime73-sdl-experiments-618662dc9e82/src/video/psp/SDL_pspvideo.c
++++ slime73-sdl-experiments-618662dc9e82/src/video/psp/SDL_pspvideo.c
+@@ -319,1 +319,1 @@
+-void PSP_ShowScreenKeyboard(_THIS, SDL_Window *window)
++void PSP_ShowScreenKeyboard(_THIS, SDL_Window *window, int keyboard_type)
+
+--- slime73-sdl-experiments-618662dc9e82/include/SDL_keyboard.h
++++ slime73-sdl-experiments-618662dc9e82/include/SDL_keyboard.h
+@@ -160,1 +160,1 @@
+-extern DECLSPEC void SDLCALL SDL_StartTextInput(void);
++extern DECLSPEC void SDLCALL SDL_StartTextInput(int keyboard_type);
+
+--- slime73-sdl-experiments-618662dc9e82/Xcode-iOS/Demos/src/keyboard.c
++++ slime73-sdl-experiments-618662dc9e82/Xcode-iOS/Demos/src/keyboard.c
+@@ -246,1 +246,1 @@
+-    SDL_StartTextInput();
++    SDL_StartTextInput(0);
+
+--- slime73-sdl-experiments-618662dc9e82/src/events/SDL_keyboard.c
++++ slime73-sdl-experiments-618662dc9e82/src/events/SDL_keyboard.c
+@@ -672,1 +672,1 @@
+-                video->StartTextInput(video);
++                video->StartTextInput(video, 0);
+
 --- slime73-sdl-experiments-618662dc9e82/src/video/uikit/SDL_uikitopenglview.m.orig	2015-08-20 16:09:59.000000000 +0200
 +++ slime73-sdl-experiments-618662dc9e82/src/video/uikit/SDL_uikitopenglview.m	2015-08-20 16:11:25.000000000 +0200
 @@ -99,7 +99,7 @@
@@ -9,3 +115,4 @@
          eaglLayer.drawableProperties = @{
              kEAGLDrawablePropertyRetainedBacking:@(retained),
              kEAGLDrawablePropertyColorFormat:colorFormat
+
