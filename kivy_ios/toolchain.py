@@ -1354,6 +1354,14 @@ pip           Install a pip dependency into the distribution
                     print("{recipe.name:<12} {recipe.version:<8}".format(recipe=recipe))
 
     def clean(self):
+        def clean_cache(recipe, ctx):
+            """ Remove download artifacts for this build. """
+            # Remove the cached download
+            recipe_inst = Recipe.get_recipe(recipe, ctx)
+            recipe_inst.ctx = ctx
+            if exists(recipe_inst.archive_fn):
+                shutil.rm(self.archive_fn)
+
         parser = argparse.ArgumentParser(
                 description="Clean the build")
         parser.add_argument("recipe", nargs="*", help="Recipe to clean")
@@ -1365,6 +1373,7 @@ pip           Install a pip dependency into the distribution
                 ctx.state.remove_all("{}.".format(recipe))
                 build_dir = join(ctx.build_dir, recipe)
                 shutil.rmtree(build_dir, ignore_errors=True)
+                clean_cache(recipe, ctx)
         else:
             logger.info("Delete build directory")
             shutil.rmtree(ctx.build_dir, ignore_errors=True)
