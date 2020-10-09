@@ -210,7 +210,6 @@ Available commands:
     build         Build a recipe (compile a library for the required target
                     architecture)
     clean         Clean the build of the specified recipe
-    clean_cache   Clean the cache and the build
     distclean     Clean the build and the result
     recipes       List all the available recipes
     status        List all the recipes and their build status

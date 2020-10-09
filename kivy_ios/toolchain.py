@@ -1384,11 +1384,6 @@ pip           Install a pip dependency into the distribution
         shutil.rmtree(ctx.dist_dir, ignore_errors=True)
         shutil.rmtree(ctx.cache_dir, ignore_errors=True)
 
-    def clean_cache(self):
-        ctx = Context()
-        shutil.rmtree(ctx.cache_dir, ignore_errors=True)
-        shutil.rmtree(ctx.build_dir, ignore_errors=True)
-
     def status(self):
         ctx = Context()
         for recipe in Recipe.list_recipes():
