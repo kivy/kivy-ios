@@ -1356,7 +1356,6 @@ pip           Install a pip dependency into the distribution
     def clean(self):
         def clean_cache(recipe, ctx):
             """ Remove download artifacts for this build. """
-            # Remove the cached download
             recipe_inst = Recipe.get_recipe(recipe, ctx)
             recipe_inst.ctx = ctx
             if exists(recipe_inst.archive_fn):
