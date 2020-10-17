@@ -1359,7 +1359,7 @@ pip           Install a pip dependency into the distribution
             recipe_inst = Recipe.get_recipe(recipe, ctx)
             recipe_inst.ctx = ctx
             if exists(recipe_inst.archive_fn):
-                shutil.rm(self.archive_fn)
+                unlink(self.archive_fn)
 
         parser = argparse.ArgumentParser(
                 description="Clean the build")
