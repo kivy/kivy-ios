@@ -56,7 +56,7 @@ You can list the available recipes and their versions with:
     audiostream  master
     click        7.1.2
     cymunk       master
-    ffmpeg       2.6.3
+    ffmpeg       n4.3.1
     ffpyplayer   v3.2
     flask        1.1.2
     freetype     2.5.5
@@ -72,7 +72,7 @@ You can list the available recipes and their versions with:
     markupsafe   1.1.1
     moodstocks   4.1.5
     numpy        1.16.4
-    openssl      1.0.2k
+    openssl      1.1.1g
     photolibrary master
     pillow       6.1.0
     plyer        master

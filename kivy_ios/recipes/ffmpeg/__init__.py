@@ -4,7 +4,7 @@ import sh
 
 
 class FFMpegRecipe(Recipe):
-    version = "n3.4.5"
+    version = "n4.3.1"
     url = "https://github.com/FFmpeg/FFmpeg/archive/{version}.zip"
     include_per_arch = True
     include_dir = "dist/include"
