@@ -1,5 +1,5 @@
 import os
-from kivy_ios.toolchain import Recipe
+from kivy_ios.toolchain import Recipe, shprint
 from os.path import join
 import sh
 import fnmatch
