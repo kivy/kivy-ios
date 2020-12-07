@@ -8,10 +8,10 @@ jobs:
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1.1.0
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
       with:
-        python-version: 3.7
+        python-version: '3.8.x'
     - name: Install dependencies
       run: |
         pip install --upgrade setuptools wheel twine

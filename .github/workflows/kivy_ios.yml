@@ -9,10 +9,10 @@ jobs:
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1.1.0
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
       with:
-        python-version: 3.7
+        python-version: '3.8.x'
     - name: Run flake8
       run: |
         python -m pip install --upgrade pip
@@ -24,10 +24,10 @@ jobs:
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
-    - name: Set up Python 3.7.x
-      uses: actions/setup-python@v1
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
       with:
-        python-version: 3.7.x
+        python-version: '3.8.x'
     - name: Install requirements
       run: |
         pip3 install -r requirements.txt
@@ -52,10 +52,10 @@ jobs:
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
-    - name: Set up Python 3.7.x
-      uses: actions/setup-python@v1
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
       with:
-        python-version: 3.7.x
+        python-version: '3.8.x'
     - name: Install requirements
       run: |
         python -m venv venv
@@ -85,10 +85,10 @@ jobs:
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
-    - name: Set up Python 3.7.x
-      uses: actions/setup-python@v1
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
       with:
-        python-version: 3.7.x
+        python-version: '3.8.x'
     - name: Install requirements
       run: |
         pip3 install -r requirements.txt
