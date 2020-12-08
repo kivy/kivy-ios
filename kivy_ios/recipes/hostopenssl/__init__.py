@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class HostOpensslRecipe(Recipe):
-    version = "1.1.1f"
+    version = "1.1.1g"
     url = "http://www.openssl.org/source/openssl-{version}.tar.gz"
     archs = ["x86_64"]
 
