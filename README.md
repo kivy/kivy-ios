@@ -61,6 +61,7 @@ You can list the available recipes and their versions with:
     flask        1.1.2
     freetype     2.5.5
     hostlibffi   3.2.1
+    hostopenssl  1.1.1g
     hostpython3  3.7.1
     ios          master
     itsdangerous 1.1.0
