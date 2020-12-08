@@ -67,6 +67,8 @@ class Hostpython3Recipe(Recipe):
         os.makedirs(build_subdir, exist_ok=True)
         with cd(build_subdir):
             shprint(configure,
+                    "ac_cv_func_preadv=no",
+                    "ac_cv_func_pwritev=no",
                     "--prefix={}".format(join(self.ctx.dist_dir, "hostpython3")),
                     "--with-openssl={}".format(join(self.ctx.dist_dir, 'hostopenssl')),
                     _env=build_env)
