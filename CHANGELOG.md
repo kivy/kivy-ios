@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.2.0] - 2020-12-xx
+## [1.2.0] - 2020-12-26
 ### Added
 - :books: Advise on using a venv [\#495](https://github.com/kivy/kivy-ios/issues/495) ([AndreMiras](https://github.com/AndreMiras))
 - Add custom recipes [\#417](https://github.com/kivy/kivy-ios/issues/417) ([misl6](https://github.com/misl6))
