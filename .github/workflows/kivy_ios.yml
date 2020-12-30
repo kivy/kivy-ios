@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   flake8:
     name: Flake8 tests
-    runs-on: macos-latest
+    runs-on: macos-11.0
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
@@ -20,7 +20,7 @@ jobs:
         tox -e pep8
 
   build_python3_kivy:
-    runs-on: macos-latest
+    runs-on: macos-11.0
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
@@ -48,7 +48,7 @@ jobs:
         .ci/test_project.sh
 
   build_python3_kivy_venv:
-    runs-on: macos-latest
+    runs-on: macos-11.0
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
@@ -81,7 +81,7 @@ jobs:
 
   build_updated_recipes:
     needs: flake8
-    runs-on: macos-latest
+    runs-on: macos-11.0
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
