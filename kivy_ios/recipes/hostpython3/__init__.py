@@ -4,6 +4,7 @@ import os
 import sh
 import shutil
 import logging
+import platform
 from kivy_ios.context_managers import cd
 
 
@@ -57,6 +58,11 @@ class Hostpython3Recipe(Recipe):
                 "-mmacosx-version-min=10.12",
                 "-I{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "include"))
                 ])
+        mac_ver = float('.'.join(platform.mac_ver()[0].split('.')[:2]))
+        if mac_ver > 10.15:
+            # Both 10.16 and 11.0 are BigSur
+            build_env["LDFLAGS"] += " -L{}".format(join(sdk_path, "usr", "lib"))
+            build_env["CFLAGS"] += " -I{}".format(join(sdk_path, "usr", "include"))
         return build_env
 
     def build_x86_64(self):
@@ -69,6 +75,7 @@ class Hostpython3Recipe(Recipe):
             shprint(configure,
                     "ac_cv_func_preadv=no",
                     "ac_cv_func_pwritev=no",
+                    "ac_cv_func_sendfile=no",
                     "--prefix={}".format(join(self.ctx.dist_dir, "hostpython3")),
                     "--with-openssl={}".format(join(self.ctx.dist_dir, 'hostopenssl')),
                     _env=build_env)
