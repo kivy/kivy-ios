@@ -322,14 +322,14 @@
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"\"$(PROJECT_DIR)/../build/include\"",
-					"\"$(PROJECT_DIR)/../build/python/include\"",
+					"{{ cookiecutter.dist_dir }}/root/python3/include/python3.8/**",
+					"{{ cookiecutter.dist_dir }}/include/common/sdl2",
 				);
 				INFOPLIST_FILE = "{{ cookiecutter.project_name }}-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(PROJECT_DIR)/../build/lib\"",
+					"{{ cookiecutter.dist_dir }}/lib",
 				);
 				OTHER_LDFLAGS = "-all_load";
 				PRODUCT_NAME = {{ cookiecutter.project_name }};
@@ -340,6 +340,7 @@
 				STRIP_INSTALLED_PRODUCT = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
 		};
