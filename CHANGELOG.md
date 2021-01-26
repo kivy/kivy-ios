@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1] - 2021-01-26
+### Fixed
+- Fixes hostpython3 recipe on MacOS 11.1 BigSur [\#581](https://github.com/kivy/kivy-ios/issues/581) ([misl6](https://github.com/misl6))
+- Fixes iOS Simulator on latest Xcode [\#571](https://github.com/kivy/kivy-ios/issues/571) ([misl6](https://github.com/misl6))
+- Fixes Pillow build on Xcode 12.2 [\#579](https://github.com/kivy/kivy-ios/issues/579) ([misl6](https://github.com/misl6))
+- Cookiecutter: Fixes header and library search paths on Release [\#582](https://github.com/kivy/kivy-ios/issues/582) ([misl6](https://github.com/misl6))
+
 ## [1.2.0] - 2020-12-26
 ### Added
 - :books: Advise on using a venv [\#495](https://github.com/kivy/kivy-ios/issues/495) ([AndreMiras](https://github.com/AndreMiras))
