@@ -247,6 +247,10 @@ Then use the `toolchain.py` script:
 
 You need to install the Command line tools: `xcode-select --install`
 
+### Error: SDK "iphonesimulator" cannot be located
+
+Xcode path is not set up correctly. Run the following command to fix this: `sudo xcode-select --switch <YOUR_XCODEAPP_PATH>` (Change `<YOUR_XCODEAPP_PATH>` to the path that reflects your XCode installation, usually is `/Applications/Xcode.app`)
+
 ### You must build with bitcode disabled (Xcode setting ENABLE_BITCODE should be No).
 
 We don't support bitcode. You need to go to the project setting, and disable bitcode.
@@ -325,4 +329,3 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 <a href="https://opencollective.com/kivy/sponsor/7/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/7/avatar.svg"></a>
 <a href="https://opencollective.com/kivy/sponsor/8/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/kivy/sponsor/9/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/9/avatar.svg"></a>
-
