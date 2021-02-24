@@ -14,6 +14,7 @@ from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
 import sh
 import zipfile
 import tarfile
+import certifi
 import importlib
 import io
 import json
@@ -21,6 +22,7 @@ import shutil
 import fnmatch
 import tempfile
 import time
+import urllib3
 from contextlib import suppress
 from datetime import datetime
 from pprint import pformat
@@ -83,6 +85,16 @@ def remove_junk(d):
             if fn.endswith(exts):
                 print('Found junk {}/{}, removing'.format(root, fn))
                 unlink(join(root, fn))
+
+
+def https_download(url, filepath):
+    http = urllib3.PoolManager(cert_reqs="CERT_REQUIRED", ca_certs=certifi.where())
+    with http.request("GET", url, preload_content=False) as resp, open(
+        filepath, "wb"
+    ) as out_file:
+        shutil.copyfileobj(resp, out_file)
+
+    resp.release_conn()
 
 
 class ChromeDownloader(FancyURLopener):
@@ -469,16 +481,20 @@ class Recipe:
         logger.info('Downloading {0}'.format(url))
         attempts = 0
         while True:
-            try:
-                urlretrieve(url, filename, report_hook)
-            except OSError:
-                attempts += 1
-                if attempts >= 5:
-                    logger.error('Max download attempts reached: {}'.format(attempts))
-                    raise
-                logger.warning('Download failed. Retrying in 1 second...')
-                time.sleep(1)
-                continue
+            if url.startswith("https://") or url.startswith("http://"):
+                https_download(url, filename)
+            else:
+                try:
+                    # ftp paths use the old way
+                    urlretrieve(url, filename, report_hook)
+                except OSError:
+                    attempts += 1
+                    if attempts >= 5:
+                        logger.error('Max download attempts reached: {}'.format(attempts))
+                        raise
+                    logger.warning('Download failed. Retrying in 1 second...')
+                    time.sleep(1)
+                    continue
             break
 
         return filename
