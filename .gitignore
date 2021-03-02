@@ -21,3 +21,5 @@ src/ios/ios.c
 __pycache__
 .tox
 venv
+kivy_ios/build/*
+kivy_ios/dist/*

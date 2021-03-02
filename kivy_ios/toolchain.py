@@ -28,6 +28,7 @@ import logging
 from urllib.request import FancyURLopener, urlcleanup
 from pbxproj import XcodeProject
 from pbxproj.pbxextensions.ProjectFiles import FileOptions
+import boto3
 
 curdir = dirname(__file__)
 
@@ -440,6 +441,24 @@ class Recipe:
             if not hasattr(cls, prop):
                 setattr(cls, prop, value)
         return super().__new__(cls)
+        
+    def download_code_artifact_file(self, package, version, asset_name, filename):
+        client = boto3.client('codeartifact')
+        response = client.get_package_version_asset(
+            domain='diamond-kinetics',
+            repository='dk-pypi',
+            format='pypi',
+            package=package,
+            packageVersion=version,
+            asset=asset_name)
+        
+        asset = response['asset']
+        bytes = asset.read()
+        asset.close()
+        
+        file = open(filename, 'wb')
+        file.write(bytes)
+        file.close()
 
     # API available for recipes
     def download_file(self, url, filename, cwd=None):
@@ -729,7 +748,10 @@ class Recipe:
                 return
             fn = self.archive_fn
             if not exists(fn):
-                self.download_file(self.url.format(version=self.version), fn)
+                if self.package:
+                    self.download_code_artifact_file(self.package, self.version, self.asset_name, fn)
+                else:
+                    self.download_file(self.url.format(version=self.version), fn)
             status = self.get_archive_rootdir(self.archive_fn)
             if status is not None:
                 self.ctx.state[key] = status

@@ -4,3 +4,4 @@ requests>=2.13
 cookiecutter==1.7.2
 sh==1.12.14
 Cython==0.29.17
+boto3
