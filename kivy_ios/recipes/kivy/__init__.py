@@ -10,8 +10,10 @@ class KivyRecipe(CythonRecipe):
     """
     The targeted commit includes these iOS specific fixes that were merged after kivy 2.0.0 release:
     - Camera: Added API to change avfoundation camera provider orientation (PR #7263)
+    - Camera: improve avfoundation by using memoryview and re-scheduling the interval on framerate change (PR #7290)
+    - Camera: Fix AVFoundation provider to release the camera, start it async, and check if started before stopping it (PR #7303)
     """
-    version = "b5ec51ed2315a9a890f264b0df6d23c8e6341d42"
+    version = "de520e601fee568b03800e8069118730ccbbdb95"
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
     depends = ["sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios",
