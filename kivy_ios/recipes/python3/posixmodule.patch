@@ -1,31 +1,12 @@
-diff -Naur Python-3.8.2.orig/Modules/posixmodule.c Python-3.8.2/Modules/posixmodule.c
---- Python-3.8.2.orig/Modules/posixmodule.c	2020-04-12 00:11:47.000000000 +0200
-+++ Python-3.8.2/Modules/posixmodule.c	2020-04-12 00:13:21.000000000 +0200
-@@ -216,6 +216,27 @@
- #endif  /* _MSC_VER */
- #endif  /* ! __WATCOMC__ || __QNX__ */
- 
-+// iOS
-+#undef HAVE_EXECV
-+#undef HAVE_FORK
-+#undef HAVE_FORK1
-+#undef HAVE_FORKPTY
-+#undef HAVE_GETGROUPS
-+#undef HAVE_SCHED_H
-+#undef HAVE_SENDFILE
-+#undef HAVE_SETPRIORITY
-+#undef HAVE_SPAWNV
-+#undef HAVE_WAIT
-+#undef HAVE_WAIT3
-+#undef HAVE_WAIT4
-+#undef HAVE_WAITPID
-+#undef HAVE_SYSTEM
-+#undef HAVE_FEXECVE
-+#undef HAVE_RTPSPAWN
-+#undef HAVE_POSIX_SPAWN
-+#undef HAVE_POSIX_SPAWNP
-+#undef HAVE_FDWALK
-+#undef HAVE_COPY_FILE_RANGE
- 
- /*[clinic input]
- # one of the few times we lie about this name!
+diff -Naur Python-3.9.2.orig/Modules/posixmodule.c Python-3.9.2/Modules/posixmodule.c
+--- Python-3.9.2.orig/Modules/posixmodule.c	2021-03-20 12:28:02.000000000 +0100
++++ Python-3.9.2/Modules/posixmodule.c	2021-03-20 12:29:00.000000000 +0100
+@@ -326,7 +326,7 @@
+ #    define HAVE_KILL       1
+ #    define HAVE_OPENDIR    1
+ #    define HAVE_PIPE       1
+-#    define HAVE_SYSTEM     1
++#    undef HAVE_SYSTEM
+ #    define HAVE_WAIT       1
+ #    define HAVE_TTYNAME    1
+ #  endif  /* _MSC_VER */

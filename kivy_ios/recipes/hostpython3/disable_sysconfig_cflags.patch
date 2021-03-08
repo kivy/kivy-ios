@@ -1,0 +1,16 @@
+diff -Naur Python-3.9.2.orig/Lib/distutils/sysconfig.py Python-3.9.2/Lib/distutils/sysconfig.py
+--- Python-3.9.2.orig/Lib/distutils/sysconfig.py	2021-03-20 13:44:04.000000000 +0100
++++ Python-3.9.2/Lib/distutils/sysconfig.py	2021-03-20 13:47:12.000000000 +0100
+@@ -196,6 +196,12 @@
+         (cc, cxx, cflags, ccshared, ldshared, shlib_suffix, ar, ar_flags) = \
+             get_config_vars('CC', 'CXX', 'CFLAGS',
+                             'CCSHARED', 'LDSHARED', 'SHLIB_SUFFIX', 'AR', 'ARFLAGS')
++        
++        """
++        sysconfig was overriding our cflags and extensions were failing to build.
++        This hack resets the cflags provided by sysconfig.
++        """
++        cflags = ""
+ 
+         if 'CC' in os.environ:
+             newcc = os.environ['CC']

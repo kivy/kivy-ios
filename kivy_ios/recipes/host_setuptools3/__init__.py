@@ -6,8 +6,8 @@ import sh
 class HostSetuptools3(Recipe):
     depends = ["openssl", "hostpython3", "python3"]
     archs = ["x86_64"]
-    version = '40.9.0'
-    url = 'https://pypi.python.org/packages/source/s/setuptools/setuptools-{version}.zip'
+    version = '54.1.2'
+    url = 'https://pypi.python.org/packages/source/s/setuptools/setuptools-{version}.tar.gz'
 
     @cache_execution
     def install(self):
