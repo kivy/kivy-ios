@@ -19,9 +19,7 @@ class NetifacesRecipe(CythonRecipe):
 
     def get_netifaces_env(self, arch):
         build_env = arch.get_env()
-        build_env["PYTHONPATH"] = join(
-            self.dest_dir(), "lib", "python3.8", "site-packages"
-        )
+        build_env["PYTHONPATH"] = self.ctx.site_packages_dir
         return build_env
 
     def install(self):

@@ -17,7 +17,7 @@ class MarkupSafeRecipe(PythonRecipe):
         hostpython = sh.Command(self.ctx.hostpython)
         build_env = arch.get_env()
         dest_dir = join(self.ctx.dist_dir, "root", "python3")
-        build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.8', 'site-packages')
+        build_env['PYTHONPATH'] = self.ctx.site_packages_dir
         cmd = sh.Command("sed")
         shprint(cmd, "-i", "", "s/,.*Feature//g", "./setup.py", _env=build_env)
         shprint(cmd, "-i", "", "/^speedups = Feature/,/^)$/s/.*//g", "./setup.py", _env=build_env)
