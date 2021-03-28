@@ -972,24 +972,23 @@ class Recipe:
         if name in cls.recipes:
             recipe = cls.recipes[name]
         else:
-            try:
-                mod = importlib.import_module("kivy_ios.recipes.{}".format(name))
+            for custom_recipe_path in ctx.custom_recipes_paths:
+                if custom_recipe_path.split("/")[-1] == name:
+                    spec = importlib.util.spec_from_file_location(
+                        name, join(custom_recipe_path, "__init__.py")
+                    )
+                    mod = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(mod)
+                    recipe = mod.recipe
+                    recipe.recipe_dir = custom_recipe_path
+                    logger.info(f"A custom version for recipe '{name}' found in folder {custom_recipe_path}")
+                    break
+            else:
+                logger.info(f"Using the bundled version for recipe '{name}'")
+                mod = importlib.import_module(f"kivy_ios.recipes.{name}")
                 recipe = mod.recipe
                 recipe.recipe_dir = join(ctx.root_dir, "recipes", name)
-            except ImportError:
-                logger.info("Looking for recipe '{}' in custom recipes paths (if provided)".format(name))
-                for custom_recipe_path in ctx.custom_recipes_paths:
-                    if custom_recipe_path.split('/')[-1] == name:
-                        spec = importlib.util.spec_from_file_location(name,
-                                                                      join(custom_recipe_path, '__init__.py'))
-                        mod = importlib.util.module_from_spec(spec)
-                        spec.loader.exec_module(mod)
-                        recipe = mod.recipe
-                        recipe.recipe_dir = custom_recipe_path
-                        logger.info("Custom recipe '{}' found in folder {}".format(name, custom_recipe_path))
-                        break
-                else:
-                    raise
+
             recipe.init_after_import(ctx)
 
         if version:
@@ -1304,6 +1303,16 @@ pip           Install a pip dependency into the distribution
             filename = xcodeproj[0]
         return filename
 
+    @staticmethod
+    def validate_custom_recipe_paths(ctx, paths):
+        for custom_recipe_path in paths:
+            if exists(custom_recipe_path):
+                logger.info(f"Adding {custom_recipe_path} to custom recipes paths")
+                ctx.custom_recipes_paths.append(custom_recipe_path)
+            else:
+                logger.error(f"{custom_recipe_path} isn't a valid path")
+                raise FileNotFoundError
+
     def build(self):
         ctx = Context()
         parser = argparse.ArgumentParser(
@@ -1339,18 +1348,16 @@ pip           Install a pip dependency into the distribution
             ctx.use_pigz = False
         if args.no_pbzip2:
             ctx.use_pbzip2 = False
+
+        self.validate_custom_recipe_paths(ctx, args.add_custom_recipe)
+
         ctx.use_pigz = ctx.use_pbzip2
         logger.info("Building with {} processes, where supported".format(ctx.num_cores))
         if ctx.use_pigz:
             logger.info("Using pigz to decompress gzip data")
         if ctx.use_pbzip2:
             logger.info("Using pbzip2 to decompress bzip2 data")
-        for custom_recipe_path in args.add_custom_recipe:
-            if exists(custom_recipe_path):
-                logger.info(f"Adding {custom_recipe_path} to custom recipes paths")
-                ctx.custom_recipes_paths.append(custom_recipe_path)
-            else:
-                logger.error(f"{custom_recipe_path} isn't a valid path")
+
         build_recipes(args.recipe, ctx)
 
     def recipes(self):
@@ -1378,11 +1385,16 @@ pip           Install a pip dependency into the distribution
             if exists(recipe_inst.archive_fn):
                 unlink(recipe_inst.archive_fn)
 
+        ctx = Context()
         parser = argparse.ArgumentParser(
                 description="Clean the build")
         parser.add_argument("recipe", nargs="*", help="Recipe to clean")
+        parser.add_argument("--add-custom-recipe", action="append", default=[],
+                            help="Path to custom recipe")
         args = parser.parse_args(sys.argv[2:])
-        ctx = Context()
+
+        self.validate_custom_recipe_paths(ctx, args.add_custom_recipe)
+
         if args.recipe:
             for recipe in args.recipe:
                 logger.info("Cleaning {} build".format(recipe))
