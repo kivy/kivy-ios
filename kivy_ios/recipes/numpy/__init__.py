@@ -11,7 +11,6 @@ class NumpyRecipe(CythonRecipe):
     libraries = ["libnpymath.a", "libnpyrandom.a"]
     include_dir = "numpy/core/include"
     depends = ["python"]
-    pbx_frameworks = ["Accelerate"]
     hostpython_prerequisites = ["Cython"]
     cythonize = False
 
@@ -27,9 +26,9 @@ class NumpyRecipe(CythonRecipe):
         # compile and execute an empty C to see if the compiler works. This is
         # obviously not working when crosscompiling
         env["CC"] = "{} {}".format(env["CC"], env["CFLAGS"])
-        # Numpy configuration. Don't try to compile anything related to it,
-        # we're going to use the Accelerate framework
-        env["NPYCONFIG"] = "env BLAS=None LAPACK=None ATLAS=None"
+        # Disable Accelerate.framework by disabling the optimized BLAS and LAPACK libraries cause it's now unsupported
+        env["NPY_BLAS_ORDER"] = ""
+        env["NPY_LAPACK_ORDER"] = ""
         return env
 
     def build_arch(self, arch):
