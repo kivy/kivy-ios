@@ -1,0 +1,23 @@
+diff -Naur numpy-1.20.2.orig/numpy/linalg/setup.py numpy-1.20.2/numpy/linalg/setup.py
+--- numpy-1.20.2.orig/numpy/linalg/setup.py	2021-04-04 11:04:17.000000000 +0200
++++ numpy-1.20.2/numpy/linalg/setup.py	2021-04-04 11:04:54.000000000 +0200
+@@ -75,7 +75,7 @@
+     # umath_linalg module
+     config.add_extension(
+         '_umath_linalg',
+-        sources=['umath_linalg.c.src', get_lapack_lite_sources],
++        sources=['umath_linalg.c.src'],
+         depends=['lapack_lite/f2c.h'],
+         extra_info=lapack_info,
+         libraries=['npymath'],
+diff -Naur numpy-1.20.2.orig/numpy/random/setup.py numpy-1.20.2/numpy/random/setup.py
+--- numpy-1.20.2.orig/numpy/random/setup.py	2021-04-04 11:04:17.000000000 +0200
++++ numpy-1.20.2/numpy/random/setup.py	2021-04-04 11:05:22.000000000 +0200
+@@ -127,7 +127,6 @@
+     config.add_extension('mtrand',
+                          sources=['mtrand.c',
+                                   'src/legacy/legacy-distributions.c',
+-                                  'src/distributions/distributions.c',
+                                  ],
+                          include_dirs=['.', 'src', 'src/legacy'],
+                          libraries=['m'] if os.name != 'nt' else [],

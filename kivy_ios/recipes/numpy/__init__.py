@@ -5,19 +5,19 @@ import shutil
 
 
 class NumpyRecipe(CythonRecipe):
-    version = "1.16.4"
+    version = "1.20.2"
     url = "https://pypi.python.org/packages/source/n/numpy/numpy-{version}.zip"
     library = "libnumpy.a"
-    libraries = ["libnpymath.a", "libnpysort.a"]
+    libraries = ["libnpymath.a", "libnpyrandom.a"]
     include_dir = "numpy/core/include"
     depends = ["python"]
-    pbx_frameworks = ["Accelerate"]
+    hostpython_prerequisites = ["Cython"]
     cythonize = False
 
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
-        self.apply_patch("numpy-1.16.4.patch")
+        self.apply_patch("duplicated_symbols.patch")
         self.set_marker("patched")
 
     def get_recipe_env(self, arch):
@@ -26,9 +26,9 @@ class NumpyRecipe(CythonRecipe):
         # compile and execute an empty C to see if the compiler works. This is
         # obviously not working when crosscompiling
         env["CC"] = "{} {}".format(env["CC"], env["CFLAGS"])
-        # Numpy configuration. Don't try to compile anything related to it,
-        # we're going to use the Accelerate framework
-        env["NPYCONFIG"] = "env BLAS=None LAPACK=None ATLAS=None"
+        # Disable Accelerate.framework by disabling the optimized BLAS and LAPACK libraries cause it's now unsupported
+        env["NPY_BLAS_ORDER"] = ""
+        env["NPY_LAPACK_ORDER"] = ""
         return env
 
     def build_arch(self, arch):
@@ -45,6 +45,7 @@ class NumpyRecipe(CythonRecipe):
         shutil.rmtree(join(dest_dir, "f2py", "tests"))
         shutil.rmtree(join(dest_dir, "fft", "tests"))
         shutil.rmtree(join(dest_dir, "lib", "tests"))
+        shutil.rmtree(join(dest_dir, "linalg", "tests"))
         shutil.rmtree(join(dest_dir, "ma", "tests"))
         shutil.rmtree(join(dest_dir, "matrixlib", "tests"))
         shutil.rmtree(join(dest_dir, "polynomial", "tests"))

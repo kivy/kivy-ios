@@ -432,7 +432,8 @@ class Recipe:
         "frameworks": [],
         "sources": [],
         "pbx_frameworks": [],
-        "pbx_libraries": []
+        "pbx_libraries": [],
+        "hostpython_prerequisites": []
     }
 
     def __new__(cls):
@@ -696,6 +697,7 @@ class Recipe:
             self.ctx.state.remove_all(self.name)
         self.download()
         self.extract()
+        self.install_hostpython_prerequisites()
         self.build_all()
 
     @property
@@ -756,6 +758,11 @@ class Recipe:
                 return
             ensure_dir(build_dir)
             self.extract_file(self.archive_fn, build_dir)
+
+    @cache_execution
+    def install_hostpython_prerequisites(self):
+        for prerequisite in self.hostpython_prerequisites:
+            _hostpython_pip(["install", prerequisite])
 
     @cache_execution
     def build(self, arch):
@@ -1166,9 +1173,17 @@ def _pip(args):
         pip_args = ["--isolated", "--prefix", ctx.python_prefix]
         args = ["install"] + pip_args + args[1:]
 
-    logger.error("Executing pip with: {}".format(args))
+    logger.info("Executing pip with: {}".format(args))
     pip_cmd = sh.Command(pip_path)
     shprint(pip_cmd, *args, _env=pip_env)
+
+
+def _hostpython_pip(args):
+    ctx = Context()
+    pip_path = join(ctx.dist_dir, 'hostpython3', 'bin', 'pip3')
+    logger.info("Executing pip for hostpython with: {}".format(args))
+    pip_cmd = sh.Command(pip_path)
+    shprint(pip_cmd, *args)
 
 
 def update_pbxproj(filename, pbx_frameworks=None):
