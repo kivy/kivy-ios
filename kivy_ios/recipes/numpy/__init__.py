@@ -5,19 +5,20 @@ import shutil
 
 
 class NumpyRecipe(CythonRecipe):
-    version = "1.16.4"
+    version = "1.20.2"
     url = "https://pypi.python.org/packages/source/n/numpy/numpy-{version}.zip"
     library = "libnumpy.a"
-    libraries = ["libnpymath.a", "libnpysort.a"]
+    libraries = ["libnpymath.a", "libnpyrandom.a"]
     include_dir = "numpy/core/include"
     depends = ["python"]
     pbx_frameworks = ["Accelerate"]
+    hostpython_prerequisites = ["Cython"]
     cythonize = False
 
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
-        self.apply_patch("numpy-1.16.4.patch")
+        self.apply_patch("duplicated_symbols.patch")
         self.set_marker("patched")
 
     def get_recipe_env(self, arch):
@@ -45,6 +46,7 @@ class NumpyRecipe(CythonRecipe):
         shutil.rmtree(join(dest_dir, "f2py", "tests"))
         shutil.rmtree(join(dest_dir, "fft", "tests"))
         shutil.rmtree(join(dest_dir, "lib", "tests"))
+        shutil.rmtree(join(dest_dir, "linalg", "tests"))
         shutil.rmtree(join(dest_dir, "ma", "tests"))
         shutil.rmtree(join(dest_dir, "matrixlib", "tests"))
         shutil.rmtree(join(dest_dir, "polynomial", "tests"))
