@@ -253,7 +253,7 @@ Xcode path is not set up correctly. Run the following command to fix this: `sudo
 
 ### Bitcode is partially supported now (Xcode setting ENABLE_BITCODE can be set to Yes).
 
-Suuported recipes: python3, kivy, sdl2, sdl2_image, sdl2_mixer and libffi
+Supported recipes: python3, kivy, sdl2, sdl2_image, sdl2_mixer and libffi
 
 ### You don't have permissions to run
 
