@@ -251,9 +251,9 @@ You need to install the Command line tools: `xcode-select --install`
 
 Xcode path is not set up correctly. Run the following command to fix this: `sudo xcode-select --switch <YOUR_XCODEAPP_PATH>` (Change `<YOUR_XCODEAPP_PATH>` to the path that reflects your XCode installation, usually is `/Applications/Xcode.app`)
 
-### You must build with bitcode disabled (Xcode setting ENABLE_BITCODE should be No).
+### Bitcode is partially supported now (Xcode setting ENABLE_BITCODE can be set to Yes).
 
-We don't support bitcode. You need to go to the project setting, and disable bitcode.
+Suuported recipes: python3, kivy, sdl2, sdl2_image, sdl2_mixer and libffi
 
 ### You don't have permissions to run
 
