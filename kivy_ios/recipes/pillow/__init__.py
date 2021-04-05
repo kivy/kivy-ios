@@ -1,61 +1,67 @@
-from kivy_ios.toolchain import Recipe, shprint
+from kivy_ios.toolchain import CythonRecipe, shprint
 from os.path import join
 import sh
 import os
-import fnmatch
 
 
-class PillowRecipe(Recipe):
-    version = "6.1.0"
+class PillowRecipe(CythonRecipe):
+    version = "8.2.0"
     url = "https://pypi.python.org/packages/source/P/Pillow/Pillow-{version}.tar.gz"
     library = "libpillow.a"
-    depends = ["hostpython3", "host_setuptools3", "freetype", "libjpeg", "python3", "ios"]
+    depends = [
+        "hostpython3",
+        "host_setuptools3",
+        "freetype",
+        "libjpeg",
+        "python3",
+        "ios",
+    ]
     python_depends = ["setuptools"]
     pbx_libraries = ["libz", "libbz2"]
     include_per_arch = True
+    cythonize = False
 
-    def get_pil_env(self, arch):
-        build_env = arch.get_env()
-        build_env["IOSROOT"] = self.ctx.root_dir
-        build_env["IOSSDKROOT"] = arch.sysroot
-        build_env["LDSHARED"] = join(self.ctx.root_dir, "tools", "liblink")
-        build_env["ARM_LD"] = build_env["LD"]
-        build_env["ARCH"] = arch.arch
-        build_env["C_INCLUDE_PATH"] = join(arch.sysroot, "usr", "include")
-        build_env["LIBRARY_PATH"] = join(arch.sysroot, "usr", "lib")
-        build_env["CFLAGS"] += " ".join([
-            "-I{}".format(join(self.ctx.dist_dir, "include", arch.arch, "freetype")) +
-            " -I{}".format(join(self.ctx.dist_dir, "include", arch.arch, "libjpeg")) +
-            " -arch {}".format(arch.arch)
-            ])
-        build_env['PATH'] = os.environ['PATH']
-        return build_env
+    def prebuild_arch(self, arch):
+        if self.has_marker("patched"):
+            return
+        self.apply_patch("bypass-find-library.patch")
+        self.set_marker("patched")
+
+    def get_recipe_env(self, arch):
+        env = super().get_recipe_env(arch)
+        env["C_INCLUDE_PATH"] = join(arch.sysroot, "usr", "include")
+        env["LIBRARY_PATH"] = join(arch.sysroot, "usr", "lib")
+        env["CFLAGS"] += " ".join(
+            [
+                "-I{}".format(join(self.ctx.dist_dir, "include", arch.arch, "freetype"))
+                + " -I{}".format(
+                    join(self.ctx.dist_dir, "include", arch.arch, "libjpeg")
+                )
+                + " -arch {}".format(arch.arch)
+            ]
+        )
+        env["PATH"] = os.environ["PATH"]
+        env[
+            "PKG_CONFIG"
+        ] = "ios-pkg-config"  # ios-pkg-config does not exists, is needed to disable the pkg-config usage.
+        return env
 
     def build_arch(self, arch):
-        build_env = self.get_pil_env(arch)
+        build_env = self.get_recipe_env(arch)
         hostpython3 = sh.Command(self.ctx.hostpython)
-        shprint(hostpython3, "setup.py", "build_ext", "--disable-tiff",
-                "--disable-webp", "-g", _env=build_env)
+        shprint(
+            hostpython3,
+            "setup.py",
+            "build_ext",
+            "--disable-tiff",
+            "--disable-webp",
+            "--disable-jpeg2000",
+            "--disable-lcms",
+            "--disable-platform-guessing",
+            "-g",
+            _env=build_env,
+        )
         self.biglink()
-
-    def install(self):
-        arch = list(self.filtered_archs)[0]
-        build_dir = self.get_build_dir(arch.arch)
-        os.chdir(build_dir)
-        hostpython3 = sh.Command(self.ctx.hostpython)
-        build_env = self.get_pil_env(arch)
-        dest_dir = join(self.ctx.dist_dir, "root", "python3")
-        build_env['PYTHONPATH'] = self.ctx.site_packages_dir
-        shprint(hostpython3, "setup.py", "install", "--prefix", dest_dir,
-                _env=build_env)
-
-    def biglink(self):
-        dirs = []
-        for root, dirnames, filenames in os.walk(self.build_dir):
-            if fnmatch.filter(filenames, "*.so.libs"):
-                dirs.append(root)
-        cmd = sh.Command(join(self.ctx.root_dir, "tools", "biglink"))
-        shprint(cmd, join(self.build_dir, "libpillow.a"), *dirs)
 
 
 recipe = PillowRecipe()

@@ -4,7 +4,7 @@ import sh
 
 
 class JpegRecipe(Recipe):
-    version = "v9a"
+    version = "v9d"
     url = "http://www.ijg.org/files/jpegsrc.{version}.tar.gz"
     library = ".libs/libjpeg.a"
     include_dir = [
