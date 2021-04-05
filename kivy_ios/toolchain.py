@@ -230,6 +230,8 @@ class Arch:
             "-O3",
             self.version_min
         ] + include_dirs)
+        if self.sdk == "iphoneos":
+            env["CFLAGS"] += " -fembed-bitcode"
         env["LDFLAGS"] = " ".join([
             "-arch", self.arch,
             # "--sysroot", self.sysroot,
