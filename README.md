@@ -14,7 +14,7 @@ You do need to compile it at least once before creating your Xcode project.
 The toolchain supports:
 
 - iPhone Simulator (x86_64)
-- iPhone / iOS (armv7 and arm64)
+- iPhone / iOS (arm64)
 
 These recipes are not ported to the new toolchain yet:
 
@@ -110,7 +110,7 @@ You can think of it as follows: the kivy recipe will compile everything
 necessary for a minimal working version of Kivy.
 
 Don't grab a coffee, just do diner. Compiling all the libraries for the first
-time, 3x over (remember, 3 archs, x86_64, armv7, arm64) will take time.
+time, 2x over (remember, 2 archs, x86_64, arm64) will take time.
 
 For a complete list of available commands, type:
 
@@ -186,7 +186,7 @@ things you can do to achieve this:
    Python dynamic modules and will remove needed symbols.
 
 - By default, the iOS package compiles binaries for all processor
-   architectures, namely x86_64, armv7 and arm64 as per the guidelines from
+   architectures, namely x86_64 and arm64 as per the guidelines from
    Apple. You can reduce the size of your ipa significantly by removing the
    x86_64 architecture as they are used only for the emulator.
 
@@ -194,10 +194,10 @@ things you can do to achieve this:
 
       toolchain build hostpython3
 
-   Then build all the rest of the recipes using --arch=armv7 --arch=arm64
+   Then build all the rest of the recipes using --arch=arm64
    arguments as follows:
 
-      toolchain build python3 kivy --arch=armv7 --arch=arm64
+      toolchain build python3 kivy --arch=arm64
 
    Note that these packages will not run in the iOS emulators, so use them
    only for deployment.
@@ -258,7 +258,7 @@ Xcode path is not set up correctly. Run the following command to fix this: `sudo
 ### You don't have permissions to run
 
 It is due to invalid archs, search for them and check it. Maybe you
-targetted a simulator but have only armv7/arm64. Maybe you want to target
+targetted a simulator but have only arm64. Maybe you want to target
 your iPad but it as only x86_64.
 
 ### Why does the python multiprocess/subprocess module not work?
