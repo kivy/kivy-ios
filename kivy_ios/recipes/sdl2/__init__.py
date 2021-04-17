@@ -25,6 +25,7 @@ class LibSDL2Recipe(Recipe):
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(arch.arch),
+                "BITCODE_GENERATION_MODE=bitcode",
                 "CC={}".format(env['CC']),
                 "-sdk", arch.sdk,
                 "-project", "Xcode-iOS/SDL/SDL.xcodeproj",

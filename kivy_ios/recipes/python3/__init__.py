@@ -79,7 +79,7 @@ class Python3Recipe(Recipe):
         shprint(configure,
                 "CC={}".format(build_env["CC"]),
                 "LD={}".format(build_env["LD"]),
-                "CFLAGS={}".format(build_env["CFLAGS"]),
+                "CFLAGS={}".format(build_env["CFLAGS"].replace("-fembed-bitcode", "")),
                 "LDFLAGS={} -undefined dynamic_lookup".format(build_env["LDFLAGS"]),
                 "ac_cv_file__dev_ptmx=yes",
                 "ac_cv_file__dev_ptc=no",
@@ -129,7 +129,7 @@ class Python3Recipe(Recipe):
                     _PYTHON_SYSCONFIGDATA_NAME=_sysconfigdata_$(ABIFLAGS)_$(MACHDEP)_$(MULTIARCH)\
                     {}".format(sh.Command(self.ctx.hostpython)),
                 _env=build_env)
-        shprint(sh.make, self.ctx.concurrent_make)
+        shprint(sh.make, self.ctx.concurrent_make, "CFLAGS={}".format(build_env["CFLAGS"]))
 
     def install(self):
         arch = list(self.filtered_archs)[0]
