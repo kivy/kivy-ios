@@ -3,9 +3,7 @@ from os.path import join
 import sh
 
 
-arch_mapper = {'i386': 'darwin-i386-cc',
-               'x86_64': 'darwin64-x86_64-cc',
-               'armv7': 'ios-cross',
+arch_mapper = {'x86_64': 'darwin64-x86_64-cc',
                'arm64': 'ios64-cross'}
 
 
