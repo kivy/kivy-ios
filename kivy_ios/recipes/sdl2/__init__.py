@@ -40,7 +40,7 @@ class LibSDL2Recipe(Recipe):
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
-        self.apply_patch("uikit-transparent.patch")
+        # self.apply_patch("uikit-transparent.patch")
         if os.environ.get("KIVYIOS_USE_METALANGLE"):
             self.apply_patch("enable-metalangle.patch")
             downloaded_file = self.download_file(
