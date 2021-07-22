@@ -1495,11 +1495,11 @@ pip           Install a pip dependency into the distribution
         _pip(sys.argv[2:])
 
     def launchimage(self):
-        from tools.external import xcassets
+        from .tools.external import xcassets
         self._xcassets("LaunchImage", xcassets.launchimage)
 
     def icon(self):
-        from tools.external import xcassets
+        from .tools.external import xcassets
         self._xcassets("Icon", xcassets.icon)
 
     def xcode(self):
