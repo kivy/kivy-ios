@@ -1482,7 +1482,7 @@ pip           Install a pip dependency into the distribution
         self._xcassets("LaunchImage", xcassets.launchimage)
 
     def icon(self):
-        import xcassets
+        from .tools.external import xcassets
         self._xcassets("Icon", xcassets.icon)
 
     def xcode(self):
