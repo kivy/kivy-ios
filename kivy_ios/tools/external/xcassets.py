@@ -686,7 +686,7 @@ def _generate(d, image_xcassets, image_fn, options, icon=False):
             filename = image_fn
 
         if icon:
-            args += ["-Z", c]
+            args += [filename, "-Z", c]
             args += [
                 "--out",
                 join(image_xcassets, d, out_fn)
