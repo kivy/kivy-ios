@@ -33,7 +33,7 @@ class PillowRecipe(CythonRecipe):
         env["LIBRARY_PATH"] = join(arch.sysroot, "usr", "lib")
         env["CFLAGS"] += " ".join(
             [
-                "-I{}".format(join(self.ctx.dist_dir, "include", arch.arch, "freetype"))
+                " -I{}".format(join(self.ctx.dist_dir, "include", arch.arch, "freetype"))
                 + " -I{}".format(
                     join(self.ctx.dist_dir, "include", arch.arch, "libjpeg")
                 )
