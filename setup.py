@@ -18,6 +18,7 @@ setup(
     name="kivy-ios",
     version="1.3.0.dev0",
     description="Kivy for iOS",
+    license="MIT License",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     author="The Kivy team",
