@@ -1467,7 +1467,7 @@ pip           Install a pip dependency into the distribution
                 "{}.xcodeproj".format(args.name.lower()),
                 "project.pbxproj")
 
-        recipes = self.recipes_names_from_paths(args.add_custom_recipes)
+        recipes = self.recipes_names_from_paths(args.add_custom_recipe)
 
         update_pbxproj(filename, pbx_frameworks=args.add_framework,
                        custom_recipes=recipes, custom_recipes_paths=args.add_custom_recipe)
@@ -1484,7 +1484,6 @@ pip           Install a pip dependency into the distribution
         parser.add_argument("--add-framework", action="append", help="Additional Frameworks to include with this project")
         parser.add_argument("--add-custom-recipe", action="append", default=[],
                             help="Path to custom recipe (the recipe must already have been built with the 'build' command)")
-
         args = parser.parse_args(sys.argv[2:])
 
         filename = self.find_xcodeproj(args.filename)
@@ -1493,7 +1492,7 @@ pip           Install a pip dependency into the distribution
             logger.error("{} not found".format(filename))
             sys.exit(1)
 
-        recipes = self.recipes_names_from_paths(args.add_custom_recipes)
+        recipes = self.recipes_names_from_paths(args.add_custom_recipe)
 
         update_pbxproj(filename, pbx_frameworks=args.add_framework,
                        custom_recipes=recipes, custom_recipes_paths=args.add_custom_recipe)
