@@ -1,0 +1,6 @@
+recursive-include kivy_ios *.py
+recursive-include kivy_ios/recipes *.py *.patch *.diff *.rst ModulesSetup ModulesSetup.mobile *.m *.h *.pyx *.so
+recursive-include kivy_ios/tools *.py biglink liblink
+recursive-include kivy_ios/tools/templates *
+
+prune .git
