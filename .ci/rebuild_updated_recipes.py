@@ -38,7 +38,7 @@ def main():
     updated_recipes = " ".join(recipes)
     if updated_recipes != "":
         subprocess.run(
-            f"python3 toolchain.py build {updated_recipes}", shell=True, check=True
+            f"toolchain build {updated_recipes}", shell=True, check=True
         )
     else:
         print("Nothing to do. No updated recipes.")
