@@ -3,7 +3,7 @@
 
 set -eo pipefail
 
-python3 toolchain.py create Touchtracer kivy-ci-clone/examples/demo/touchtracer
+toolchain create Touchtracer kivy-ci-clone/examples/demo/touchtracer
 
 xcodebuild -project touchtracer-ios/touchtracer.xcodeproj \
             -scheme touchtracer \
