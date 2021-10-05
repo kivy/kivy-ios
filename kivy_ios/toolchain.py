@@ -33,12 +33,23 @@ curdir = dirname(__file__)
 
 initial_working_directory = getcwd()
 
-
-# Quiet the loggers we don't care about
-sh_logging = logging.getLogger('sh')
-sh_logging.setLevel(logging.WARNING)
-
 logger = logging.getLogger(__name__)
+
+
+def log_setup(level, quiet=True):
+    """ Setup logging at level. """
+    # customize loging here
+    if quiet:
+        level -= 1
+    level = logging.DEBUG if level > 0 else logging.WARNING if level < 0 else logging.INFO
+    # For more detailed logging, use something like
+    # format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(funcName)s():%(lineno)d] %(message)s'
+    logging.basicConfig(format='[%(levelname)-8s] %(message)s',
+        datefmt='%Y-%m-%d:%H:%M:%S',
+        level=level)
+    # Quiet the loggers we don't care about
+    sh_logging = logging.getLogger('sh')
+    sh_logging.setLevel(logging.WARNING)
 
 
 def shprint(command, *args, **kwargs):
@@ -78,18 +89,6 @@ def remove_junk(d):
             if fn.endswith(exts):
                 print('Found junk {}/{}, removing'.format(root, fn))
                 unlink(join(root, fn))
-
-
-def log_setup(level, quiet=True):
-    """ Setup logging at level. """
-    if quiet:
-        level -= 1
-    level = logging.DEBUG if level > 0 else logging.WARNING if level < 0 else logging.INFO
-    # For more detailed logging, use something like
-    # format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(funcName)s():%(lineno)d] %(message)s'
-    logging.basicConfig(format='[%(levelname)-8s] %(message)s',
-        datefmt='%Y-%m-%d:%H:%M:%S',
-        level=level)
 
 
 class ChromeDownloader(FancyURLopener):
