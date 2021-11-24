@@ -1,12 +1,11 @@
-from kivy_ios.toolchain import Recipe, shprint, cache_execution
+from kivy_ios.toolchain import HostRecipe, shprint, cache_execution
 from kivy_ios.context_managers import cd, python_path
 import sh
 
 
-class HostSetuptools3(Recipe):
+class HostSetuptools3(HostRecipe):
     depends = ["openssl", "hostpython3", "python3"]
-    archs = ["x86_64"]
-    version = '54.1.2'
+    version = '59.2.0'
     url = 'https://pypi.python.org/packages/source/s/setuptools/setuptools-{version}.tar.gz'
 
     @cache_execution

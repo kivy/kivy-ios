@@ -7,6 +7,7 @@ This tool intend to replace all the previous tools/ in shell script.
 """
 
 import argparse
+import platform
 import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename
@@ -995,6 +996,12 @@ class Recipe:
             recipe.version = version
 
         return recipe
+
+
+class HostRecipe(Recipe):
+    @property
+    def archs(self):
+        return [platform.machine()]
 
 
 class PythonRecipe(Recipe):
