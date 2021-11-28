@@ -8,7 +8,7 @@ arch_mapper = {'x86_64': 'darwin64-x86_64-cc',
 
 
 class OpensslRecipe(Recipe):
-    version = "1.1.1g"
+    version = "1.1.1l"
     url = "http://www.openssl.org/source/openssl-{version}.tar.gz"
     libraries = ["libssl.a", "libcrypto.a"]
     include_dir = "include"

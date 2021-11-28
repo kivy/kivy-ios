@@ -1,4 +1,4 @@
-from kivy_ios.toolchain import Recipe, shprint
+from kivy_ios.toolchain import HostRecipe, shprint
 from os.path import join
 import os
 import sh
@@ -10,12 +10,11 @@ from kivy_ios.context_managers import cd
 logger = logging.getLogger(__name__)
 
 
-class Hostpython3Recipe(Recipe):
-    version = "3.9.2"
+class Hostpython3Recipe(HostRecipe):
+    version = "3.9.9"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
-    depends = ["hostlibffi", "hostopenssl"]
+    depends = ["hostopenssl"]
     optional_depends = []
-    archs = ["x86_64"]
     build_subdir = 'native-build'
 
     def init_with_ctx(self, ctx):
@@ -49,21 +48,18 @@ class Hostpython3Recipe(Recipe):
         build_env["LDFLAGS"] = " ".join([
                 "-lsqlite3",
                 "-lffi",
-                "-L{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "lib"))
                 ])
         build_env["CFLAGS"] = " ".join([
                 "--sysroot={}".format(sdk_path),
                 "-mmacosx-version-min=10.12",
-                "-I{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "include"))
                 ])
         return build_env
 
-    def build_x86_64(self):
+    def build_arch(self, arch):
         build_env = self.get_build_env()
 
         configure = sh.Command(join(self.build_dir, "configure"))
 
-        arch = self.filtered_archs[0]
         build_subdir = self.get_build_subdir(arch.arch)
         os.makedirs(build_subdir, exist_ok=True)
 
