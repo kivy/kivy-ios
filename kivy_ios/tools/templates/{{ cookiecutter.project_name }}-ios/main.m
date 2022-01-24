@@ -33,8 +33,6 @@ int main(int argc, char *argv[]) {
 
     // Kivy environment to prefer some implementation on iOS platform
     putenv("KIVY_BUILD=ios");
-    putenv("KIVY_NO_CONFIG=1");
-    putenv("KIVY_NO_FILELOG=1");
     putenv("KIVY_WINDOW=sdl2");
     putenv("KIVY_IMAGE=imageio,tex,gif,sdl2");
     putenv("KIVY_AUDIO=sdl2");
