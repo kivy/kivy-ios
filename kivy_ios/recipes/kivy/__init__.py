@@ -7,11 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class KivyRecipe(CythonRecipe):
-    """
-    The targeted commit includes these iOS specific fixes that were merged after kivy 2.0.0 release:
-    - Camera: Added API to change avfoundation camera provider orientation (PR #7263)
-    """
-    version = "b5ec51ed2315a9a890f264b0df6d23c8e6341d42"
+    version = "2.1.0"
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
     depends = ["sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios",
