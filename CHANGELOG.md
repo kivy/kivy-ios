@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.3.0] - 2022-03-13
+
+### Added
+- Add native support for Apple Silicon [\#660](https://github.com/kivy/kivy-ios/pull/660) ([misl6](https://github.com/misl6))
+- Makes \_bz2 module available [\#658](https://github.com/kivy/kivy-ios/pull/658) ([misl6](https://github.com/misl6))
+- enable sdl2 image provider to allow image to be saved from widget [\#656](https://github.com/kivy/kivy-ios/pull/656) ([brentpicasso](https://github.com/brentpicasso))
+- Add MANIFEST.in [\#651](https://github.com/kivy/kivy-ios/pull/651) ([misl6](https://github.com/misl6))
+- Add official OSI name in the license metadata [\#639](https://github.com/kivy/kivy-ios/pull/639) ([ecederstrand](https://github.com/ecederstrand))
+- Enables buildozer to automatically install dependencies [\#638](https://github.com/kivy/kivy-ios/pull/638) ([meow464](https://github.com/meow464))
+- Add bitcode support [\#605](https://github.com/kivy/kivy-ios/pull/605) ([kewlbear](https://github.com/kewlbear))
+- Add the ability to clean a custom recipe, use the custom recipe instead of the bundled one, if available. [\#602](https://github.com/kivy/kivy-ios/pull/602) ([misl6](https://github.com/misl6))
+- Add an error to FAQ [\#586](https://github.com/kivy/kivy-ios/pull/586) ([mvasilkov](https://github.com/mvasilkov))
+
+### Removed
+- Remove NO\_CONFIG and NO\_FILE\_LOG [\#670](https://github.com/kivy/kivy-ios/pull/670) ([akshayaurora](https://github.com/akshayaurora))
+- Remove i386 and armv7 references from docs and code. Both are unsupported since a while. [\#610](https://github.com/kivy/kivy-ios/pull/610) ([misl6](https://github.com/misl6))
+
+### Fixed
+- Bump Kivy version to 2.1.0 [\#679](https://github.com/kivy/kivy-ios/pull/679) ([misl6](https://github.com/misl6))
+- CI: Use a Kivy-ios installation for tests, instead of the legacy toolchain.py [\#653](https://github.com/kivy/kivy-ios/pull/653) ([misl6](https://github.com/misl6))
+- Fix outdated freetype url [\#632](https://github.com/kivy/kivy-ios/pull/632) ([misl6](https://github.com/misl6))
+- Bump sdl2\_ttf to 2.0.15 to improve compatibility with kivymd [\#624](https://github.com/kivy/kivy-ios/pull/624) ([brentpicasso](https://github.com/brentpicasso))
+- add leading whitespace for include file [\#623](https://github.com/kivy/kivy-ios/pull/623) ([brentpicasso](https://github.com/brentpicasso))
+- fix icon generation [\#620](https://github.com/kivy/kivy-ios/pull/620) ([akshayaurora](https://github.com/akshayaurora))
+- Switch to iOS 9.0 where applicable [\#611](https://github.com/kivy/kivy-ios/pull/611) ([misl6](https://github.com/misl6))
+- Pillow recipe rework + upgrade to version 8.2.0 [\#606](https://github.com/kivy/kivy-ios/pull/606) ([misl6](https://github.com/misl6))
+- Update numpy to version 1.20.2 [\#604](https://github.com/kivy/kivy-ios/pull/604) ([misl6](https://github.com/misl6))
+- Upgrade python version to 3.9.2 [\#601](https://github.com/kivy/kivy-ios/pull/601) ([misl6](https://github.com/misl6))
+
 ## [1.2.1] - 2021-01-26
 ### Fixed
 - Fixes hostpython3 recipe on MacOS 11.1 BigSur [\#581](https://github.com/kivy/kivy-ios/issues/581) ([misl6](https://github.com/misl6))
