@@ -15,6 +15,7 @@ class LibffiRecipe(Recipe):
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
+        self.apply_patch("enable-tramp-build.patch")
         shprint(sh.sed,
                 "-i.bak",
                 "s/-miphoneos-version-min=7.0/-miphoneos-version-min=9.0/g",
