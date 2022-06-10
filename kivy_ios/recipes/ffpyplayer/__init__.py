@@ -3,7 +3,7 @@ from os.path import join
 
 
 class FFPyplayerRecipe(CythonRecipe):
-    version = "4.2.0"
+    version = "v4.3.5"
     url = "https://github.com/matham/ffpyplayer/archive/{version}.zip"
     library = "libffpyplayer.a"
     depends = ["python", "ffmpeg"]
