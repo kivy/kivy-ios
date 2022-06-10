@@ -1,0 +1,19 @@
+diff -Naur SDL2_image-2.0.5.orig/Xcode-iOS/SDL_image.xcodeproj/project.pbxproj SDL2_image-2.0.5/Xcode-iOS/SDL_image.xcodeproj/project.pbxproj
+--- SDL2_image-2.0.5.orig/Xcode-iOS/SDL_image.xcodeproj/project.pbxproj	2019-06-30 06:52:03.000000000 +0200
++++ SDL2_image-2.0.5/Xcode-iOS/SDL_image.xcodeproj/project.pbxproj	2019-11-28 12:42:49.000000000 +0100
+@@ -410,6 +410,7 @@
+ 					LOAD_TIF,
+ 					LOAD_XPM,
+ 					LOAD_XV,
++					LOAD_WEBP,
+ 				);
+ 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+ 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+@@ -475,6 +476,7 @@
+ 					LOAD_TIF,
+ 					LOAD_XPM,
+ 					LOAD_XV,
++					LOAD_WEBP,
+ 				);
+ 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+ 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
