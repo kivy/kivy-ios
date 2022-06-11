@@ -21,3 +21,4 @@ src/ios/ios.c
 __pycache__
 .tox
 venv
+*.egg-info
