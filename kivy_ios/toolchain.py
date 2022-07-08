@@ -1364,8 +1364,9 @@ pip           Install a pip dependency into the distribution
             logger.info("Using pigz to decompress gzip data")
         if ctx.use_pbzip2:
             logger.info("Using pbzip2 to decompress bzip2 data")
-
-        build_recipes(args.recipe, ctx)
+            
+        recipe = ''.join(args.recipe).split()
+        build_recipes(recipe, ctx)
 
     def recipes(self):
         parser = argparse.ArgumentParser(
