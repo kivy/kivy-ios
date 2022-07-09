@@ -1,8 +1,8 @@
 diff --git a/DNS/Base.py b/DNS/Base.py
-index 34a6da7..a558889 100644
+index 34a6da7..27ab6ca 100644
 --- a/DNS/Base.py
 +++ b/DNS/Base.py
-@@ -15,6 +15,7 @@ import socket, string, types, time, select
+@@ -15,12 +15,13 @@ import socket, string, types, time, select
  import errno
  from . import Type,Class,Opcode
  import asyncore
@@ -10,18 +10,43 @@ index 34a6da7..a558889 100644
  #
  # This random generator is used for transaction ids and port selection.  This
  # is important to prevent spurious results from lost packets, and malicious
+ # cache poisoning.  This doesn't matter if you are behind a caching nameserver
+ # or your app is a primary DNS server only. To install your own generator,
+-# replace DNS.Base.random.  SystemRandom uses /dev/urandom or similar source.  
++# replace DNS.Base.random.  SystemRandom uses /dev/urandom or similar source.
+ #
+ try:
+   from random import SystemRandom
 @@ -50,8 +51,12 @@ defaults= { 'protocol':'udp', 'port':53, 'opcode':Opcode.QUERY,
  
  def ParseResolvConf(resolv_path="/etc/resolv.conf"):
      "parses the /etc/resolv.conf file and sets defaults for name servers"
 -    with open(resolv_path, 'r') as stream:
 -        return ParseResolvConfFromIterable(stream)
-+    if os.path.exists(resolv_path):
++    if os.path.existst(resolv_path):
 +        with open(resolv_path, 'r') as stream:
 +            return ParseResolvConfFromIterable(stream)
 +    else:
-+        defaults['server'].append('8.8.8.8')
++        defaults['server'].extend(['8.8.8.8', '8.8.4.4'])
 +        return
  
  def ParseResolvConfFromIterable(lines):
      "parses a resolv.conf formatted stream and sets defaults for name servers"
+@@ -61,7 +66,7 @@ def ParseResolvConfFromIterable(lines):
+         if not line or line[0]==';' or line[0]=='#':
+             continue
+         fields=line.split()
+-        if len(fields) < 2: 
++        if len(fields) < 2:
+             continue
+         if fields[0]=='domain' and len(fields) > 1:
+             defaults['domain']=fields[1]
+@@ -212,7 +217,7 @@ class DnsRequest:
+                 source_port = random.randint(1024,65535)
+                 self.s.bind(('', source_port))
+                 break
+-            except socket.error as msg: 
++            except socket.error as msg:
+                 # errno.EADDRINUSE, 'Address already in use'
+                 if msg.errno != errno.EADDRINUSE: raise
+ 
