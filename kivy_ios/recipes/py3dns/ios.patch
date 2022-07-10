@@ -16,7 +16,7 @@ index 34a6da7..27ab6ca 100644
      "parses the /etc/resolv.conf file and sets defaults for name servers"
 -    with open(resolv_path, 'r') as stream:
 -        return ParseResolvConfFromIterable(stream)
-+    if os.path.existst(resolv_path):
++    if os.path.exists(resolv_path):
 +        with open(resolv_path, 'r') as stream:
 +            return ParseResolvConfFromIterable(stream)
 +    else:
