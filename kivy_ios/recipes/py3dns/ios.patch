@@ -1,8 +1,8 @@
 diff --git a/DNS/Base.py b/DNS/Base.py
-index 34a6da7..27ab6ca 100644
+index 34a6da7..b755e79 100644
 --- a/DNS/Base.py
 +++ b/DNS/Base.py
-@@ -15,12 +15,13 @@ import socket, string, types, time, select
+@@ -15,6 +15,7 @@ import socket, string, types, time, select
  import errno
  from . import Type,Class,Opcode
  import asyncore
