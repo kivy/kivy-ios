@@ -1365,7 +1365,7 @@ pip           Install a pip dependency into the distribution
         if ctx.use_pbzip2:
             logger.info("Using pbzip2 to decompress bzip2 data")
 
-        recipe = ''.join(args.recipe).replace(',', '').replace('  ', ' ').split()
+        recipe = ' '.join(args.recipe).replace(',', '').replace('  ', ' ').split()
         build_recipes(recipe, ctx)
 
     def recipes(self):
