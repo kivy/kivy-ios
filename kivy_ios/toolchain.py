@@ -1512,7 +1512,8 @@ pip           Install a pip dependency into the distribution
         self.pip()
 
     def pip(self):
-        _pip(sys.argv[2:])
+        args = ' '.join(sys.argv[2:]).replace(',', '').replace(' ', ' ').split()
+        _pip(args)
 
     def launchimage(self):
         from .tools.external import xcassets
