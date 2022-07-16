@@ -11,7 +11,7 @@ import platform
 import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename
-from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
+from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk, mkdir
 import sh
 import zipfile
 import tarfile
@@ -754,7 +754,8 @@ class Recipe:
             shutil.copytree(self.custom_dir, dest_dir)
         else:
             if exists(dest_dir):
-                return
+                shutil.rmtree(dest_dir, ignore_errors=True)
+
             src_dir = join(self.recipe_dir, self.url)
             if exists(src_dir):
                 shutil.copytree(src_dir, dest_dir)
@@ -775,12 +776,14 @@ class Recipe:
                 self.name, arch.arch))
             logger.warning("Warning: deleting the build and restarting.")
             shutil.rmtree(self.build_dir, ignore_errors=True)
-            self.extract_arch(arch.arch)
 
         if self.has_marker("build_done"):
             logger.info("Build python for {} already done.".format(arch.arch))
             return
 
+        if not isdir(self.build_dir):
+            mkdir(self.build_dir)
+        self.extract_arch(arch.arch)
         self.set_marker("building")
 
         chdir(self.build_dir)
