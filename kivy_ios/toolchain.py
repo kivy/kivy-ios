@@ -7,7 +7,6 @@ This tool intend to replace all the previous tools/ in shell script.
 """
 
 import argparse
-import os.path
 import platform
 import sys
 from sys import stdout
