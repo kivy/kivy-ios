@@ -184,7 +184,7 @@ class Arch:
         use_ccache = environ.get("USE_CCACHE", "1")
         ccache = None
         if use_ccache == "1":
-            ccache = sh.which('ccache')
+            ccache = shutil.which('ccache')
         if ccache:
             ccache = ccache.strip()
             env["USE_CCACHE"] = "1"
@@ -361,9 +361,9 @@ class Context:
             Arch64IOS(self))
 
         # path to some tools
-        self.ccache = sh.which("ccache")
+        self.ccache = shutil.which("ccache")
         for cython_fn in ("cython-2.7", "cython"):
-            cython = sh.which(cython_fn)
+            cython = shutil.which(cython_fn)
             if cython:
                 self.cython = cython
                 break
@@ -373,15 +373,15 @@ class Context:
 
         # check the basic tools
         for tool in ("pkg-config", "autoconf", "automake", "libtool"):
-            if not sh.which(tool):
+            if not shutil.which(tool):
                 logger.error("Missing requirement: {} is not installed".format(
                     tool))
 
         if not ok:
             sys.exit(1)
 
-        self.use_pigz = sh.which('pigz')
-        self.use_pbzip2 = sh.which('pbzip2')
+        self.use_pigz = shutil.which('pigz')
+        self.use_pbzip2 = shutil.which('pbzip2')
 
         try:
             num_cores = int(sh.sysctl('-n', 'hw.ncpu'))
