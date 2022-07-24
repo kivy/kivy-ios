@@ -23,7 +23,7 @@ These recipes are not ported to the new toolchain yet:
 
 ## Installation & requirements
 
-Before we start, we strongly advise to use a Python virtual environment to install Python packages.
+Before we start, we strongly advise using a Python virtual environment to install Python packages.
 
       python3 -m venv venv
       . venv/bin/activate
@@ -32,7 +32,7 @@ Install [Kivy for iOS from PyPI](https://pypi.org/project/kivy-ios) with pip lik
 
       pip3 install kivy-ios
 
-Additionally you would need few system dependencies and configuration.
+Additionally, you would need a few system dependencies and configuration.
 
 - Xcode 10 or above, with an iOS SDK and command line tools installed:
 
@@ -47,7 +47,7 @@ Additionally you would need few system dependencies and configuration.
 
 Any Python extensions or C/C++ library must be compiled: you need to have what
 we call a `recipe` to compile it. For example, Python, libffi, SDL2, SDL_image,
-freetype... all the dependencies, compilation and packaging instructions are
+freetype... all the dependencies, compilation, and packaging instructions are
 contained in a `recipe`.
 
 You can list the available recipes and their versions with:
@@ -105,7 +105,7 @@ You can install package that don't require compilation with pip::
     $ toolchain pip install plyer
 
 The Kivy recipe depends on several others, like the sdl\* and python recipes.
-These may in turn depend on others e.g. sdl2_ttf depends on freetype, etc.
+These may, in turn, depend on others e.g. sdl2_ttf depends on freetype, etc.
 You can think of it as follows: the kivy recipe will compile everything
 necessary for a minimal working version of Kivy.
 
@@ -131,9 +131,9 @@ You can open the Xcode project using::
 
 Then click on `Play`, and enjoy.
 
-> *Did you know ?*
+> *Did you know?*
 >
-> Everytime you press `Play`, your application directory will be synced to
+> Every time you press `Play`, your application directory will be synced to
 > the `<title>-ios/YourApp` directory. Don't make changes in the -ios
 > directory directly.
 
@@ -143,7 +143,7 @@ Then click on `Play`, and enjoy.
 You can configure and customize your app in various ways:
 
 - Set the icon and launch images in XCode. Note that XCode requires that you
-   specify these assests per device or/and iOS version.
+   specify these assets per device or/and iOS version.
 
 - When you first build your XCode project, a 'main.m' file is created in your
    XCode project folder. This file configures your environment variables and
@@ -152,12 +152,12 @@ You can configure and customize your app in various ways:
 
 - Kivy uses SDL, and as soon as the application starts the SDL main, the launch
    image will disappear. To prevent that, you need to have 2 files named
-   `Default.png` and `Default-Landscape.png`, and put them
+   `Default.png` and `Default-Landscape.png` and put them
    in the `Resources` folder in Xcode (not in your application folder)
 
-> *Did you know ?*
+> *Did you know?*
 >
-> If you wish to restrict your apps orientation, you should do this via
+> If you wish to restrict your app's orientation, you should do this via
 > the 'export_orientation' function in 'main.m'. The XCode orientation
 > settings should be set to support all.
 
@@ -253,19 +253,19 @@ Xcode path is not set up correctly. Run the following command to fix this: `sudo
 
 ### Bitcode is partially supported now (Xcode setting ENABLE_BITCODE can be set to Yes).
 
-* Supported recipes: python3, kivy, sdl2, sdl2_image, sdl2_mixer and libffi
+* Supported recipes: python3, kivy, sdl2, sdl2_image, sdl2_mixer, and libffi
 
-### You don't have permissions to run
+### You don't have permission to run
 
 It is due to invalid archs, search for them and check it. Maybe you
 targetted a simulator but have only arm64. Maybe you want to target
-your iPad but it as only x86_64.
+your iPad but it is only x86_64.
 
 ### Why does the python multiprocess/subprocess module not work?
 
 The iOS application model does not currently support multi-processing in a
 cross-platform compatible way. The application design focuses on minimizing
-processor usage (to minimize power consumption) and promotes an
+processor usage (to minimize power consumption) and promotes an 
 [alternative concurrency model](https://developer.apple.com/library/archive/documentation/General/Conceptual/ConcurrencyProgrammingGuide/Introduction/Introduction.html).
 
 If you need to make use of multiple processes, you should consider using
