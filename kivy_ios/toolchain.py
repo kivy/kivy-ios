@@ -1056,7 +1056,7 @@ class CythonRecipe(PythonRecipe):
         # doesn't (yet) have the executable bit hence we explicitly call it
         # with the Python interpreter
         cythonize_script = join(self.ctx.root_dir, "tools", "cythonize.py")
-        shprint(sh.python, cythonize_script, filename)
+        shprint(sh.Command(sys.executable), cythonize_script, filename)
 
     def cythonize_build(self):
         if not self.cythonize:
