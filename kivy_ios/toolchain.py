@@ -1498,7 +1498,7 @@ pip           Install a pip dependency into the distribution
                 if not callable(attr) and attr != 'archs':
                     print("{}: {}".format(attr, pformat(getattr(ctx, attr))))
         for arch in ctx.archs:
-            ul = '-' * (len(str(arch))+6)
+            ul = '-' * (len(str(arch)) + 6)
             print("\narch: {}\n{}".format(str(arch), ul))
             for attr in dir(arch):
                 if not attr.startswith("_"):
