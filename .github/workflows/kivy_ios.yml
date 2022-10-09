@@ -9,10 +9,10 @@ jobs:
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
-    - name: Set up Python 3.8
+    - name: Set up Python 3.10
       uses: actions/setup-python@v2
       with:
-        python-version: '3.8.x'
+        python-version: '3.10'
     - name: Run flake8
       run: |
         python -m pip install --upgrade pip
@@ -25,9 +25,9 @@ jobs:
       matrix:
         include:
           - runs_on: macos-latest
-            python: 3.9
+            python: '3.10'
           - runs_on: apple-silicon-m1
-            python: 3.9.7
+            python: '3.10.7'
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
@@ -75,9 +75,9 @@ jobs:
       matrix:
         include:
           - runs_on: macos-latest
-            python: 3.9
+            python: '3.10'
           - runs_on: apple-silicon-m1
-            python: 3.9.7
+            python: '3.10.7'
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
@@ -131,9 +131,9 @@ jobs:
       matrix:
         include:
           - runs_on: macos-latest
-            python: 3.9
+            python: '3.10'
           - runs_on: apple-silicon-m1
-            python: 3.9.7
+            python: '3.10.7'
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v2
