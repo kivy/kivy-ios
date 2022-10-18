@@ -1237,17 +1237,19 @@ def update_pbxproj(filename, pbx_frameworks=None):
     group = project.get_or_create_group("Frameworks")
     g_classes = project.get_or_create_group("Classes")
     file_options = FileOptions(embed_framework=False, code_sign_on_copy=True)
+    file_options_embed = FileOptions(embed_framework=True, code_sign_on_copy=True)
     for framework in pbx_frameworks:
-        framework_name = "{}.framework".format(framework)
-        if framework_name in frameworks:
+        if framework in frameworks:
             logger.info("Ensure {} is in the project (pbx_frameworks, local)".format(framework))
-            f_path = join(ctx.dist_dir, "frameworks", framework_name)
+            f_path = join(ctx.dist_dir, "frameworks", f"{framework}.framework")
+            project.add_file(f_path, parent=group, tree="DEVELOPER_DIR",
+                             force=False, file_options=file_options_embed)
         else:
             logger.info("Ensure {} is in the project (pbx_frameworks, system)".format(framework))
             f_path = join(sysroot, "System", "Library", "Frameworks",
                           "{}.framework".format(framework))
-        project.add_file(f_path, parent=group, tree="DEVELOPER_DIR",
-                         force=False, file_options=file_options)
+            project.add_file(f_path, parent=group, tree="DEVELOPER_DIR",
+                             force=False, file_options=file_options)
     for library in pbx_libraries:
         logger.info("Ensure {} is in the project (pbx_libraries, dylib+tbd)".format(library))
         f_path = join(sysroot, "usr", "lib",
