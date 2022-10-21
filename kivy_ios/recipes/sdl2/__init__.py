@@ -3,16 +3,14 @@ import sh
 
 
 class LibSDL2Recipe(Recipe):
-    # version = "2.0.9"
-    # url = "https://www.libsdl.org/release/SDL2-{version}.tar.gz"
-    version = "7cc4fc886d9e"
-    url = "https://hg.libsdl.org/SDL/archive/{version}.tar.gz"
-    library = "Xcode-iOS/SDL/build/Release-{arch.sdk}/libSDL2.a"
+    version = "2.24.1"
+    url = "https://github.com/libsdl-org/SDL/releases/download/release-{version}/SDL2-{version}.tar.gz"
+    library = "Xcode/SDL/build/Release-{arch.sdk}/libSDL2.a"
     include_dir = "include"
     pbx_frameworks = [
         "OpenGLES", "AudioToolbox", "QuartzCore", "CoreGraphics",
         "CoreMotion", "GameController", "AVFoundation", "Metal",
-        "UIKit"]
+        "UIKit", "CoreHaptics", "CoreBluetooth"]
 
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
@@ -28,8 +26,8 @@ class LibSDL2Recipe(Recipe):
                 "BITCODE_GENERATION_MODE=bitcode",
                 "CC={}".format(env['CC']),
                 "-sdk", arch.sdk,
-                "-project", "Xcode-iOS/SDL/SDL.xcodeproj",
-                "-target", "libSDL-iOS",
+                "-project", "Xcode/SDL/SDL.xcodeproj",
+                "-target", "Static Library-iOS",
                 "-configuration", "Release")
 
 
