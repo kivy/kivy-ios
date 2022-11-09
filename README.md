@@ -144,6 +144,14 @@ You can configure and customize your app in various ways:
 
 - Set the icon and launch images in XCode. Note that XCode requires that you
    specify these assests per device or/and iOS version.
+   
+- To add Launch screen go to Xcode code click on your project, File > New > Launch Screen. In the General Tab
+  under “App icons and Launch Screen” select the Launch Screen File and add the launch screen you just created. Under 
+  development info in Xcode general tab switch to iOS 9.0 0r 10, you can also design the launch screen as you
+  wish.
+- To create app icon for your projects visit [HERE](https://www.fanstudio.co.uk/appicon/) 
+
+- To Show status bar on your iOS, Xcode > main.m change  IOS_IS_WINDOWED to True(IOS_IS_WINDOWED=True)
 
 - When you first build your XCode project, a 'main.m' file is created in your
    XCode project folder. This file configures your environment variables and
