@@ -1,7 +1,7 @@
 print("Python 3 running!")
-import sys
+import sys  # noqa: E402
 print(f"sys.path: {sys.path}")
-import traceback
+import traceback  # noqa: E402
 
 modules_to_tests = [
     "math", "_sre", "array",
@@ -20,16 +20,16 @@ for name in modules_to_tests:
 
 # test pyobjus
 print("- import pyobjus start")
-import pyobjus  # noqa: F401
+import pyobjus  # noqa: F401, E402
 print("- import done")
-from pyobjus import autoclass
+from pyobjus import autoclass  # noqa: E402
 NSNotificationCenter = autoclass("NSNotificationCenter")
 
 # test ios
-import ios  # noqa: F401
+import ios  # noqa: F401, E402
 
-from kivy.app import App
-from kivy.lang import Builder
+from kivy.app import App  # noqa: E402
+from kivy.lang import Builder  # noqa: E402
 
 
 class TestApp(App):

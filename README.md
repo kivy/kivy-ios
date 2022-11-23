@@ -109,7 +109,7 @@ These may in turn depend on others e.g. sdl2_ttf depends on freetype, etc.
 You can think of it as follows: the kivy recipe will compile everything
 necessary for a minimal working version of Kivy.
 
-Don't grab a coffee, just do diner. Compiling all the libraries for the first
+Don't grab a coffee, just do dinner. Compiling all the libraries for the first
 time, 2x over (remember, 2 archs, x86_64, arm64) will take time.
 
 For a complete list of available commands, type:

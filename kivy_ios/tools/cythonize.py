@@ -21,7 +21,7 @@ def resolve_cython():
 
 def do(fn):
     print('cythonize:', fn)
-    assert(fn.endswith('.pyx'))
+    assert fn.endswith('.pyx')
     parts = fn.split('/')
     if parts[0] == '.':
         parts.pop(0)
