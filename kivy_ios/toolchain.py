@@ -1056,7 +1056,7 @@ class CythonRecipe(PythonRecipe):
         # doesn't (yet) have the executable bit hence we explicitly call it
         # with the Python interpreter
         cythonize_script = join(self.ctx.root_dir, "tools", "cythonize.py")
-        shprint(sh.python, cythonize_script, filename)
+        shprint(sh.Command(sys.executable), cythonize_script, filename)
 
     def cythonize_build(self):
         if not self.cythonize:
@@ -1498,7 +1498,7 @@ pip           Install a pip dependency into the distribution
                 if not callable(attr) and attr != 'archs':
                     print("{}: {}".format(attr, pformat(getattr(ctx, attr))))
         for arch in ctx.archs:
-            ul = '-' * (len(str(arch))+6)
+            ul = '-' * (len(str(arch)) + 6)
             print("\narch: {}\n{}".format(str(arch), ul))
             for attr in dir(arch):
                 if not attr.startswith("_"):
