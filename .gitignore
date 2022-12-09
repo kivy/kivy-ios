@@ -20,5 +20,6 @@ src/ios/ios.c
 *-ios/
 __pycache__
 .tox
+.idea
 venv
 *.egg-info
