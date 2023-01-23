@@ -255,7 +255,7 @@ Xcode path is not set up correctly. Run the following command to fix this: `sudo
 
 * Supported recipes: python3, kivy, sdl2, sdl2_image, sdl2_mixer, and libffi
 
-### You don't have permission to run
+### You don't have permissions to run
 
 It is due to invalid archs, search for them and check it. Maybe you
 targetted a simulator but have only arm64. Maybe you want to target
