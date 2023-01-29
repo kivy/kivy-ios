@@ -1,5 +1,54 @@
 # Changelog
 
+## [v2023.01.29](https://github.com/kivy/kivy-ios/tree/v2023.01.29)
+
+[Full Changelog](https://github.com/kivy/kivy-ios/compare/v2022.07.19...v2023.01.29)
+
+**Closed issues:**
+
+- Unknown class `<BoxShadow>` [\#758](https://github.com/kivy/kivy-ios/issues/758)
+- toolchain pip3 install pycryptodome error [\#755](https://github.com/kivy/kivy-ios/issues/755)
+- Stuck between two error codes: ImportError...\(PyInit\_\_imaging\) and 407 duplicate symbols [\#752](https://github.com/kivy/kivy-ios/issues/752)
+- Toolchain Build error - commandnotfound python [\#748](https://github.com/kivy/kivy-ios/issues/748)
+- No module named 'xxx' [\#744](https://github.com/kivy/kivy-ios/issues/744)
+- dynamic module does not define module export function \(PyInit\_\_sqlite3\) [\#743](https://github.com/kivy/kivy-ios/issues/743)
+- \[BUG\] Kivy Ios on mac os monterey arm64 simulator [\#740](https://github.com/kivy/kivy-ios/issues/740)
+- PhaseScriptExecution failed when hitting Play in Xcode [\#739](https://github.com/kivy/kivy-ios/issues/739)
+- toolchain.py build python3 openssl kivy not completing after upgrading macOS Monterey 12.5  [\#738](https://github.com/kivy/kivy-ios/issues/738)
+- Proposal of versioning numbering method change for the next release [\#729](https://github.com/kivy/kivy-ios/issues/729)
+- xcode archive failure- missing signing identifier ... site-packages/google/...\_api\_implementation.cpython-39-darwin.so [\#697](https://github.com/kivy/kivy-ios/issues/697)
+
+**Merged pull requests:**
+
+- Update pbxproj pinned version in requirements.txt [\#757](https://github.com/kivy/kivy-ios/pull/757) ([misl6](https://github.com/misl6))
+- Add default Launch Screen storyboard [\#756](https://github.com/kivy/kivy-ios/pull/756) ([misl6](https://github.com/misl6))
+- Flake8 does not support inline comments for any of the keys [\#754](https://github.com/kivy/kivy-ios/pull/754) ([misl6](https://github.com/misl6))
+- Use Python 3.10 for tests [\#750](https://github.com/kivy/kivy-ios/pull/750) ([misl6](https://github.com/misl6))
+- Update SDL2, SDL2\_ttf, SDL2\_mixer, SDL2\_image to latest releases [\#749](https://github.com/kivy/kivy-ios/pull/749) ([misl6](https://github.com/misl6))
+- :rotating\_light: Minor linting fixes/updates [\#747](https://github.com/kivy/kivy-ios/pull/747) ([AndreMiras](https://github.com/AndreMiras))
+- Fixes some E275 - assert is a keyword [\#746](https://github.com/kivy/kivy-ios/pull/746) ([misl6](https://github.com/misl6))
+- Use `sys.executable` instead of `sh.python` [\#745](https://github.com/kivy/kivy-ios/pull/745) ([misl6](https://github.com/misl6))
+- Multiple fixes to README [\#737](https://github.com/kivy/kivy-ios/pull/737) ([rshah713](https://github.com/rshah713))
+- Fix typo in README [\#736](https://github.com/kivy/kivy-ios/pull/736) ([rshah713](https://github.com/rshah713))
+- Disable configuration of i386-Simulator for libffi [\#761](https://github.com/kivy/kivy-ios/pull/761) ([misl6](https://github.com/misl6)
+
+## [2022.07.19] - 2022-07-19
+
+## Added
+- Added py3dns recipe [\#728](https://github.com/kivy/kivy-ios/pull/728) ([Neizvestnyj](https://github.com/Neizvestnyj))
+- Ignore egg-info in git [\#718](https://github.com/kivy/kivy-ios/pull/718) ([tito](https://github.com/tito))
+- Bump Kivy recipe to a commit that includes latest camera API enhancements [\#700](https://github.com/kivy/kivy-ios/pull/700) ([RobertFlatt](https://github.com/RobertFlatt))
+- Add support-requests v2 [\#689](https://github.com/kivy/kivy-ios/pull/689) ([misl6](https://github.com/misl6))
+
+## Fixed
+- Updated shebangs to target python3. Bumped libffi version to 3.4.2 [\#688](https://github.com/kivy/kivy-ios/pull/688) ([misl6](https://github.com/misl6))
+- Fixes libffi 3.4.2 not linking correctly (missing symbols) on iOS Simulator [\#695](https://github.com/kivy/kivy-ios/pull/695) ([misl6](https://github.com/misl6))
+- Update dpi for latest iPhone models [\#707](https://github.com/kivy/kivy-ios/pull/707) ([akshayaurora](https://github.com/akshayaurora))
+- Our self-hosted Apple Silicon runner now has been migrated to actions/runner v2.292.0 which now supports arm64 natively [\#710](https://github.com/kivy/kivy-ios/pull/710) ([misl6](https://github.com/misl6))
+- Update xcassets to include mandatory icons in latest xcode [\#717](https://github.com/kivy/kivy-ios/pull/717) ([tito](https://github.com/tito))
+- Bump cookiecutter from 1.7.2 to 2.1.1 [\#714](https://github.com/kivy/kivy-ios/pull/714) ([dependabot](https://github.com/dependabot))
+- Use shutil.which instead of sh.which [\#735](https://github.com/kivy/kivy-ios/pull/735) ([misl6](https://github.com/misl6))
+
 ## [2022.07.19] - 2022-07-19
 
 ## Added
