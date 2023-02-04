@@ -34,7 +34,7 @@ Install [Kivy for iOS from PyPI](https://pypi.org/project/kivy-ios) with pip lik
 
 Additionally, you would need a few system dependencies and configuration.
 
-- Xcode 10 or above, with an iOS SDK and command line tools installed:
+- Xcode 13 or above, with an iOS SDK and command line tools installed:
 
       xcode-select --install
 
