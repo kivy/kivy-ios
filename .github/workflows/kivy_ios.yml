@@ -8,9 +8,9 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up Python 3.10
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: '3.10'
     - name: Run flake8
@@ -30,11 +30,11 @@ jobs:
             python: '3.10.7'
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up Python 3.x
       # Needs to be skipped on our self-hosted runners tagged as 'apple-silicon-m1'
       if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python }}
     - name: Install requirements
@@ -59,7 +59,7 @@ jobs:
         arm64_set_path_and_python_version ${{ matrix.python }}
         toolchain build python3 kivy
     - name: Checkout kivy for tests apps
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: kivy/kivy
         path: kivy-ci-clone
@@ -80,11 +80,11 @@ jobs:
             python: '3.10.7'
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up Python 3.x
       # Needs to be skipped on our self-hosted runners tagged as 'apple-silicon-m1'
       if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python }}
     - name: Install requirements
@@ -113,7 +113,7 @@ jobs:
         . venv/bin/activate
         toolchain build python3 kivy
     - name: Checkout kivy for tests apps
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: kivy/kivy
         path: kivy-ci-clone
@@ -136,11 +136,11 @@ jobs:
             python: '3.10.7'
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up Python 3.x
       # Needs to be skipped on our self-hosted runners tagged as 'apple-silicon-m1'
       if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python }}
     - name: Install requirements
