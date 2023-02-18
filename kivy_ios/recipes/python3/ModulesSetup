@@ -49,7 +49,7 @@ fcntl fcntlmodule.c
 grp grpmodule.c
 math mathmodule.c
 # mmap mmapmodule.c
-parser parsermodule.c
+# parser parsermodule.c
 pyexpat expat/xmlparse.c \
     expat/xmlrole.c \
     expat/xmltok.c \

@@ -5,8 +5,14 @@ import sh
 
 class HostSetuptools3(HostRecipe):
     depends = ["openssl", "hostpython3", "python3"]
-    version = '59.2.0'
+    version = '67.3.2'
     url = 'https://pypi.python.org/packages/source/s/setuptools/setuptools-{version}.tar.gz'
+
+    def prebuild_arch(self, arch):
+        if self.has_marker("patched"):
+            return
+        self.apply_patch("allow-cflags-override.patch")
+        self.set_marker("patched")
 
     @cache_execution
     def install(self):

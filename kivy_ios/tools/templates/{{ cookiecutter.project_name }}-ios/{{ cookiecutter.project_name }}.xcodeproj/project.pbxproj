@@ -253,7 +253,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = "DEBUG=1";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"{{ cookiecutter.dist_dir }}/root/python3/include/python3.9/**",
+					"{{ cookiecutter.dist_dir }}/root/python3/include/python3.10/**",
 					"{{ cookiecutter.dist_dir }}/include/common/sdl2",
 				);
 				INFOPLIST_FILE = "{{ cookiecutter.project_name }}-Info.plist";
@@ -290,7 +290,7 @@
 				GCC_PREFIX_HEADER = "";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"{{ cookiecutter.dist_dir }}/root/python3/include/python3.9/**",
+					"{{ cookiecutter.dist_dir }}/root/python3/include/python3.10/**",
 					"{{ cookiecutter.dist_dir }}/include/common/sdl2",
 				);
 				INFOPLIST_FILE = "{{ cookiecutter.project_name }}-Info.plist";

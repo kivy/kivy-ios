@@ -1,41 +1,41 @@
-diff -Naur Python-3.8.2.orig/configure Python-3.8.2/configure
---- Python-3.8.2.orig/configure	2020-04-12 00:00:42.000000000 +0200
-+++ Python-3.8.2/configure	2020-04-12 00:08:45.000000000 +0200
-@@ -3271,6 +3271,15 @@
+diff -Naur Python-3.10.10.orig/configure Python-3.10.10/configure
+--- Python-3.10.10.orig/configure	2023-02-12 15:08:28
++++ Python-3.10.10/configure	2023-02-12 15:10:45
+@@ -3344,6 +3344,15 @@
  	*-*-cygwin*)
  		ac_sys_system=Cygwin
  		;;
 +  *-apple-ios)
-+  	ac_sys_system=iOS
-+  	;;
++    ac_sys_system=iOS
++    ;;
 +  *-apple-tvos)
-+  	ac_sys_system=tvOS
-+  	;;
++    ac_sys_system=tvOS
++    ;;
 +  *-apple-watchos)
-+  	ac_sys_system=watchOS
-+  	;;
++    ac_sys_system=watchOS
++    ;;
  	*-*-vxworks*)
  	    ac_sys_system=VxWorks
  	    ;;
-@@ -3318,6 +3327,15 @@
+@@ -3391,6 +3400,15 @@
  			_host_cpu=$host_cpu
  		esac
  		;;
 +  *-apple-*)
-+      case "$host_cpu" in
-+      arm*)
-+          _host_cpu=arm
-+          ;;
-+      *)
-+          _host_cpu=$host_cpu
++    case "$host_cpu" in
++    arm*)
++        _host_cpu=arm
++        ;;
++    *)
++        _host_cpu=$host_cpu
 +    esac
 +    ;;
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -3396,6 +3414,13 @@
+@@ -3469,6 +3487,13 @@
      define_xopen_source=no;;
-   Darwin/1[0-9].*)
+   Darwin/[12][0-9].*)
      define_xopen_source=no;;
 +  # On iOS, defining _POSIX_C_SOURCE also disables platform specific features.
 +  iOS/*)
@@ -44,10 +44,23 @@ diff -Naur Python-3.8.2.orig/configure Python-3.8.2/configure
 +    define_xopen_source=no;;
 +  watchOS/*)
 +    define_xopen_source=no;;
-   # On AIX 4 and 5.1, mbstate_t is defined only when _XOPEN_SOURCE == 500 but
-   # used in wcsnrtombs() and mbsnrtowcs() even if _XOPEN_SOURCE is not defined
-   # or has another value. By not (re)defining it, the defaults come in place.
-@@ -6165,10 +6190,16 @@
+   # On QNX 6.3.2, defining _XOPEN_SOURCE prevents netdb.h from
+   # defining NI_NUMERICHOST.
+   QNX/6.3.2)
+@@ -5389,6 +5414,12 @@
+ case $ac_sys_system in #(
+   Darwin*) :
+     MULTIARCH="" ;; #(
++  iOS*) :
++    MULTIARCH="" ;; #(
++  tvOS*) :
++    MULTIARCH="" ;; #(
++  watchOS*) :
++    MULTIARCH="" ;; #(
+   FreeBSD*) :
+     MULTIARCH="" ;; #(
+   *) :
+@@ -6249,11 +6280,17 @@
  fi
  
  if test "$cross_compiling" = yes; then
@@ -55,6 +68,7 @@ diff -Naur Python-3.8.2.orig/configure Python-3.8.2/configure
 -	readelf|:)
 -	as_fn_error $? "readelf for the host is required for cross builds" "$LINENO" 5
 -	;;
+-    esac
 +    case "$host" in
 +    *-apple-*os)
 +        # readelf not required for iOS cross builds.
@@ -65,26 +79,26 @@ diff -Naur Python-3.8.2.orig/configure Python-3.8.2/configure
 +            as_fn_error $? "readelf for the host is required for cross builds" "$LINENO" 5
 +            ;;
 +        esac
-     esac
++     esac
  fi
  
-@@ -6920,8 +6951,6 @@
+ 
+@@ -7051,7 +7088,6 @@
  # tweak BASECFLAGS based on compiler and platform
  case $GCC in
  yes)
 -    CFLAGS_NODIST="$CFLAGS_NODIST -std=c99"
--
+ 
      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -Wextra" >&5
  $as_echo_n "checking for -Wextra... " >&6; }
-      ac_save_cc="$CC"
-@@ -11438,6 +11467,10 @@
- 	;;
+@@ -11912,6 +11948,10 @@
+ then
+ 	case $ac_sys_system/$ac_sys_release in
  	hp*|HP*) DYNLOADFILE="dynload_hpux.o";;
 +  # Dynamic loading on iOS
 +  iOS/*) DYNLOADFILE="dynload_shlib.o";;
 +  tvOS/*) DYNLOADFILE="dynload_shlib.o";;
 +  watchOS/*) DYNLOADFILE="dynload_shlib.o";;
-	*)
+ 	*)
  	# use dynload_shlib.c and dlopen() if we have it; otherwise stub
  	# out any dynamic loading
- 	if test "$ac_cv_func_dlopen" = yes
