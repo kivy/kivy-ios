@@ -27,7 +27,6 @@ class Python3Recipe(Recipe):
         # common to all archs
         if self.has_marker("patched"):
             return
-        # self.apply_patch("config.sub.patch")
         self.apply_patch("configure.patch")
         self.apply_patch("posixmodule.patch")
         self.apply_patch("dynload_shlib.patch")
