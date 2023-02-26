@@ -2,7 +2,6 @@ from kivy_ios.toolchain import Recipe, shprint
 from kivy_ios.context_managers import cd
 from os.path import join
 import sh
-import shutil
 import os
 import logging
 
@@ -38,28 +37,9 @@ class Python3Recipe(Recipe):
         self.set_marker("patched")
 
     def postbuild_arch(self, arch):
-        # include _sqlite module to .a
-        py_arch = arch.arch
-        if py_arch == "arm64":
-            py_arch = "aarch64"
-        tmp_folder = "temp.ios-{}-3.10{}".format(py_arch, self.build_dir)
-        build_env = self.get_build_env(arch)
-        for o_file in [
-            "cache.o",
-            "connection.o",
-            "cursor.o",
-            "microprotocols.o",
-            "module.o",
-            "prepare_protocol.o",
-            "row.o",
-            "statement.o",
-            "util.o",
-        ]:
-            shprint(sh.Command(build_env['AR']),
-                    "-r",
-                    "{}/{}".format(self.build_dir, self.library),
-                    "{}/build/{}/Modules/_sqlite/{}".format(self.build_dir, tmp_folder, o_file))
-        print("Added _sqlite to archive")
+        # We need to skip remove_junk, because we need to keep few files.
+        # A cleanup will be done in the final step.
+        return
 
     def get_build_env(self, arch):
         build_env = arch.get_env()
@@ -142,16 +122,7 @@ class Python3Recipe(Recipe):
                 "install",
                 "prefix={}".format(join(self.ctx.dist_dir, "root", "python3")),
                 _env=build_env)
-        self.install_mock_modules()
         self.reduce_python()
-
-    def install_mock_modules(self):
-        logger.info("Install mock modules")
-        sqlite3_src = join(self.recipe_dir, 'mock_modules', '_sqlite3')
-        site_packages_folder = join(
-                self.ctx.dist_dir, "root", "python3", "lib", "python3.10", "site-packages", "_sqlite3")
-        shutil.rmtree(site_packages_folder, ignore_errors=True)  # Needed in case of rebuild
-        shutil.copytree(sqlite3_src, site_packages_folder)
 
     def reduce_python(self):
         logger.info("Reduce python")
