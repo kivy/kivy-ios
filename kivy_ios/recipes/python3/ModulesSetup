@@ -56,8 +56,7 @@ cmath cmathmodule.c _math.c
 fcntl fcntlmodule.c
 grp grpmodule.c
 math mathmodule.c
-# mmap mmapmodule.c
-# parser parsermodule.c
+mmap mmapmodule.c
 pyexpat expat/xmlparse.c \
     expat/xmlrole.c \
     expat/xmltok.c \

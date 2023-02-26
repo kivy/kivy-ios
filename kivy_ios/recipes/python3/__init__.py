@@ -99,6 +99,7 @@ class Python3Recipe(Recipe):
                 "ac_cv_func_explicit_memset=no",
                 "ac_cv_func_close_range=no",
                 "ac_cv_func_splice=no",
+                "ac_cv_func_mremap=no",
                 "--host={}-apple-ios".format(py_arch),
                 "--build=x86_64-apple-darwin",
                 "--prefix={}".format(prefix),
