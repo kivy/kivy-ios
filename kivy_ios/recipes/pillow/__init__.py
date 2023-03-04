@@ -10,7 +10,6 @@ class PillowRecipe(CythonRecipe):
     library = "libpillow.a"
     depends = [
         "hostpython3",
-        "host_setuptools3",
         "freetype",
         "libjpeg",
         "python3",

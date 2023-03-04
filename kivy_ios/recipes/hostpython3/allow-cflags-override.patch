@@ -1,0 +1,13 @@
+--- setuptools.orig/_distutils/sysconfig.py	2023-02-18 18:21:53
++++ setuptools/_distutils/sysconfig.py	2023-02-18 18:23:17
+@@ -329,7 +329,9 @@
+         if 'LDFLAGS' in os.environ:
+             ldshared = ldshared + ' ' + os.environ['LDFLAGS']
+         if 'CFLAGS' in os.environ:
+-            cflags = cflags + ' ' + os.environ['CFLAGS']
++            # cflags = cflags + ' ' + os.environ['CFLAGS']
++            # TODO: we may have found a bug in distutils?
++            cflags = os.environ['CFLAGS']
+             ldshared = ldshared + ' ' + os.environ['CFLAGS']
+         if 'CPPFLAGS' in os.environ:
+             cpp = cpp + ' ' + os.environ['CPPFLAGS']
