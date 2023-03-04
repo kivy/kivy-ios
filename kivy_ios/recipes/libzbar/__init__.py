@@ -13,23 +13,23 @@ class LibZBarRecipe(Recipe):
 
     library = 'zbar/.libs/libzbar.a'
 
-    include_per_arch = True
+    include_per_platform = True
     include_dir = [
         ("include", "")
         ]
 
-    def prebuild_arch(self, arch):
+    def prebuild_platform(self, plat):
         if self.has_marker("patched"):
             return
         self.apply_patch("werror.patch")
         self.set_marker("patched")
 
-    def build_arch(self, arch):
-        super(LibZBarRecipe, self).build_arch(arch)
-        build_env = arch.get_env()
+    def build_platform(self, plat):
+        super(LibZBarRecipe, self).build_platform(plat)
+        build_env = plat.get_env()
         build_env["CFLAGS"] = " ".join([
-            "-I{}".format(join(self.ctx.dist_dir, "build", "libiconv", arch.arch)) +
-            " -arch {}".format(arch.arch), build_env['CFLAGS']
+            "-I{}".format(join(self.ctx.dist_dir, "build", "libiconv", plat.name)) +
+            " -arch {}".format(plat.arch), build_env['CFLAGS']
             ])
         shprint(sh.Command('autoreconf'), '-vif')
         shprint(
@@ -38,8 +38,8 @@ class LibZBarRecipe(Recipe):
             "LD={}".format(build_env["LD"]),
             "CFLAGS={}".format(build_env["CFLAGS"]),
             "LDFLAGS={}".format(build_env["LDFLAGS"]),
-            "--host={}".format(arch.triple),
-            '--target={}'.format(arch.triple),
+            "--host={}".format(plat.triple),
+            '--target={}'.format(plat.triple),
             # Python bindings are compiled in a separated recipe
             '--with-python=no',
             '--with-gtk=no',

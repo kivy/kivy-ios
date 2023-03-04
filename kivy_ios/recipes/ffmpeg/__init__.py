@@ -6,7 +6,7 @@ import sh
 class FFMpegRecipe(Recipe):
     version = "n4.4.2"
     url = "https://github.com/FFmpeg/FFmpeg/archive/{version}.zip"
-    include_per_arch = True
+    include_per_platform = True
     include_dir = "dist/include"
     optional_depends = ["openssl"]
     libraries = [
@@ -21,7 +21,7 @@ class FFMpegRecipe(Recipe):
     ]
     pbx_frameworks = ["VideoToolbox"]
 
-    def build_arch(self, arch):
+    def build_platform(self, plat):
         options = [
             "--disable-everything",
             "--enable-parsers",
@@ -57,12 +57,12 @@ class FFMpegRecipe(Recipe):
                 "--enable-nonfree",
                 "--enable-protocol=https,tls_openssl"]
 
-        build_env = arch.get_env()
+        build_env = plat.get_env()
         build_env["VERBOSE"] = "1"
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
                 "--target-os=darwin",
-                "--arch={}".format(arch.arch),
+                "--arch={}".format(plat.arch),
                 "--cc={}".format(build_env["CC"]),
                 "--prefix={}/dist".format(self.build_dir),
                 "--extra-cflags={}".format(build_env["CFLAGS"]),

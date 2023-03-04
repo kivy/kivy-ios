@@ -13,10 +13,10 @@ class JpegRecipe(Recipe):
         ("jerror.h", ""),
         ("jmorecfg.h", ""),
         ]
-    include_per_arch = True
+    include_per_platform = True
 
-    def build_arch(self, arch):
-        build_env = arch.get_env()
+    def build_platform(self, plat):
+        build_env = plat.get_env()
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
                 "CC={}".format(build_env["CC"]),
@@ -24,7 +24,7 @@ class JpegRecipe(Recipe):
                 "CFLAGS={}".format(build_env["CFLAGS"]),
                 "LDFLAGS={}".format(build_env["LDFLAGS"]),
                 "--prefix=/",
-                "--host={}".format(arch.triple),
+                "--host={}".format(plat.triple),
                 "--disable-shared")
         shprint(sh.make, "clean")
         shprint(sh.make, self.ctx.concurrent_make)

@@ -4,24 +4,28 @@ import sh
 
 
 class CurlRecipe(Recipe):
-    version = "7.65.3"
+    version = "7.88.1"
     url = "https://curl.haxx.se/download/curl-{version}.tar.gz"
     library = "lib/.libs/libcurl.a"
     include_dir = "include"
     depends = ["openssl"]
 
-    def build_arch(self, arch):
-        build_env = arch.get_env()
+    def build_platform(self, plat):
+        build_env = plat.get_env()
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
                 "CC={}".format(build_env["CC"]),
                 "LD={}".format(build_env["LD"]),
                 "CFLAGS={}".format(build_env["CFLAGS"]),
                 "LDFLAGS={}".format(build_env["LDFLAGS"]),
+                "PKG_CONFIG=ios-pkg-config",
+                # ios-pkg-config does not exists,
+                # is needed to disable the pkg-config usage.
                 "--prefix=/",
-                "--host={}".format(arch.triple),
+                "--host={}".format(plat.triple),
                 "--disable-shared",
-                "--without-libidn2")
+                "--without-libidn2",
+                "--with-openssl")
         shprint(sh.make, "clean")
         shprint(sh.make, self.ctx.concurrent_make)
 

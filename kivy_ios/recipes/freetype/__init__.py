@@ -8,10 +8,10 @@ class FreetypeRecipe(Recipe):
     url = "https://download.savannah.gnu.org/releases/freetype/freetype-old/freetype-{version}.tar.bz2"
     library = "objs/.libs/libfreetype.a"
     include_dir = ["include", ("builds/unix/ftconfig.h", "config/ftconfig.h")]
-    include_per_arch = True
+    include_per_platform = True
 
-    def build_arch(self, arch):
-        build_env = arch.get_env()
+    def build_platform(self, plat):
+        build_env = plat.get_env()
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
                 "CC={}".format(build_env["CC"]),
@@ -19,7 +19,7 @@ class FreetypeRecipe(Recipe):
                 "CFLAGS={}".format(build_env["CFLAGS"]),
                 "LDFLAGS={}".format(build_env["LDFLAGS"]),
                 "--prefix=/",
-                "--host={}".format(arch.triple),
+                "--host={}".format(plat.triple),
                 "--without-png",
                 "--without-bzip2",
                 "--without-fsspec",

@@ -23,7 +23,7 @@ class Python3Recipe(Recipe):
         ctx.site_packages_dir = join(
             ctx.python_prefix, "lib", ctx.python_ver_dir, "site-packages")
 
-    def prebuild_arch(self, arch):
+    def prebuild_platform(self, plat):
         # common to all archs
         if self.has_marker("patched"):
             return
@@ -35,23 +35,23 @@ class Python3Recipe(Recipe):
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
         self.set_marker("patched")
 
-    def postbuild_arch(self, arch):
+    def postbuild_platform(self, plat):
         # We need to skip remove_junk, because we need to keep few files.
         # A cleanup will be done in the final step.
         return
 
-    def get_build_env(self, arch):
-        build_env = arch.get_env()
+    def get_build_env(self, plat):
+        build_env = plat.get_env()
         build_env["PATH"] = "{}:{}".format(
             join(self.ctx.dist_dir, "hostpython3", "bin"),
             os.environ["PATH"])
-        build_env["CFLAGS"] += " --sysroot={}".format(arch.sysroot)
+        build_env["CFLAGS"] += " --sysroot={}".format(plat.sysroot)
         return build_env
 
-    def build_arch(self, arch):
-        build_env = self.get_build_env(arch)
+    def build_platform(self, plat):
+        build_env = self.get_build_env(plat)
         configure = sh.Command(join(self.build_dir, "configure"))
-        py_arch = arch.arch
+        py_arch = plat.arch
         if py_arch == "arm64":
             py_arch = "aarch64"
         prefix = join(self.ctx.dist_dir, "root", "python3")
@@ -114,9 +114,9 @@ class Python3Recipe(Recipe):
         shprint(sh.make, self.ctx.concurrent_make, "CFLAGS={}".format(build_env["CFLAGS"]))
 
     def install(self):
-        arch = list(self.filtered_archs)[0]
-        build_env = self.get_build_env(arch)
-        build_dir = self.get_build_dir(arch.arch)
+        plat = list(self.platforms_to_build)[0]
+        build_env = self.get_build_env(plat)
+        build_dir = self.get_build_dir(plat)
         shprint(sh.make, self.ctx.concurrent_make,
                 "-C", build_dir,
                 "install",

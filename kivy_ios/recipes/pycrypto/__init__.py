@@ -10,11 +10,11 @@ class PycryptoRecipe(CythonRecipe):
     version = "2.6.1"
     url = "https://ftp.dlitz.net/pub/dlitz/crypto/pycrypto/pycrypto-{version}.tar.gz"
     depends = ["python", "openssl"]
-    include_per_arch = True
+    include_per_platform = True
     library = "libpycrypto.a"
 
-    def build_arch(self, arch):
-        build_env = arch.get_env()
+    def build_platform(self, plat):
+        build_env = plat.get_env()
         self.apply_patch('hash_SHA2_template.c.patch', target_dir=self.build_dir + '/src')
         configure = sh.Command(join(self.build_dir, "configure"))
         shprint(configure,
@@ -23,16 +23,16 @@ class PycryptoRecipe(CythonRecipe):
                 "CFLAGS={}".format(build_env["CFLAGS"]),
                 "LDFLAGS={} -Wno-error ".format(build_env["LDFLAGS"]),
                 "--prefix=/",
-                "--host={}".format(arch),
+                "--host={}".format(plat),
                 "ac_cv_func_malloc_0_nonnull=yes",
                 "ac_cv_func_realloc_0_nonnull=yes")
-        super(PycryptoRecipe, self).build_arch(arch)
+        super(PycryptoRecipe, self).build_platform(plat)
 
     def install(self):
-        arch = list(self.filtered_archs)[0]
-        build_dir = self.get_build_dir(arch.arch)
+        plat = list(self.platforms_to_build)[0]
+        build_dir = self.get_build_dir(plat)
         hostpython = sh.Command(self.ctx.hostpython)
-        build_env = arch.get_env()
+        build_env = plat.get_env()
         dest_dir = join(self.ctx.dist_dir, "root", "python")
         build_env['PYTHONPATH'] = join(dest_dir, 'lib', 'python3.7', 'site-packages')
         with cd(build_dir):
