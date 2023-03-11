@@ -10,12 +10,13 @@ class LibSDL2Recipe(Recipe):
     pbx_frameworks = [
         "OpenGLES", "AudioToolbox", "QuartzCore", "CoreGraphics",
         "CoreMotion", "GameController", "AVFoundation", "Metal",
-        "UIKit", "CoreHaptics", "CoreBluetooth"]
+        "UIKit", "CoreHaptics"]
 
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
         self.apply_patch("uikit-transparent.patch")
+        self.apply_patch("disable-hidapi.patch")
         self.set_marker("patched")
 
     def build_arch(self, arch):
