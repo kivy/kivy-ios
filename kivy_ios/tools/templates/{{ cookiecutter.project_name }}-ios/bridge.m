@@ -2,6 +2,8 @@
 
 @implementation bridge
 
+CMAltimeter *altimeterManager;
+
 - (id) init {
     if(self = [super init]) {
         self.motionManager = [[CMMotionManager alloc] init];
@@ -43,6 +45,56 @@
     }
 }
 
+- (void)startDeviceMotion {
+
+    if (self.motionManager.deviceMotionAvailable) {
+        [self.motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXTrueNorthZVertical toQueue:queue withHandler:^(CMDeviceMotion *deviceMotion, NSError *error) {
+            self.sp_roll = deviceMotion.attitude.roll;
+            self.sp_pitch = deviceMotion.attitude.pitch;
+            self.sp_yaw = deviceMotion.attitude.yaw;
+
+            self.g_x = deviceMotion.gravity.x;
+            self.g_y = deviceMotion.gravity.y;
+            self.g_z = deviceMotion.gravity.z;
+
+            self.rotation_rate_x = deviceMotion.rotationRate.x;
+            self.rotation_rate_y = deviceMotion.rotationRate.y;
+            self.rotation_rate_z = deviceMotion.rotationRate.z;
+
+            self.user_acc_x = deviceMotion.userAcceleration.x;
+            self.user_acc_y = deviceMotion.userAcceleration.y;
+            self.user_acc_z = deviceMotion.userAcceleration.z;
+
+            self.q_x = deviceMotion.attitude.quaternion.x;
+            self.q_y = deviceMotion.attitude.quaternion.y;
+            self.q_z = deviceMotion.attitude.quaternion.z;
+            self.q_w = deviceMotion.attitude.quaternion.w;
+        }];
+    }
+}
+
+- (void)startDeviceMotionWithReferenceFrame {
+
+    if (self.motionManager.deviceMotionAvailable) {
+        [self.motionManager startDeviceMotionUpdatesUsingReferenceFrame:CMAttitudeReferenceFrameXArbitraryCorrectedZVertical toQueue:queue withHandler:^(CMDeviceMotion *deviceMotion, NSError *error) {
+            self.mf_x = deviceMotion.magneticField.field.x;
+            self.mf_y = deviceMotion.magneticField.field.y;
+            self.mf_z = deviceMotion.magneticField.field.z;
+        }];
+    }
+}
+
+- (void)startRelativeAltitude {
+
+    if ([CMAltimeter isRelativeAltitudeAvailable]) {
+        altimeterManager = [[CMAltimeter alloc] init];
+        [altimeterManager startRelativeAltitudeUpdatesToQueue:queue withHandler:^(CMAltitudeData *altitudeData, NSError *error) {
+            self.relative_altitude = altitudeData.relativeAltitude.floatValue;
+            self.pressure = altitudeData.pressure.floatValue;
+        }];
+    }
+}
+
 - (void) stopAccelerometer {
     [self.motionManager stopAccelerometerUpdates];
 }
@@ -53,6 +105,14 @@
 
 - (void) stopMagnetometer {
     [self.motionManager stopMagnetometerUpdates];
+}
+
+- (void) stopDeviceMotion {
+    [self.motionManager stopDeviceMotionUpdates];
+}
+
+- (void) stopRelativeAltitude {
+    [altimeterManager stopRelativeAltitudeUpdates];
 }
 
 - (void) dealloc {
