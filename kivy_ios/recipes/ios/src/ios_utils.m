@@ -171,3 +171,7 @@ padding ios_get_safe_area() {
 	}	
 	return safearea;
 }
+
+void ios_nslog(char *str) {
+    NSLog(@"%s", str);
+}

@@ -1,12 +1,12 @@
 //
 //  main.m
-//  {{ cookiecutter.project_name }}
+//  iciavant-sedan
 //
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #include "Python.h"
-#include "{{ cookiecutter.dist_dir }}/include/common/sdl2/SDL_main.h"
+#include "/Users/tito/Documents/ios/dist/include/common/sdl2/SDL_main.h"
 #include <dlfcn.h>
 
 void export_orientation();
@@ -44,6 +44,10 @@ int main(int argc, char *argv[]) {
     #ifndef DEBUG
     putenv("KIVY_NO_CONSOLELOG=1");
     #endif
+
+    // In production, if you want to redirect stdout/stderr to NSLog, uncomment
+    // the following line. This is useful to debug python errors in production.
+    putenv("KIVY_NSLOG=1");
 
     // Export orientation preferences for Kivy
     export_orientation();
@@ -156,6 +160,23 @@ void load_custom_builtin_importer() {
         "        def flush(self, *args, **kw): pass\n" \
         "    sys.stdout = fakestd()\n" \
         "    sys.stderr = fakestd()\n" \
+        "else if environ.get('KIVY_NSLOG', '1') == '1':\n" \
+        "   from ios import nslog\n" \
+        "   class NslogRedirect(object):\n" \
+        "       def __init__(self):\n" \
+        "           self.buffer = ""\n" \
+        "       def write(self, chunk):\n" \
+        "           self.buffer += chunk\n" \
+        "           if "\n" in self.buffer:\n" \
+        "               lines = self.buffer.split("\n")\n" \
+        "               for line in lines[:-1]:\n" \
+        "                   nslog(line)\n" \
+        "               self.buffer = lines[-1]\n" \
+        "       def flush(self):\n" \
+        "           nslog(self.buffer)\n" \
+        "           self.buffer = ""\n" \
+        "    sys.stdout = NslogRedirect()\n" \
+        "    sys.stderr = NslogRedirect()\n" \
         "# Custom builtin importer for precompiled modules\n" \
         "class CustomBuiltinImporter(object):\n" \
         "    def find_module(self, fullname, mpath=None):\n" \
