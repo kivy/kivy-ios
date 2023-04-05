@@ -167,8 +167,8 @@ void load_custom_builtin_importer() {
         "           self.buffer = ""\n" \
         "       def write(self, chunk):\n" \
         "           self.buffer += chunk\n" \
-        "           if "\n" in self.buffer:\n" \
-        "               lines = self.buffer.split("\n")\n" \
+        "           if '\n' in self.buffer:\n" \
+        "               lines = self.buffer.split('\n')\n" \
         "               for line in lines[:-1]:\n" \
         "                   nslog(line)\n" \
         "               self.buffer = lines[-1]\n" \
