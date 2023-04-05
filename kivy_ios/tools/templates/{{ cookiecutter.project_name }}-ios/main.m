@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 
     // In production, if you want to redirect stdout/stderr to NSLog, uncomment
     // the following line. This is useful to debug python errors in production.
-    putenv("KIVY_NSLOG=1");
+    //putenv("KIVY_NSLOG=1");
 
     // Export orientation preferences for Kivy
     export_orientation();
