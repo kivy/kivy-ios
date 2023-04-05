@@ -158,7 +158,7 @@ int ios_uiscreen_get_dpi() {
 padding ios_get_safe_area() {
 	padding safearea;
 	if (@available(iOS 11.0, *)){
-		UIWindow *window = UIApplication.sharedApplication.windows[0];
+		UIWindow *window = [[[UIApplication sharedApplication] delegate] window];
 		safearea.top = window.safeAreaInsets.top;
 		safearea.bottom = window.safeAreaInsets.bottom;
 		safearea.left = window.safeAreaInsets.left;
