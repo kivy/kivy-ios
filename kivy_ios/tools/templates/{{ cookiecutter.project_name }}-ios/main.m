@@ -1,12 +1,12 @@
 //
 //  main.m
-//  iciavant-sedan
+//  {{ cookiecutter.project_name }}
 //
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #include "Python.h"
-#include "/Users/tito/Documents/ios/dist/include/common/sdl2/SDL_main.h"
+#include "{{ cookiecutter.dist_dir }}/include/common/sdl2/SDL_main.h"
 #include <dlfcn.h>
 
 void export_orientation();
