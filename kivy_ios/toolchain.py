@@ -945,7 +945,7 @@ class Recipe:
     @cache_execution
     def install_python_deps(self):
         for dep in self.python_depends:
-            _pip(["install", dep])
+            _pip(["install", "--no-deps", "--platform", "any", dep])
 
     @cache_execution
     def install(self):
