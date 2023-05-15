@@ -945,7 +945,7 @@ class Recipe:
     @cache_execution
     def install_python_deps(self):
         for dep in self.python_depends:
-            _pip(["install", dep])
+            _pip(["install", "--no-deps", "--platform", "any", dep])
 
     @cache_execution
     def install(self):
@@ -1178,7 +1178,16 @@ def _pip(args):
     pip_path = join(ctx.dist_dir, 'hostpython3', 'bin', 'pip3')
 
     if len(args) > 1 and args[0] == "install":
-        pip_args = ["--isolated", "--prefix", ctx.python_prefix]
+        pip_args = ["--isolated"]
+
+        # --platform option requires --target, but --target can't be used
+        # with --prefix. We should prefer --prefix if it's possible,
+        # cause it notices already installed dependencies.
+        if "--platform" in args:
+            pip_args += ["--target", ctx.site_packages_dir]
+        else:
+            pip_args += ["--prefix", ctx.python_prefix]
+
         args = ["install"] + pip_args + args[1:]
 
     logger.info("Executing pip with: {}".format(args))
