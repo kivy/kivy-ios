@@ -1,0 +1,7 @@
+--- a/src/zbarlight/__init__.py
++++ b/src/zbarlight/__init__.py
+@@ -5 +4,0 @@
+-import pkg_resources
+@@ -10 +9 @@
+-__version__ = pkg_resources.get_distribution('zbarlight').version
++__version__ = '3.0'
