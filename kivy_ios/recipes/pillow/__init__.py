@@ -11,6 +11,7 @@ class PillowRecipe(CythonRecipe):
     depends = [
         "hostpython3",
         "freetype",
+        "sdl2_ttf",
         "libjpeg",
         "python3",
         "ios",
