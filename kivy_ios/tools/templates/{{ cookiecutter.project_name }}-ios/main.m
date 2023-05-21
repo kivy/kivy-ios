@@ -146,6 +146,7 @@ void load_custom_builtin_importer() {
         "    sys.modules['subprocess'].STDOUT = None\n" \
         "    sys.modules['subprocess'].DEVNULL = None\n" \
         "    sys.modules['subprocess'].CalledProcessError = Exception\n" \
+        "    sys.modules['subprocess'].CompletedProcess = None\n" \
         "    sys.modules['subprocess'].check_output = None\n" \
         "except ImportError:\n" \
         "    EXTS = ['.so']\n"
