@@ -1,5 +1,48 @@
 # Changelog
 
+## [v2023.05.21](https://github.com/kivy/kivy-ios/tree/v2023.05.21)
+
+[Full Changelog](https://github.com/kivy/kivy-ios/compare/v2023.01.29...v2023.05.21)
+
+**Closed issues:**
+
+- Issue adding Pillow to Kivy-ios build [\#807](https://github.com/kivy/kivy-ios/issues/807)
+- I have created and app using kivy. it works in python through VS code but when I run throgh Xcode it gets no module named "application name" in main.py,  line number 4 error and close the app in simulator. I tried all the ways in previus discussions but still not working. is there any other way I can try?  [\#800](https://github.com/kivy/kivy-ios/issues/800)
+- Kivy ios save an screen as an image to the users ios photos [\#799](https://github.com/kivy/kivy-ios/issues/799)
+- Command PhaseScriptExecution failed with a nonzero exit code [\#793](https://github.com/kivy/kivy-ios/issues/793)
+- ImportError: PyInit\_interval [\#788](https://github.com/kivy/kivy-ios/issues/788)
+- Recipe for the cryptography module [\#786](https://github.com/kivy/kivy-ios/issues/786)
+- Pyaudio [\#785](https://github.com/kivy/kivy-ios/issues/785)
+- Check \#783 [\#784](https://github.com/kivy/kivy-ios/issues/784)
+- Command PhaseScriptExecution failed with a nonzero exit code [\#783](https://github.com/kivy/kivy-ios/issues/783)
+- Cocoapods import not found when kivy is installed [\#777](https://github.com/kivy/kivy-ios/issues/777)
+- sh.CommandNotFound: /Users/suhaan/Documents/weatherappkivy/dist/hostpython3/bin/pip3 [\#775](https://github.com/kivy/kivy-ios/issues/775)
+- check \#773 issue [\#774](https://github.com/kivy/kivy-ios/issues/774)
+- Asset validation failed Invalid bundle structure. The “theweatherreporterapp.app/lib/python3.9/site-packages/charset\_normalizer/md\_\_mypyc.cpython-39-darwin.so” binary file is not permitted. Your app cannot contain standalone executables or libraries, other than a valid CFBundleExecutable of supported bundles. For details, visit: https://developer.apple.com/documentation/bundleresources/placing\_content\_in\_a\_bundle \(ID: eb2a7a62-515c-459b-a222-5330e609551d\) [\#773](https://github.com/kivy/kivy-ios/issues/773)
+- dynamic module does not define module export function \(PyInit\_md\) error [\#772](https://github.com/kivy/kivy-ios/issues/772)
+- Toolchain 407 duplicate error of arm64 [\#771](https://github.com/kivy/kivy-ios/issues/771)
+- bash: toolchain: command not found [\#770](https://github.com/kivy/kivy-ios/issues/770)
+- when running toolchain build python3 kivy pillow with arch arm64 with apple sicion geting list index out of range [\#769](https://github.com/kivy/kivy-ios/issues/769)
+- Error compiling SDL\_Image [\#763](https://github.com/kivy/kivy-ios/issues/763)
+- ImportError: dynamic module does not define module export function \(PyInit\_PIL\_\_imaging\) [\#711](https://github.com/kivy/kivy-ios/issues/711)
+- Build python3 with mmap module [\#659](https://github.com/kivy/kivy-ios/issues/659)
+
+**Merged pull requests:**
+
+- Fix AnyIO \(and asks\) support [\#803](https://github.com/kivy/kivy-ios/pull/803) ([Cheaterman](https://github.com/Cheaterman))
+- Update Kivy recipe for 2.2.0 [\#802](https://github.com/kivy/kivy-ios/pull/802) ([misl6](https://github.com/misl6))
+- Use `--no-deps` and `--platform` during install of recipe python deps [\#801](https://github.com/kivy/kivy-ios/pull/801) ([misl6](https://github.com/misl6))
+- Fixes crash on ios.get\_safe\_area\(\) in iOS 16 [\#790](https://github.com/kivy/kivy-ios/pull/790) ([tito](https://github.com/tito))
+- Update bridge.m/h to make plyer works with severals implementation [\#789](https://github.com/kivy/kivy-ios/pull/789) ([tito](https://github.com/tito))
+- Bump `numpy` version to `1.24.2` \( and fix the build on Python 3.10 ✅ \) [\#780](https://github.com/kivy/kivy-ios/pull/780) ([misl6](https://github.com/misl6))
+- Disable SDL2 hidapi in order to avoid dependency on `CoreBluetooth` [\#779](https://github.com/kivy/kivy-ios/pull/779) ([misl6](https://github.com/misl6))
+- 🎉 Python 3.10 support [\#768](https://github.com/kivy/kivy-ios/pull/768) ([misl6](https://github.com/misl6))
+- Upgrade more GitHub Actions plus Python 3.11.1 and Cython 0.29.33 [\#767](https://github.com/kivy/kivy-ios/pull/767) ([cclauss](https://github.com/cclauss))
+- Upgrade GitHub Actions [\#765](https://github.com/kivy/kivy-ios/pull/765) ([cclauss](https://github.com/cclauss))
+- Update required Xcode version to 13 [\#764](https://github.com/kivy/kivy-ios/pull/764) ([misl6](https://github.com/misl6))
+- Update ffmpeg/ffpyplayer versions [\#716](https://github.com/kivy/kivy-ios/pull/716) ([tito](https://github.com/tito))
+
+
 ## [v2023.01.29](https://github.com/kivy/kivy-ios/tree/v2023.01.29)
 
 [Full Changelog](https://github.com/kivy/kivy-ios/compare/v2022.07.19...v2023.01.29)
