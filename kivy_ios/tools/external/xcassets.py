@@ -360,6 +360,24 @@ launchimage_json = {
     {
       "extent": "full-screen",
       "idiom": "iphone",
+      "subtype": "844h",
+      "filename": "Default1170x2532.png",
+      "minimum-system-version": "15.0",
+      "orientation": "portrait",
+      "scale": "3x"
+    },
+    {
+      "extent": "full-screen",
+      "idiom": "iphone",
+      "subtype": "844h",
+      "filename": "Default2532x1170.png",
+      "minimum-system-version": "15.0",
+      "orientation": "landscape",
+      "scale": "3x"
+    },
+    {
+      "extent": "full-screen",
+      "idiom": "iphone",
       "subtype": "736h",
       "filename": "Default1242x2208.png",
       "minimum-system-version": "8.0",
@@ -657,6 +675,10 @@ def launchimage(image_xcassets, image_fn):
         ("2208 1242", None, "Default2208x1242.png"),
         # iPhone 5.5" @3x - portrait
         ("1242 2208", None, "Default1242x2208.png"),
+        # iPhone 13" @3x - landscape
+        ("2532 1170", None, "Default2532x1170.png"),
+        # iPhone 13" @3x - portrait
+        ("1170 2532", None, "Default1170x2532.png")
         # iPhone 4.7" @2x
         ("750 1334", None, "Default750x1334.png"),
         # iPad @2x - landscape
