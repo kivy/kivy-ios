@@ -62,6 +62,16 @@ int ios_uiscreen_get_dpi() {
         @"iPhone12,1": @326,
         @"iPhone12,3": @458,
         @"iPhone12,5": @458,
+	@"iPhone12,8": @326,
+	@"iPhone13,1": @476,
+        @"iPhone13,2": @460,
+        @"iPhone13,3": @460,
+        @"iPhone13,4": @458,
+        @"iPhone14,2": @460,
+        @"iPhone14,3": @458,
+        @"iPhone14,4": @476,
+        @"iPhone14,5": @460,
+        @"iPhone14,6": @326,
         @"iPad1,1": @132,
         @"iPad2,1": @132,
         @"iPad2,2": @132,
@@ -148,7 +158,7 @@ int ios_uiscreen_get_dpi() {
 padding ios_get_safe_area() {
 	padding safearea;
 	if (@available(iOS 11.0, *)){
-		UIWindow *window = UIApplication.sharedApplication.windows[0];
+		UIWindow *window = [[[UIApplication sharedApplication] delegate] window];
 		safearea.top = window.safeAreaInsets.top;
 		safearea.bottom = window.safeAreaInsets.bottom;
 		safearea.left = window.safeAreaInsets.left;

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Tool for compiling iOS toolchain
 ================================
@@ -7,6 +7,7 @@ This tool intend to replace all the previous tools/ in shell script.
 """
 
 import argparse
+import platform
 import sys
 from sys import stdout
 from os.path import join, dirname, realpath, exists, isdir, basename
@@ -183,7 +184,7 @@ class Arch:
         use_ccache = environ.get("USE_CCACHE", "1")
         ccache = None
         if use_ccache == "1":
-            ccache = sh.which('ccache')
+            ccache = shutil.which('ccache')
         if ccache:
             ccache = ccache.strip()
             env["USE_CCACHE"] = "1"
@@ -360,9 +361,9 @@ class Context:
             Arch64IOS(self))
 
         # path to some tools
-        self.ccache = sh.which("ccache")
+        self.ccache = shutil.which("ccache")
         for cython_fn in ("cython-2.7", "cython"):
-            cython = sh.which(cython_fn)
+            cython = shutil.which(cython_fn)
             if cython:
                 self.cython = cython
                 break
@@ -372,15 +373,15 @@ class Context:
 
         # check the basic tools
         for tool in ("pkg-config", "autoconf", "automake", "libtool"):
-            if not sh.which(tool):
+            if not shutil.which(tool):
                 logger.error("Missing requirement: {} is not installed".format(
                     tool))
 
         if not ok:
             sys.exit(1)
 
-        self.use_pigz = sh.which('pigz')
-        self.use_pbzip2 = sh.which('pbzip2')
+        self.use_pigz = shutil.which('pigz')
+        self.use_pbzip2 = shutil.which('pbzip2')
 
         try:
             num_cores = int(sh.sysctl('-n', 'hw.ncpu'))
@@ -944,7 +945,7 @@ class Recipe:
     @cache_execution
     def install_python_deps(self):
         for dep in self.python_depends:
-            _pip(["install", dep])
+            _pip(["install", "--no-deps", "--platform", "any", dep])
 
     @cache_execution
     def install(self):
@@ -995,6 +996,12 @@ class Recipe:
             recipe.version = version
 
         return recipe
+
+
+class HostRecipe(Recipe):
+    @property
+    def archs(self):
+        return [platform.machine()]
 
 
 class PythonRecipe(Recipe):
@@ -1049,7 +1056,7 @@ class CythonRecipe(PythonRecipe):
         # doesn't (yet) have the executable bit hence we explicitly call it
         # with the Python interpreter
         cythonize_script = join(self.ctx.root_dir, "tools", "cythonize.py")
-        shprint(sh.python, cythonize_script, filename)
+        shprint(sh.Command(sys.executable), cythonize_script, filename)
 
     def cythonize_build(self):
         if not self.cythonize:
@@ -1171,7 +1178,16 @@ def _pip(args):
     pip_path = join(ctx.dist_dir, 'hostpython3', 'bin', 'pip3')
 
     if len(args) > 1 and args[0] == "install":
-        pip_args = ["--isolated", "--prefix", ctx.python_prefix]
+        pip_args = ["--isolated"]
+
+        # --platform option requires --target, but --target can't be used
+        # with --prefix. We should prefer --prefix if it's possible,
+        # cause it notices already installed dependencies.
+        if "--platform" in args:
+            pip_args += ["--target", ctx.site_packages_dir]
+        else:
+            pip_args += ["--prefix", ctx.python_prefix]
+
         args = ["install"] + pip_args + args[1:]
 
     logger.info("Executing pip with: {}".format(args))
@@ -1491,7 +1507,7 @@ pip           Install a pip dependency into the distribution
                 if not callable(attr) and attr != 'archs':
                     print("{}: {}".format(attr, pformat(getattr(ctx, attr))))
         for arch in ctx.archs:
-            ul = '-' * (len(str(arch))+6)
+            ul = '-' * (len(str(arch)) + 6)
             print("\narch: {}\n{}".format(str(arch), ul))
             for attr in dir(arch):
                 if not attr.startswith("_"):

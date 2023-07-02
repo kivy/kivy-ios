@@ -8,11 +8,11 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+      uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.8.x'
+        python-version: 3.x
     - name: Run flake8
       run: |
         python -m pip install --upgrade pip
@@ -20,86 +20,146 @@ jobs:
         tox -e pep8
 
   build_python3_kivy:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      matrix:
+        include:
+          - runs_on: macos-latest
+            python: 3.x
+          - runs_on: apple-silicon-m1
+            python: '3.11'
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+      uses: actions/checkout@v3
+    - name: Set up Python 3.x
+      # Needs to be skipped on our self-hosted runners tagged as 'apple-silicon-m1'
+      if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.8.x'
+        python-version: ${{ matrix.python }}
     - name: Install requirements
       run: |
+        source .ci/utils.sh
+        arm64_set_path_and_python_version ${{ matrix.python }}
+        brew install libjpeg
+        pip3 install wheel
         pip3 install -r requirements.txt
         brew install autoconf automake libtool pkg-config
         brew link libtool
-        pip3 install Cython==0.29.17
-        gem install xcpretty
+        pip3 install Cython==0.29.33
+        sudo gem install xcpretty
     - name: Install kivy-ios
-      run: python setup.py install
+      run: |
+        source .ci/utils.sh
+        arm64_set_path_and_python_version ${{ matrix.python }}
+        python setup.py install
     - name: Build Python & Kivy
-      run: toolchain build python3 kivy
+      run: |
+        source .ci/utils.sh
+        arm64_set_path_and_python_version ${{ matrix.python }}
+        toolchain build python3 kivy
     - name: Checkout kivy for tests apps
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: kivy/kivy
         path: kivy-ci-clone
     - name: Create & Build test project
       run: |
+        source .ci/utils.sh
+        arm64_set_path_and_python_version ${{ matrix.python }}
         .ci/test_project.sh
 
   build_python3_kivy_venv:
-    runs-on: macos-latest
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      matrix:
+        include:
+          - runs_on: macos-latest
+            python: 3.x
+          - runs_on: apple-silicon-m1
+            python: '3.11'
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+      uses: actions/checkout@v3
+    - name: Set up Python 3.x
+      # Needs to be skipped on our self-hosted runners tagged as 'apple-silicon-m1'
+      if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.8.x'
+        python-version: ${{ matrix.python }}
     - name: Install requirements
       run: |
+        source .ci/utils.sh
+        arm64_set_path_and_python_version ${{ matrix.python }}
         python -m venv venv
         . venv/bin/activate
+        brew install libjpeg
+        pip install wheel
         pip install -r requirements.txt
         pip install sh
         brew install autoconf automake libtool pkg-config
         brew link libtool
-        pip install Cython==0.29.17
+        pip install Cython==0.29.33
+        sudo gem install xcpretty
     - name: Install kivy-ios
-      run: python setup.py install
+      run: |
+        source .ci/utils.sh
+        arm64_set_path_and_python_version ${{ matrix.python }}
+        python setup.py install
     - name: Build Python & Kivy
       run: |
+        source .ci/utils.sh
+        arm64_set_path_and_python_version ${{ matrix.python }}
         . venv/bin/activate
         toolchain build python3 kivy
     - name: Checkout kivy for tests apps
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: kivy/kivy
         path: kivy-ci-clone
     - name: Create & Build test project
       run: |
+        source .ci/utils.sh
+        arm64_set_path_and_python_version ${{ matrix.python }}
         . venv/bin/activate
         .ci/test_project.sh
 
   build_updated_recipes:
     needs: flake8
-    runs-on: macos-latest
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      matrix:
+        include:
+          - runs_on: macos-latest
+            python: 3.x
+          - runs_on: apple-silicon-m1
+            python: '3.11'
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v2
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+      uses: actions/checkout@v3
+    - name: Set up Python 3.x
+      # Needs to be skipped on our self-hosted runners tagged as 'apple-silicon-m1'
+      if: ${{ matrix.runs_on  != 'apple-silicon-m1' }}
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.8.x'
+        python-version: ${{ matrix.python }}
     - name: Install requirements
       run: |
+        source .ci/utils.sh
+        arm64_set_path_and_python_version ${{ matrix.python }}
+        brew install libjpeg
+        pip3 install wheel
         pip3 install -r requirements.txt
         brew install autoconf automake libtool pkg-config
         brew link libtool
-        pip3 install Cython==0.29.17
+        pip3 install Cython==0.29.33
     - name: Install kivy-ios
-      run: python setup.py install
+      run: |
+        source .ci/utils.sh
+        arm64_set_path_and_python_version ${{ matrix.python }}
+        python setup.py install
     - name: Build updated recipes
       run: |
+        source .ci/utils.sh
+        arm64_set_path_and_python_version ${{ matrix.python }}
         python3 .ci/rebuild_updated_recipes.py

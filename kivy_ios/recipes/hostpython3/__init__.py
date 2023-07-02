@@ -1,4 +1,4 @@
-from kivy_ios.toolchain import Recipe, shprint
+from kivy_ios.toolchain import HostRecipe, shprint
 from os.path import join
 import os
 import sh
@@ -10,18 +10,17 @@ from kivy_ios.context_managers import cd
 logger = logging.getLogger(__name__)
 
 
-class Hostpython3Recipe(Recipe):
-    version = "3.9.2"
+class Hostpython3Recipe(HostRecipe):
+    version = "3.10.10"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
-    depends = ["hostlibffi", "hostopenssl"]
+    depends = ["hostopenssl"]
     optional_depends = []
-    archs = ["x86_64"]
     build_subdir = 'native-build'
 
     def init_with_ctx(self, ctx):
         super().init_with_ctx(ctx)
-        self.set_hostpython(self, "3.9")
-        self.ctx.so_suffix = ".cpython-39m-darwin.so"
+        self.set_hostpython(self, "3.10")
+        self.ctx.so_suffix = ".cpython-310m-darwin.so"
         self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython3", "bin", "python")
         self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython3", "bin", "pgen")
         logger.info("Global: hostpython located at {}".format(self.ctx.hostpython))
@@ -49,21 +48,18 @@ class Hostpython3Recipe(Recipe):
         build_env["LDFLAGS"] = " ".join([
                 "-lsqlite3",
                 "-lffi",
-                "-L{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "lib"))
                 ])
         build_env["CFLAGS"] = " ".join([
                 "--sysroot={}".format(sdk_path),
                 "-mmacosx-version-min=10.12",
-                "-I{}".format(join(self.ctx.dist_dir, "hostlibffi", "usr", "local", "include"))
                 ])
         return build_env
 
-    def build_x86_64(self):
+    def build_arch(self, arch):
         build_env = self.get_build_env()
 
         configure = sh.Command(join(self.build_dir, "configure"))
 
-        arch = self.filtered_archs[0]
         build_subdir = self.get_build_subdir(arch.arch)
         os.makedirs(build_subdir, exist_ok=True)
 
@@ -90,6 +86,25 @@ class Hostpython3Recipe(Recipe):
         shutil.copy(
             join(self.ctx.dist_dir, "hostpython3", "bin", "python3"),
             join(self.ctx.dist_dir, "hostpython3", "bin", "python"))
+
+        # hostpython3 installs bundled versions of `pip`
+        # and `setuptools` in `lib/python3.10/site-packages`.
+        # This is fine, but `setuptools` have a bug that prevents
+        # it from working properly when cross-compiling, so we
+        # patch it here.
+        # We can't do that before cause the packaged setuptools
+        # is installed from a wheel.
+        self.apply_patch(
+            "allow-cflags-override.patch",
+            join(
+                self.ctx.dist_dir,
+                "hostpython3",
+                "lib",
+                "python3.10",
+                "site-packages",
+                "setuptools",
+            ),
+        )
 
 
 recipe = Hostpython3Recipe()

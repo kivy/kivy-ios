@@ -4,8 +4,8 @@ from os.path import exists
 
 
 class LibffiRecipe(Recipe):
-    version = "3.2.1"
-    url = "https://sourceware.org/pub/libffi/libffi-{version}.tar.gz"
+    version = "3.4.2"
+    url = "https://github.com/libffi/libffi/releases/download/v{version}/libffi-{version}.tar.gz"
     library = "build/Release-{arch.sdk}/libffi.a"
     include_per_arch = True
     include_dir = "build_{arch.sdk}-{arch.arch}/include"
@@ -15,12 +15,15 @@ class LibffiRecipe(Recipe):
     def prebuild_arch(self, arch):
         if self.has_marker("patched"):
             return
+        self.apply_patch("enable-tramp-build.patch")
         shprint(sh.sed,
                 "-i.bak",
-                "s/-miphoneos-version-min=5.1.1/-miphoneos-version-min=9.0/g",
+                "s/-miphoneos-version-min=7.0/-miphoneos-version-min=9.0/g",
                 "generate-darwin-source-and-headers.py")
-        self.apply_patch("fix-win32-unreferenced-symbol.patch")
-        self.apply_patch("generate-darwin-source-and-headers-python3-items.patch")
+        shprint(sh.sed,
+                "-i.bak",
+                "s/build_target(ios_simulator_platform, platform_headers)/print('Skipping i386')/g",
+                "generate-darwin-source-and-headers.py")
         self.set_marker("patched")
 
     def build_arch(self, arch):

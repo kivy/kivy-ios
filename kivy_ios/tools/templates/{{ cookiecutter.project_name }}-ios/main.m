@@ -33,8 +33,6 @@ int main(int argc, char *argv[]) {
 
     // Kivy environment to prefer some implementation on iOS platform
     putenv("KIVY_BUILD=ios");
-    putenv("KIVY_NO_CONFIG=1");
-    putenv("KIVY_NO_FILELOG=1");
     putenv("KIVY_WINDOW=sdl2");
     putenv("KIVY_IMAGE=imageio,tex,gif,sdl2");
     putenv("KIVY_AUDIO=sdl2");
@@ -54,7 +52,7 @@ int main(int argc, char *argv[]) {
     NSString *python_home = [NSString stringWithFormat:@"PYTHONHOME=%@", resourcePath, nil];
     putenv((char *)[python_home UTF8String]);
 
-    NSString *python_path = [NSString stringWithFormat:@"PYTHONPATH=%@:%@/lib/python3.9/:%@/lib/python3.9/site-packages:.", resourcePath, resourcePath, resourcePath, nil];
+    NSString *python_path = [NSString stringWithFormat:@"PYTHONPATH=%@:%@/lib/python3.10/:%@/lib/python3.10/site-packages:.", resourcePath, resourcePath, resourcePath, nil];
     putenv((char *)[python_path UTF8String]);
 
     NSString *tmp_path = [NSString stringWithFormat:@"TMP=%@/tmp", resourcePath, nil];
@@ -148,6 +146,7 @@ void load_custom_builtin_importer() {
         "    sys.modules['subprocess'].STDOUT = None\n" \
         "    sys.modules['subprocess'].DEVNULL = None\n" \
         "    sys.modules['subprocess'].CalledProcessError = Exception\n" \
+        "    sys.modules['subprocess'].CompletedProcess = None\n" \
         "    sys.modules['subprocess'].check_output = None\n" \
         "except ImportError:\n" \
         "    EXTS = ['.so']\n"
