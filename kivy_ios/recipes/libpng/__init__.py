@@ -6,7 +6,7 @@ import sh
 
 class PngRecipe(Recipe):
     version = '1.6.40'
-    url = 'https://altushost-swe.dl.sourceforge.net/project/libpng/libpng16/1.6.40/libpng-1.6.40.tar.gz'
+    url = 'https://downloads.sourceforge.net/sourceforge/libpng/libpng-{version}.tar.gz'
     library = 'dist/lib/libpng16.a'
     include_dir = 'dist/include'
 
