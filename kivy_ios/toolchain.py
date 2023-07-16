@@ -26,9 +26,13 @@ from contextlib import suppress
 from datetime import datetime
 from pprint import pformat
 import logging
-from urllib.request import FancyURLopener, urlcleanup
+import urllib.request
 from pbxproj import XcodeProject
 from pbxproj.pbxextensions.ProjectFiles import FileOptions
+
+url_opener = urllib.request.build_opener()
+url_orig_headers = url_opener.addheaders
+urllib.request.install_opener(url_opener)
 
 curdir = dirname(__file__)
 
@@ -84,15 +88,6 @@ def remove_junk(d):
             if fn.endswith(exts):
                 print('Found junk {}/{}, removing'.format(root, fn))
                 unlink(join(root, fn))
-
-
-class ChromeDownloader(FancyURLopener):
-    version = (
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
-        '(KHTML, like Gecko) Chrome/28.0.1500.71 Safari/537.36')
-
-
-urlretrieve = ChromeDownloader().retrieve
 
 
 class JsonStore:
@@ -468,13 +463,14 @@ class Recipe:
             unlink(filename)
 
         # Clean up temporary files just in case before downloading.
-        urlcleanup()
+        urllib.request.urlcleanup()
 
         logger.info('Downloading {0}'.format(url))
         attempts = 0
         while True:
             try:
-                urlretrieve(url, filename, report_hook)
+                url_opener.addheaders = [('User-agent', 'Wget/1.0')]
+                urllib.request.urlretrieve(url, filename, report_hook)
             except OSError:
                 attempts += 1
                 if attempts >= 5:
@@ -483,6 +479,8 @@ class Recipe:
                 logger.warning('Download failed. Retrying in 1 second...')
                 time.sleep(1)
                 continue
+            finally:
+                url_opener.addheaders = url_orig_headers
             break
 
         return filename
