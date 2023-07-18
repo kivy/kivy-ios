@@ -5,6 +5,7 @@ Tool for compiling iOS toolchain
 
 This tool intend to replace all the previous tools/ in shell script.
 """
+import glob
 
 import argparse
 import platform
@@ -29,7 +30,9 @@ import logging
 import urllib.request
 from pbxproj import XcodeProject
 from pbxproj.pbxextensions.ProjectFiles import FileOptions
-
+from kivy_ios.logger import (logger, info, warning, debug, shprint, info_main)
+from kivy_ios.util import (current_directory, ensure_dir,
+                                   BuildInterruptingException)
 url_opener = urllib.request.build_opener()
 url_orig_headers = url_opener.addheaders
 urllib.request.install_opener(url_opener)
@@ -1041,7 +1044,51 @@ class PythonRecipe(Recipe):
         """
         pass
 
+class CompiledComponentsPythonRecipe(PythonRecipe):
+    pre_build_ext = False
 
+    build_cmd = 'build_ext'
+
+    def build_arch(self, arch):
+        '''Build any cython components, then install the Python module by
+        calling setup.py install with the target Python dir.
+        '''
+        Recipe.build_arch(self, arch)
+        self.build_compiled_components(arch)
+        self.install_python_package(arch)
+
+    def build_compiled_components(self, arch):
+        info('Building compiled components in {}'.format(self.name))
+
+        env = self.get_recipe_env(arch)
+        hostpython = sh.Command(self.hostpython_location)
+        with current_directory(self.get_build_dir(arch.arch)):
+            if self.install_in_hostpython:
+                shprint(hostpython, 'setup.py', 'clean', '--all', _env=env)
+            shprint(hostpython, 'setup.py', self.build_cmd, '-v',
+                    _env=env, *self.setup_extra_args)
+            build_dir = glob.glob('build/lib.*')[0]
+            shprint(sh.find, build_dir, '-name', '"*.o"', '-exec',
+                    env['STRIP'], '{}', ';', _env=env)
+
+    def install_hostpython_package(self, arch):
+        env = self.get_hostrecipe_env(arch)
+        self.rebuild_compiled_components(arch, env)
+        super().install_hostpython_package(arch)
+
+    def rebuild_compiled_components(self, arch, env):
+        info('Rebuilding compiled components in {}'.format(self.name))
+
+        hostpython = sh.Command(self.real_hostpython_location)
+        shprint(hostpython, 'setup.py', 'clean', '--all', _env=env)
+        shprint(hostpython, 'setup.py', self.build_cmd, '-v', _env=env,
+                *self.setup_extra_args)
+
+
+class CppCompiledComponentsPythonRecipe(CompiledComponentsPythonRecipe):
+    """ Extensions that require the cxx-stl """
+    call_hostpython_via_targetpython = False
+    need_stl_shared = True
 class CythonRecipe(PythonRecipe):
     pre_build_ext = False
     cythonize = True
