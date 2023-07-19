@@ -30,9 +30,8 @@ import logging
 import urllib.request
 from pbxproj import XcodeProject
 from pbxproj.pbxextensions.ProjectFiles import FileOptions
-from kivy_ios.logger import (logger, info, warning, debug, shprint, info_main)
-from kivy_ios.util import (current_directory, ensure_dir,
-                                   BuildInterruptingException)
+from kivy_ios.logger import ( info, shprint)
+from kivy_ios.util import (current_directory)
 url_opener = urllib.request.build_opener()
 url_orig_headers = url_opener.addheaders
 urllib.request.install_opener(url_opener)
