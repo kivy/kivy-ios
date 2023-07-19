@@ -23,16 +23,12 @@ These recipes are not ported to the new toolchain yet:
 
 ## Installation & requirements
 
-Before we start, we strongly advise using a Python virtual environment to install Python packages.
+    git clone https://github.com/pythonsus/kivy-ios.git
+    cd kivy-ios/
+    python3 -m venv venv
+    . venv/bin/activate
+    pip install -e .
 
-      python3 -m venv venv
-      . venv/bin/activate
-
-Install [Kivy for iOS from PyPI](https://pypi.org/project/kivy-ios) with pip like any Python package.
-
-      pip3 install kivy-ios
-
-Additionally, you would need a few system dependencies and configuration.
 
 - Xcode 13 or above, with an iOS SDK and command line tools installed:
 
@@ -53,6 +49,7 @@ contained in a `recipe`.
 You can list the available recipes and their versions with:
 
     $ toolchain recipes
+    pandas       1.0.3
     audiostream  master
     click        7.1.2
     cymunk       master
@@ -230,7 +227,7 @@ Alternatively, it's also possible to clone the repository and use all the
 described commands in the above sections.
 Clone and install it to your local virtual environment:
 
-    git clone https://github.com/kivy/kivy-ios.git
+    git clone https://github.com/pythonsus/kivy-ios.git
     cd kivy-ios/
     python3 -m venv venv
     . venv/bin/activate
