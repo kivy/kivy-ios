@@ -5,7 +5,7 @@ import shutil
 
 
 class NumpyRecipe(CythonRecipe):
-    version = "1.24.2"
+    version = "1.25.1"
     url = "https://pypi.python.org/packages/source/n/numpy/numpy-{version}.tar.gz"
     library = "libnumpy.a"
     libraries = ["libnpymath.a", "libnpyrandom.a"]
