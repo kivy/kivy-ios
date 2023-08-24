@@ -1,5 +1,49 @@
 # Changelog
 
+## [v2023.08.24](https://github.com/kivy/kivy-ios/tree/v2023.08.24)
+
+[Full Changelog](https://github.com/kivy/kivy-ios/compare/v2023.05.21...v2023.08.24)
+
+**Fixed bugs:**
+
+- ld: 407 duplicate symbols for architecture arm64 [\#787](https://github.com/kivy/kivy-ios/issues/787)
+
+**Closed issues:**
+
+- please delete [\#846](https://github.com/kivy/kivy-ios/issues/846)
+- Label and MDLabel don't work correctly on iOS [\#845](https://github.com/kivy/kivy-ios/issues/845)
+- ImportError: dynamic module does not define module export function \(PyInit\_\_bcrypt\) [\#841](https://github.com/kivy/kivy-ios/issues/841)
+- Build failure [\#838](https://github.com/kivy/kivy-ios/issues/838)
+- Custom recipes just like p4a [\#837](https://github.com/kivy/kivy-ios/issues/837)
+- pandas recipe  [\#836](https://github.com/kivy/kivy-ios/issues/836)
+- Build numpy: '\['/kivy/dist/hostpython3/bin/python', '-m', 'cython', '-3', '--fast-fail', '-o', '\_philox.c', '\_philox.pyx'\]' returned non-zero exit status 1.' [\#835](https://github.com/kivy/kivy-ios/issues/835)
+- ios.c not found when building ios for kivy [\#833](https://github.com/kivy/kivy-ios/issues/833)
+- Imvaild symlink [\#825](https://github.com/kivy/kivy-ios/issues/825)
+- dynamic module does not define module export function \(PyInit\_\_multiarray\_umath\) [\#822](https://github.com/kivy/kivy-ios/issues/822)
+- Toolchain build openssl not working [\#819](https://github.com/kivy/kivy-ios/issues/819)
+-  OSError: codec configuration error when reading image file [\#818](https://github.com/kivy/kivy-ios/issues/818)
+- Command PhaseScriptExecution failed with a nonzero exit code [\#817](https://github.com/kivy/kivy-ios/issues/817)
+- We discovered that the content didn’t load after lauched.  [\#816](https://github.com/kivy/kivy-ios/issues/816)
+- Asset validation failed Invalid bundle structure. The “soccer.app/lib/python3.10/site-packages/charset\_normalizer/md.cpython-310-darwin.so” binary file is not permitted.  [\#815](https://github.com/kivy/kivy-ios/issues/815)
+- Asset validation failed Invalid Bundle Structure for libnpyrandom.a and libnpymath.a [\#814](https://github.com/kivy/kivy-ios/issues/814)
+- kivy-ios Not found '\_SHA256.so' [\#813](https://github.com/kivy/kivy-ios/issues/813)
+- The toggling of the 'readonly' attribute \(True/False\) for the MDTextField is not functioning as expected in the xcode build [\#811](https://github.com/kivy/kivy-ios/issues/811)
+- libpng recipe won't build [\#808](https://github.com/kivy/kivy-ios/issues/808)
+- build error in Python3.8 [\#796](https://github.com/kivy/kivy-ios/issues/796)
+
+**Merged pull requests:**
+
+- Use a pinned version of `Cython` for now, as most of the recipes are incompatible with `Cython==3.x.x` [\#844](https://github.com/kivy/kivy-ios/pull/844) ([misl6](https://github.com/misl6))
+- Remove Unused Dependency: `requests` [\#840](https://github.com/kivy/kivy-ios/pull/840) ([gdrosos](https://github.com/gdrosos))
+- Fix download from `sourceforge` \(and possibly many others\) [\#830](https://github.com/kivy/kivy-ios/pull/830) ([misl6](https://github.com/misl6))
+- Now Github Actions provides `python3` via `setup-python` also for Apple Silicon macs [\#829](https://github.com/kivy/kivy-ios/pull/829) ([misl6](https://github.com/misl6))
+- Bump Kivy version to 2.2.1 [\#828](https://github.com/kivy/kivy-ios/pull/828) ([misl6](https://github.com/misl6))
+- Update `libpng` recipe and build `SDL2_ttf` vendored `freetype` with png support, so can render colored emoji [\#827](https://github.com/kivy/kivy-ios/pull/827) ([misl6](https://github.com/misl6))
+- SDL\_ttf: Hide internal symbols via single-object prelink [\#820](https://github.com/kivy/kivy-ios/pull/820) ([misl6](https://github.com/misl6))
+- Update zbarlight recipe to 3.0, refactor [\#805](https://github.com/kivy/kivy-ios/pull/805) ([Cheaterman](https://github.com/Cheaterman))
+- Refactor biglink ; add extra assertions to help debug failures [\#804](https://github.com/kivy/kivy-ios/pull/804) ([Cheaterman](https://github.com/Cheaterman))
+
+
 ## [v2023.05.21](https://github.com/kivy/kivy-ios/tree/v2023.05.21)
 
 [Full Changelog](https://github.com/kivy/kivy-ios/compare/v2023.01.29...v2023.05.21)
