@@ -22,3 +22,11 @@ __pycache__
 .tox
 venv
 *.egg-info
+artifacts/*
+.idea/vcs.xml
+.idea/workspace.xml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/kivy-ios.iml
+.idea/misc.xml
+.idea/dk-kivy-ios.iml
+.idea/*
