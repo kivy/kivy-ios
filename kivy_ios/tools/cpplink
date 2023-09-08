@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+'''
+C++ libraries are linked using environ['CXX'] compiler. This is different
+from C libraries, which are linked using environ['LDSHARED'].
+
+This script behaves like a C++ compiler or a linker, depending on
+whether its output file ends with '.so'.
+
+If for compiling, this script forwards all arguments in a call to the
+compiler specified as environ['CXX_ORIG'].
+
+If for linking, this script collects the same object and dependent
+library data.  It then generates the same files as liblink would for an
+ld target.
+'''
+
+import sys
+import subprocess
+from os import environ
+
+
+output = None
+get_next = False
+
+for arg in sys.argv:
+    if get_next:
+        output = arg
+        break
+    elif arg.startswith('-o'):
+        if arg == '-o':
+            get_next = True
+        else:
+            so_output = arg[2:]
+            break
+
+if not output.endswith('.so'):
+    result = subprocess.run([environ['CXX_ORIG'], *sys.argv[1:]])
+    sys.exit(result.returncode)
+
+
+libs = []
+objects = []
+
+i = 1
+while i < len(sys.argv):
+    opt = sys.argv[i]
+    i += 1
+
+    if opt == "-o":
+        output = sys.argv[i]
+        i += 1
+        continue
+
+    if opt.startswith("-l") or opt.startswith("-L"):
+        libs.append(opt)
+        continue
+
+    if opt in ("-r", "-pipe", "-no-cpp-precomp"):
+        continue
+
+    if opt in (
+            "--sysroot", "-isysroot", "-framework", "-undefined",
+            "-macosx_version_min"
+            ):
+        i += 1
+        continue
+
+    if opt.startswith("-I"):
+        continue
+
+    if opt.startswith("-m"):
+        continue
+
+    if opt.startswith("-f"):
+        continue
+
+    if opt.startswith("-O"):
+        continue
+
+    if opt.startswith("-g"):
+        continue
+
+    if opt.startswith("-D"):
+        continue
+
+    if opt.startswith('-arch'):
+        continue
+
+    if opt.startswith("-Wl,"):
+        continue
+
+    if opt.startswith("-W"):
+        continue
+
+    if opt.startswith("-stdlib="):
+        continue
+
+    if opt.startswith("-"):
+        print(sys.argv)
+        print("Unknown option: ", opt)
+        sys.exit(1)
+
+    if not opt.endswith('.o'):
+        continue
+
+    objects.append(opt)
+
+
+f = open(output, "w")
+f.close()
+
+f = open(output + ".libs", "w")
+f.write(" ".join(libs))
+f.close()
+
+print('Liblink redirect linking with', objects)
+ld = environ.get('ARM_LD')
+arch = environ.get('ARCH', 'arm64')
+if 'arm' in arch:
+    min_version_flag = '-ios_version_min'
+else:
+    min_version_flag = '-ios_simulator_version_min'
+call = [ld, '-r', '-o', output + '.o', min_version_flag, '9.0', '-arch', arch]
+if min_version_flag == "-ios_version_min":
+    call += ["-bitcode_bundle"]
+call += objects
+print("Linking: {}".format(" ".join(call)))
+subprocess.call(call)

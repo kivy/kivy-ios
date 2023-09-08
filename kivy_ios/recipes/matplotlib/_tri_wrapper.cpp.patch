@@ -1,0 +1,12 @@
+--- matplotlib-3.5.2.orig/src/tri/_tri_wrapper.cpp	2022-05-02 22:49:57
++++ matplotlib-3.5.2/src/tri/_tri_wrapper.cpp	2023-09-08 13:23:47
+@@ -1,7 +1,9 @@
+ #include "_tri.h"
+ #include "../mplutils.h"
+ #include "../py_exceptions.h"
++
+ 
++using namespace tri;
+ 
+ /* Triangulation */
+ 

@@ -1,0 +1,17 @@
+--- matplotlib-3.5.2.orig/src/tri/_tri.h	2022-05-02 22:49:57
++++ matplotlib-3.5.2/src/tri/_tri.h	2023-09-08 13:17:12
+@@ -72,6 +72,7 @@
+ #include <vector>
+ 
+ 
++namespace tri {
+ 
+ /* An edge of a triangle consisting of an triangle index in the range 0 to
+  * ntri-1 and an edge index in the range 0 to 2.  Edge i goes from the
+@@ -814,5 +815,6 @@
+     const unsigned long _m, _a, _c;
+     unsigned long _seed;
+ };
++}
+ 
+ #endif

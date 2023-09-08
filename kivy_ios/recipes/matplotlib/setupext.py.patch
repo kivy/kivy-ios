@@ -1,0 +1,44 @@
+--- matplotlib-3.5.2.orig/setupext.py	2023-09-08 14:01:18
++++ matplotlib-3.5.2/setupext.py	2023-09-08 13:09:10
+@@ -404,7 +404,7 @@
+             "matplotlib._contour", [
+                 "src/_contour.cpp",
+                 "src/_contour_wrapper.cpp",
+-                "src/py_converters.cpp",
++#                "src/py_converters.cpp",
+             ])
+         add_numpy_flags(ext)
+         add_libagg_flags(ext)
+@@ -414,7 +414,7 @@
+             "matplotlib.ft2font", [
+                 "src/ft2font.cpp",
+                 "src/ft2font_wrapper.cpp",
+-                "src/py_converters.cpp",
++#                "src/py_converters.cpp",
+             ])
+         FreeType.add_flags(ext)
+         add_numpy_flags(ext)
+@@ -424,19 +424,19 @@
+         ext = Extension(
+             "matplotlib._image", [
+                 "src/_image_wrapper.cpp",
+-                "src/py_converters.cpp",
++#                "src/py_converters.cpp",
+             ])
+         add_numpy_flags(ext)
+-        add_libagg_flags_and_sources(ext)
++        add_libagg_flags(ext)
+         yield ext
+         # path
+         ext = Extension(
+             "matplotlib._path", [
+-                "src/py_converters.cpp",
++#                "src/py_converters.cpp",
+                 "src/_path_wrapper.cpp",
+             ])
+         add_numpy_flags(ext)
+-        add_libagg_flags_and_sources(ext)
++        add_libagg_flags(ext)
+         yield ext
+         # qhull
+         ext = Extension(
