@@ -11,91 +11,143 @@ compiler specified as environ['CXX_ORIG'].
 
 If for linking, this script collects the same object and dependent
 library data.  It then generates the same files as liblink would for an
-ld target.
+ld target.  The linker called is specified in environ['ARM_LD'].
 '''
 
 import sys
 import subprocess
-from os import environ
+from os import environ, remove
 
 
-output = None
-get_next = False
+# this section is to quickly bypass the full script for cases of c++ compiling
 
-for arg in sys.argv:
-    if get_next:
-        output = arg
-        break
-    elif arg.startswith('-o'):
-        if arg == '-o':
-            get_next = True
-        else:
-            so_output = arg[2:]
+def get_output(args):
+    '''
+    gets output file
+    '''
+    output = None
+    get_next = False
+
+    for arg in args:
+        if get_next:
+            output = arg
             break
+        elif arg.startswith('-o'):
+            if arg == '-o':
+                get_next = True
+            else:
+                output = arg[2:]
+                break
+
+    return output
+
+
+def call_cpp(args):
+    '''
+    call the c++ compiler and return error code
+    throws a RuntimeError if there is an exception in processing
+    '''
+    result = subprocess.run([environ['CXX_ORIG'], *args])
+    if result.returncode != 0:
+        raise RuntimeError("Compiling C++ failed")
+
+
+def parse_linker_args(args):
+    '''
+    parse arguments to the linker
+    '''
+    libs = []
+    objects = []
+    i = 0
+    while i < len(args):
+        opt = args[i]
+        i += 1
+
+        if opt == "-o":
+            i += 1
+            continue
+        elif opt.startswith("-l") or opt.startswith("-L"):
+            libs.append(opt)
+            continue
+        elif opt in ("-r", "-pipe", "-no-cpp-precomp"):
+            continue
+        elif opt in (
+                "--sysroot", "-isysroot", "-framework", "-undefined",
+                "-macosx_version_min"
+                ):
+            i += 1
+            continue
+        elif opt.startswith(("-I", "-m", "-f", "-O", "-g", "-D", "-arch", "-Wl", "-W", "-stdlib=")):
+            continue
+        elif opt.startswith("-"):
+            raise RuntimeError(str(args) + "\nUnknown option: " + opt)
+        elif not opt.endswith('.o'):
+            continue
+
+        objects.append(opt)
+
+    if not objects:
+        raise RuntimeError('C++ Linker arguments contain no object files')
+
+    return libs, objects
+
+
+def call_linker(objects, output):
+    '''
+    calls linker (environ['ARM_LD']) and returns error code
+    throws a RuntimeError if there is an exception in processing
+    '''
+    print('Liblink redirect linking with', objects)
+    ld = environ.get('ARM_LD')
+    arch = environ.get('ARCH', 'arm64')
+    if 'arm' in arch:
+        min_version_flag = '-ios_version_min'
+    else:
+        min_version_flag = '-ios_simulator_version_min'
+    call = [ld, '-r', '-o', output + '.o', min_version_flag, '9.0', '-arch', arch]
+    if min_version_flag == "-ios_version_min":
+        call += ["-bitcode_bundle"]
+    call += objects
+    print("Linking: {}".format(" ".join(call)))
+    result = subprocess.run(call)
+
+    if result.returncode != 0:
+        raise RuntimeError("C++ Linking failed")
+
+
+def delete_so_files(output):
+    '''
+    delete shared object files needed for proper module loading
+    '''
+    try:
+        remove(output)
+        remove(output + '.libs')
+    except FileNotFoundError:
+        pass
+
+
+def write_so_files(output, libs):
+    '''
+    Writes empty .so and .so.libs file which is needed for proper module loading
+    '''
+    with open(output, "w") as f:
+        f.write('')
+
+    with open(output + ".libs", "w") as f:
+        f.write(" ".join(libs))
+
+
+# command line arguments to the C++ Compiler/Linker
+args = sys.argv[1:]
+# get the output files
+output = get_output(args)
 
 if not output.endswith('.so'):
-    result = subprocess.run([environ['CXX_ORIG'], *sys.argv[1:]])
-    sys.exit(result.returncode)
-
-
-libs = []
-objects = []
-
-i = 1
-while i < len(sys.argv):
-    opt = sys.argv[i]
-    i += 1
-
-    if opt == "-o":
-        output = sys.argv[i]
-        i += 1
-        continue
-
-    if opt.startswith("-l") or opt.startswith("-L"):
-        libs.append(opt)
-        continue
-
-    if opt in ("-r", "-pipe", "-no-cpp-precomp"):
-        continue
-
-    if opt in (
-            "--sysroot", "-isysroot", "-framework", "-undefined",
-            "-macosx_version_min"
-            ):
-        i += 1
-        continue
-
-    if opt.startswith(("-I", "-m", "-f", "-O", "-g", "-D", "-arch", "-Wl", "-W", "-stdlib=")):
-        continue
-
-    if opt.startswith("-"):
-        print(sys.argv)
-        print("Unknown option: ", opt)
-        sys.exit(1)
-
-    if not opt.endswith('.o'):
-        continue
-
-    objects.append(opt)
-
-
-f = open(output, "w")
-f.close()
-
-f = open(output + ".libs", "w")
-f.write(" ".join(libs))
-f.close()
-
-print('Liblink redirect linking with', objects)
-ld = environ.get('ARM_LD')
-arch = environ.get('ARCH', 'arm64')
-if 'arm' in arch:
-    min_version_flag = '-ios_version_min'
+    # C++ Compiling
+    subprocess.run([environ['CXX_ORIG'], *args])
 else:
-    min_version_flag = '-ios_simulator_version_min'
-call = [ld, '-r', '-o', output + '.o', min_version_flag, '9.0', '-arch', arch]
-if min_version_flag == "-ios_version_min":
-    call += ["-bitcode_bundle"]
-call += objects
-print("Linking: {}".format(" ".join(call)))
-subprocess.call(call)
+    # C++ Linking
+    libs, objects = parse_linker_args(args)
+    delete_so_files(output)
+    call_linker(objects, output)
+    write_so_files(output, libs)
