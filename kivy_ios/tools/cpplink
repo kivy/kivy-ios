@@ -121,6 +121,10 @@ def delete_so_files(output):
     '''
     try:
         remove(output)
+    except FileNotFoundError:
+        pass
+
+    try:
         remove(output + '.libs')
     except FileNotFoundError:
         pass
