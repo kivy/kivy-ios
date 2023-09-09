@@ -8,10 +8,8 @@ creating the library files needed for inclusion in an iOS project.
 It also depends on the headers from the cppy package.
 '''
 
-from kivy_ios.toolchain import CythonRecipe, shprint
+from kivy_ios.toolchain import CythonRecipe
 from os.path import join
-import sh
-import shutil
 
 
 class KiwiSolverRecipe(CythonRecipe):
@@ -27,7 +25,7 @@ class KiwiSolverRecipe(CythonRecipe):
     def get_recipe_env(self, arch=None, with_flags_in_cc=True):
         env = super().get_recipe_env(arch)
 
-        #cpplink setup
+        # cpplink setup
         env['CXX_ORIG'] = env['CXX']
         env['CXX'] = join(self.ctx.root_dir, "tools", "cpplink")
 
@@ -35,5 +33,6 @@ class KiwiSolverRecipe(CythonRecipe):
         env['CC'] = env['CXX']
         env['CFLAGS'] += ' -isysroot {}'.format(env['IOSSDKROOT'])
         return env
+
 
 recipe = KiwiSolverRecipe()

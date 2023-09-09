@@ -10,11 +10,7 @@ are necessary to prevent duplicate symbols from appearing in the final
 link of a kivy-ios application.
 '''
 
-from kivy_ios.toolchain import CythonRecipe, shprint, ensure_dir
-from os.path import join
-import sh
-import shutil
-
+from kivy_ios.toolchain import CythonRecipe, ensure_dir
 from os.path import join
 from os.path import abspath
 import shutil
@@ -117,5 +113,6 @@ class MatplotlibRecipe(CythonRecipe):
         env['CFLAGS'] += ' -isysroot {}'.format(env['IOSSDKROOT'])
 
         return env
+
 
 recipe = MatplotlibRecipe()
