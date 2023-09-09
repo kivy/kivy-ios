@@ -65,34 +65,7 @@ while i < len(sys.argv):
         i += 1
         continue
 
-    if opt.startswith("-I"):
-        continue
-
-    if opt.startswith("-m"):
-        continue
-
-    if opt.startswith("-f"):
-        continue
-
-    if opt.startswith("-O"):
-        continue
-
-    if opt.startswith("-g"):
-        continue
-
-    if opt.startswith("-D"):
-        continue
-
-    if opt.startswith('-arch'):
-        continue
-
-    if opt.startswith("-Wl,"):
-        continue
-
-    if opt.startswith("-W"):
-        continue
-
-    if opt.startswith("-stdlib="):
+    if opt.startswith(("-I", "-m", "-f", "-O", "-g", "-D", "-arch", "-Wl", "-W", "-stdlib=")):
         continue
 
     if opt.startswith("-"):
