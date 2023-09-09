@@ -97,7 +97,7 @@ def call_linker(objects, output):
     calls linker (environ['ARM_LD']) and returns error code
     throws a RuntimeError if there is an exception in processing
     '''
-    print('Liblink redirect linking with', objects)
+    print('cpplink redirect linking with', objects)
     ld = environ.get('ARM_LD')
     arch = environ.get('ARCH', 'arm64')
     if 'arm' in arch:
