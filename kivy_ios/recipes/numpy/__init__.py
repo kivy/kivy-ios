@@ -5,13 +5,13 @@ import shutil
 
 
 class NumpyRecipe(CythonRecipe):
-    version = "1.24.4"
+    version = "1.24.3"
     url = "https://pypi.python.org/packages/source/n/numpy/numpy-{version}.tar.gz"
     library = "libnumpy.a"
     libraries = ["libnpymath.a", "libnpyrandom.a"]
     include_dir = "numpy/core/include"
     depends = ["python"]
-    hostpython_prerequisites = ["Cython==0.29.36"]
+    hostpython_prerequisites = ["Cython==0.29.34"]
     cythonize = False
 
     def prebuild_arch(self, arch):

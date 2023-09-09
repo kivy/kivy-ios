@@ -15,8 +15,8 @@ if [ -z $version ]; then
 fi
 
 # Clean up Toolchain Dist
-echo "Cleaning up Toolchain Dist"
-python3 toolchain.py distclean
+# echo "Cleaning up Toolchain Dist"
+# python3 toolchain.py distclean
 
 # Clone PE
 git clone --branch ${version} git@github.com:diamondkinetics/dk-python.git ./temp/dk-python/
@@ -53,6 +53,7 @@ git clone git@github.com:diamondkinetics/pose_engine.git ./temp/pose_engine/
 
 # Build default libraries using the kivy toolchain
 # Could run a clean if desired, python3 toolchain.py clean
+
 python3 toolchain.py build python3 numpy
 
 # Patch numpy

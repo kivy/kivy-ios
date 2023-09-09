@@ -29,6 +29,7 @@ import logging
 import urllib.request
 from pbxproj import XcodeProject
 from pbxproj.pbxextensions.ProjectFiles import FileOptions
+import boto3
 
 url_opener = urllib.request.build_opener()
 url_orig_headers = url_opener.addheaders
@@ -42,7 +43,7 @@ initial_working_directory = getcwd()
 # format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(funcName)s():%(lineno)d] %(message)s'
 logging.basicConfig(format='[%(levelname)-8s] %(message)s',
                     datefmt='%Y-%m-%d:%H:%M:%S',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 
 # Quiet the loggers we don't care about
 sh_logging = logging.getLogger('sh')
@@ -440,6 +441,23 @@ class Recipe:
                 setattr(cls, prop, value)
         return super().__new__(cls)
 
+    def download_code_artifact_file(self, package, version, asset_name, filename):
+        client = boto3.client('codeartifact')
+        response = client.get_package_version_asset(
+            domain='diamond-kinetics',
+            repository='dk-pypi',
+            format='pypi',
+            package=package,
+            packageVersion=version,
+            asset=asset_name)
+        
+        asset = response['asset']
+        bytes = asset.read()
+        asset.close()
+        
+        with open(filename, 'wb') as file:
+            file.write(bytes)
+
     # API available for recipes
     def download_file(self, url, filename, cwd=None):
         """
@@ -732,7 +750,10 @@ class Recipe:
                 return
             fn = self.archive_fn
             if not exists(fn):
-                self.download_file(self.url.format(version=self.version), fn)
+                if hasattr(self, 'package'):
+                    self.download_code_artifact_file(self.package, self.version, self.asset_name, fn)
+                else:
+                    self.download_file(self.url.format(version=self.version), fn)
             status = self.get_archive_rootdir(self.archive_fn)
             if status is not None:
                 self.ctx.state[key] = status
@@ -1316,6 +1337,21 @@ pip           Install a pip dependency into the distribution
                 sys.exit(1)
             filename = xcodeproj[0]
         return filename
+        
+    def download(self):
+        parser = argparse.ArgumentParser(description="Download recipe to cache")
+        parser.add_argument("recipe", help="Recipe to download")
+        args = parser.parse_args(sys.argv[2:])
+        ctx = Context()
+
+        try:
+            recipe = Recipe.get_recipe(args.recipe, ctx)
+        except KeyError:
+            logger.error("No recipe named {}".format(name))
+            sys.exit(1)
+            
+        recipe.init_with_ctx(ctx)
+        recipe.download()
 
     @staticmethod
     def validate_custom_recipe_paths(ctx, paths):
