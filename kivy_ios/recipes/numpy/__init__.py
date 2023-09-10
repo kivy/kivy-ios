@@ -14,15 +14,15 @@ class NumpyRecipe(CythonRecipe):
     hostpython_prerequisites = ["Cython==0.29.36"]
     cythonize = False
 
-    def prebuild_arch(self, arch):
+    def prebuild_platform(self, plat):
         if self.has_marker("patched"):
             return
         self.apply_patch("skip-math-test.patch")
         self.apply_patch("duplicated_symbols.patch")
         self.set_marker("patched")
 
-    def get_recipe_env(self, arch):
-        env = super().get_recipe_env(arch)
+    def get_recipe_env(self, plat):
+        env = super().get_recipe_env(plat)
         # CC must have the CFLAGS with arm arch, because numpy tries first to
         # compile and execute an empty C to see if the compiler works. This is
         # obviously not working when crosscompiling
@@ -32,8 +32,8 @@ class NumpyRecipe(CythonRecipe):
         env["NPY_LAPACK_ORDER"] = ""
         return env
 
-    def build_arch(self, arch):
-        super().build_arch(arch)
+    def build_platform(self, plat):
+        super().build_platform(plat)
         sh.cp(sh.glob(join(self.build_dir, "build", "temp.*", "libnpy*.a")),
               self.build_dir)
 

@@ -26,17 +26,17 @@ class Hostpython3Recipe(HostRecipe):
         logger.info("Global: hostpython located at {}".format(self.ctx.hostpython))
         logger.info("Global: hostpgen located at {}".format(self.ctx.hostpgen))
 
-    def get_build_subdir(self, arch):
-        return join(self.get_build_dir(arch), self.build_subdir)
+    def get_build_subdir(self, plat):
+        return join(self.get_build_dir(plat), self.build_subdir)
 
-    def prebuild_arch(self, arch):
+    def prebuild_platform(self, plat):
         if self.has_marker("patched"):
             return
         self.apply_patch("disable_sysconfig_cflags.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.set_marker("patched")
 
-    def postbuild_arch(self, arch):
+    def postbuild_platform(self, plat):
         return
 
     def get_build_env(self):
@@ -55,12 +55,12 @@ class Hostpython3Recipe(HostRecipe):
                 ])
         return build_env
 
-    def build_arch(self, arch):
+    def build_platform(self, plat):
         build_env = self.get_build_env()
 
         configure = sh.Command(join(self.build_dir, "configure"))
 
-        build_subdir = self.get_build_subdir(arch.arch)
+        build_subdir = self.get_build_subdir(plat)
         os.makedirs(build_subdir, exist_ok=True)
 
         with cd(build_subdir):
@@ -75,9 +75,9 @@ class Hostpython3Recipe(HostRecipe):
                 _env=build_env)
 
     def install(self):
-        arch = list(self.filtered_archs)[0]
+        plat = list(self.platforms_to_build)[0]
         build_env = self.get_build_env()
-        build_subdir = self.get_build_subdir(arch.arch)
+        build_subdir = self.get_build_subdir(plat)
         build_env["PATH"] = os.environ["PATH"]
         shprint(sh.make, self.ctx.concurrent_make,
                 "-C", build_subdir,

@@ -18,24 +18,24 @@ class HostOpensslRecipe(HostRecipe):
         self.build_env = build_env
         return build_env
 
-    def build_arch(self, arch):
+    def build_platform(self, plat):
         build_env = self.get_build_env()
         configure = sh.Command(join(self.build_dir, "Configure"))
         shprint(configure,
-                arch_mapper[arch.arch],
+                arch_mapper[plat.arch],
                 _env=build_env)
         shprint(sh.make, "clean")
         shprint(sh.make, self.ctx.concurrent_make, "build_libs")
 
     def install(self):
-        arch = self.archs[0]
+        plat = list(self.platforms_to_build)[0]
         sh.mkdir('-p', join(self.ctx.dist_dir, 'hostopenssl'))
-        sh.cp('-r', join(self.get_build_dir(arch), 'include'),
+        sh.cp('-r', join(self.get_build_dir(plat), 'include'),
               join(self.ctx.dist_dir, 'hostopenssl', 'include'))
         sh.mkdir('-p', join(self.ctx.dist_dir, 'hostopenssl', 'lib'))
-        sh.cp(join(self.get_build_dir(arch), 'libssl.a'),
+        sh.cp(join(self.get_build_dir(plat), 'libssl.a'),
               join(self.ctx.dist_dir, 'hostopenssl', 'lib'))
-        sh.cp(join(self.get_build_dir(arch), 'libcrypto.a'),
+        sh.cp(join(self.get_build_dir(plat), 'libcrypto.a'),
               join(self.ctx.dist_dir, 'hostopenssl', 'lib'))
 
 

@@ -16,8 +16,8 @@ class KivyRecipe(CythonRecipe):
     pbx_frameworks = ["OpenGLES", "Accelerate", "CoreMedia", "CoreVideo"]
     pre_build_ext = True
 
-    def get_recipe_env(self, arch):
-        env = super().get_recipe_env(arch)
+    def get_recipe_env(self, plat):
+        env = super().get_recipe_env(plat)
         env["KIVY_SDL2_PATH"] = ":".join([
             join(self.ctx.dist_dir, "include", "common", "sdl2"),
             join(self.ctx.dist_dir, "include", "common", "sdl2_image"),
@@ -25,9 +25,9 @@ class KivyRecipe(CythonRecipe):
             join(self.ctx.dist_dir, "include", "common", "sdl2_mixer")])
         return env
 
-    def build_arch(self, arch):
+    def build_platform(self, plat):
         self._patch_setup()
-        super().build_arch(arch)
+        super().build_platform(plat)
 
     def _patch_setup(self):
         # patch setup to remove some functionnalities
