@@ -1,0 +1,20 @@
+--- matplotlib-3.5.2.orig/setup.py	2022-05-02 22:49:57
++++ matplotlib-3.5.2/setup.py	2023-09-09 22:22:57
+@@ -315,7 +315,7 @@
+     python_requires='>={}'.format('.'.join(str(n) for n in py_min_version)),
+     setup_requires=[
+         "certifi>=2020.06.20",
+-        "numpy>=1.17",
++#        "numpy>=1.17",
+         "setuptools_scm>=4",
+         "setuptools_scm_git_archive",
+     ],
+@@ -323,7 +323,7 @@
+         "cycler>=0.10",
+         "fonttools>=4.22.0",
+         "kiwisolver>=1.0.1",
+-        "numpy>=1.17",
++#        "numpy>=1.17",
+         "packaging>=20.0",
+         "pillow>=6.2.0",
+         "pyparsing>=2.2.1",
