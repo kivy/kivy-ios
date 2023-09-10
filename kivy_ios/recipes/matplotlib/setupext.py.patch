@@ -1,5 +1,5 @@
 --- matplotlib-3.5.2.orig/setupext.py	2023-09-08 14:01:18
-+++ matplotlib-3.5.2/setupext.py	2023-09-08 13:09:10
++++ matplotlib-3.5.2/setupext.py	2023-09-09 22:23:24
 @@ -404,7 +404,7 @@
              "matplotlib._contour", [
                  "src/_contour.cpp",
@@ -42,3 +42,14 @@
          yield ext
          # qhull
          ext = Extension(
+@@ -499,8 +499,8 @@
+ 
+ 
+ def add_numpy_flags(ext):
+-    import numpy as np
+-    ext.include_dirs.append(np.get_include())
++#    import numpy as np
++#    ext.include_dirs.append(np.get_include())
+     ext.define_macros.extend([
+         # Ensure that PY_ARRAY_UNIQUE_SYMBOL is uniquely defined for each
+         # extension.
