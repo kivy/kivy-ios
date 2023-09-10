@@ -79,6 +79,7 @@ class MatplotlibRecipe(CythonRecipe):
         self.apply_patch('_tri.h.patch')
         self.apply_patch('_tri_wrapper.cpp.patch')
         self.apply_patch('setupext.py.patch')
+        self.apply_patch('setup.py.patch')
         self.set_marker("patched")
 
     def get_recipe_env(self, arch=None, with_flags_in_cc=True):
