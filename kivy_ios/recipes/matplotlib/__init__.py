@@ -11,9 +11,9 @@ link of a kivy-ios application.
 '''
 
 from kivy_ios.toolchain import CythonRecipe, ensure_dir
-from os.path import join
-from os.path import abspath
+from os.path import join, abspath, dirname
 import shutil
+import sh
 
 
 class MatplotlibRecipe(CythonRecipe):
@@ -105,6 +105,9 @@ class MatplotlibRecipe(CythonRecipe):
         numpy_inc_dir = join(numpytype.get_build_dir(arch.arch),
                              'build', 'src.macosx-13.5-arm64-3.10',
                              'numpy', 'core', 'include', 'numpy')
+
+        # this numpy include directory is not in the dist directory
+        numpy_inc_dir = dirname(sh.glob(numpytype.get_build_dir(arch.arch) + '/**/_numpyconfig.h', recursive=True)[0])
 
         env['CFLAGS'] += f' -I{free_inc_dir} -I{numpy_inc_dir}'
         env['CXX_ORIG'] = env['CXX']
