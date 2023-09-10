@@ -1,0 +1,15 @@
+--- matplotlib-3.5.2.orig/src/tri/_tri.cpp	2022-05-02 22:49:57
++++ matplotlib-3.5.2/src/tri/_tri.cpp	2023-09-08 13:17:37
+@@ -13,6 +13,7 @@
+ #include <algorithm>
+ #include <set>
+ 
++namespace tri {
+ 
+ TriEdge::TriEdge()
+     : tri(-1), edge(-1)
+@@ -2069,3 +2070,4 @@
+     _seed = (_seed*_a + _c) % _m;
+     return (_seed*max_value) / _m;
+ }
++}
