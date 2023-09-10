@@ -22,8 +22,8 @@ class KiwiSolverRecipe(CythonRecipe):
     cythonize = False
     library = "libkiwisolver.a"
 
-    def get_recipe_env(self, arch=None, with_flags_in_cc=True):
-        env = super().get_recipe_env(arch)
+    def get_recipe_env(self, plat):
+        env = super().get_recipe_env(plat)
 
         # cpplink setup
         env['CXX_ORIG'] = env['CXX']

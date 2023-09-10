@@ -1,5 +1,5 @@
 --- matplotlib-3.5.2.orig/setupext.py	2023-09-08 14:01:18
-+++ matplotlib-3.5.2/setupext.py	2023-09-09 22:23:24
++++ matplotlib-3.5.2/setupext.py	2023-09-10 11:29:38
 @@ -404,7 +404,7 @@
              "matplotlib._contour", [
                  "src/_contour.cpp",
@@ -53,3 +53,45 @@
      ext.define_macros.extend([
          # Ensure that PY_ARRAY_UNIQUE_SYMBOL is uniquely defined for each
          # extension.
+@@ -749,22 +749,22 @@
+                 ext.libraries.extend("m")
+ 
+ 
+-class BackendMacOSX(OptionalPackage):
+-    config_category = 'gui_support'
+-    name = 'macosx'
+-
+-    def check(self):
+-        if sys.platform != 'darwin':
+-            raise Skipped("Mac OS-X only")
+-        return super().check()
+-
+-    def get_extensions(self):
+-        sources = [
+-            'src/_macosx.m'
+-            ]
+-        ext = Extension('matplotlib.backends._macosx', sources)
+-        ext.extra_compile_args.extend(['-Werror=unguarded-availability'])
+-        ext.extra_link_args.extend(['-framework', 'Cocoa'])
+-        if platform.python_implementation().lower() == 'pypy':
+-            ext.extra_compile_args.append('-DPYPY=1')
+-        yield ext
++#class BackendMacOSX(OptionalPackage):
++#    config_category = 'gui_support'
++#    name = 'macosx'
++#
++#    def check(self):
++#        if sys.platform != 'darwin':
++#            raise Skipped("Mac OS-X only")
++#        return super().check()
++#
++#    def get_extensions(self):
++#        sources = [
++#            'src/_macosx.m'
++#            ]
++#        ext = Extension('matplotlib.backends._macosx', sources)
++#        ext.extra_compile_args.extend(['-Werror=unguarded-availability'])
++#        ext.extra_link_args.extend(['-framework', 'Cocoa'])
++#        if platform.python_implementation().lower() == 'pypy':
++#            ext.extra_compile_args.append('-DPYPY=1')
++#        yield ext
