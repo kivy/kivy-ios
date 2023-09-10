@@ -26,7 +26,7 @@ class MatplotlibRecipe(CythonRecipe):
                       'pyparsing', 'python-dateutil']
     cythonize = False
 
-    def generate_libraries_pc_files(self, arch):
+    def generate_libraries_pc_files(self, plat):
         """
         Create *.pc files for libraries that `matplotib` depends on.
 
@@ -35,7 +35,7 @@ class MatplotlibRecipe(CythonRecipe):
         well...we don't even install the libraries...so we must trick a little
         the mlp install).
         """
-        pkg_config_path = self.get_recipe_env(arch)['PKG_CONFIG_PATH']
+        pkg_config_path = self.get_recipe_env(plat)['PKG_CONFIG_PATH']
         ensure_dir(pkg_config_path)
 
         lib_to_pc_file = {
@@ -56,7 +56,7 @@ class MatplotlibRecipe(CythonRecipe):
             # set the library absolute path and library version
             lib_recipe = self.get_recipe(lib_name, self.ctx)
             text_buffer = text_buffer.replace(
-                'path_to_built', lib_recipe.get_build_dir(arch.arch),
+                'path_to_built', lib_recipe.get_build_dir(plat),
             )
             text_buffer = text_buffer.replace(
                 'library_version', lib_recipe.version,
@@ -67,14 +67,14 @@ class MatplotlibRecipe(CythonRecipe):
             with open(pc_dest_file, 'w') as pc_file:
                 pc_file.write(text_buffer)
 
-    def prebuild_arch(self, arch):
+    def prebuild_platform(self, plat):
         if self.has_marker("patched"):
             return
         shutil.copyfile(
             join(abspath(self.recipe_dir), "setup.cfg.template"),
-            join(self.get_build_dir(arch.arch), "mplsetup.cfg"),
+            join(self.get_build_dir(plat), "mplsetup.cfg"),
         )
-        self.generate_libraries_pc_files(arch)
+        self.generate_libraries_pc_files(plat)
         self.apply_patch('_tri.cpp.patch')
         self.apply_patch('_tri.h.patch')
         self.apply_patch('_tri_wrapper.cpp.patch')
@@ -82,14 +82,14 @@ class MatplotlibRecipe(CythonRecipe):
         self.apply_patch('setup.py.patch')
         self.set_marker("patched")
 
-    def get_recipe_env(self, arch=None, with_flags_in_cc=True):
-        env = super().get_recipe_env(arch)
+    def get_recipe_env(self, plat):
+        env = super().get_recipe_env(plat)
 
         # we make use of the same directory than `XDG_CACHE_HOME`, for our
         # custom library pc files, so we have all the install files that we
         # generate at the same place
         env['XDG_CACHE_HOME'] = join(
-            self.get_build_dir(arch.arch),
+            self.get_build_dir(plat),
             'p4a_files'
         )
         env['PKG_CONFIG_PATH'] = env['XDG_CACHE_HOME']
@@ -99,15 +99,11 @@ class MatplotlibRecipe(CythonRecipe):
         # libraries), but if we tell the compiler where to find our libraries
         # and includes, then the install success :)
         freetype = self.get_recipe('freetype', self.ctx)
-        free_inc_dir = join(freetype.get_build_dir(arch.arch), 'include')
+        free_inc_dir = join(freetype.get_build_dir(plat), 'include')
 
         numpytype = self.get_recipe('numpy', self.ctx)
-        numpy_inc_dir = join(numpytype.get_build_dir(arch.arch),
-                             'build', 'src.macosx-13.5-arm64-3.10',
-                             'numpy', 'core', 'include', 'numpy')
-
         # this numpy include directory is not in the dist directory
-        numpy_inc_dir = dirname(sh.glob(numpytype.get_build_dir(arch.arch) + '/**/_numpyconfig.h', recursive=True)[0])
+        numpy_inc_dir = dirname(sh.glob(numpytype.get_build_dir(plat) + '/**/_numpyconfig.h', recursive=True)[0])
 
         env['CFLAGS'] += f' -I{free_inc_dir} -I{numpy_inc_dir}'
         env['CXX_ORIG'] = env['CXX']

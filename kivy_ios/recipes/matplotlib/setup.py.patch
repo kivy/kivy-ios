@@ -1,5 +1,14 @@
 --- matplotlib-3.5.2.orig/setup.py	2022-05-02 22:49:57
-+++ matplotlib-3.5.2/setup.py	2023-09-09 22:22:57
++++ matplotlib-3.5.2/setup.py	2023-09-10 11:11:57
+@@ -47,7 +47,7 @@
+     setupext.FreeType(),
+     setupext.Qhull(),
+     setupext.Tests(),
+-    setupext.BackendMacOSX(),
++#    setupext.BackendMacOSX(),
+     ]
+ 
+ 
 @@ -315,7 +315,7 @@
      python_requires='>={}'.format('.'.join(str(n) for n in py_min_version)),
      setup_requires=[
