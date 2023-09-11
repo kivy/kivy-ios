@@ -17,13 +17,14 @@ import sh
 
 
 class MatplotlibRecipe(CythonRecipe):
-    version = '3.5.2'
+    version = '3.7.2'
     url = 'https://github.com/matplotlib/matplotlib/archive/v{version}.zip'
     library = 'libmatplotlib.a'
     depends = ['kiwisolver', 'numpy', 'pillow', 'freetype']
     pre_build_ext = True
     python_depends = ['cycler', 'fonttools', 'packaging',
-                      'pyparsing', 'python-dateutil']
+                      'pyparsing', 'python-dateutil', 'six']
+    hostpython_prerequisites = ['pybind11', 'certifi']
     cythonize = False
 
     def generate_libraries_pc_files(self, plat):
@@ -71,7 +72,7 @@ class MatplotlibRecipe(CythonRecipe):
         if self.has_marker("patched"):
             return
         shutil.copyfile(
-            join(abspath(self.recipe_dir), "setup.cfg.template"),
+            join(abspath(self.recipe_dir), "mplsetup.cfg"),
             join(self.get_build_dir(plat), "mplsetup.cfg"),
         )
         self.generate_libraries_pc_files(plat)
@@ -80,6 +81,12 @@ class MatplotlibRecipe(CythonRecipe):
         self.apply_patch('_tri_wrapper.cpp.patch')
         self.apply_patch('setupext.py.patch')
         self.apply_patch('setup.py.patch')
+        with open(join(self.get_build_dir(plat), 'lib', 'matplotlib', '_version.py'), 'w') as of:
+            v1, v2, v3 = self.version.split('.')
+            of.write(f'''
+__version__ = version = '{self.version}'
+__version_tuple__ = version_tuple = ({v1}, {v2}, {v3})
+''')
         self.set_marker("patched")
 
     def get_recipe_env(self, plat):

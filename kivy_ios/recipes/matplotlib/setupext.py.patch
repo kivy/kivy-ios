@@ -1,15 +1,17 @@
---- matplotlib-3.5.2.orig/setupext.py	2023-09-08 14:01:18
-+++ matplotlib-3.5.2/setupext.py	2023-09-10 11:29:38
-@@ -404,7 +404,7 @@
-             "matplotlib._contour", [
-                 "src/_contour.cpp",
-                 "src/_contour_wrapper.cpp",
--                "src/py_converters.cpp",
-+#                "src/py_converters.cpp",
-             ])
-         add_numpy_flags(ext)
-         add_libagg_flags(ext)
-@@ -414,7 +414,7 @@
+--- matplotlib-3.7.2.orig/setupext.py	2023-07-05 13:43:01
++++ matplotlib-3.7.2/setupext.py	2023-09-10 22:52:48
+@@ -17,6 +17,10 @@
+ import urllib.request
+ 
+ from pybind11.setup_helpers import Pybind11Extension
++import pybind11.setup_helpers
++# need to prevent host flags
++pybind11.setup_helpers.MACOS = False
++
+ from setuptools import Distribution, Extension
+ 
+ _log = logging.getLogger(__name__)
+@@ -415,7 +419,7 @@
              "matplotlib.ft2font", [
                  "src/ft2font.cpp",
                  "src/ft2font_wrapper.cpp",
@@ -18,7 +20,7 @@
              ])
          FreeType.add_flags(ext)
          add_numpy_flags(ext)
-@@ -424,19 +424,19 @@
+@@ -425,19 +429,19 @@
          ext = Extension(
              "matplotlib._image", [
                  "src/_image_wrapper.cpp",
@@ -42,7 +44,7 @@
          yield ext
          # qhull
          ext = Extension(
-@@ -499,8 +499,8 @@
+@@ -506,8 +510,8 @@
  
  
  def add_numpy_flags(ext):
@@ -53,45 +55,3 @@
      ext.define_macros.extend([
          # Ensure that PY_ARRAY_UNIQUE_SYMBOL is uniquely defined for each
          # extension.
-@@ -749,22 +749,22 @@
-                 ext.libraries.extend("m")
- 
- 
--class BackendMacOSX(OptionalPackage):
--    config_category = 'gui_support'
--    name = 'macosx'
--
--    def check(self):
--        if sys.platform != 'darwin':
--            raise Skipped("Mac OS-X only")
--        return super().check()
--
--    def get_extensions(self):
--        sources = [
--            'src/_macosx.m'
--            ]
--        ext = Extension('matplotlib.backends._macosx', sources)
--        ext.extra_compile_args.extend(['-Werror=unguarded-availability'])
--        ext.extra_link_args.extend(['-framework', 'Cocoa'])
--        if platform.python_implementation().lower() == 'pypy':
--            ext.extra_compile_args.append('-DPYPY=1')
--        yield ext
-+#class BackendMacOSX(OptionalPackage):
-+#    config_category = 'gui_support'
-+#    name = 'macosx'
-+#
-+#    def check(self):
-+#        if sys.platform != 'darwin':
-+#            raise Skipped("Mac OS-X only")
-+#        return super().check()
-+#
-+#    def get_extensions(self):
-+#        sources = [
-+#            'src/_macosx.m'
-+#            ]
-+#        ext = Extension('matplotlib.backends._macosx', sources)
-+#        ext.extra_compile_args.extend(['-Werror=unguarded-availability'])
-+#        ext.extra_link_args.extend(['-framework', 'Cocoa'])
-+#        if platform.python_implementation().lower() == 'pypy':
-+#            ext.extra_compile_args.append('-DPYPY=1')
-+#        yield ext
