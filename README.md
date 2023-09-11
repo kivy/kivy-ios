@@ -1,5 +1,7 @@
 # Kivy for iOS
 
+# NOTE: this is a fork from kivy-ios. This repo contains changes and additions to support DK building of kivy-ios to support the use of Physics Engine
+
 [![kivy-ios](https://github.com/kivy/kivy-ios/workflows/kivy-ios/badge.svg)](https://github.com/kivy/kivy-ios/actions?query=workflow%3Akivy-ios)
 [![PyPI version](https://badge.fury.io/py/kivy-ios.svg)](https://badge.fury.io/py/kivy-ios)
 [![Backers on Open Collective](https://opencollective.com/kivy/backers/badge.svg)](#backers)
