@@ -212,10 +212,11 @@ class GenericPlatform:
             def noicctempfile():
                 '''
                 reported issue where C Python has issues with 'icc' in the compiler path
+                https://github.com/python/cpython/issues/96398
+                https://github.com/python/cpython/pull/96399
                 '''
-                x = tempfile.NamedTemporaryFile()
-                while 'icc' in x.name:
-                    x = tempfile.NamedTemporaryFile()
+                while 'icc' in (x := tempfile.NamedTemporaryFile()).name:
+                    pass
                 return x
 
             self._ccsh = noicctempfile()
