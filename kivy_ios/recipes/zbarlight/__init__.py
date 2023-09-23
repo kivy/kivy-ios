@@ -12,7 +12,8 @@ class ZbarLightRecipe(Recipe):
     url = "https://github.com/Polyconseil/zbarlight/archive/{version}.tar.gz"
     library = "zbarlight.a"
     depends = ["hostpython3", "python3", "libzbar"]
-    pbx_libraries = ["libz", "libbz2", "libc++", "libsqlite3", "CoreMotion"]
+    pbx_libraries = ["libz", "libbz2", "libc++", "libsqlite3"]
+    pbx_frameworks = ["CoreMotion"]
     include_per_platform = True
 
     def get_zbar_env(self, plat):

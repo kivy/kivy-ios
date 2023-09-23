@@ -1322,7 +1322,6 @@ def update_pbxproj(filename, pbx_frameworks=None):
     logger.info("Analysis of {}".format(filename))
 
     project = XcodeProject.load(filename)
-    sysroot = sh.xcrun("--sdk", "iphonesimulator", "--show-sdk-path").strip()
 
     group = project.get_or_create_group("Frameworks")
     g_classes = project.get_or_create_group("Classes")
@@ -1333,8 +1332,9 @@ def update_pbxproj(filename, pbx_frameworks=None):
             f_path = join(ctx.dist_dir, "frameworks", framework_name)
         else:
             logger.info("Ensure {} is in the project (pbx_frameworks, system)".format(framework))
-            f_path = join(sysroot, "System", "Library", "Frameworks",
-                          "{}.framework".format(framework))
+            # We do not need to specify the full path to the framework, as
+            # Xcode will search for it in the SDKs.
+            f_path = framework_name
         project.add_file(
             f_path,
             parent=group,
@@ -1346,13 +1346,11 @@ def update_pbxproj(filename, pbx_frameworks=None):
             ),
         )
     for library in pbx_libraries:
-        logger.info("Ensure {} is in the project (pbx_libraries, dylib+tbd)".format(library))
-        f_path = join(sysroot, "usr", "lib",
-                      "{}.dylib".format(library))
-        project.add_file(f_path, parent=group, tree="DEVELOPER_DIR", force=False)
-        f_path = join(sysroot, "usr", "lib",
-                      "{}.tbd".format(library))
-        project.add_file(f_path, parent=group, tree="DEVELOPER_DIR", force=False)
+        library_name = f"{library}.tbd"
+        logger.info("Ensure {} is in the project (pbx_libraries, tbd)".format(library))
+        # We do not need to specify the full path to the library, as
+        # Xcode will search for it in the SDKs.
+        project.add_file(library_name, parent=group, tree="DEVELOPER_DIR", force=False)
     for xcframework in xcframeworks:
         logger.info("Ensure {} is in the project (xcframework)".format(xcframework))
         project.add_file(
