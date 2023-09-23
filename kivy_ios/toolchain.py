@@ -209,8 +209,18 @@ class GenericPlatform:
                  'include_file_mtime,include_file_ctime,file_stat_matches'))
 
         if not self._ccsh:
-            self._ccsh = tempfile.NamedTemporaryFile()
-            self._cxxsh = tempfile.NamedTemporaryFile()
+            def noicctempfile():
+                '''
+                reported issue where C Python has issues with 'icc' in the compiler path
+                https://github.com/python/cpython/issues/96398
+                https://github.com/python/cpython/pull/96399
+                '''
+                while 'icc' in (x := tempfile.NamedTemporaryFile()).name:
+                    pass
+                return x
+
+            self._ccsh = noicctempfile()
+            self._cxxsh = noicctempfile()
             sh.chmod("+x", self._ccsh.name)
             sh.chmod("+x", self._cxxsh.name)
             self._ccsh.write(b'#!/bin/sh\n')
