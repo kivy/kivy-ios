@@ -1,7 +1,6 @@
-diff -Naur Python-3.10.10.orig/configure Python-3.10.10/configure
---- Python-3.10.10.orig/configure	2023-02-12 15:08:28
-+++ Python-3.10.10/configure	2023-02-12 15:10:45
-@@ -3344,6 +3344,15 @@
+--- Python-3.11.6/configure.orig	2023-10-15 12:23:31
++++ Python-3.11.6/configure	2023-10-15 12:30:23
+@@ -3823,6 +3823,15 @@
  	*-*-cygwin*)
  		ac_sys_system=Cygwin
  		;;
@@ -17,7 +16,7 @@ diff -Naur Python-3.10.10.orig/configure Python-3.10.10/configure
  	*-*-vxworks*)
  	    ac_sys_system=VxWorks
  	    ;;
-@@ -3391,6 +3400,15 @@
+@@ -3876,6 +3885,15 @@
  			_host_cpu=$host_cpu
  		esac
  		;;
@@ -33,13 +32,14 @@ diff -Naur Python-3.10.10.orig/configure Python-3.10.10/configure
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -3469,6 +3487,13 @@
+@@ -3956,7 +3974,14 @@
+   Darwin/[6789].*)
      define_xopen_source=no;;
    Darwin/[12][0-9].*)
-     define_xopen_source=no;;
++    define_xopen_source=no;;
 +  # On iOS, defining _POSIX_C_SOURCE also disables platform specific features.
 +  iOS/*)
-+    define_xopen_source=no;;
+     define_xopen_source=no;;
 +  tvOS/*)
 +    define_xopen_source=no;;
 +  watchOS/*)
@@ -47,7 +47,7 @@ diff -Naur Python-3.10.10.orig/configure Python-3.10.10/configure
    # On QNX 6.3.2, defining _XOPEN_SOURCE prevents netdb.h from
    # defining NI_NUMERICHOST.
    QNX/6.3.2)
-@@ -5389,6 +5414,12 @@
+@@ -6204,6 +6229,12 @@
  case $ac_sys_system in #(
    Darwin*) :
      MULTIARCH="" ;; #(
@@ -60,7 +60,7 @@ diff -Naur Python-3.10.10.orig/configure Python-3.10.10/configure
    FreeBSD*) :
      MULTIARCH="" ;; #(
    *) :
-@@ -6249,11 +6280,17 @@
+@@ -7210,11 +7241,17 @@
  fi
  
  if test "$cross_compiling" = yes; then
@@ -83,15 +83,16 @@ diff -Naur Python-3.10.10.orig/configure Python-3.10.10/configure
  fi
  
  
-@@ -7051,7 +7088,6 @@
+@@ -8259,7 +8296,7 @@
  # tweak BASECFLAGS based on compiler and platform
  case $GCC in
  yes)
--    CFLAGS_NODIST="$CFLAGS_NODIST -std=c99"
+-    CFLAGS_NODIST="$CFLAGS_NODIST -std=c11"
++    CFLAGS_NODIST="$CFLAGS_NODIST -std=c11" #
  
-     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -Wextra" >&5
- $as_echo_n "checking for -Wextra... " >&6; }
-@@ -11912,6 +11948,10 @@
+ 
+ 
+@@ -15157,6 +15194,10 @@
  then
  	case $ac_sys_system/$ac_sys_release in
  	hp*|HP*) DYNLOADFILE="dynload_hpux.o";;

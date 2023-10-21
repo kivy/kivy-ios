@@ -9,16 +9,16 @@ logger = logging.getLogger(__name__)
 
 
 class Python3Recipe(Recipe):
-    version = "3.10.10"
+    version = "3.11.6"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
     depends = ["hostpython3", "libffi", "openssl"]
-    library = "libpython3.10.a"
+    library = "libpython3.11.a"
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
 
     def init_with_ctx(self, ctx):
         super().init_with_ctx(ctx)
-        self.set_python(self, "3.10")
-        ctx.python_ver_dir = "python3.10"
+        self.set_python(self, "3.11")
+        ctx.python_ver_dir = "python3.11"
         ctx.python_prefix = join(ctx.dist_dir, "root", "python3")
         ctx.site_packages_dir = join(
             ctx.python_prefix, "lib", ctx.python_ver_dir, "site-packages")
@@ -28,9 +28,7 @@ class Python3Recipe(Recipe):
         if self.has_marker("patched"):
             return
         self.apply_patch("configure.patch")
-        self.apply_patch("posixmodule.patch")
         self.apply_patch("dynload_shlib.patch")
-        self.apply_patch("ctypes_duplicate.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
         self.set_marker("patched")
@@ -97,10 +95,15 @@ class Python3Recipe(Recipe):
                 "ac_cv_func_explicit_bzero=no",
                 "ac_cv_func_explicit_memset=no",
                 "ac_cv_func_close_range=no",
+                "ac_cv_search_crypt_r=no",
+                "ac_cv_func_fork1=no",
+                "ac_cv_func_system=no",
+                "ac_cv_func_clock_nanosleep=no",
                 "ac_cv_func_splice=no",
                 "ac_cv_func_mremap=no",
                 "--host={}-apple-ios".format(py_arch),
                 "--build=x86_64-apple-darwin",
+                "--with-build-python={}".format(join(self.ctx.dist_dir, "hostpython3", "bin", "python3")),
                 "--prefix={}".format(prefix),
                 "--without-ensurepip",
                 "--with-system-ffi",
@@ -132,9 +135,9 @@ class Python3Recipe(Recipe):
         # platform binaries and configuration
         with cd(join(
                 self.ctx.dist_dir, "root", "python3", "lib",
-                "python3.10", "config-3.10-darwin")):
+                "python3.11", "config-3.11-darwin")):
             sh.rm(
-                "libpython3.10.a",
+                "libpython3.11.a",
                 "python.o",
                 "config.c.in",
                 "makesetup",
@@ -143,11 +146,11 @@ class Python3Recipe(Recipe):
 
         # cleanup pkgconfig and compiled lib
         with cd(join(self.ctx.dist_dir, "root", "python3", "lib")):
-            sh.rm("-rf", "pkgconfig", "libpython3.10.a")
+            sh.rm("-rf", "pkgconfig", "libpython3.11.a")
 
         # cleanup python libraries
         with cd(join(
-                self.ctx.dist_dir, "root", "python3", "lib", "python3.10")):
+                self.ctx.dist_dir, "root", "python3", "lib", "python3.11")):
             sh.rm("-rf", "wsgiref", "curses", "idlelib", "lib2to3",
                   "ensurepip", "turtledemo", "lib-dynload", "venv",
                   "pydoc_data")
@@ -168,12 +171,12 @@ class Python3Recipe(Recipe):
             sh.find(".", "-name", "__pycache__", "-type", "d", "-delete")
 
             # create the lib zip
-            logger.info("Create a python3.10.zip")
-            sh.mv("config-3.10-darwin", "..")
+            logger.info("Create a python3.11.zip")
+            sh.mv("config-3.11-darwin", "..")
             sh.mv("site-packages", "..")
-            sh.zip("-r", "../python310.zip", sh.glob("*"))
+            sh.zip("-r", "../python311.zip", sh.glob("*"))
             sh.rm("-rf", sh.glob("*"))
-            sh.mv("../config-3.10-darwin", ".")
+            sh.mv("../config-3.11-darwin", ".")
             sh.mv("../site-packages", ".")
 
 

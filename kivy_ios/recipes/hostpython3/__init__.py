@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class Hostpython3Recipe(HostRecipe):
-    version = "3.10.10"
+    version = "3.11.6"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
     depends = ["hostopenssl"]
     optional_depends = []
@@ -19,8 +19,8 @@ class Hostpython3Recipe(HostRecipe):
 
     def init_with_ctx(self, ctx):
         super().init_with_ctx(ctx)
-        self.set_hostpython(self, "3.10")
-        self.ctx.so_suffix = ".cpython-310m-darwin.so"
+        self.set_hostpython(self, "3.11")
+        self.ctx.so_suffix = ".cpython-311m-darwin.so"
         self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython3", "bin", "python")
         self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython3", "bin", "pgen")
         logger.info("Global: hostpython located at {}".format(self.ctx.hostpython))
@@ -88,7 +88,7 @@ class Hostpython3Recipe(HostRecipe):
             join(self.ctx.dist_dir, "hostpython3", "bin", "python"))
 
         # hostpython3 installs bundled versions of `pip`
-        # and `setuptools` in `lib/python3.10/site-packages`.
+        # and `setuptools` in `lib/python3.x/site-packages`.
         # This is fine, but `setuptools` have a bug that prevents
         # it from working properly when cross-compiling, so we
         # patch it here.
@@ -100,7 +100,7 @@ class Hostpython3Recipe(HostRecipe):
                 self.ctx.dist_dir,
                 "hostpython3",
                 "lib",
-                "python3.10",
+                "python3.11",
                 "site-packages",
                 "setuptools",
             ),
