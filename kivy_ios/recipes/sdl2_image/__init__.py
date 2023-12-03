@@ -7,7 +7,7 @@ class LibSDL2ImageRecipe(Recipe):
     version = "2.7.1"
     url = "https://github.com/libsdl-org/SDL_image/releases/download/prerelease-{version}/SDL2_image-{version}.tar.gz"
     library = "Xcode/build/Release-{plat.sdk}/libSDL2_image.a"
-    include_dir = "SDL_image.h"
+    include_dir = "include/SDL_image.h"
     depends = ["sdl2"]
     pbx_frameworks = ["CoreGraphics", "MobileCoreServices"]
 
