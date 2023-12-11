@@ -5,7 +5,7 @@ import os
 
 
 class PillowRecipe(CythonRecipe):
-    version = "8.2.0"
+    version = "10.1.0"
     url = "https://pypi.python.org/packages/source/P/Pillow/Pillow-{version}.tar.gz"
     library = "libpillow.a"
     depends = [
