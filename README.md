@@ -17,7 +17,7 @@ and manage the creation of [Xcode](https://developer.apple.com/xcode/) projects.
 The toolchain supports:
 
 - iPhone / iOS (arm64)
-- iPhone Simulator (x86_64)
+- iPhone Simulator (x86_64, arm64)
 
 We do not provide any binary distributions of this toolchain.
 You do need to compile it at least once before creating your Xcode project.
@@ -121,7 +121,7 @@ You can think of it as follows: the kivy recipe will compile everything
 necessary for a minimal working version of Kivy.
 
 Don't just grab a coffee; do dinner. Compiling all the libraries for the first
-time, twice over (Remember: two architectures - x86_64, arm64) will take time.
+time, twice over (Remember: two platforms - iOS, iPhoneSimulator) will take time.
 
 For a complete list of available commands, type:
 
@@ -265,21 +265,23 @@ community and is supported by many projects managed by the
 
 ## Support
 
-Are you having trouble using the Kivy framework, or any of its related projects?
+Are you having trouble using kivy-ios or any of its related projects in the Kivy
+ecosystem?
 Is there an error you don’t understand? Are you trying to figure out how to use 
 it? We have volunteers who can help!
 
 The best channels to contact us for support are listed in the latest 
-[Contact Us](https://github.com/kivy/kivy/blob/master/CONTACT.md) document.
+[Contact Us](https://github.com/kivy/kivy-ios/blob/master/CONTACT.md) document.
 
 ## Contributing
 
-Kivy is a large product used by many thousands of developers for free, but it 
+kivy-ios is part of the [Kivy](https://kivy.org) ecosystem - a large group of
+products used by many thousands of developers for free, but it
 is built entirely by the contributions of volunteers. We welcome (and rely on) 
 users who want to give back to the community by contributing to the project.
 
 Contributions can come in many forms. See the latest 
-[Kivy Contribution Guidelines](https://github.com/kivy/kivy/blob/master/CONTRIBUTING.md)
+[Contribution Guidelines](https://github.com/kivy/kivy-ios/blob/master/CONTRIBUTING.md)
 for how you can help us.
 
 ## Code of Conduct
