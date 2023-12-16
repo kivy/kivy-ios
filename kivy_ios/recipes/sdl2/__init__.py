@@ -3,7 +3,7 @@ import sh
 
 
 class LibSDL2Recipe(Recipe):
-    version = "2.24.1"
+    version = "2.28.5"
     url = "https://github.com/libsdl-org/SDL/releases/download/release-{version}/SDL2-{version}.tar.gz"
     library = "Xcode/SDL/build/Release-{plat.sdk}/libSDL2.a"
     include_dir = "include"

@@ -3,7 +3,7 @@ import sh
 
 
 class LibSDL2MixerRecipe(Recipe):
-    version = "2.6.2"
+    version = "2.6.3"
     url = "https://github.com/libsdl-org/SDL_mixer/releases/download/release-{version}/SDL2_mixer-{version}.tar.gz"
     library = "Xcode/build/Release-{plat.sdk}/libSDL2_mixer.a"
     include_dir = "include/SDL_mixer.h"

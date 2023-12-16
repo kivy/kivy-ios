@@ -4,21 +4,12 @@ import sh
 
 
 class LibSDL2ImageRecipe(Recipe):
-    version = "2.6.2"
+    version = "2.8.0"
     url = "https://github.com/libsdl-org/SDL_image/releases/download/release-{version}/SDL2_image-{version}.tar.gz"
     library = "Xcode/build/Release-{plat.sdk}/libSDL2_image.a"
-    include_dir = "SDL_image.h"
+    include_dir = "include/SDL_image.h"
     depends = ["sdl2"]
     pbx_frameworks = ["CoreGraphics", "MobileCoreServices"]
-
-    def prebuild_platform(self, plat):
-        if self.has_marker("patched"):
-            return
-        # fix-ios-xcodebuild is a patch taken from the SDL2_image repo
-        # (See: https://github.com/libsdl-org/SDL_image/pull/292)
-        # We will need to remove it once is included into a release
-        self.apply_patch("fix-ios-xcodebuild.patch")
-        self.set_marker("patched")
 
     def build_platform(self, plat):
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
