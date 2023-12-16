@@ -11,20 +11,19 @@ jobs:
   action:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/support-requests@v2
+      - uses: dessant/support-requests@v4
         with:
           github-token: ${{ github.token }}
           support-label: 'support'
           issue-comment: >
             👋 We use the issue tracker exclusively for bug reports and feature requests.
             However, this issue appears to be a support request. Please use our
-            [support channels](https://github.com/kivy/kivy-ios/blob/master/README.md#support)
+            [support channels](https://github.com/kivy/pyjnius/blob/master/CONTACT.md)
             to get help with the project.
             
-            
-            If you're having trouble installing or using kivy-ios,
-            maybe you could be interested to [installation and requirements](https://github.com/kivy/kivy-ios/blob/master/README.md#installation--requirements).
-            
+            For troubleshooting advice and other frequently asked questions, consult
+            the latest 
+            [Kivy for iOS FAQ](https://github.com/kivy/kivy-ios/blob/master/FAQ.md).
             
             Let us know if this comment was made in error, and we'll be happy
             to reopen the issue.
