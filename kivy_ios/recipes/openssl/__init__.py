@@ -11,7 +11,7 @@ plat_mapper = {
 
 
 class OpensslRecipe(Recipe):
-    version = "1.1.1l"
+    version = "1.1.1w"
     url = "http://www.openssl.org/source/openssl-{version}.tar.gz"
     libraries = ["libssl.a", "libcrypto.a"]
     include_dir = "include"
