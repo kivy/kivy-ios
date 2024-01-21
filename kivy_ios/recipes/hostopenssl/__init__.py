@@ -10,7 +10,7 @@ arch_mapper = {'x86_64': 'darwin64-x86_64-cc',
 
 
 class HostOpensslRecipe(HostRecipe):
-    version = "1.1.1l"
+    version = "1.1.1w"
     url = "http://www.openssl.org/source/openssl-{version}.tar.gz"
 
     def get_build_env(self):
