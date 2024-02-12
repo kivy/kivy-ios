@@ -30,7 +30,6 @@ class LibffiRecipe(Recipe):
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(plat.arch),
-                "BITCODE_GENERATION_MODE=bitcode",
                 "-sdk", plat.sdk,
                 "-project", "libffi.xcodeproj",
                 "-target", "libffi-iOS",

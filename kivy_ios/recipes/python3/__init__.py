@@ -56,7 +56,7 @@ class Python3Recipe(Recipe):
         shprint(configure,
                 "CC={}".format(build_env["CC"]),
                 "LD={}".format(build_env["LD"]),
-                "CFLAGS={}".format(build_env["CFLAGS"].replace("-fembed-bitcode", "")),
+                "CFLAGS={}".format(build_env["CFLAGS"]),
                 "LDFLAGS={} -undefined dynamic_lookup".format(build_env["LDFLAGS"]),
                 "ac_cv_file__dev_ptmx=yes",
                 "ac_cv_file__dev_ptc=no",
