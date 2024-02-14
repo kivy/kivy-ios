@@ -87,8 +87,6 @@ elif sdk == 'iphonesimulator':
 else:
     raise ValueError("Unsupported SDK: {}".format(sdk))
 call = [ld, '-r', '-o', output + '.o', min_version_flag, '9.0', '-arch', arch]
-if min_version_flag == "-ios_version_min":
-    call += ["-bitcode_bundle"]
 call += objects
 print("Linking: {}".format(" ".join(call)))
 subprocess.call(call)

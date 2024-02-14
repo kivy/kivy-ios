@@ -18,7 +18,6 @@ class LibSDL2MixerRecipe(Recipe):
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
                 "ARCHS={}".format(plat.arch),
-                "BITCODE_GENERATION_MODE=bitcode",
                 "HEADER_SEARCH_PATHS=$HEADER_SEARCH_PATHS /usr/include/machine {} ".format(" ".join(plat.include_dirs)),
                 "-sdk", plat.sdk,
                 "-project", "Xcode/SDL_mixer.xcodeproj",
