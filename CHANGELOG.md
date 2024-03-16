@@ -1,5 +1,73 @@
 # Changelog
 
+## [v2024.03.16](https://github.com/kivy/kivy-ios/tree/v2024.03.16)
+
+[Full Changelog](https://github.com/kivy/kivy-ios/compare/v2023.08.24...v2024.03.16)
+
+**Fixed bugs:**
+
+- zbarlite recipe has hardcoded python version [\#677](https://github.com/kivy/kivy-ios/issues/677)
+
+**Closed issues:**
+
+- libffi recipe build hangs during configuration [\#889](https://github.com/kivy/kivy-ios/issues/889)
+- Can't Input text on IOS17.2 Simulator with Xcode 15.1 [\#888](https://github.com/kivy/kivy-ios/issues/888)
+- \[Request\]: Pypi packages [\#886](https://github.com/kivy/kivy-ios/issues/886)
+- Add pdf2docx recipe [\#883](https://github.com/kivy/kivy-ios/issues/883)
+- \[Question\] : Pygame and pyexpat ? [\#873](https://github.com/kivy/kivy-ios/issues/873)
+- Support mail address is broken [\#872](https://github.com/kivy/kivy-ios/issues/872)
+- Toolchain python version mismatch [\#869](https://github.com/kivy/kivy-ios/issues/869)
+- how to show ip camera footage [\#868](https://github.com/kivy/kivy-ios/issues/868)
+- Working app crash on iOS 17 [\#864](https://github.com/kivy/kivy-ios/issues/864)
+- Crash during background execution [\#862](https://github.com/kivy/kivy-ios/issues/862)
+- Python3 build fails with `unknown argument: '-fp-model'` [\#860](https://github.com/kivy/kivy-ios/issues/860)
+- issue creating recipe for kiwsolver [\#857](https://github.com/kivy/kivy-ios/issues/857)
+- App runs fine from XCode, but terminates with an error if installed through TestFlight [\#850](https://github.com/kivy/kivy-ios/issues/850)
+- ffmpeg related errors after adding this recipe to the project [\#849](https://github.com/kivy/kivy-ios/issues/849)
+- how do you init your custom c module at app startup? [\#848](https://github.com/kivy/kivy-ios/issues/848)
+- Replacement for pycrypto [\#843](https://github.com/kivy/kivy-ios/issues/843)
+- Xcode build fails with ModuleNotFoundError: No module named 'encodings' [\#842](https://github.com/kivy/kivy-ios/issues/842)
+- Invalid Signature when adding Python to iOS App Extension [\#826](https://github.com/kivy/kivy-ios/issues/826)
+- APP crashes easily [\#824](https://github.com/kivy/kivy-ios/issues/824)
+- when creating xcodeproj using kivy-ios, how to change the default bundleIdentifier [\#823](https://github.com/kivy/kivy-ios/issues/823)
+- toolchain build: no matching architecture in universal wrapper [\#792](https://github.com/kivy/kivy-ios/issues/792)
+- Explanation to build recipe in iOS [\#776](https://github.com/kivy/kivy-ios/issues/776)
+- Support arm64 simulator on Apple Silicon hardware [\#751](https://github.com/kivy/kivy-ios/issues/751)
+- PyObjC import error  [\#741](https://github.com/kivy/kivy-ios/issues/741)
+- App Store Connect Operation Error Invalid Bundle Structure - The binary file '\*myapp\*.app/lib/python3.9/site-packages/google/protobuf/pyext/\_message.cpython-39-darwin.so' is not permitted. [\#702](https://github.com/kivy/kivy-ios/issues/702)
+- libzbar recipe missing libiconv dependency [\#676](https://github.com/kivy/kivy-ios/issues/676)
+- Lib Not Found [\#674](https://github.com/kivy/kivy-ios/issues/674)
+-  toolchain build kivy Error [\#668](https://github.com/kivy/kivy-ios/issues/668)
+- leverage conda to create the host\* packages  [\#655](https://github.com/kivy/kivy-ios/issues/655)
+- ImportError: dynamic module does not define module export function \(PyInit\_\_imaging\) [\#644](https://github.com/kivy/kivy-ios/issues/644)
+- kivy ios and boto3 [\#641](https://github.com/kivy/kivy-ios/issues/641)
+- Recipe for OpenCV [\#637](https://github.com/kivy/kivy-ios/issues/637)
+- Issues with using threads on an iOS device [\#609](https://github.com/kivy/kivy-ios/issues/609)
+- Xcode fails to build: Undefined symbols for architecture x86\_64 [\#607](https://github.com/kivy/kivy-ios/issues/607)
+- There is a memory leak in the program [\#419](https://github.com/kivy/kivy-ios/issues/419)
+- Include Unit tests and CI to test build for the toolchain [\#296](https://github.com/kivy/kivy-ios/issues/296)
+
+**Merged pull requests:**
+
+- Remove bitcode support, as is now deprecated by Apple [\#894](https://github.com/kivy/kivy-ios/pull/894) ([misl6](https://github.com/misl6))
+- Bump openssl version to `1.1.1w` [\#891](https://github.com/kivy/kivy-ios/pull/891) ([misl6](https://github.com/misl6))
+- Bump Kivy version to 2.3.0 [\#890](https://github.com/kivy/kivy-ios/pull/890) ([misl6](https://github.com/misl6))
+- Set `fetch-depth: 0` for updated recipes checkout and use `actions/checkout@v4` instead of `actions/checkout@v3` [\#884](https://github.com/kivy/kivy-ios/pull/884) ([misl6](https://github.com/misl6))
+- Update sdl2 deps to reflect the same targeted in kivy/kivy [\#881](https://github.com/kivy/kivy-ios/pull/881) ([misl6](https://github.com/misl6))
+- Make doc structure consistent and up-to-date [\#879](https://github.com/kivy/kivy-ios/pull/879) ([Julian-O](https://github.com/Julian-O))
+- Create no-response [\#878](https://github.com/kivy/kivy-ios/pull/878) ([Julian-O](https://github.com/Julian-O))
+- Support Section Updated issue \#872 resolved [\#876](https://github.com/kivy/kivy-ios/pull/876) ([seharbat00l](https://github.com/seharbat00l))
+- Install kivy-ios via pip during tests, so dependencies are automatically managed [\#871](https://github.com/kivy/kivy-ios/pull/871) ([misl6](https://github.com/misl6))
+- Update `python3` recipe to `3.11.6` [\#870](https://github.com/kivy/kivy-ios/pull/870) ([misl6](https://github.com/misl6))
+- Do not use full path for system libraries and frameworks in `.xcodeproj` [\#867](https://github.com/kivy/kivy-ios/pull/867) ([misl6](https://github.com/misl6))
+- Fix for upstream issues with compiler path [\#866](https://github.com/kivy/kivy-ios/pull/866) ([tcaduser](https://github.com/tcaduser))
+- update to matplotlib 3.7.2 [\#861](https://github.com/kivy/kivy-ios/pull/861) ([tcaduser](https://github.com/tcaduser))
+- update for recent iOS platform changes [\#859](https://github.com/kivy/kivy-ios/pull/859) ([tcaduser](https://github.com/tcaduser))
+- matplotlib recipe [\#858](https://github.com/kivy/kivy-ios/pull/858) ([tcaduser](https://github.com/tcaduser))
+- Bump `numpy` version to `1.24.4` [\#856](https://github.com/kivy/kivy-ios/pull/856) ([misl6](https://github.com/misl6))
+- Support ARM64 Simulator + Introduce build platform concept + Introduce `xcframework` [\#778](https://github.com/kivy/kivy-ios/pull/778) ([misl6](https://github.com/misl6))
+
+
 ## [v2023.08.24](https://github.com/kivy/kivy-ios/tree/v2023.08.24)
 
 [Full Changelog](https://github.com/kivy/kivy-ios/compare/v2023.05.21...v2023.08.24)
