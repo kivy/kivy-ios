@@ -22,10 +22,10 @@ def modified_recipes(branch="origin/master"):
     # with a bunch of fixes, e.g. disabled TTY, see:
     # https://stackoverflow.com/a/20128598/185510
     sh.contrib.git.fetch("origin", "master")
-    git_diff = sh.contrib.git.diff("--name-only", "--diff-filter=d", branch)
+    git_diff = sh.contrib.git.diff("--name-only", "--diff-filter=d", branch).split("\n")
     recipes = set()
     for file_path in git_diff:
-        if fnmatch(file_path, "kivy_ios/recipes/*/__init__.py\n"):
+        if fnmatch(file_path, "kivy_ios/recipes/*/__init__.py"):
             recipe = file_path.split("/")[2]
             recipes.add(recipe)
     return recipes

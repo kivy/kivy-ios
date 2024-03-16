@@ -8,7 +8,7 @@
 ![PyPI - Version](https://img.shields.io/pypi/v/kivy-ios)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kivy-ios)
 
-[![kivy-ios](https://github.com/kivy/kivy-ios/workflows/kivy-ios/badge.svg)](https://github.com/kivy/kivy-ios/actions?query=workflow%3Akivy-ios)
+[![kivy-ios](https://github.com/kivy/kivy-ios/actions/workflows/kivy_ios.yml/badge.svg)](https://github.com/kivy/kivy-ios/actions/workflows/kivy_ios.yml)
 
 Kivy for iOS (kivy-ios) is a toolchain to compile the necessary libraries for 
 [iOS](https://www.apple.com/ios/) to run [Kivy](https://kivy.org) applications,
