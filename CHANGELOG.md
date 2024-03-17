@@ -1,8 +1,8 @@
 # Changelog
 
-## [v2024.03.16](https://github.com/kivy/kivy-ios/tree/v2024.03.16)
+## [v2024.03.17](https://github.com/kivy/kivy-ios/tree/v2024.03.17)
 
-[Full Changelog](https://github.com/kivy/kivy-ios/compare/v2023.08.24...v2024.03.16)
+[Full Changelog](https://github.com/kivy/kivy-ios/compare/v2023.08.24...v2024.03.17)
 
 **Fixed bugs:**
 
@@ -10,6 +10,7 @@
 
 **Closed issues:**
 
+- Materialyoucolor-python Recipe [\#895](https://github.com/kivy/kivy-ios/issues/895)
 - libffi recipe build hangs during configuration [\#889](https://github.com/kivy/kivy-ios/issues/889)
 - Can't Input text on IOS17.2 Simulator with Xcode 15.1 [\#888](https://github.com/kivy/kivy-ios/issues/888)
 - \[Request\]: Pypi packages [\#886](https://github.com/kivy/kivy-ios/issues/886)
@@ -49,6 +50,8 @@
 
 **Merged pull requests:**
 
+- :construction\_worker: Fix the rebuild recipe script [\#900](https://github.com/kivy/kivy-ios/pull/900) ([AndreMiras](https://github.com/AndreMiras))
+- recipes: add new `materialyoucolor` recipe [\#898](https://github.com/kivy/kivy-ios/pull/898) ([T-Dynamos](https://github.com/T-Dynamos))
 - Remove bitcode support, as is now deprecated by Apple [\#894](https://github.com/kivy/kivy-ios/pull/894) ([misl6](https://github.com/misl6))
 - Bump openssl version to `1.1.1w` [\#891](https://github.com/kivy/kivy-ios/pull/891) ([misl6](https://github.com/misl6))
 - Bump Kivy version to 2.3.0 [\#890](https://github.com/kivy/kivy-ios/pull/890) ([misl6](https://github.com/misl6))
