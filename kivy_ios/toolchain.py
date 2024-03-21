@@ -38,17 +38,23 @@ curdir = dirname(__file__)
 
 initial_working_directory = getcwd()
 
-# For more detailed logging, use something like
-# format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(funcName)s():%(lineno)d] %(message)s'
-logging.basicConfig(format='[%(levelname)-8s] %(message)s',
-                    datefmt='%Y-%m-%d:%H:%M:%S',
-                    level=logging.DEBUG)
-
-# Quiet the loggers we don't care about
-sh_logging = logging.getLogger('sh')
-sh_logging.setLevel(logging.WARNING)
-
 logger = logging.getLogger(__name__)
+
+
+def log_setup(level, quiet=True):
+    """ Setup logging at level. """
+    # customize loging here
+    if quiet:
+        level -= 1
+    level = logging.DEBUG if level > 0 else logging.WARNING if level < 0 else logging.INFO
+    # For more detailed logging, use something like
+    # format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(funcName)s():%(lineno)d] %(message)s'
+    logging.basicConfig(format='[%(levelname)-8s] %(message)s',
+        datefmt='%Y-%m-%d:%H:%M:%S',
+        level=level)
+    # Quiet the loggers we don't care about
+    sh_logging = logging.getLogger('sh')
+    sh_logging.setLevel(logging.WARNING)
 
 
 def shprint(command, *args, **kwargs):
@@ -1399,11 +1405,29 @@ icon          Create Icons for your xcode project
 pip           Install a pip dependency into the distribution
 """)
         parser.add_argument("command", help="Command to run")
-        args = parser.parse_args(sys.argv[1:2])
+        parser.add_argument('--verbose', '-v', action='append_const', const=1)
+        parser.add_argument('--quiet', '-q', action='append_const', const=-1)
+
+        if len(sys.argv) == 1 or sys.argv[1] in { "--help", "-h" }:
+            parser.print_help()
+            exit(1)
+
+        # holding --help|-h flag for commands
+        has_help = { "--help", "-h"} & set(sys.argv)
+        sys.argv = [ a for a in sys.argv if a not in { "--help", "-h" } ]
+
+        args, other = parser.parse_known_args()
+
         if not hasattr(self, args.command):
             print('Unrecognized command')
             parser.print_help()
             exit(1)
+
+        log_setup(sum((args.verbose or [0]) + (args.quiet or [0])))
+
+        sys.argv = [sys.argv[0], args.command] + other
+        if has_help:
+            sys.argv.append("--help")
         getattr(self, args.command)()
 
     @staticmethod
