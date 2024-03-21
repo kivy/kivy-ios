@@ -10,7 +10,7 @@ import argparse
 import platform
 import sys
 from sys import stdout
-from os.path import join, dirname, realpath, exists, isdir, basename
+from os.path import join, dirname, realpath, exists, isdir, basename, split
 from os import listdir, unlink, makedirs, environ, chdir, getcwd, walk
 import sh
 import zipfile
@@ -1292,7 +1292,7 @@ def _hostpython_pip(args):
     shprint(pip_cmd, *args)
 
 
-def update_pbxproj(filename, pbx_frameworks=None):
+def update_pbxproj(filename, pbx_frameworks=None, custom_recipes=None, custom_recipes_paths=None):
     # list all the compiled recipes
     ctx = Context()
     pbx_libraries = []
@@ -1301,7 +1301,17 @@ def update_pbxproj(filename, pbx_frameworks=None):
     frameworks = []
     xcframeworks = []
     sources = []
+
+    if custom_recipes and custom_recipes_paths:
+        recipes = custom_recipes
+        ctx.custom_recipes_paths = custom_recipes_paths
+    else:
+        recipes = []
+
     for recipe in Recipe.list_recipes():
+        recipes.append(recipe)
+
+    for recipe in recipes:
         key = "{}.build_all".format(recipe)
         if key not in ctx.state:
             continue
@@ -1547,12 +1557,22 @@ pip           Install a pip dependency into the distribution
             print("{:<12} - {}".format(
                 recipe, status))
 
+    def recipes_names_from_paths(self, paths):
+        recipes = []
+        for p in paths:
+            _, name = split(p)
+            recipes.append(name)
+
+        return recipes
+
     def create(self):
         parser = argparse.ArgumentParser(
                 description="Create a new xcode project")
         parser.add_argument("name", help="Name of your project")
         parser.add_argument("directory", help="Directory where your project lives")
         parser.add_argument("--add-framework", action="append", help="Additional Frameworks to include with this project")
+        parser.add_argument("--add-custom-recipe", action="append", default=[],
+                            help="Path to custom recipe")
         args = parser.parse_args(sys.argv[2:])
 
         from cookiecutter.main import cookiecutter
@@ -1580,7 +1600,11 @@ pip           Install a pip dependency into the distribution
                 "{}-ios".format(args.name.lower()),
                 "{}.xcodeproj".format(args.name.lower()),
                 "project.pbxproj")
-        update_pbxproj(filename, pbx_frameworks=args.add_framework)
+
+        recipes = self.recipes_names_from_paths(args.add_custom_recipe)
+
+        update_pbxproj(filename, pbx_frameworks=args.add_framework,
+                       custom_recipes=recipes, custom_recipes_paths=args.add_custom_recipe)
         print("--")
         print("Project directory : {}-ios".format(
             args.name.lower()))
@@ -1592,6 +1616,8 @@ pip           Install a pip dependency into the distribution
                 description="Update an existing xcode project")
         parser.add_argument("filename", help="Path to your project or xcodeproj")
         parser.add_argument("--add-framework", action="append", help="Additional Frameworks to include with this project")
+        parser.add_argument("--add-custom-recipe", action="append", default=[],
+                            help="Path to custom recipe (the recipe must already have been built with the 'build' command)")
         args = parser.parse_args(sys.argv[2:])
 
         filename = self.find_xcodeproj(args.filename)
@@ -1600,7 +1626,10 @@ pip           Install a pip dependency into the distribution
             logger.error("{} not found".format(filename))
             sys.exit(1)
 
-        update_pbxproj(filename, pbx_frameworks=args.add_framework)
+        recipes = self.recipes_names_from_paths(args.add_custom_recipe)
+
+        update_pbxproj(filename, pbx_frameworks=args.add_framework,
+                       custom_recipes=recipes, custom_recipes_paths=args.add_custom_recipe)
         print("--")
         print("Project {} updated".format(filename))
 
