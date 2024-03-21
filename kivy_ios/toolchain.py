@@ -1443,6 +1443,8 @@ pip           Install a pip dependency into the distribution
                             help="do not use pbzip2 for bzip2 decompression")
         parser.add_argument("--add-custom-recipe", action="append", default=[],
                             help="Path to custom recipe")
+        parser.add_argument("--r", type=str, default='', help="Requirements from file")
+
         args = parser.parse_args(sys.argv[2:])
 
         if args.platform:
@@ -1480,7 +1482,41 @@ pip           Install a pip dependency into the distribution
         if ctx.use_pbzip2:
             logger.info("Using pbzip2 to decompress bzip2 data")
 
-        build_recipes(args.recipe, ctx)
+        if args.r:
+            recipe = self.parse_requirements(args.r)
+        else:
+            recipe = args.recipe
+
+        build_recipes(recipe, ctx)
+
+    def parse_requirements(self, filename: str) -> list:
+        """
+        Parse a requirements file into a list
+        :param filename: path to requirements file
+        :returns: list
+        """
+
+        if not exists(filename):
+            logger.error(f"{filename} isn't a valid path")
+            raise FileNotFoundError
+
+        req_file = open(filename)
+
+        requirements = []
+
+        for line in req_file:
+            if line == '' or line == '\n' or line.startswith('-'):
+                continue
+
+            elif not line or line.startswith('#'):
+                # comments are lines that start with # only
+                continue
+
+            else:
+                line = line.replace('\n', '').strip()
+                requirements.append(line)
+
+        return requirements
 
     def recipes(self):
         parser = argparse.ArgumentParser(
