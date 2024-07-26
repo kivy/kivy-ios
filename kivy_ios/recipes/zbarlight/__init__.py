@@ -10,7 +10,7 @@ import fnmatch
 class ZbarLightRecipe(Recipe):
     version = "3.0"
     url = "https://github.com/Polyconseil/zbarlight/archive/{version}.tar.gz"
-    library = "zbarlight.a"
+    library = "libzbarlight.a"
     depends = ["hostpython3", "python3", "libzbar"]
     pbx_libraries = ["libz", "libbz2", "libc++", "libsqlite3"]
     pbx_frameworks = ["CoreMotion"]
@@ -21,6 +21,7 @@ class ZbarLightRecipe(Recipe):
         build_env["ARCH"] = plat.arch
         build_env["ARM_LD"] = build_env["LD"]
         build_env["LDSHARED"] = join(self.ctx.root_dir, "tools", "liblink")
+        build_env["PLATFORM_SDK"] = plat.sdk
         return build_env
 
     def build_platform(self, plat):
@@ -53,7 +54,7 @@ class ZbarLightRecipe(Recipe):
                 dirs.append(root)
 
         cmd = sh.Command(join(self.ctx.root_dir, "tools", "biglink"))
-        shprint(cmd, join(self.build_dir, "zbarlight.a"), *dirs)
+        shprint(cmd, join(self.build_dir, self.library), *dirs)
 
 
 recipe = ZbarLightRecipe()
