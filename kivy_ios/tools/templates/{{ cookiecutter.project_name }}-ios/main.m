@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     putenv("KIVY_WINDOW=sdl2");
     putenv("KIVY_IMAGE=imageio,tex,gif,sdl2");
     putenv("KIVY_AUDIO=sdl2");
-    putenv("KIVY_GL_BACKEND=sdl2");
+    putenv("KIVY_GL_BACKEND=angle");
 
     // IOS_IS_WINDOWED=True disables fullscreen and then statusbar is shown
     putenv("IOS_IS_WINDOWED=False");
