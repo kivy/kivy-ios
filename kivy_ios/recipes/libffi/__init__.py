@@ -22,6 +22,10 @@ class LibffiRecipe(Recipe):
                 "-i.bak",
                 "s/build_target(ios_simulator_i386_platform, platform_headers)/print('Skipping i386')/g",
                 "generate-darwin-source-and-headers.py")
+        shprint(sh.sed,
+                "-i.bak",
+                "s/ -fembed-bitcode//g",
+                "generate-darwin-source-and-headers.py")
         self.set_marker("patched")
 
     def build_platform(self, plat):
