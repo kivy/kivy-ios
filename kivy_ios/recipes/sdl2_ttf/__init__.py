@@ -10,6 +10,14 @@ class LibSDL2TTFRecipe(Recipe):
     include_dir = "SDL_ttf.h"
     depends = ["libpng", "sdl2"]
 
+    def prebuild_platform(self, plat):
+        if self.has_marker("patched"):
+            return
+
+        self.apply_patch("harfbuzz.patch")
+
+        self.set_marker("patched")
+
     def build_platform(self, plat):
         shprint(sh.xcodebuild, self.ctx.concurrent_xcodebuild,
                 "ONLY_ACTIVE_ARCH=NO",
