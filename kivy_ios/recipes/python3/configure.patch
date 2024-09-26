@@ -1,5 +1,5 @@
---- Python-3.11.6/configure.orig	2023-10-15 12:23:31
-+++ Python-3.11.6/configure	2023-10-15 12:30:23
+--- Python-3.11.6.orig/configure	2023-10-02 08:29:10
++++ Python-3.11.6/configure	2024-09-25 22:32:20
 @@ -3823,6 +3823,15 @@
  	*-*-cygwin*)
  		ac_sys_system=Cygwin
@@ -32,34 +32,33 @@
  	*-*-cygwin*)
  		_host_cpu=
  		;;
-@@ -3956,7 +3974,14 @@
+@@ -3956,6 +3974,13 @@
    Darwin/[6789].*)
      define_xopen_source=no;;
    Darwin/[12][0-9].*)
 +    define_xopen_source=no;;
 +  # On iOS, defining _POSIX_C_SOURCE also disables platform specific features.
 +  iOS/*)
-     define_xopen_source=no;;
++    define_xopen_source=no;;
 +  tvOS/*)
 +    define_xopen_source=no;;
 +  watchOS/*)
-+    define_xopen_source=no;;
+     define_xopen_source=no;;
    # On QNX 6.3.2, defining _XOPEN_SOURCE prevents netdb.h from
    # defining NI_NUMERICHOST.
-   QNX/6.3.2)
-@@ -6204,6 +6229,12 @@
+@@ -6203,6 +6228,12 @@
+ $as_echo_n "checking for multiarch... " >&6; }
  case $ac_sys_system in #(
    Darwin*) :
-     MULTIARCH="" ;; #(
++    MULTIARCH="" ;; #(
 +  iOS*) :
 +    MULTIARCH="" ;; #(
 +  tvOS*) :
 +    MULTIARCH="" ;; #(
 +  watchOS*) :
-+    MULTIARCH="" ;; #(
+     MULTIARCH="" ;; #(
    FreeBSD*) :
      MULTIARCH="" ;; #(
-   *) :
 @@ -7210,11 +7241,17 @@
  fi
  
@@ -103,3 +102,89 @@
  	*)
  	# use dynload_shlib.c and dlopen() if we have it; otherwise stub
  	# out any dynamic loading
+@@ -23443,45 +23484,46 @@
+ 
+ if test "x$with_builtin_blake2" = xyes; then :
+ 
+-
+-pkg_failed=no
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBB2" >&5
+-$as_echo_n "checking for LIBB2... " >&6; }
+-
+-if test -n "$LIBB2_CFLAGS"; then
+-    pkg_cv_LIBB2_CFLAGS="$LIBB2_CFLAGS"
+- elif test -n "$PKG_CONFIG"; then
+-    if test -n "$PKG_CONFIG" && \
+-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libb2\""; } >&5
+-  ($PKG_CONFIG --exists --print-errors "libb2") 2>&5
+-  ac_status=$?
+-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+-  test $ac_status = 0; }; then
+-  pkg_cv_LIBB2_CFLAGS=`$PKG_CONFIG --cflags "libb2" 2>/dev/null`
+-		      test "x$?" != "x0" && pkg_failed=yes
+-else
+-  pkg_failed=yes
+-fi
+- else
+-    pkg_failed=untried
+-fi
+-if test -n "$LIBB2_LIBS"; then
+-    pkg_cv_LIBB2_LIBS="$LIBB2_LIBS"
+- elif test -n "$PKG_CONFIG"; then
+-    if test -n "$PKG_CONFIG" && \
+-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libb2\""; } >&5
+-  ($PKG_CONFIG --exists --print-errors "libb2") 2>&5
+-  ac_status=$?
+-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+-  test $ac_status = 0; }; then
+-  pkg_cv_LIBB2_LIBS=`$PKG_CONFIG --libs "libb2" 2>/dev/null`
+-		      test "x$?" != "x0" && pkg_failed=yes
+-else
+-  pkg_failed=yes
+-fi
+- else
+-    pkg_failed=untried
+-fi
++# fix issue with libb2 on iOS
++pkg_failed=yes
++#pkg_failed=no
++#{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBB2" >&5
++#$as_echo_n "checking for LIBB2... " >&6; }
++#
++#if test -n "$LIBB2_CFLAGS"; then
++#    pkg_cv_LIBB2_CFLAGS="$LIBB2_CFLAGS"
++# elif test -n "$PKG_CONFIG"; then
++#    if test -n "$PKG_CONFIG" && \
++#    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libb2\""; } >&5
++#  ($PKG_CONFIG --exists --print-errors "libb2") 2>&5
++#  ac_status=$?
++#  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
++#  test $ac_status = 0; }; then
++#  pkg_cv_LIBB2_CFLAGS=`$PKG_CONFIG --cflags "libb2" 2>/dev/null`
++#		      test "x$?" != "x0" && pkg_failed=yes
++#else
++#  pkg_failed=yes
++#fi
++# else
++#    pkg_failed=untried
++#fi
++#if test -n "$LIBB2_LIBS"; then
++#    pkg_cv_LIBB2_LIBS="$LIBB2_LIBS"
++# elif test -n "$PKG_CONFIG"; then
++#    if test -n "$PKG_CONFIG" && \
++#    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libb2\""; } >&5
++#  ($PKG_CONFIG --exists --print-errors "libb2") 2>&5
++#  ac_status=$?
++#  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
++#  test $ac_status = 0; }; then
++#  pkg_cv_LIBB2_LIBS=`$PKG_CONFIG --libs "libb2" 2>/dev/null`
++#		      test "x$?" != "x0" && pkg_failed=yes
++#else
++#  pkg_failed=yes
++#fi
++# else
++#    pkg_failed=untried
++#fi
+ 
+ 
+ 
