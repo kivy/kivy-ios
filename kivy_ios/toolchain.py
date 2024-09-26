@@ -16,7 +16,6 @@ import sh
 import zipfile
 import tarfile
 import importlib
-import io
 import json
 import shutil
 import fnmatch
@@ -99,7 +98,7 @@ class JsonStore:
         self.data = {}
         if exists(filename):
             try:
-                with io.open(filename, encoding='utf-8') as fd:
+                with open(filename, encoding='utf-8') as fd:
                     self.data = json.load(fd)
             except ValueError:
                 logger.warning("Unable to read the state.db, content will be replaced.")
