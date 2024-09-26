@@ -249,6 +249,7 @@ class GenericPlatform:
             "-O3",
             self.version_min,
         ] + include_dirs)
+        env["CXXFLAGS"] = env["CFLAGS"]
         env["LDFLAGS"] = " ".join([
             "-arch", self.arch,
             # "--sysroot", self.sysroot,

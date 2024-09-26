@@ -1,0 +1,31 @@
+diff -Naur setuptools.orig/_distutils/unixccompiler.py setuptools/_distutils/unixccompiler.py
+--- setuptools.orig/_distutils/unixccompiler.py	2024-02-11 18:42:58
++++ setuptools/_distutils/unixccompiler.py	2024-02-11 18:45:30
+@@ -253,14 +253,20 @@
+                 building_exe = target_desc == CCompiler.EXECUTABLE
+                 linker = (self.linker_exe if building_exe else self.linker_so)[:]
+ 
+-                if target_lang == "c++" and self.compiler_cxx:
+-                    env, linker_ne = _split_env(linker)
+-                    aix, linker_na = _split_aix(linker_ne)
+-                    _, compiler_cxx_ne = _split_env(self.compiler_cxx)
+-                    _, linker_exe_ne = _split_env(self.linker_exe)
++                # Mirko: We need our LDSHARED also for c++ things, 
++                # otherwise our hack to have static libs does not work
++                # properly.
++                # We will likely remove all these caveats once PEP 730
++                # is implemented (and we will conform to it).
+ 
+-                    params = _linker_params(linker_na, linker_exe_ne)
+-                    linker = env + aix + compiler_cxx_ne + params
++                #if target_lang == "c++" and self.compiler_cxx:
++                #    env, linker_ne = _split_env(linker)
++                #    aix, linker_na = _split_aix(linker_ne)
++                #    _, compiler_cxx_ne = _split_env(self.compiler_cxx)
++                #    _, linker_exe_ne = _split_env(self.linker_exe)
++
++                #    params = _linker_params(linker_na, linker_exe_ne)
++                #    linker = env + aix + compiler_cxx_ne + params
+ 
+                 linker = compiler_fixup(linker, ld_args)
+ 
