@@ -44,6 +44,9 @@ class Python3Recipe(Recipe):
             join(self.ctx.dist_dir, "hostpython3", "bin"),
             os.environ["PATH"])
         build_env["CFLAGS"] += " --sysroot={}".format(plat.sysroot)
+        # fixes build issue when libb2 installed on host system
+        build_env["LIBB2_CFLAGS"] = ""
+        build_env["LIBB2_LIBS"] = ""
         return build_env
 
     def build_platform(self, plat):
