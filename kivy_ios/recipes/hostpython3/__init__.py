@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class Hostpython3Recipe(HostRecipe):
-    version = "3.11.6"
+    version = "3.12.6"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
     depends = ["hostopenssl"]
     optional_depends = []
@@ -19,8 +19,8 @@ class Hostpython3Recipe(HostRecipe):
 
     def init_with_ctx(self, ctx):
         super().init_with_ctx(ctx)
-        self.set_hostpython(self, "3.11")
-        self.ctx.so_suffix = ".cpython-311m-darwin.so"
+        self.set_hostpython(self, "3.12")
+        self.ctx.so_suffix = ".cpython-312m-darwin.so"
         self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython3", "bin", "python")
         self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython3", "bin", "pgen")
         logger.info("Global: hostpython located at {}".format(self.ctx.hostpython))
@@ -100,7 +100,7 @@ class Hostpython3Recipe(HostRecipe):
                 self.ctx.dist_dir,
                 "hostpython3",
                 "lib",
-                "python3.11",
+                "python3.12",
                 "site-packages",
                 "setuptools",
             ),
