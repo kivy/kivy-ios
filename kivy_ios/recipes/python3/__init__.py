@@ -9,16 +9,16 @@ logger = logging.getLogger(__name__)
 
 
 class Python3Recipe(Recipe):
-    version = "3.11.6"
+    version = "3.12.6"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
     depends = ["hostpython3", "libffi", "openssl"]
-    library = "libpython3.11.a"
+    library = "libpython3.12.a"
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
 
     def init_with_ctx(self, ctx):
         super().init_with_ctx(ctx)
-        self.set_python(self, "3.11")
-        ctx.python_ver_dir = "python3.11"
+        self.set_python(self, "3.12")
+        ctx.python_ver_dir = "python3.12"
         ctx.python_prefix = join(ctx.dist_dir, "root", "python3")
         ctx.site_packages_dir = join(
             ctx.python_prefix, "lib", ctx.python_ver_dir, "site-packages")
@@ -135,9 +135,9 @@ class Python3Recipe(Recipe):
         # platform binaries and configuration
         with cd(join(
                 self.ctx.dist_dir, "root", "python3", "lib",
-                "python3.11", "config-3.11-darwin")):
+                "python3.12", "config-3.12-darwin")):
             sh.rm(
-                "libpython3.11.a",
+                "libpython3.12.a",
                 "python.o",
                 "config.c.in",
                 "makesetup",
@@ -146,11 +146,11 @@ class Python3Recipe(Recipe):
 
         # cleanup pkgconfig and compiled lib
         with cd(join(self.ctx.dist_dir, "root", "python3", "lib")):
-            sh.rm("-rf", "pkgconfig", "libpython3.11.a")
+            sh.rm("-rf", "pkgconfig", "libpython3.12.a")
 
         # cleanup python libraries
         with cd(join(
-                self.ctx.dist_dir, "root", "python3", "lib", "python3.11")):
+                self.ctx.dist_dir, "root", "python3", "lib", "python3.12")):
             sh.rm("-rf", "wsgiref", "curses", "idlelib", "lib2to3",
                   "ensurepip", "turtledemo", "lib-dynload", "venv",
                   "pydoc_data")
@@ -171,12 +171,12 @@ class Python3Recipe(Recipe):
             sh.find(".", "-name", "__pycache__", "-type", "d", "-delete")
 
             # create the lib zip
-            logger.info("Create a python3.11.zip")
-            sh.mv("config-3.11-darwin", "..")
+            logger.info("Create a python3.12.zip")
+            sh.mv("config-3.12-darwin", "..")
             sh.mv("site-packages", "..")
             sh.zip("-r", "../python311.zip", sh.glob("*"))
             sh.rm("-rf", sh.glob("*"))
-            sh.mv("../config-3.11-darwin", ".")
+            sh.mv("../config-3.12-darwin", ".")
             sh.mv("../site-packages", ".")
 
 
