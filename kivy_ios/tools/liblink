@@ -23,6 +23,10 @@ while i < len(sys.argv):
         libs.append(opt)
         continue
 
+    if opt.startswith("-F"):
+        libs.append(opt)
+        continue
+
     if opt in ("-r", "-pipe", "-no-cpp-precomp"):
         continue
 
