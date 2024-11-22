@@ -46,7 +46,7 @@ Additionally, you would need a few system dependencies and configuration.
 
 - Using brew, you can install the following dependencies:
 
-      brew install autoconf automake libtool pkg-config
+      brew install autoconf automake libtool pkg-config libjpeg libtiff webp little-cms2
       brew link libtool
 
 ## Using the toolchain
