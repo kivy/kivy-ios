@@ -1,10 +1,9 @@
-diff -Naur Pillow-8.2.0.orig/setup.py Pillow-8.2.0/setup.py
---- Pillow-8.2.0.orig/setup.py	2021-04-05 11:11:26.000000000 +0200
-+++ Pillow-8.2.0/setup.py	2021-04-05 11:16:12.000000000 +0200
-@@ -222,12 +222,9 @@
+--- Pillow-11.0.0.orig/setup.py	2024-10-15 01:55:00.000000000 -0400
++++ Pillow-11.0.0/setup.py	2024-11-19 12:20:09.514795844 -0500
+@@ -231,12 +231,9 @@
  
  
- def _find_library_file(self, library):
+ def _find_library_file(self: pil_build_ext, library: str) -> str | None:
 -    ret = self.compiler.find_library_file(self.compiler.library_dirs, library)
 -    if ret:
 -        _dbg("Found library %s at %s", (library, ret))
@@ -16,4 +15,4 @@ diff -Naur Pillow-8.2.0.orig/setup.py Pillow-8.2.0/setup.py
 +    return True
  
  
- def _find_include_dir(self, dirname, include):
+ def _find_include_dir(self: pil_build_ext, dirname: str, include: str) -> bool | str:
