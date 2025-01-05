@@ -2,9 +2,6 @@
 This file is derived from the p4a recipe for kiwisolver.
 It is a dependency of matplotlib.
 
-It is a C++ library, and it utilizes the cpplink script to handle
-creating the library files needed for inclusion in an iOS project.
-
 It also depends on the headers from the cppy package.
 '''
 
@@ -21,18 +18,6 @@ class KiwiSolverRecipe(CythonRecipe):
     hostpython_prerequisites = ["cppy", "Cython==0.29.37"]
     cythonize = False
     library = "libkiwisolver.a"
-
-    def get_recipe_env(self, plat):
-        env = super().get_recipe_env(plat)
-
-        # cpplink setup
-        env['CXX_ORIG'] = env['CXX']
-        env['CXX'] = join(self.ctx.root_dir, "tools", "cpplink")
-
-        # setuptools uses CC for compiling and CXX for linking
-        env['CC'] = env['CXX']
-        env['CFLAGS'] += ' -isysroot {}'.format(env['IOSSDKROOT'])
-        return env
 
 
 recipe = KiwiSolverRecipe()

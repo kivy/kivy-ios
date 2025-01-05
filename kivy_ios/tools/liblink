@@ -58,6 +58,9 @@ while i < len(sys.argv):
     if opt.startswith("-W"):
         continue
 
+    if opt.startswith("-stdlib="):
+        continue
+
     if opt.startswith("-"):
         print(sys.argv)
         print("Unknown option: ", opt)

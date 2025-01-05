@@ -2,9 +2,6 @@
 This file is derived from the p4a recipe for matplotlib.
 It is a dependency of matplotlib.
 
-It is a C++ library, and it utilizes the cpplink script to handle
-creating the library files needed for inclusion in an iOS project.
-
 In addition to the original patch files for p4a, additional patch files
 are necessary to prevent duplicate symbols from appearing in the final
 link of a kivy-ios application.
@@ -113,11 +110,6 @@ __version_tuple__ = version_tuple = ({v1}, {v2}, {v3})
         numpy_inc_dir = dirname(sh.glob(numpytype.get_build_dir(plat) + '/**/_numpyconfig.h', recursive=True)[0])
 
         env['CFLAGS'] += f' -I{free_inc_dir} -I{numpy_inc_dir}'
-        env['CXX_ORIG'] = env['CXX']
-        env['CXX'] = join(self.ctx.root_dir, "tools", "cpplink")
-
-        # setuptools uses CC for compiling and CXX for linking
-        env['CFLAGS'] += ' -isysroot {}'.format(env['IOSSDKROOT'])
 
         return env
 
