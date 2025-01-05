@@ -6,7 +6,6 @@ It also depends on the headers from the cppy package.
 '''
 
 from kivy_ios.toolchain import CythonRecipe
-from os.path import join
 
 
 class KiwiSolverRecipe(CythonRecipe):
