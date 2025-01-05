@@ -24,7 +24,7 @@ class MatplotlibRecipe(CythonRecipe):
     pre_build_ext = True
     python_depends = ['cycler', 'fonttools', 'packaging',
                       'pyparsing', 'python-dateutil', 'six']
-    hostpython_prerequisites = ['pybind11', 'certifi']
+    hostpython_prerequisites = ['pybind11', 'certifi', "Cython==0.29.37"]
     cythonize = False
 
     def generate_libraries_pc_files(self, plat):

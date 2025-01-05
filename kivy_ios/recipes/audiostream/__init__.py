@@ -7,6 +7,7 @@ class AudiostreamRecipe(CythonRecipe):
     library = "libaudiostream.a"
     depends = ["python", "sdl2", "sdl2_mixer"]
     pre_build_ext = True
+    hostpython_prerequisites = ["Cython==0.29.37"]
 
 
 recipe = AudiostreamRecipe()

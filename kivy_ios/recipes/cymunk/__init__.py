@@ -12,7 +12,7 @@ class CymunkRecipe(CythonRecipe):
     name = 'cymunk'
     pre_build_ext = True
     library = 'libcymunk.a'
-
+    hostpython_prerequisites = ["Cython==0.29.37"]
     depends = ['python']
 
     def get_recipe_env(self, arch):

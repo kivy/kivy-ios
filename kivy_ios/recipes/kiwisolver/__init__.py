@@ -18,7 +18,7 @@ class KiwiSolverRecipe(CythonRecipe):
     version = '1.3.2'
     url = 'https://github.com/nucleic/kiwi/archive/{version}.zip'
     depends = ["python"]
-    hostpython_prerequisites = ["cppy"]
+    hostpython_prerequisites = ["cppy", "Cython==0.29.37"]
     cythonize = False
     library = "libkiwisolver.a"
 
