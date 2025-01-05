@@ -12,6 +12,7 @@ def is_cplus(fn):
                 return True
     return False
 
+
 def do(fn):
     print('cythonize:', fn)
     assert fn.endswith('.pyx')
@@ -49,6 +50,6 @@ if __name__ == '__main__':
     for fn in sys.argv[1:]:
         try:
             do(fn)
-        except:
+        except:  # noqa: E722
             print("Failed to cythonize, this is not necessarily a problem")
             pass
