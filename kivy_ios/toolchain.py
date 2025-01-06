@@ -184,7 +184,7 @@ class GenericPlatform:
                     "root",
                     "python3",
                     "include",
-                    "python3.11",
+                    f"python{self.ctx.hostpython_ver}",
                 )
             )
         ]
