@@ -12,6 +12,7 @@ class PycryptoRecipe(CythonRecipe):
     depends = ["python", "openssl"]
     include_per_platform = True
     library = "libpycrypto.a"
+    hostpython_prerequisites = ["Cython==0.29.37"]
 
     def build_platform(self, plat):
         build_env = plat.get_env()

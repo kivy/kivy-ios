@@ -1,22 +1,16 @@
 #!/usr/bin/env python3
 
-import os
 import sys
-import subprocess
-
-# resolve cython executable
-cython = None
+from Cython.Build.Cythonize import main as cythonize_main
 
 
-def resolve_cython():
-    global cython
-    for executable in ('cython', 'cython-2.7'):
-        for path in os.environ['PATH'].split(':'):
-            if not os.path.exists(path):
-                continue
-            if executable in os.listdir(path):
-                cython = os.path.join(path, executable)
-                return
+def is_cplus(fn):
+    # Check if there's the directive to compile as C++
+    with open(fn) as fd:
+        for line in fd:
+            if line.startswith('# distutils: language = c++'):
+                return True
+    return False
 
 
 def do(fn):
@@ -29,13 +23,13 @@ def do(fn):
     package = '_'.join(parts[:-1])
 
     # cythonize
-    subprocess.Popen([cython, fn], env=os.environ).communicate()
+    cythonize_main([fn])
 
     if not package:
         print('no need to rewrite', fn)
     else:
         # get the .c, and change the initXXX
-        fn_c = fn[:-3] + 'c'
+        fn_c = fn[:-3] + ('c' if not is_cplus(fn) else 'cpp')
         with open(fn_c) as fd:
             data = fd.read()
         modname = modname.split('.')[-1]
@@ -53,6 +47,9 @@ def do(fn):
 
 if __name__ == '__main__':
     print('-- cythonize', sys.argv)
-    resolve_cython()
     for fn in sys.argv[1:]:
-        do(fn)
+        try:
+            do(fn)
+        except:  # noqa: E722
+            print("Failed to cythonize, this is not necessarily a problem")
+            pass

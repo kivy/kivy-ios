@@ -11,7 +11,7 @@ class NumpyRecipe(CythonRecipe):
     libraries = ["libnpymath.a", "libnpyrandom.a"]
     include_dir = "numpy/core/include"
     depends = ["python"]
-    hostpython_prerequisites = ["Cython==0.29.36"]
+    hostpython_prerequisites = ["Cython==0.29.37"]
     cythonize = False
 
     def prebuild_platform(self, plat):

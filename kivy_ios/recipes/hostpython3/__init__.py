@@ -100,10 +100,21 @@ class Hostpython3Recipe(HostRecipe):
                 self.ctx.dist_dir,
                 "hostpython3",
                 "lib",
-                "python3.11",
+                f"python{self.ctx.hostpython_ver}",
                 "site-packages",
                 "setuptools",
             ),
+        )
+        self.apply_patch(
+             "fix-ldshared-override.patch",
+             join(
+                 self.ctx.dist_dir,
+                 "hostpython3",
+                 "lib",
+                 f"python{self.ctx.hostpython_ver}",
+                 "site-packages",
+                 "setuptools",
+             ),
         )
 
 

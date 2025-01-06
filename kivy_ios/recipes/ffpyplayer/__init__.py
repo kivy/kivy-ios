@@ -12,6 +12,7 @@ class FFPyplayerRecipe(CythonRecipe):
         "CoreMotion"]
     pbx_libraries = ["libiconv"]
     pre_build_ext = True
+    hostpython_prerequisites = ["Cython==0.29.37"]
 
     def get_recipe_env(self, plat):
         env = super(FFPyplayerRecipe, self).get_recipe_env(plat)

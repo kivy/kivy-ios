@@ -2,4 +2,3 @@ pbxproj==3.5.0
 Pillow>=6.1.0
 cookiecutter==2.1.1
 sh==1.12.14
-Cython==0.29.36

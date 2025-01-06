@@ -176,6 +176,19 @@ class GenericPlatform:
         include_dirs += ["-I{}".format(
             join(self.ctx.dist_dir, "include", self.name))]
 
+        # Add Python include directories
+        include_dirs += [
+            "-I{}".format(
+                join(
+                    self.ctx.dist_dir,
+                    "root",
+                    "python3",
+                    "include",
+                    f"python{self.ctx.hostpython_ver}",
+                )
+            )
+        ]
+
         env = {}
         cc = sh.xcrun("-find", "-sdk", self.sdk, "clang").strip()
         cxx = sh.xcrun("-find", "-sdk", self.sdk, "clang++").strip()
@@ -249,6 +262,7 @@ class GenericPlatform:
             "-O3",
             self.version_min,
         ] + include_dirs)
+        env["CXXFLAGS"] = env["CFLAGS"]
         env["LDFLAGS"] = " ".join([
             "-arch", self.arch,
             # "--sysroot", self.sysroot,
@@ -1134,6 +1148,7 @@ class PythonRecipe(Recipe):
 class CythonRecipe(PythonRecipe):
     pre_build_ext = False
     cythonize = True
+    hostpython_prerequisites = ["Cython==3.0.11"]
 
     def cythonize_file(self, filename):
         if filename.startswith(self.build_dir):
@@ -1143,7 +1158,8 @@ class CythonRecipe(PythonRecipe):
         # doesn't (yet) have the executable bit hence we explicitly call it
         # with the Python interpreter
         cythonize_script = join(self.ctx.root_dir, "tools", "cythonize.py")
-        shprint(sh.Command(sys.executable), cythonize_script, filename)
+
+        shprint(sh.Command(self.ctx.hostpython), cythonize_script, filename)
 
     def cythonize_build(self):
         if not self.cythonize:

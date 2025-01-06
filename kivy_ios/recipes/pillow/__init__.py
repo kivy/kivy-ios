@@ -18,6 +18,7 @@ class PillowRecipe(CythonRecipe):
     python_depends = ["setuptools"]
     pbx_libraries = ["libz", "libbz2"]
     include_per_platform = True
+    hostpython_prerequisites = ["Cython==0.29.37"]
     cythonize = False
 
     def prebuild_platform(self, plat):

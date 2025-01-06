@@ -21,6 +21,7 @@ class KiventCoreRecipe(CythonRecipe):
     subbuilddir = False
     cythonize = True
     pbx_frameworks = ["OpenGLES"]  # note: This line may be unnecessary
+    hostpython_prerequisites = ["Cython==0.29.37"]
 
     def get_recipe_env(self, plat):
         env = super(KiventCoreRecipe, self).get_recipe_env(plat)

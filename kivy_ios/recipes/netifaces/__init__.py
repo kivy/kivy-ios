@@ -11,6 +11,7 @@ class NetifacesRecipe(CythonRecipe):
     url = "https://pypi.io/packages/source/n/netifaces/netifaces-{version}.tar.gz"
     depends = ["python3"]
     python_depends = ["setuptools"]
+    hostpython_prerequisites = ["Cython==0.29.37"]
     library = "libnetifaces.a"
     cythonize = False
 
