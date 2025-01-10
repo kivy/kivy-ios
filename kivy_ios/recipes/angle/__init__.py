@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from kivy_ios.toolchain import GenericPlatform, Recipe, cache_execution, logger
+from kivy_ios.toolchain import GenericPlatform, Recipe, cache_execution
 
 
 class IphoneAllUniversalPlatform(GenericPlatform):
@@ -12,7 +12,7 @@ class IphoneAllUniversalPlatform(GenericPlatform):
 
 
 class ANGLERecipe(Recipe):
-    version = "chromium-6367_rev1"
+    version = "chromium-6778_rev2"
     url = "https://github.com/kivy/angle-builder/releases/download/{version}/angle-iphoneall-universal.tar.gz"
     include_dir = ["include"]
     libraries = ["libEGL.a", "libGLESv2.a"]
