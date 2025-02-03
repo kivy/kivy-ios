@@ -7,9 +7,9 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Set up Python 3.x
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: 3.x
     - name: Install dependencies
@@ -25,8 +25,8 @@ jobs:
       run: |
         python -m venv venv
         . venv/bin/activate
-        pip install dist/kivy-ios-*.tar.gz
-        pip install Cython==0.29.33
+        pip install dist/kivy_ios-*.tar.gz
+        pip install Cython==0.29.36
         brew install autoconf automake libtool pkg-config
     - name: Basic toolchain commands
       run: |

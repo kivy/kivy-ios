@@ -1,25 +1,32 @@
 # Kivy for iOS
 
-[![kivy-ios](https://github.com/kivy/kivy-ios/workflows/kivy-ios/badge.svg)](https://github.com/kivy/kivy-ios/actions?query=workflow%3Akivy-ios)
-[![PyPI version](https://badge.fury.io/py/kivy-ios.svg)](https://badge.fury.io/py/kivy-ios)
-[![Backers on Open Collective](https://opencollective.com/kivy/backers/badge.svg)](#backers)
-[![Sponsors on Open Collective](https://opencollective.com/kivy/sponsors/badge.svg)](#sponsors)
 
-This toolchain is designed to compile the necessary libraries for iOS to run
-your application and manage the creation of the Xcode project.
+[![Backers on Open Collective](https://opencollective.com/kivy/backers/badge.svg)](https://opencollective.com/kivy)
+[![Sponsors on Open Collective](https://opencollective.com/kivy/sponsors/badge.svg)](https://opencollective.com/kivy)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
+
+![PyPI - Version](https://img.shields.io/pypi/v/kivy-ios)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/kivy-ios)
+
+[![kivy-ios](https://github.com/kivy/kivy-ios/actions/workflows/kivy_ios.yml/badge.svg)](https://github.com/kivy/kivy-ios/actions/workflows/kivy_ios.yml)
+
+Kivy for iOS (kivy-ios) is a toolchain to compile the necessary libraries for 
+[iOS](https://www.apple.com/ios/) to run [Kivy](https://kivy.org) applications,
+and manage the creation of [Xcode](https://developer.apple.com/xcode/) projects.
+
+The toolchain supports:
+
+- iPhone / iOS (arm64)
+- iPhone Simulator (x86_64, arm64)
 
 We do not provide any binary distributions of this toolchain.
 You do need to compile it at least once before creating your Xcode project.
 
-The toolchain supports:
+Because Xcode only runs on macOS, Kivy for iOS is only useful on this
+platform.
 
-- iPhone Simulator (x86_64)
-- iPhone / iOS (arm64)
-
-These recipes are not ported to the new toolchain yet:
-
-- lxml
-
+Kivy for iOS is managed by the [Kivy Team](https://kivy.org/about.html) and can be
+used with [Buildozer](https://github.com/kivy/buildozer).
 
 ## Installation & requirements
 
@@ -88,6 +95,10 @@ You can list the available recipes and their versions with:
     sdl2_ttf     2.0.12
     werkzeug     1.0.1
 
+Note: These recipes are not ported to the new toolchain yet:
+
+- lxml
+
 Then, start the compilation with:
 
     $ toolchain build python3 kivy
@@ -109,8 +120,8 @@ These may, in turn, depend on others e.g. sdl2_ttf depends on freetype, etc.
 You can think of it as follows: the kivy recipe will compile everything
 necessary for a minimal working version of Kivy.
 
-Don't grab a coffee, just do dinner. Compiling all the libraries for the first
-time, 2x over (remember, 2 archs, x86_64, arm64) will take time.
+Don't just grab a coffee; do dinner. Compiling all the libraries for the first
+time, twice over (Remember: two platforms - iOS, iPhoneSimulator) will take time.
 
 For a complete list of available commands, type:
 
@@ -240,92 +251,91 @@ Then use the `toolchain.py` script:
 
     python toolchain.py --help
 
-
 ## FAQ
 
-### Fatal error: "stdio.h" file not found
-
-You need to install the Command line tools: `xcode-select --install`
-
-### Error: SDK "iphonesimulator" cannot be located
-
-Xcode path is not set up correctly. Run the following command to fix this: `sudo xcode-select --switch <YOUR_XCODEAPP_PATH>` (Change `<YOUR_XCODEAPP_PATH>` to the path that reflects your XCode installation, usually is `/Applications/Xcode.app`)
-
-### Bitcode is partially supported now (Xcode setting ENABLE_BITCODE can be set to Yes).
-
-* Supported recipes: python3, kivy, sdl2, sdl2_image, sdl2_mixer, and libffi
-
-### You don't have permissions to run
-
-It is due to invalid archs, search for them and check it. Maybe you
-targetted a simulator but have only arm64. Maybe you want to target
-your iPad but it is only x86_64.
-
-### Why does the python multiprocess/subprocess module not work?
-
-The iOS application model does not currently support multi-processing in a
-cross-platform compatible way. The application design focuses on minimizing
-processor usage (to minimize power consumption) and promotes an 
-[alternative concurrency model](https://developer.apple.com/library/archive/documentation/General/Conceptual/ConcurrencyProgrammingGuide/Introduction/Introduction.html).
-
-If you need to make use of multiple processes, you should consider using
-[PyObjus](https://github.com/kivy/pyobjus) to leverage native iOS
-functionals for this.
-
-## Support
-
-If you need assistance, you can ask for help on our mailing list:
-
-* User Group : https://groups.google.com/group/kivy-users
-* Email      : kivy-users@googlegroups.com
-
-We also have a Discord channel:
-
-* Server     : https://chat.kivy.org
-* Channel    : #support
-
-
-## Contributing
-
-We love pull requests and discussing novel ideas. Check out our
-[contribution guide](http://kivy.org/docs/contribute.html) and
-feel free to improve Kivy for iOS.
-
-The following mailing list and IRC channel are used exclusively for
-discussions about developing the Kivy framework and its sister projects:
-
-* Dev Group : https://groups.google.com/group/kivy-dev
-* Email     : kivy-dev@googlegroups.com
-
-Discord channel:
-
-* Server     : https://chat.kivy.org
-* Channel    : #dev
+For troubleshooting advice and other frequently asked questions, consult
+the latest 
+[Kivy for iOS FAQ](https://github.com/kivy/kivy-ios/blob/master/FAQ.md).
 
 ## License
 
-Kivy for iOS is released under the terms of the MIT License. Please refer to the
-LICENSE file.
+Kivy for iOS is [MIT licensed](LICENSE), actively developed by a great
+community and is supported by many projects managed by the 
+[Kivy Organization](https://www.kivy.org/about.html).
 
+## Support
+
+Are you having trouble using kivy-ios or any of its related projects in the Kivy
+ecosystem?
+Is there an error you don’t understand? Are you trying to figure out how to use 
+it? We have volunteers who can help!
+
+The best channels to contact us for support are listed in the latest 
+[Contact Us](https://github.com/kivy/kivy-ios/blob/master/CONTACT.md) document.
+
+## Contributing
+
+kivy-ios is part of the [Kivy](https://kivy.org) ecosystem - a large group of
+products used by many thousands of developers for free, but it
+is built entirely by the contributions of volunteers. We welcome (and rely on) 
+users who want to give back to the community by contributing to the project.
+
+Contributions can come in many forms. See the latest 
+[Contribution Guidelines](https://github.com/kivy/kivy-ios/blob/master/CONTRIBUTING.md)
+for how you can help us.
+
+## Code of Conduct
+
+In the interest of fostering an open and welcoming community, we as 
+contributors and maintainers need to ensure participation in our project and 
+our sister projects is a harassment-free and positive experience for everyone. 
+It is vital that all interaction is conducted in a manner conveying respect, 
+open-mindedness and gratitude.
+
+Please consult the [latest Kivy Code of Conduct](https://github.com/kivy/kivy/blob/master/CODE_OF_CONDUCT.md).
+
+## Contributors
+
+This project exists thanks to 
+[all the people who contribute](https://github.com/kivy/kivy-ios/graphs/contributors).
+[[Become a contributor](CONTRIBUTING.md)].
+
+<img src="https://contrib.nn.ci/api?repo=kivy/python-for-android&pages=5&no_bot=true&radius=22&cols=18">
 
 ## Backers
 
-Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/kivy#backer)]
+Thank you to [all of our backers](https://opencollective.com/kivy)! 
+🙏 [[Become a backer](https://opencollective.com/kivy#backer)]
 
-<a href="https://opencollective.com/kivy#backers" target="_blank"><img src="https://opencollective.com/kivy/backers.svg?width=890"></a>
-
+<img src="https://opencollective.com/kivy/backers.svg?width=890&avatarHeight=44&button=false">
 
 ## Sponsors
 
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/kivy#sponsor)]
+Special thanks to 
+[all of our sponsors, past and present](https://opencollective.com/kivy).
+Support this project by 
+[[becoming a sponsor](https://opencollective.com/kivy#sponsor)].
 
+Here are our top current sponsors. Please click through to see their websites,
+and support them as they support us. 
+
+<!--- See https://github.com/orgs/kivy/discussions/15 for explanation of this code. -->
 <a href="https://opencollective.com/kivy/sponsor/0/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/kivy/sponsor/1/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/1/avatar.svg"></a>
 <a href="https://opencollective.com/kivy/sponsor/2/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/2/avatar.svg"></a>
 <a href="https://opencollective.com/kivy/sponsor/3/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/3/avatar.svg"></a>
+
 <a href="https://opencollective.com/kivy/sponsor/4/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/4/avatar.svg"></a>
 <a href="https://opencollective.com/kivy/sponsor/5/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/5/avatar.svg"></a>
 <a href="https://opencollective.com/kivy/sponsor/6/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/6/avatar.svg"></a>
 <a href="https://opencollective.com/kivy/sponsor/7/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/7/avatar.svg"></a>
+
 <a href="https://opencollective.com/kivy/sponsor/8/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/kivy/sponsor/9/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/9/avatar.svg"></a>
+<a href="https://opencollective.com/kivy/sponsor/10/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/10/avatar.svg"></a>
+<a href="https://opencollective.com/kivy/sponsor/11/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/11/avatar.svg"></a>
+
+<a href="https://opencollective.com/kivy/sponsor/12/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/12/avatar.svg"></a>
+<a href="https://opencollective.com/kivy/sponsor/13/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/13/avatar.svg"></a>
+<a href="https://opencollective.com/kivy/sponsor/14/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/14/avatar.svg"></a>
+<a href="https://opencollective.com/kivy/sponsor/15/website" target="_blank"><img src="https://opencollective.com/kivy/sponsor/15/avatar.svg"></a>

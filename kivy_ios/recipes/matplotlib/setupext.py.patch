@@ -1,0 +1,57 @@
+--- matplotlib-3.7.2.orig/setupext.py	2023-07-05 13:43:01
++++ matplotlib-3.7.2/setupext.py	2023-09-10 22:52:48
+@@ -17,6 +17,10 @@
+ import urllib.request
+ 
+ from pybind11.setup_helpers import Pybind11Extension
++import pybind11.setup_helpers
++# need to prevent host flags
++pybind11.setup_helpers.MACOS = False
++
+ from setuptools import Distribution, Extension
+ 
+ _log = logging.getLogger(__name__)
+@@ -415,7 +419,7 @@
+             "matplotlib.ft2font", [
+                 "src/ft2font.cpp",
+                 "src/ft2font_wrapper.cpp",
+-                "src/py_converters.cpp",
++#                "src/py_converters.cpp",
+             ])
+         FreeType.add_flags(ext)
+         add_numpy_flags(ext)
+@@ -425,19 +429,19 @@
+         ext = Extension(
+             "matplotlib._image", [
+                 "src/_image_wrapper.cpp",
+-                "src/py_converters.cpp",
++#                "src/py_converters.cpp",
+             ])
+         add_numpy_flags(ext)
+-        add_libagg_flags_and_sources(ext)
++        add_libagg_flags(ext)
+         yield ext
+         # path
+         ext = Extension(
+             "matplotlib._path", [
+-                "src/py_converters.cpp",
++#                "src/py_converters.cpp",
+                 "src/_path_wrapper.cpp",
+             ])
+         add_numpy_flags(ext)
+-        add_libagg_flags_and_sources(ext)
++        add_libagg_flags(ext)
+         yield ext
+         # qhull
+         ext = Extension(
+@@ -506,8 +510,8 @@
+ 
+ 
+ def add_numpy_flags(ext):
+-    import numpy as np
+-    ext.include_dirs.append(np.get_include())
++#    import numpy as np
++#    ext.include_dirs.append(np.get_include())
+     ext.define_macros.extend([
+         # Ensure that PY_ARRAY_UNIQUE_SYMBOL is uniquely defined for each
+         # extension.

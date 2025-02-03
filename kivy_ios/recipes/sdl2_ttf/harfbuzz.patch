@@ -1,0 +1,13 @@
+
+diff -Naur SDL2_ttf-2.20.2.orig/external/harfbuzz/src/hb-ft.cc SDL2_ttf-2.20.2/external/harfbuzz/src/hb-ft.cc
+--- SDL2_ttf-2.20.2.orig/external/harfbuzz/src/hb-ft.cc	2022-05-25 12:51:24
++++ SDL2_ttf-2.20.2/external/harfbuzz/src/hb-ft.cc	2024-09-24 21:33:24
+@@ -41,6 +41,8 @@
+ #include FT_MULTIPLE_MASTERS_H
+ #include FT_TRUETYPE_TABLES_H
+ 
++/** function pointer warning with XCode 16 */
++#pragma clang diagnostic ignored "-Wcast-function-type-strict"
+ 
+ /**
+  * SECTION:hb-ft

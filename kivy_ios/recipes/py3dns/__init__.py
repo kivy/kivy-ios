@@ -8,7 +8,7 @@ class Py3DNSRecipe(PythonRecipe):
           '+download/py3dns-{version}.tar.gz'
     depends = ['python3']
 
-    def prebuild_arch(self, arch):
+    def prebuild_platform(self, plat):
         if self.has_marker("patched"):
             return
 

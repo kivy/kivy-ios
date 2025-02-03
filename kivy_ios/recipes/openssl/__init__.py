@@ -3,30 +3,25 @@ from os.path import join
 import sh
 
 
-arch_mapper = {'x86_64': 'darwin64-x86_64-cc',
-               'arm64': 'ios64-cross'}
+plat_mapper = {
+    'iphoneos-arm64': 'ios64-xcrun',
+    'iphonesimulator-x86_64': 'iossimulator-xcrun',
+    'iphonesimulator-arm64': 'iossimulator-xcrun',
+}
 
 
 class OpensslRecipe(Recipe):
-    version = "1.1.1l"
+    version = "1.1.1w"
     url = "http://www.openssl.org/source/openssl-{version}.tar.gz"
     libraries = ["libssl.a", "libcrypto.a"]
     include_dir = "include"
-    include_per_arch = True
+    include_per_platform = True
 
-    def build_arch(self, arch):
-        build_env = arch.get_env()
-        target = arch_mapper[arch.arch]
+    def build_platform(self, plat):
+        build_env = plat.get_env()
+        target = plat_mapper[plat.name]
         shprint(sh.env, _env=build_env)
-        sh.perl(join(self.build_dir, "Configure"),
-                target,
-                _env=build_env)
-        if target.endswith('-cross'):
-            with open('Makefile', 'r') as makefile:
-                filedata = makefile.read()
-            filedata = filedata.replace('$(CROSS_TOP)/SDKs/$(CROSS_SDK)', arch.sysroot)
-            with open('Makefile', 'w') as makefile:
-                makefile.write(filedata)
+        sh.perl(join(self.build_dir, "Configure"), target, _env=build_env)
         shprint(sh.make, "clean")
         shprint(sh.make, self.ctx.concurrent_make, "build_libs")
 

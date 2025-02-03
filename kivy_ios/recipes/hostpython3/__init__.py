@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class Hostpython3Recipe(HostRecipe):
-    version = "3.10.10"
+    version = "3.11.6"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
     depends = ["hostopenssl"]
     optional_depends = []
@@ -19,24 +19,24 @@ class Hostpython3Recipe(HostRecipe):
 
     def init_with_ctx(self, ctx):
         super().init_with_ctx(ctx)
-        self.set_hostpython(self, "3.10")
-        self.ctx.so_suffix = ".cpython-310m-darwin.so"
+        self.set_hostpython(self, "3.11")
+        self.ctx.so_suffix = ".cpython-311m-darwin.so"
         self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython3", "bin", "python")
         self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython3", "bin", "pgen")
         logger.info("Global: hostpython located at {}".format(self.ctx.hostpython))
         logger.info("Global: hostpgen located at {}".format(self.ctx.hostpgen))
 
-    def get_build_subdir(self, arch):
-        return join(self.get_build_dir(arch), self.build_subdir)
+    def get_build_subdir(self, plat):
+        return join(self.get_build_dir(plat), self.build_subdir)
 
-    def prebuild_arch(self, arch):
+    def prebuild_platform(self, plat):
         if self.has_marker("patched"):
             return
         self.apply_patch("disable_sysconfig_cflags.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.set_marker("patched")
 
-    def postbuild_arch(self, arch):
+    def postbuild_platform(self, plat):
         return
 
     def get_build_env(self):
@@ -55,12 +55,12 @@ class Hostpython3Recipe(HostRecipe):
                 ])
         return build_env
 
-    def build_arch(self, arch):
+    def build_platform(self, plat):
         build_env = self.get_build_env()
 
         configure = sh.Command(join(self.build_dir, "configure"))
 
-        build_subdir = self.get_build_subdir(arch.arch)
+        build_subdir = self.get_build_subdir(plat)
         os.makedirs(build_subdir, exist_ok=True)
 
         with cd(build_subdir):
@@ -75,9 +75,9 @@ class Hostpython3Recipe(HostRecipe):
                 _env=build_env)
 
     def install(self):
-        arch = list(self.filtered_archs)[0]
+        plat = list(self.platforms_to_build)[0]
         build_env = self.get_build_env()
-        build_subdir = self.get_build_subdir(arch.arch)
+        build_subdir = self.get_build_subdir(plat)
         build_env["PATH"] = os.environ["PATH"]
         shprint(sh.make, self.ctx.concurrent_make,
                 "-C", build_subdir,
@@ -88,7 +88,7 @@ class Hostpython3Recipe(HostRecipe):
             join(self.ctx.dist_dir, "hostpython3", "bin", "python"))
 
         # hostpython3 installs bundled versions of `pip`
-        # and `setuptools` in `lib/python3.10/site-packages`.
+        # and `setuptools` in `lib/python3.x/site-packages`.
         # This is fine, but `setuptools` have a bug that prevents
         # it from working properly when cross-compiling, so we
         # patch it here.
@@ -100,10 +100,21 @@ class Hostpython3Recipe(HostRecipe):
                 self.ctx.dist_dir,
                 "hostpython3",
                 "lib",
-                "python3.10",
+                f"python{self.ctx.hostpython_ver}",
                 "site-packages",
                 "setuptools",
             ),
+        )
+        self.apply_patch(
+             "fix-ldshared-override.patch",
+             join(
+                 self.ctx.dist_dir,
+                 "hostpython3",
+                 "lib",
+                 f"python{self.ctx.hostpython_ver}",
+                 "site-packages",
+                 "setuptools",
+             ),
         )
 
 

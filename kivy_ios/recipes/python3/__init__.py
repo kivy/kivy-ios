@@ -9,56 +9,54 @@ logger = logging.getLogger(__name__)
 
 
 class Python3Recipe(Recipe):
-    version = "3.10.10"
+    version = "3.11.6"
     url = "https://www.python.org/ftp/python/{version}/Python-{version}.tgz"
     depends = ["hostpython3", "libffi", "openssl"]
-    library = "libpython3.10.a"
+    library = "libpython3.11.a"
     pbx_libraries = ["libz", "libbz2", "libsqlite3"]
 
     def init_with_ctx(self, ctx):
         super().init_with_ctx(ctx)
-        self.set_python(self, "3.10")
-        ctx.python_ver_dir = "python3.10"
+        self.set_python(self, "3.11")
+        ctx.python_ver_dir = "python3.11"
         ctx.python_prefix = join(ctx.dist_dir, "root", "python3")
         ctx.site_packages_dir = join(
             ctx.python_prefix, "lib", ctx.python_ver_dir, "site-packages")
 
-    def prebuild_arch(self, arch):
+    def prebuild_platform(self, plat):
         # common to all archs
         if self.has_marker("patched"):
             return
         self.apply_patch("configure.patch")
-        self.apply_patch("posixmodule.patch")
         self.apply_patch("dynload_shlib.patch")
-        self.apply_patch("ctypes_duplicate.patch")
         self.copy_file("ModulesSetup", "Modules/Setup.local")
         self.append_file("ModulesSetup.mobile", "Modules/Setup.local")
         self.set_marker("patched")
 
-    def postbuild_arch(self, arch):
+    def postbuild_platform(self, plat):
         # We need to skip remove_junk, because we need to keep few files.
         # A cleanup will be done in the final step.
         return
 
-    def get_build_env(self, arch):
-        build_env = arch.get_env()
+    def get_build_env(self, plat):
+        build_env = plat.get_env()
         build_env["PATH"] = "{}:{}".format(
             join(self.ctx.dist_dir, "hostpython3", "bin"),
             os.environ["PATH"])
-        build_env["CFLAGS"] += " --sysroot={}".format(arch.sysroot)
+        build_env["CFLAGS"] += " --sysroot={}".format(plat.sysroot)
         return build_env
 
-    def build_arch(self, arch):
-        build_env = self.get_build_env(arch)
+    def build_platform(self, plat):
+        build_env = self.get_build_env(plat)
         configure = sh.Command(join(self.build_dir, "configure"))
-        py_arch = arch.arch
+        py_arch = plat.arch
         if py_arch == "arm64":
             py_arch = "aarch64"
         prefix = join(self.ctx.dist_dir, "root", "python3")
         shprint(configure,
                 "CC={}".format(build_env["CC"]),
                 "LD={}".format(build_env["LD"]),
-                "CFLAGS={}".format(build_env["CFLAGS"].replace("-fembed-bitcode", "")),
+                "CFLAGS={}".format(build_env["CFLAGS"]),
                 "LDFLAGS={} -undefined dynamic_lookup".format(build_env["LDFLAGS"]),
                 "ac_cv_file__dev_ptmx=yes",
                 "ac_cv_file__dev_ptc=no",
@@ -97,10 +95,15 @@ class Python3Recipe(Recipe):
                 "ac_cv_func_explicit_bzero=no",
                 "ac_cv_func_explicit_memset=no",
                 "ac_cv_func_close_range=no",
+                "ac_cv_search_crypt_r=no",
+                "ac_cv_func_fork1=no",
+                "ac_cv_func_system=no",
+                "ac_cv_func_clock_nanosleep=no",
                 "ac_cv_func_splice=no",
                 "ac_cv_func_mremap=no",
                 "--host={}-apple-ios".format(py_arch),
                 "--build=x86_64-apple-darwin",
+                "--with-build-python={}".format(join(self.ctx.dist_dir, "hostpython3", "bin", "python3")),
                 "--prefix={}".format(prefix),
                 "--without-ensurepip",
                 "--with-system-ffi",
@@ -114,9 +117,9 @@ class Python3Recipe(Recipe):
         shprint(sh.make, self.ctx.concurrent_make, "CFLAGS={}".format(build_env["CFLAGS"]))
 
     def install(self):
-        arch = list(self.filtered_archs)[0]
-        build_env = self.get_build_env(arch)
-        build_dir = self.get_build_dir(arch.arch)
+        plat = list(self.platforms_to_build)[0]
+        build_env = self.get_build_env(plat)
+        build_dir = self.get_build_dir(plat)
         shprint(sh.make, self.ctx.concurrent_make,
                 "-C", build_dir,
                 "install",
@@ -132,9 +135,9 @@ class Python3Recipe(Recipe):
         # platform binaries and configuration
         with cd(join(
                 self.ctx.dist_dir, "root", "python3", "lib",
-                "python3.10", "config-3.10-darwin")):
+                "python3.11", "config-3.11-darwin")):
             sh.rm(
-                "libpython3.10.a",
+                "libpython3.11.a",
                 "python.o",
                 "config.c.in",
                 "makesetup",
@@ -143,11 +146,11 @@ class Python3Recipe(Recipe):
 
         # cleanup pkgconfig and compiled lib
         with cd(join(self.ctx.dist_dir, "root", "python3", "lib")):
-            sh.rm("-rf", "pkgconfig", "libpython3.10.a")
+            sh.rm("-rf", "pkgconfig", "libpython3.11.a")
 
         # cleanup python libraries
         with cd(join(
-                self.ctx.dist_dir, "root", "python3", "lib", "python3.10")):
+                self.ctx.dist_dir, "root", "python3", "lib", "python3.11")):
             sh.rm("-rf", "wsgiref", "curses", "idlelib", "lib2to3",
                   "ensurepip", "turtledemo", "lib-dynload", "venv",
                   "pydoc_data")
@@ -168,12 +171,12 @@ class Python3Recipe(Recipe):
             sh.find(".", "-name", "__pycache__", "-type", "d", "-delete")
 
             # create the lib zip
-            logger.info("Create a python3.10.zip")
-            sh.mv("config-3.10-darwin", "..")
+            logger.info("Create a python3.11.zip")
+            sh.mv("config-3.11-darwin", "..")
             sh.mv("site-packages", "..")
-            sh.zip("-r", "../python310.zip", sh.glob("*"))
+            sh.zip("-r", "../python311.zip", sh.glob("*"))
             sh.rm("-rf", sh.glob("*"))
-            sh.mv("../config-3.10-darwin", ".")
+            sh.mv("../config-3.11-darwin", ".")
             sh.mv("../site-packages", ".")
 
 

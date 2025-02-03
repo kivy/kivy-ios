@@ -58,6 +58,9 @@ while i < len(sys.argv):
     if opt.startswith("-W"):
         continue
 
+    if opt.startswith("-stdlib="):
+        continue
+
     if opt.startswith("-"):
         print(sys.argv)
         print("Unknown option: ", opt)
@@ -79,13 +82,14 @@ f.close()
 print('Liblink redirect linking with', objects)
 ld = environ.get('ARM_LD')
 arch = environ.get('ARCH', 'arm64')
-if 'arm' in arch:
+sdk = environ.get('PLATFORM_SDK', 'iphoneos')
+if sdk == 'iphoneos':
     min_version_flag = '-ios_version_min'
-else:
+elif sdk == 'iphonesimulator':
     min_version_flag = '-ios_simulator_version_min'
+else:
+    raise ValueError("Unsupported SDK: {}".format(sdk))
 call = [ld, '-r', '-o', output + '.o', min_version_flag, '9.0', '-arch', arch]
-if min_version_flag == "-ios_version_min":
-    call += ["-bitcode_bundle"]
 call += objects
 print("Linking: {}".format(" ".join(call)))
 subprocess.call(call)

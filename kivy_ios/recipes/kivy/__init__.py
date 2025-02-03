@@ -7,17 +7,24 @@ logger = logging.getLogger(__name__)
 
 
 class KivyRecipe(CythonRecipe):
-    version = "2.2.0"
+    version = "2.3.1"
     url = "https://github.com/kivy/kivy/archive/{version}.zip"
     library = "libkivy.a"
     depends = ["sdl2", "sdl2_image", "sdl2_mixer", "sdl2_ttf", "ios",
                "pyobjus", "python"]
-    python_depends = ["certifi", "charset-normalizer", "idna", "requests", "urllib3"]
+    python_depends = [
+        "certifi",
+        "charset-normalizer",
+        "idna",
+        "requests",
+        "urllib3",
+        "filetype",
+    ]
     pbx_frameworks = ["OpenGLES", "Accelerate", "CoreMedia", "CoreVideo"]
     pre_build_ext = True
 
-    def get_recipe_env(self, arch):
-        env = super().get_recipe_env(arch)
+    def get_recipe_env(self, plat):
+        env = super().get_recipe_env(plat)
         env["KIVY_SDL2_PATH"] = ":".join([
             join(self.ctx.dist_dir, "include", "common", "sdl2"),
             join(self.ctx.dist_dir, "include", "common", "sdl2_image"),
@@ -25,9 +32,9 @@ class KivyRecipe(CythonRecipe):
             join(self.ctx.dist_dir, "include", "common", "sdl2_mixer")])
         return env
 
-    def build_arch(self, arch):
+    def build_platform(self, plat):
         self._patch_setup()
-        super().build_arch(arch)
+        super().build_platform(plat)
 
     def _patch_setup(self):
         # patch setup to remove some functionnalities

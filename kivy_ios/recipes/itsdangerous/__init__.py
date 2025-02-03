@@ -11,10 +11,10 @@ class ItsDangerousRecipe(PythonRecipe):
     depends = ["python"]
 
     def install(self):
-        arch = list(self.filtered_archs)[0]
-        build_dir = self.get_build_dir(arch.arch)
+        plat = list(self.platforms_to_build)[0]
+        build_dir = self.get_build_dir(plat)
         hostpython = sh.Command(self.ctx.hostpython)
-        build_env = arch.get_env()
+        build_env = plat.get_env()
         dest_dir = join(self.ctx.dist_dir, "root", "python3")
         build_env['PYTHONPATH'] = self.ctx.site_packages_dir
         with cd(build_dir):

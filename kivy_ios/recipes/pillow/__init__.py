@@ -17,26 +17,27 @@ class PillowRecipe(CythonRecipe):
     ]
     python_depends = ["setuptools"]
     pbx_libraries = ["libz", "libbz2"]
-    include_per_arch = True
+    include_per_platform = True
+    hostpython_prerequisites = ["Cython==0.29.37"]
     cythonize = False
 
-    def prebuild_arch(self, arch):
+    def prebuild_platform(self, plat):
         if self.has_marker("patched"):
             return
         self.apply_patch("bypass-find-library.patch")
         self.set_marker("patched")
 
-    def get_recipe_env(self, arch):
-        env = super().get_recipe_env(arch)
-        env["C_INCLUDE_PATH"] = join(arch.sysroot, "usr", "include")
-        env["LIBRARY_PATH"] = join(arch.sysroot, "usr", "lib")
+    def get_recipe_env(self, plat):
+        env = super().get_recipe_env(plat)
+        env["C_INCLUDE_PATH"] = join(plat.sysroot, "usr", "include")
+        env["LIBRARY_PATH"] = join(plat.sysroot, "usr", "lib")
         env["CFLAGS"] += " ".join(
             [
-                " -I{}".format(join(self.ctx.dist_dir, "include", arch.arch, "freetype"))
+                " -I{}".format(join(self.ctx.dist_dir, "include", plat.name, "freetype"))
                 + " -I{}".format(
-                    join(self.ctx.dist_dir, "include", arch.arch, "libjpeg")
+                    join(self.ctx.dist_dir, "include", plat.name, "libjpeg")
                 )
-                + " -arch {}".format(arch.arch)
+                + " -arch {}".format(plat.arch)
             ]
         )
         env["PATH"] = os.environ["PATH"]
@@ -45,8 +46,8 @@ class PillowRecipe(CythonRecipe):
         ] = "ios-pkg-config"  # ios-pkg-config does not exists, is needed to disable the pkg-config usage.
         return env
 
-    def build_arch(self, arch):
-        build_env = self.get_recipe_env(arch)
+    def build_platform(self, plat):
+        build_env = self.get_recipe_env(plat)
         hostpython3 = sh.Command(self.ctx.hostpython)
         shprint(
             hostpython3,
