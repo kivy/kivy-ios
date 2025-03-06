@@ -11,13 +11,10 @@ class LibSDL3Recipe(Recipe):
     include_dir = "include"
     pbx_frameworks = [
         "AudioToolbox",
-        "Carbon",
-        "Cocoa",
         "CoreAudio",
         "CoreFoundation",
         "CoreHaptics",
         "CoreVideo",
-        "ForceFeedback",
         "GameController",
         "IOKit",
         "Metal",
