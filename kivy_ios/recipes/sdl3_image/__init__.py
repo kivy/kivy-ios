@@ -7,6 +7,7 @@ from kivy_ios.toolchain import Recipe, shprint
 
 class LibSDL3ImageRecipe(Recipe):
     version = "3.2.4"
+    embed_xcframeworks = ["SDL3_image"]
     url = "https://github.com/libsdl-org/SDL_image/releases/download/release-{version}/SDL3_image-{version}.tar.gz"
     include_dir = "include"
     pbx_frameworks = [

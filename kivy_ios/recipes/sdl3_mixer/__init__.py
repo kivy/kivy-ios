@@ -9,6 +9,7 @@ class LibSDL3MixerRecipe(Recipe):
     version = "78a2035cf4cf95066d7d9e6208e99507376409a7"
     # url = "https://github.com/libsdl-org/SDL_ttf/releases/download/release-{version}/SDL3_ttf-{version}.tar.gz"
     url = "https://github.com/libsdl-org/SDL_mixer/archive/{version}.tar.gz"
+    embed_xcframeworks = ["SDL3_mixer"]
     include_dir = "include"
     pbx_frameworks = [
         "AudioToolbox",
