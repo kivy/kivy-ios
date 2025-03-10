@@ -507,6 +507,7 @@ class Recipe:
         "include_per_platform": False,
         "include_name": None,
         "frameworks": [],
+        "embed_xcframeworks": [],
         "sources": [],
         "pbx_frameworks": [],
         "pbx_libraries": [],
@@ -696,6 +697,11 @@ class Recipe:
         for lib in self._get_all_libraries():
             lib_name = basename(lib).split(".a")[0]
             yield join(self.ctx.dist_dir, "xcframework", f"{lib_name}.xcframework")
+
+    @property
+    def dist_embed_xcframeworks(self):
+        for f in self.embed_xcframeworks:
+            yield join(self.ctx.dist_dir, "xcframework", f"{f}.xcframework")
 
     def get_build_dir(self, plat):
         return join(self.ctx.build_dir, self.name, plat.name, self.archive_root)
@@ -1315,6 +1321,7 @@ def update_pbxproj(filename, pbx_frameworks=None):
         pbx_frameworks = []
     frameworks = []
     xcframeworks = []
+    embed_xcframeworks = []
     sources = []
     for recipe in Recipe.list_recipes():
         key = "{}.build_all".format(recipe)
@@ -1326,12 +1333,14 @@ def update_pbxproj(filename, pbx_frameworks=None):
         pbx_libraries.extend(recipe.pbx_libraries)
         xcframeworks.extend(recipe.dist_xcframeworks)
         frameworks.extend(recipe.frameworks)
+        embed_xcframeworks.extend(recipe.dist_embed_xcframeworks)
         if recipe.sources:
             sources.append(recipe.name)
 
     pbx_frameworks = list(set(pbx_frameworks))
     pbx_libraries = list(set(pbx_libraries))
     xcframeworks = list(set(xcframeworks))
+    embed_xcframeworks = list(set(embed_xcframeworks))
 
     logger.info("-" * 70)
     logger.info("The project need to have:")
@@ -1339,6 +1348,7 @@ def update_pbxproj(filename, pbx_frameworks=None):
     logger.info("iOS Libraries: {}".format(pbx_libraries))
     logger.info("iOS local Frameworks: {}".format(frameworks))
     logger.info("XCFrameworks: {}".format(xcframeworks))
+    logger.info("XCFrameworks (embed): {}".format(embed_xcframeworks))
     logger.info("Sources to link: {}".format(sources))
 
     logger.info("-" * 70)
@@ -1381,6 +1391,14 @@ def update_pbxproj(filename, pbx_frameworks=None):
             parent=group,
             force=False,
             file_options=FileOptions(embed_framework=False)
+        )
+    for xcframework in embed_xcframeworks:
+        logger.info("Ensure {} is in the project (embed_xcframework)".format(xcframework))
+        project.add_file(
+            xcframework,
+            parent=group,
+            force=False,
+            file_options=FileOptions(embed_framework=True)
         )
     for name in sources:
         logger.info("Ensure {} sources are used".format(name))
