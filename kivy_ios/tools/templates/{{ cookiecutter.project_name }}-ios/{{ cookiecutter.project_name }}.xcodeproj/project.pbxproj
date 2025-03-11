@@ -256,7 +256,7 @@
 					"{{ cookiecutter.dist_dir }}/include/common/sdl2",
 				);
 				INFOPLIST_FILE = "{{ cookiecutter.project_name }}-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"{{ cookiecutter.dist_dir }}/lib",
@@ -292,7 +292,7 @@
 					"{{ cookiecutter.dist_dir }}/include/common/sdl2",
 				);
 				INFOPLIST_FILE = "{{ cookiecutter.project_name }}-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"{{ cookiecutter.dist_dir }}/lib",
