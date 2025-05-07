@@ -1,0 +1,15 @@
+diff -Naur libffi-3.4.8.orig/libffi.xcodeproj/project.pbxproj libffi-3.4.8/libffi.xcodeproj/project.pbxproj
+--- libffi-3.4.8.orig/libffi.xcodeproj/project.pbxproj	2025-05-07 20:23:47
++++ libffi-3.4.8/libffi.xcodeproj/project.pbxproj	2025-05-07 20:24:07
+@@ -87,11 +87,9 @@
+ 			files = (
+ 				FDB52FD01F614A8B00AA92E6 /* ffi.h in CopyFiles */,
+ 				FDB52FD11F614AA700AA92E6 /* ffi_arm64.h in CopyFiles */,
+-				FDB52FD21F614AAB00AA92E6 /* ffi_armv7.h in CopyFiles */,
+ 				FDB52FD41F614AB500AA92E6 /* ffi_x86_64.h in CopyFiles */,
+ 				FDB52FD81F614B8700AA92E6 /* ffitarget.h in CopyFiles */,
+ 				FDB52FD91F614B8E00AA92E6 /* ffitarget_arm64.h in CopyFiles */,
+-				FDB52FDA1F614B9300AA92E6 /* ffitarget_armv7.h in CopyFiles */,
+ 				FDB52FDD1F614BA900AA92E6 /* ffitarget_x86_64.h in CopyFiles */,
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
