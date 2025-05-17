@@ -1,5 +1,51 @@
 # Changelog
 
+## [v2025.05.17](https://github.com/kivy/kivy-ios/tree/v2025.05.17)
+
+[Full Changelog](https://github.com/kivy/kivy-ios/compare/v2024.03.17...v2025.05.17)
+
+**Closed issues:**
+
+- kivy fails to build on MacOS 15.4.1 \(-armv7 compiler failure\) [\#965](https://github.com/kivy/kivy-ios/issues/965)
+- push notification in ios? [\#964](https://github.com/kivy/kivy-ios/issues/964)
+- Libffi error while building python3 with Xcode 16.3 [\#963](https://github.com/kivy/kivy-ios/issues/963)
+- Fails to build on recipe for ios/src/ios.pyx [\#948](https://github.com/kivy/kivy-ios/issues/948)
+- target python needs to be patched [\#939](https://github.com/kivy/kivy-ios/issues/939)
+- Toolchain build kivy command is failing with Xcode 16 [\#936](https://github.com/kivy/kivy-ios/issues/936)
+- Toolchain does not build with Xcode 15.4 [\#929](https://github.com/kivy/kivy-ios/issues/929)
+- How is Accelerate not supported? [\#925](https://github.com/kivy/kivy-ios/issues/925)
+- M1 mac python3 build error [\#924](https://github.com/kivy/kivy-ios/issues/924)
+- Python error after building to iPhone Simulator [\#923](https://github.com/kivy/kivy-ios/issues/923)
+- Pillow not building [\#907](https://github.com/kivy/kivy-ios/issues/907)
+- Can't create a recipe  [\#906](https://github.com/kivy/kivy-ios/issues/906)
+- Linker Command Failure Error While Building Python3 [\#905](https://github.com/kivy/kivy-ios/issues/905)
+- MacOS toolchain build constantly failing \(I think due to C extension errors\) [\#901](https://github.com/kivy/kivy-ios/issues/901)
+- Unable to build with kivymd==2.0 [\#897](https://github.com/kivy/kivy-ios/issues/897)
+- Got dlopen error on Foundation [\#896](https://github.com/kivy/kivy-ios/issues/896)
+- Feature request: MatplotLib for iOS [\#712](https://github.com/kivy/kivy-ios/issues/712)
+
+**Merged pull requests:**
+
+- Use `-platform_version` flag during linking instead of the deprecated and now removed\) `-ios_simulator_version_min` [\#970](https://github.com/kivy/kivy-ios/pull/970) ([misl6](https://github.com/misl6))
+- Bump `libpng` version to `1.6.48` [\#967](https://github.com/kivy/kivy-ios/pull/967) ([misl6](https://github.com/misl6))
+- Disable iOS armv7 build for `libffi` [\#966](https://github.com/kivy/kivy-ios/pull/966) ([misl6](https://github.com/misl6))
+- Add `SDL3`, `SDL3_ttf`, `SDL3_mixer`, `SDL3_image` recipes for Kivy `3.0.0` [\#961](https://github.com/kivy/kivy-ios/pull/961) ([misl6](https://github.com/misl6))
+- chore\(deps\): update pypa/gh-action-pypi-publish action to v1.12.4 [\#958](https://github.com/kivy/kivy-ios/pull/958) ([renovate[bot]](https://github.com/apps/renovate))
+- Enhance Cython integration: Add support for `c++` mode, use hostpython3-provided Cython, allow pinning of specific Cython version in recipe [\#957](https://github.com/kivy/kivy-ios/pull/957) ([misl6](https://github.com/misl6))
+- Bump Kivy version to 2.3.1 [\#956](https://github.com/kivy/kivy-ios/pull/956) ([misl6](https://github.com/misl6))
+- chore\(deps\): update pypa/gh-action-pypi-publish action to v1.12.3 [\#952](https://github.com/kivy/kivy-ios/pull/952) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update pypa/gh-action-pypi-publish action to v1.12.2 [\#942](https://github.com/kivy/kivy-ios/pull/942) ([renovate[bot]](https://github.com/apps/renovate))
+- Fix libb2 issue [\#940](https://github.com/kivy/kivy-ios/pull/940) ([tcaduser](https://github.com/tcaduser))
+- :construction\_worker: Fix broken setup workflow [\#938](https://github.com/kivy/kivy-ios/pull/938) ([AndreMiras](https://github.com/AndreMiras))
+- fix build for Xcode 16 [\#937](https://github.com/kivy/kivy-ios/pull/937) ([tcaduser](https://github.com/tcaduser))
+- Fix zbarlight recipe [\#932](https://github.com/kivy/kivy-ios/pull/932) ([Cheaterman](https://github.com/Cheaterman))
+- chore\(deps\): update actions/setup-python action to v5 [\#918](https://github.com/kivy/kivy-ios/pull/918) ([renovate[bot]](https://github.com/apps/renovate))
+- chore\(deps\): update pypa/gh-action-pypi-publish action to v1.10.2 [\#917](https://github.com/kivy/kivy-ios/pull/917) ([renovate[bot]](https://github.com/apps/renovate))
+- Bump minimum Python supported version to `3.8` [\#914](https://github.com/kivy/kivy-ios/pull/914) ([misl6](https://github.com/misl6))
+- chore: Configure Renovate [\#910](https://github.com/kivy/kivy-ios/pull/910) ([renovate[bot]](https://github.com/apps/renovate))
+- Sunset `apple-silicon-m1` self-hosted runner, as now is supported by Github Hosted runners via `macos-latest` tag. Use `macos-13` for runs on Intel macs [\#909](https://github.com/kivy/kivy-ios/pull/909) ([misl6](https://github.com/misl6))
+- \(`recipes/materialyoucolor`\): update to 2.0.9 [\#904](https://github.com/kivy/kivy-ios/pull/904) ([T-Dynamos](https://github.com/T-Dynamos))
+
 ## [v2024.03.17](https://github.com/kivy/kivy-ios/tree/v2024.03.17)
 
 [Full Changelog](https://github.com/kivy/kivy-ios/compare/v2023.08.24...v2024.03.17)
