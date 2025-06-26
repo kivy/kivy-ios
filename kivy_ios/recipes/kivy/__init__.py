@@ -169,6 +169,25 @@ class KivyRecipe(CythonRecipe):
             )
         return env
 
+    def build_platform(self, plat):
+        if self.get_required_sdl_version() == "sdl2":
+            self._patch_setup()
+        super().build_platform(plat)
+
+    def _patch_setup(self):
+        # patch setup to remove some functionnalities
+        pyconfig = join(self.build_dir, "setup.py")
+
+        def _remove_line(lines, pattern):
+            for line in lines[:]:
+                if pattern in line:
+                    lines.remove(line)
+        with open(pyconfig) as fd:
+            lines = fd.readlines()
+        _remove_line(lines, "flags['libraries'] = ['GLESv2']")
+        with open(pyconfig, "w") as fd:
+            fd.writelines(lines)
+
     def reduce_python_package(self):
         dest_dir = join(self.ctx.site_packages_dir, "kivy")
         shutil.rmtree(join(dest_dir, "tools"))
