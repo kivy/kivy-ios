@@ -36,7 +36,11 @@ int main(int argc, char *argv[]) {
     putenv("KIVY_WINDOW=sdl2");
     putenv("KIVY_IMAGE=imageio,tex,gif,sdl2");
     putenv("KIVY_AUDIO=sdl2");
-    putenv("KIVY_GL_BACKEND=angle");
+    putenv("KIVY_GL_BACKEND=sdl2");
+
+    // WIP_ Will move to angle and sdl3 as default in the future
+    // Set KIVY_GL_BACKEND=angle if building for kivy==master branch
+    // putenv("KIVY_GL_BACKEND=angle");
 
     // IOS_IS_WINDOWED=True disables fullscreen and then statusbar is shown
     putenv("IOS_IS_WINDOWED=False");

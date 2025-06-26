@@ -27,7 +27,7 @@ class LibSDL3Recipe(Recipe):
         if self.has_marker("patched"):
             return
         self.apply_patch("uikit-transparent.patch")
-        # self.apply_patch("disable-hidapi.patch")
+        self.apply_patch("disable-opengl.patch")
         self.set_marker("patched")
 
     def build_platform(self, plat):

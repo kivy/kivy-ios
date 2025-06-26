@@ -15,7 +15,6 @@ class LibSDL2Recipe(Recipe):
     def prebuild_platform(self, plat):
         if self.has_marker("patched"):
             return
-        self.apply_patch("disable-opengl.patch")
         self.apply_patch("uikit-transparent.patch")
         self.apply_patch("disable-hidapi.patch")
         self.set_marker("patched")
