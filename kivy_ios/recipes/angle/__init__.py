@@ -12,7 +12,7 @@ class IphoneAllUniversalPlatform(GenericPlatform):
 
 
 class ANGLERecipe(Recipe):
-    version = "chromium-6778_rev2"
+    version = "chromium-6943_rev1"
     url = "https://github.com/kivy/angle-builder/releases/download/{version}/angle-iphoneall-universal.tar.gz"
     include_dir = ["include"]
     libraries = ["libEGL.a", "libGLESv2.a"]

@@ -27,7 +27,7 @@ class KivyRecipe(CythonRecipe):
         "urllib3",
         "filetype",
     ]
-    pbx_frameworks = [
+    _base_pbx_frameworks = [
         "Accelerate",
         "CoreMedia",
         "CoreVideo",
@@ -83,6 +83,21 @@ class KivyRecipe(CythonRecipe):
             )
 
         return self._required_sdl_version
+
+    @property
+    def pbx_frameworks(self):
+        if self.get_required_sdl_version() == "sdl2":
+            return self._base_pbx_frameworks + [
+                "OpenGLES",
+            ]
+        elif self.get_required_sdl_version() == "sdl3":
+            return self._base_pbx_frameworks + [
+                "Metal",
+            ]
+        else:
+            raise ValueError(
+                f"Unsupported SDL version: {self.get_required_sdl_version()}"
+            )
 
     @property
     def depends(self):
