@@ -8,7 +8,7 @@ class LibSDL2Recipe(Recipe):
     library = "Xcode/SDL/build/Release-{plat.sdk}/libSDL2.a"
     include_dir = "include"
     pbx_frameworks = [
-        "AudioToolbox", "QuartzCore", "CoreGraphics",
+        "OpenGLES", "AudioToolbox", "QuartzCore", "CoreGraphics",
         "CoreMotion", "GameController", "AVFoundation", "Metal",
         "UIKit", "CoreHaptics"]
 
