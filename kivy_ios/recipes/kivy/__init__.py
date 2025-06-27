@@ -27,8 +27,7 @@ class KivyRecipe(CythonRecipe):
         "urllib3",
         "filetype",
     ]
-    pbx_frameworks = [
-        "OpenGLES",
+    _base_pbx_frameworks = [
         "Accelerate",
         "CoreMedia",
         "CoreVideo",
@@ -86,6 +85,21 @@ class KivyRecipe(CythonRecipe):
         return self._required_sdl_version
 
     @property
+    def pbx_frameworks(self):
+        if self.get_required_sdl_version() == "sdl2":
+            return self._base_pbx_frameworks + [
+                "OpenGLES",
+            ]
+        elif self.get_required_sdl_version() == "sdl3":
+            return self._base_pbx_frameworks + [
+                "Metal",
+            ]
+        else:
+            raise ValueError(
+                f"Unsupported SDL version: {self.get_required_sdl_version()}"
+            )
+
+    @property
     def depends(self):
         if self.get_required_sdl_version() == "sdl2":
             return self._base_depends + [
@@ -100,6 +114,7 @@ class KivyRecipe(CythonRecipe):
                 "sdl3_image",
                 "sdl3_ttf",
                 "sdl3_mixer",
+                "angle",
             ]
         else:
             raise ValueError(
@@ -118,7 +133,8 @@ class KivyRecipe(CythonRecipe):
                 ]
             )
         elif self.get_required_sdl_version() == "sdl3":
-            env["USE_ANGLE_GL_BACKEND"] = "0"
+            env["KIVY_ANGLE_INCLUDE_DIR"] = join(self.ctx.dist_dir, "include", "common", "angle")
+            env["KIVY_ANGLE_LIB_DIR"] = join(self.ctx.dist_dir, "frameworks", plat.sdk)
             env["KIVY_SDL3_PATH"] = ":".join(
                 [
                     join(self.ctx.dist_dir, "include", "common", "sdl3"),
@@ -154,7 +170,8 @@ class KivyRecipe(CythonRecipe):
         return env
 
     def build_platform(self, plat):
-        self._patch_setup()
+        if self.get_required_sdl_version() == "sdl2":
+            self._patch_setup()
         super().build_platform(plat)
 
     def _patch_setup(self):
