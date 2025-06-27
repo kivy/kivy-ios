@@ -12,7 +12,7 @@ class IphoneAllUniversalPlatform(GenericPlatform):
 
 
 class ANGLERecipe(Recipe):
-    version = "chromium-6943_rev1"
+    version = "chromium-7151_rev1"
     url = "https://github.com/kivy/angle-builder/releases/download/{version}/angle-iphoneall-universal.tar.gz"
     include_dir = ["include"]
     libraries = ["libEGL.a", "libGLESv2.a"]
@@ -39,7 +39,7 @@ class ANGLERecipe(Recipe):
                 shutil.copytree(
                     os.path.join(build_dir, fn),
                     os.path.join(xcframework_folder, fn),
-                    dirs_exist_ok=True
+                    dirs_exist_ok=True,
                 )
 
 
