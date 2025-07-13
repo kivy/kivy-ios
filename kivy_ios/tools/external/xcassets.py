@@ -4,6 +4,7 @@ Icon and LaunchImage generator for iOS
 
 .. author:: Mathieu Virbel <mat@meltingrocks.com>
 """
+
 # flake8: noqa (E121 mainly)
 
 __all__ = ["launchimage"]
@@ -353,8 +354,6 @@ appicon_json = {
   }
 }
 
-
-
 launchimage_json = {
   "images": [
     {
@@ -491,9 +490,9 @@ launchimage_json = {
 }
 
 
+
 def icon(image_xcassets, image_fn):
-    """Generate all the possible Icon from a single image_fn
-    """
+    """Generate all the possible Icon from a single image_fn"""
     appicon_dir = join(image_xcassets, "AppIcon.appiconset")
     if not exists(appicon_dir):
         makedirs(appicon_dir)
@@ -505,38 +504,38 @@ def icon(image_xcassets, image_fn):
         # Spotlight - iOS 5,6
         # Settings - iOS 5-8
         # 29pt - 1x,2x,3x
-        ("87", None, "Icon87.png"),
-        ("58", None, "Icon58.png"),
-        ("29", "Icon58.png", "Icon29.png"),
+        ("87 87", None, "Icon87.png"),
+        ("58 58", None, "Icon58.png"),
+        ("29 29", "Icon58.png", "Icon29.png"),
 
         # iPhone notification
         # 20pt - 2x,3x
         # ("40", None, "Icon40.png"),
-        ("60", None, "Icon60.png"),
+        ("60 60", None, "Icon60.png"),
 
         # iPhone
         # Spotlight - iOS 7-8
         # 40pt 2x,3x
-        ("120", None, "Icon120.png"),
-        ("80", None, "Icon80.png"),
+        ("120 120", None, "Icon120.png"),
+        ("80 80", None, "Icon80.png"),
 
         # iPhone
         # App - iOS 5,6
         # 57pt 1x,2x
-        ("114", None, "Icon114.png"),
-        ("57", "Icon114.png", "Icon57.png"),
+        ("114 114", None, "Icon114.png"),
+        ("57 57", "Icon114.png", "Icon57.png"),
 
         # iPhone
         # App - iOS 7,8
         # 60pt 2x,3x
-        ("180", None, "Icon180.png"),
+        ("180 180", None, "Icon180.png"),
         # ("120", None, "Icon120.png # duplicate"),
 
         # iPad
         # Notifications
         # 20pt 1x,2x
-        ("20", "Icon80.png", "Icon20.png"),
-        ("40", "Icon80.png", "Icon40.png"),
+        ("20 20", "Icon80.png", "Icon20.png"),
+        ("40 40", "Icon80.png", "Icon40.png"),
 
         # iPad
         # Settings iOS 5-8
@@ -547,43 +546,41 @@ def icon(image_xcassets, image_fn):
         # Spotlight iOS 7,8
         # 40pt 1x,2x
         # ("80", None, "Icon80.png # duplicate"),
-        ("40", "Icon80.png", "Icon40.png"),
+        # ("40", "Icon80.png", "Icon40.png" # duplicate),
 
         # iPad
         # Spotlight iOS 5,6
         # 50pt 1x,2x
-        ("100", None, "Icon100.png"),
-        ("50", "Icon100.png", "Icon50.png"),
+        ("100 100", None, "Icon100.png"),
+        ("50 50", "Icon100.png", "Icon50.png"),
 
         # iPad
         # App iOS 5,6
         # 72pt 1x,2x
-        ("144", None, "Icon144.png"),
-        ("72", "Icon144.png", "Icon72.png"),
+        ("144 144", None, "Icon144.png"),
+        ("72 72", "Icon144.png", "Icon72.png"),
 
         # iPad
         # App iOS 7,8
         # 76pt 1x,2x
-        ("152", None, "Icon152.png"),
-        ("76", "Icon152.png", "Icon76.png"),
+        ("152 152", None, "Icon152.png"),
+        ("76 76", "Icon152.png", "Icon76.png"),
 
         # iPad
         # App iOS 9
         # 83.5pt 2x
-        ("167", None, "Icon167.png"),
-
+        ("167 167", None, "Icon167.png"),
 
         # CarPlay
         # App iOS 8
         # 120pt 1x
         # ("120", None, "Icon120.png # duplicate"),
 
-
         # Apple Watch
         # Notification Center
         # 38mm, 42mm
-        ("48", None, "Icon48.png"),
-        ("55", None, "Icon55.png"),
+        ("48 48", None, "Icon48.png"),
+        ("55 55", None, "Icon55.png"),
 
         # Apple Watch
         # Companion Settings
@@ -598,47 +595,45 @@ def icon(image_xcassets, image_fn):
 
         # Apple Watch
         # Long Look (42mm)
-        ("88", None, "Icon88.png"),
+        ("88 88", None, "Icon88.png"),
 
         # Apple Watch
         # Short Look
         # 38mm, 42mm, 44mm
-        ("172", None, "Icon172.png"),
-        ("196", None, "Icon196.png"),
-        ("216", None, "Icon216.png"),
-
+        ("172 172", None, "Icon172.png"),
+        ("196 196", None, "Icon196.png"),
+        ("216 216", None, "Icon216.png"),
 
         # OS X
         # 512pt 1x,2x
-        ("1024", None, "Icon1024.png"),
-        ("512", "Icon1024.png", "Icon512.png"),
+        ("1024 1024", None, "Icon1024.png"),
+        ("512 512", "Icon1024.png", "Icon512.png"),
 
         # OS X
         # 256pt 1x,2x
         # ("512", "Icon1024.png", "Icon512.png # duplicate"),
-        ("256", "Icon512.png", "Icon256.png"),
+        ("256 256", "Icon512.png", "Icon256.png"),
 
         # OS X
         # 128pt 1x,2x
         # ("256", "Icon512.png", "Icon256.png # duplicate"),
-        ("128", "Icon256.png", "Icon128.png"),
+        ("128 128", "Icon256.png", "Icon128.png"),
 
         # OS X
         # 32pt 1x,2x
-        ("64", "Icon128.png", "Icon64.png"),
-        ("32", "Icon64.png", "Icon32.png"),
+        ("64 64", "Icon128.png", "Icon64.png"),
+        ("32 32", "Icon64.png", "Icon32.png"),
 
         # OS X
         # 16pt 1x,2x
         # ("32", "Icon64.png", "Icon32.png # duplicate"),
-        ("16", "Icon32.png", "Icon16.png"))
-
+        ("16 16", "Icon32.png", "Icon16.png"),
+    )
     _generate("AppIcon.appiconset", image_xcassets, image_fn, options, icon=True)
 
 
 def launchimage(image_xcassets, image_fn):
-    """Generate all the possible Launch Images from a single image_fn
-    """
+    """Generate all the possible Launch Images from a single image_fn"""
     launchimage_dir = join(image_xcassets, "LaunchImage.launchimage")
     if not exists(launchimage_dir):
         makedirs(launchimage_dir)
@@ -673,24 +668,32 @@ def launchimage(image_xcassets, image_fn):
 
 
 def _buildimage(in_fn, out_fn, size, padcolor=None):
+
     im = Image.open(in_fn)
 
-    # read the first left/bottom pixel
+    # Read the first left/bottom pixel
     bgcolor = im.getpixel((0, 0))
 
-    # ensure the image fit in the destination size
-    if im.size[0] > size[0] or im.size[1] > size[1]:
-        f = max(im.size[0] / size[0], im.size[1] / size[1])
-        newsize = int(im.size[0] / f), int(im.size[1] / f)
-        im = im.resize(newsize)
+    # Calculate the scaling factor to fit the image within the destination size
+    scaling_factor = min(size[0] / im.size[0], size[1] / im.size[1])
 
-    # create final image
+    # Compute the new size while maintaining the aspect ratio
+    newsize = (int(im.size[0] * scaling_factor), int(im.size[1] * scaling_factor))
+
+    # Resize the image
+    im = im.resize(newsize, Image.LANCZOS)
+
+    # Create the final image with the background color
     outim = Image.new("RGB", size, bgcolor[:3])
-    x = (size[0] - im.size[0]) // 2
-    y = (size[1] - im.size[1]) // 2
+
+    # Compute the top-left coordinates to paste the resized image
+    x = (size[0] - newsize[0]) // 2
+    y = (size[1] - newsize[1]) // 2
+
+    # Paste the resized image onto the background
     outim.paste(im, (x, y))
 
-    # save the image
+    # Save the final image
     outim.save(out_fn)
 
 
@@ -704,12 +707,8 @@ def _generate(d, image_xcassets, image_fn, options, icon=False):
 
         if icon:
             args += [filename, "-Z", c]
-            args += [
-                "--out",
-                join(image_xcassets, d, out_fn)
-            ]
+            args += ["--out", join(image_xcassets, d, out_fn)]
             print("sips", " ".join(args))
             sh.sips(*args)
-        else:
-            size = [int(x) for x in c.split()]
-            _buildimage(filename, join(image_xcassets, d, out_fn), size)
+        size = [int(x) for x in c.split()]
+        _buildimage(filename, join(image_xcassets, d, out_fn), size)
