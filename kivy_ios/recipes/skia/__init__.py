@@ -1,37 +1,27 @@
 import os
 import shutil
+import sh
 
-from kivy_ios.toolchain import Recipe, cache_execution
+from kivy_ios.toolchain import Recipe, cache_execution, shprint
 
 
 class LibSkiaRecipe(Recipe):
-    version = "skia-binaries-m137-rev1.a0"
+    version = "skia-binaries-m138-rev2.a0"
     url = "https://github.com/DexerBR/skia-builder/releases/download/{version}/{plat_arch}.tar.gz"
-    libraries = [
+    skia_libraries = [
         "libskresources.a",
         "libskparagraph.a",
         "libskia.a",
-        "libicu.a",
-        "libpathkit.a",
         "libskottie.a",
         "libsvg.a",
-        "libpng.a",
-        "libwebp_sse41.a",
         "libsksg.a",
-        "libwebp.a",
-        "libcompression_utils_portable.a",
-        "libdng_sdk.a",
-        "libbentleyottmann.a",
-        "libpiex.a",
-        "libharfbuzz.a",
-        "libexpat.a",
-        "libzlib.a",
-        "libwuffs.a",
-        "libskcms.a",
-        "libjpeg.a",
         "libskshaper.a",
         "libskunicode_icu.a",
         "libskunicode_core.a",
+        "libjsonreader.a",
+    ]
+    libraries = [
+        "libskmerged.a",
     ]
 
     def build_all(self):
@@ -108,6 +98,42 @@ class LibSkiaRecipe(Recipe):
                 if os.path.exists(dest_path):
                     os.remove(dest_path)
                 os.rename(lib_path, dest_path)
+
+            # Merge the static libraries into a single library
+            merged_lib_path = os.path.join(dist_lib_dir, "libskmerged.a")
+            if os.path.exists(merged_lib_path):
+                os.remove(merged_lib_path)
+
+            # Extract all the self.skia_libraries via ar x
+            for lib in self.skia_libraries:
+                lib_path = os.path.join(dist_lib_dir, lib)
+                if not os.path.exists(lib_path):
+                    raise FileNotFoundError(f"Library {lib} not found in {dist_lib_dir}")
+
+                # Extract the library using ar
+                ar_cmd = [
+                    sh.Command("ar"),
+                    "x",
+                    lib_path,
+                ]
+                shprint(*ar_cmd, _cwd=dist_lib_dir)
+
+            #
+
+            # Use libtool to merge the libraries
+            libtool_cmd = (
+                [
+                    sh.Command("libtool"),
+                    "-static",
+                ]
+                + ["-o", merged_lib_path]
+                + [
+                    os.path.join(dist_lib_dir, lib)
+                    for lib in self.skia_libraries
+                ]
+            )
+
+            shprint(*libtool_cmd)
 
             if not first_platform:
                 first_platform = False

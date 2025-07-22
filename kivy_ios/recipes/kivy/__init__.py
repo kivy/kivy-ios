@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 class KivyRecipe(CythonRecipe):
     version = "2.3.1"
-    url = "https://github.com/kivy/kivy/archive/{version}.zip"
+    # url = "https://github.com/kivy/kivy/archive/{version}.zip"
+    url = "https://github.com/misl6/kivy/archive/refs/heads/pure_skia_tests_mirko.zip"
     library = "libkivy.a"
     _base_depends = ["ios", "pyobjus", "python"]
     python_depends = [
@@ -110,6 +111,7 @@ class KivyRecipe(CythonRecipe):
             ]
         elif self.get_required_sdl_version() == "sdl3":
             return self._base_depends + [
+                "skia",
                 "sdl3",
                 "sdl3_image",
                 "sdl3_ttf",
@@ -133,6 +135,7 @@ class KivyRecipe(CythonRecipe):
                 ]
             )
         elif self.get_required_sdl_version() == "sdl3":
+            env["SKIA_INCLUDE_DIR"] = join(self.ctx.dist_dir, "include", "common", "skia")
             env["KIVY_ANGLE_INCLUDE_DIR"] = join(self.ctx.dist_dir, "include", "common", "angle")
             env["KIVY_ANGLE_LIB_DIR"] = join(self.ctx.dist_dir, "frameworks", plat.sdk)
             env["KIVY_SDL3_PATH"] = ":".join(
