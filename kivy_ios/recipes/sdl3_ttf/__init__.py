@@ -6,7 +6,7 @@ from kivy_ios.toolchain import Recipe, shprint
 
 
 class LibSDL3TTFRecipe(Recipe):
-    version = "3.2.0"
+    version = "3.2.2"
     url = "https://github.com/libsdl-org/SDL_ttf/releases/download/release-{version}/SDL3_ttf-{version}.tar.gz"
     include_dir = "include"
     embed_xcframeworks = ["SDL3_ttf"]
