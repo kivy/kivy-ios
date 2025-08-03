@@ -944,7 +944,6 @@ class Recipe:
                 if plat.sdk not in sdks_args:
                     sdks_args[plat.sdk] = []
                 sdks_args[plat.sdk].extend([
-                    "-arch", plat.arch,
                     join(self.get_build_dir(plat), library_fp.format(plat=plat))
                 ])
 
