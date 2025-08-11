@@ -7,7 +7,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Set up Python 3.x
       uses: actions/setup-python@v5
       with:
