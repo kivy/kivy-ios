@@ -8,7 +8,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -28,7 +28,7 @@ jobs:
         runs_on: ['macos-latest', 'macos-13']
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Set up Python 3.x
       uses: actions/setup-python@v5
       with:
@@ -48,7 +48,7 @@ jobs:
       run: |
         toolchain build python3 kivy
     - name: Checkout kivy for tests apps
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: kivy/kivy
         path: kivy-ci-clone
@@ -65,7 +65,7 @@ jobs:
         runs_on: ['macos-latest', 'macos-13']
     steps:
     - name: Checkout kivy-ios
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
     - name: Set up Python 3.x
       uses: actions/setup-python@v5
       with:
@@ -89,7 +89,7 @@ jobs:
         . venv/bin/activate
         toolchain build python3 kivy
     - name: Checkout kivy for tests apps
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: kivy/kivy
         path: kivy-ci-clone
@@ -108,7 +108,7 @@ jobs:
         runs_on: ['macos-latest', 'macos-13']
     steps:
     - name: Checkout kivy-ios (all-history)
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
     - name: Set up Python 3.x
