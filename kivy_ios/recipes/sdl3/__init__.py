@@ -6,7 +6,7 @@ from kivy_ios.toolchain import Recipe, shprint
 
 
 class LibSDL3Recipe(Recipe):
-    version = "3.2.18"
+    version = "3.2.22"
     embed_xcframeworks = ["SDL3"]
     url = "https://github.com/libsdl-org/SDL/releases/download/release-{version}/SDL3-{version}.tar.gz"
     include_dir = "include"
