@@ -30,7 +30,7 @@ def cd(newdir):
 @contextmanager
 def python_path(newdir):
     """
-    Set the PYTHONPATH environmnet variable to `newdir` for the duraiton of the
+    Set the PYTHONPATH environment variable to `newdir` for the duraiton of the
     context.
     """
     prevdir = environ.get("PYTHONPATH")

@@ -7,7 +7,7 @@
 @implementation NativeImagePicker
 
 - (NSString*) getFileName:(NSURL *) ns_url {
-    // Return the file name without the path or file extention
+    // Return the file name without the path or file extension
     NSString *image_name = ns_url.pathComponents.lastObject;
     NSArray *listItems = [image_name componentsSeparatedByString:@"."];
     NSString *ret = listItems[0];
@@ -18,7 +18,7 @@
     /* Given the info frozen dictionary returned by the file picker, convert
      the image selected to a PNG and return the full path. */
 
-    // Get the image name, stripped of path and extention
+    // Get the image name, stripped of path and extension
     NSString *image_name = [self getFileName: info[UIImagePickerControllerImageURL]];
 
     // Get the png representation of the image
