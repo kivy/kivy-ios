@@ -7,7 +7,7 @@ on:
     types: [created]
   schedule:
     # Schedule for an arbitrary time (5am) once every day
-    - cron: '* 5 * * *'
+    - cron: '0 5 * * *'
 
 jobs:
   noResponse:
