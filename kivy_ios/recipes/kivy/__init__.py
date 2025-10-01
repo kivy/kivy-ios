@@ -175,7 +175,7 @@ class KivyRecipe(CythonRecipe):
         super().build_platform(plat)
 
     def _patch_setup(self):
-        # patch setup to remove some functionnalities
+        # patch setup to remove some functionalities
         pyconfig = join(self.build_dir, "setup.py")
 
         def _remove_line(lines, pattern):

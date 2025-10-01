@@ -140,7 +140,7 @@
 - Toolchain build openssl not working [\#819](https://github.com/kivy/kivy-ios/issues/819)
 -  OSError: codec configuration error when reading image file [\#818](https://github.com/kivy/kivy-ios/issues/818)
 - Command PhaseScriptExecution failed with a nonzero exit code [\#817](https://github.com/kivy/kivy-ios/issues/817)
-- We discovered that the content didn’t load after lauched.  [\#816](https://github.com/kivy/kivy-ios/issues/816)
+- We discovered that the content didn’t load after launched.  [\#816](https://github.com/kivy/kivy-ios/issues/816)
 - Asset validation failed Invalid bundle structure. The “soccer.app/lib/python3.10/site-packages/charset\_normalizer/md.cpython-310-darwin.so” binary file is not permitted.  [\#815](https://github.com/kivy/kivy-ios/issues/815)
 - Asset validation failed Invalid Bundle Structure for libnpyrandom.a and libnpymath.a [\#814](https://github.com/kivy/kivy-ios/issues/814)
 - kivy-ios Not found '\_SHA256.so' [\#813](https://github.com/kivy/kivy-ios/issues/813)
@@ -168,7 +168,7 @@
 **Closed issues:**
 
 - Issue adding Pillow to Kivy-ios build [\#807](https://github.com/kivy/kivy-ios/issues/807)
-- I have created and app using kivy. it works in python through VS code but when I run throgh Xcode it gets no module named "application name" in main.py,  line number 4 error and close the app in simulator. I tried all the ways in previus discussions but still not working. is there any other way I can try?  [\#800](https://github.com/kivy/kivy-ios/issues/800)
+- I have created and app using kivy. it works in python through VS code but when I run through Xcode it gets no module named "application name" in main.py,  line number 4 error and close the app in simulator. I tried all the ways in previous discussions but still not working. is there any other way I can try?  [\#800](https://github.com/kivy/kivy-ios/issues/800)
 - Kivy ios save an screen as an image to the users ios photos [\#799](https://github.com/kivy/kivy-ios/issues/799)
 - Command PhaseScriptExecution failed with a nonzero exit code [\#793](https://github.com/kivy/kivy-ios/issues/793)
 - ImportError: PyInit\_interval [\#788](https://github.com/kivy/kivy-ios/issues/788)
@@ -183,7 +183,7 @@
 - dynamic module does not define module export function \(PyInit\_md\) error [\#772](https://github.com/kivy/kivy-ios/issues/772)
 - Toolchain 407 duplicate error of arm64 [\#771](https://github.com/kivy/kivy-ios/issues/771)
 - bash: toolchain: command not found [\#770](https://github.com/kivy/kivy-ios/issues/770)
-- when running toolchain build python3 kivy pillow with arch arm64 with apple sicion geting list index out of range [\#769](https://github.com/kivy/kivy-ios/issues/769)
+- when running toolchain build python3 kivy pillow with arch arm64 with apple sicion getting list index out of range [\#769](https://github.com/kivy/kivy-ios/issues/769)
 - Error compiling SDL\_Image [\#763](https://github.com/kivy/kivy-ios/issues/763)
 - ImportError: dynamic module does not define module export function \(PyInit\_PIL\_\_imaging\) [\#711](https://github.com/kivy/kivy-ios/issues/711)
 - Build python3 with mmap module [\#659](https://github.com/kivy/kivy-ios/issues/659)

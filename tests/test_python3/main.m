@@ -154,7 +154,7 @@ void load_custom_builtin_importer() {
         "    sys.modules['subprocess'] = types.ModuleType(name='subprocess')\n" \
         "except ImportError:\n" \
         "    EXTS = ['.so']\n"
-        "# Fake redirection to supress console output\n" \
+        "# Fake redirection to suppress console output\n" \
         "if environ.get('KIVY_NO_CONSOLE', '0') == '1':\n" \
         "    class fakestd(object):\n" \
         "        def write(self, *args, **kw): pass\n" \

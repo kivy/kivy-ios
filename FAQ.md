@@ -23,7 +23,7 @@ Xcode path is not set up correctly. Run the following command to fix this: `sudo
 ### You don't have permissions to run
 
 It is due to invalid archs, search for them and check it. Maybe you
-targetted a simulator but have only arm64. Maybe you want to target
+targeted a simulator but have only arm64. Maybe you want to target
 your iPad but it is only x86_64.
 
 ### Why does the python multiprocess/subprocess module not work?
