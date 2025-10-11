@@ -23,9 +23,9 @@ jobs:
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
-        # macos-latest (ATM macos-14) runs on Apple Silicon,
-        # macos-13 runs on Intel
-        runs_on: ['macos-latest', 'macos-13']
+        # macos-latest (ATM macos-15) runs on Apple Silicon,
+        # macos-15-intel runs on Intel
+        runs_on: ['macos-latest', 'macos-15-intel']
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v5
@@ -60,9 +60,9 @@ jobs:
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
-        # macos-latest (ATM macos-14) runs on Apple Silicon,
-        # macos-13 runs on Intel
-        runs_on: ['macos-latest', 'macos-13']
+        # macos-latest (ATM macos-15) runs on Apple Silicon,
+        # macos-15-intel runs on Intel
+        runs_on: ['macos-latest', 'macos-15-intel']
     steps:
     - name: Checkout kivy-ios
       uses: actions/checkout@v5
@@ -103,9 +103,9 @@ jobs:
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
-        # macos-latest (ATM macos-14) runs on Apple Silicon,
-        # macos-13 runs on Intel
-        runs_on: ['macos-latest', 'macos-13']
+        # macos-latest (ATM macos-15) runs on Apple Silicon,
+        # macos-15-intel runs on Intel
+        runs_on: ['macos-latest', 'macos-15-intel']
     steps:
     - name: Checkout kivy-ios (all-history)
       uses: actions/checkout@v5
