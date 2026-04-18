@@ -673,7 +673,7 @@ def launchimage(image_xcassets, image_fn):
 
 
 def _buildimage(in_fn, out_fn, size, padcolor=None):
-    im = Image.open(in_fn)
+    im = Image.open(in_fn).convert("RGBA")
 
     # read the first left/bottom pixel
     bgcolor = im.getpixel((0, 0))
@@ -685,7 +685,7 @@ def _buildimage(in_fn, out_fn, size, padcolor=None):
         im = im.resize(newsize)
 
     # create final image
-    outim = Image.new("RGB", size, bgcolor[:3])
+    outim = Image.new("RGB", tuple(size), bgcolor[:3])
     x = (size[0] - im.size[0]) // 2
     y = (size[1] - im.size[1]) // 2
     outim.paste(im, (x, y))
@@ -703,7 +703,7 @@ def _generate(d, image_xcassets, image_fn, options, icon=False):
             filename = image_fn
 
         if icon:
-            args += [filename, "-Z", c]
+            args += [filename, "-z", c, c]
             args += [
                 "--out",
                 join(image_xcassets, d, out_fn)
