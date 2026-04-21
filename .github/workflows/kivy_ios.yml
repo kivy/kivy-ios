@@ -19,6 +19,29 @@ jobs:
         pip install tox>=2.0
         tox -e pep8
 
+  # Unit tests for the Python side of kivy-ios (e.g. tools/external/xcassets.py).
+  # Runs on Ubuntu on purpose: it's cheap/fast and the absence of macOS binaries
+  # like `sips` forces tests to be hermetic (proper mocking). macOS integration
+  # coverage stays in the build_python3_kivy* jobs below.
+  unit_tests:
+    name: Unit tests (Ubuntu)
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout kivy-ios
+      uses: actions/checkout@v5
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
+    - name: Install kivy-ios and test dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install pytest
+    - name: Run pytest
+      run: |
+        pytest tests/tools -v
+
   build_python3_kivy:
     runs-on: ${{ matrix.runs_on }}
     strategy:
