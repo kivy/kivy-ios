@@ -1,5 +1,42 @@
 # Changelog
 
+## [v3.0.0](https://github.com/kivy/kivy-ios/tree/v3.0.0)
+
+**Complete rewrite.** kivy-ios 3.0 replaces the recipe-based toolchain with a
+declarative, PEP 621-aligned workflow built around pre-built Python.xcframeworks
+and pip-installable iOS wheels. The `toolchain build-recipe` workflow is gone;
+see the [migration guide](docs/proposals/00-overview.md) and the updated README.
+
+### What's new in 3.0
+
+- **Declarative config** — project settings live in `[tool.kivy]` /
+  `[tool.kivy.ios]` sections of your app's `pyproject.toml`; no more
+  `toolchain.spec` or `requirements.txt`.
+- **Dependency locking** — `toolchain lock` resolves pure-Python and iOS wheel
+  dependencies and writes `pylock.ios.toml` (PEP 751-inspired).
+- **Python.xcframework** — Python is distributed as a pre-built xcframework;
+  no source compilation required on the developer machine.
+- **iOS wheels** — third-party packages are distributed as pre-built
+  `*-ios.whl` wheels; `toolchain build` downloads and integrates them.
+- **Xcode project generation** — `toolchain init` generates a complete
+  `.xcodeproj` via `pbxproj`; `toolchain open` launches Xcode.
+- **SDL3** — Kivy 3.0 moves to SDL3; the generated project and Info.plist
+  are configured for the SDL3 UIScene lifecycle out of the box.
+- **`platform/ios.py` shim** — a vendored iOS platform module (DPI, safe area,
+  keyboard height, `kivy.mobile` bridge) is materialized into every project.
+- **Slim CLI** — `toolchain` now dispatches to `init`, `lock`, `build`, `run`,
+  `open`, `upgrade`, `clean`, `status`, and `doctor`; legacy 2.x verbs print
+  a migration pointer.
+- **Requires Python ≥ 3.13** on the developer machine (macOS only).
+
+---
+
+> **Historical entries below this line describe kivy-ios 2.x** (the
+> recipe-based toolchain). They are preserved for reference but describe
+> a workflow that no longer exists in 3.0.
+
+---
+
 ## [v2025.05.17](https://github.com/kivy/kivy-ios/tree/v2025.05.17)
 
 [Full Changelog](https://github.com/kivy/kivy-ios/compare/v2024.03.17...v2025.05.17)

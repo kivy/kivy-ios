@@ -1,2 +1,86 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.0"]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kivy-ios"
+version = "3.0.0.dev0"
+description = "iOS bundler for Kivy apps — declarative, PEP 621-aligned, Python.xcframework-based"
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [
+    { name = "The Kivy Team", email = "kivy-dev@googlegroups.com" },
+]
+keywords = ["kivy", "ios", "toolchain", "mobile"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: MacOS :: MacOS X",
+]
+dependencies = [
+    # CLI verbs
+    "click>=8.1",
+    # PEP 508 / 621 / 503 marker evaluation and version parsing
+    "packaging>=24",
+    # Xcode project file generation (spec 06)
+    "pbxproj>=3.5",
+    # TOML writing for pylock.ios.toml; tomllib (reading) is stdlib since 3.11
+    "tomli-w>=1.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/kivy/kivy-ios"
+Source = "https://github.com/kivy/kivy-ios"
+"Bug Reports" = "https://github.com/kivy/kivy-ios/issues"
+
+[project.scripts]
+# Entry point updated for 3.0 slim dispatcher; module created during implementation
+toolchain = "kivy_ios.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=5",
+    "ruff>=0.9",
+    "Pillow>=10",
+]
+
+# ---------------------------------------------------------------------------
+# Setuptools package discovery
+# ---------------------------------------------------------------------------
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["kivy_ios*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.md", "*.txt", "*.toml", "*.h", "*.m", "*.h.in"]
+
+# ---------------------------------------------------------------------------
+# pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--tb=short -q"
+
+# ---------------------------------------------------------------------------
+# ruff (replaces flake8 + isort)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long — handled by formatter
+]

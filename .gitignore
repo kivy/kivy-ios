@@ -24,4 +24,7 @@ src/ios/ios.c
 __pycache__
 .tox
 venv
+.venv/
 *.egg-info
+.build/
+.vscode/
