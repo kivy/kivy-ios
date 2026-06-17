@@ -1,0 +1,184 @@
+#:kivy 2.2
+#:import Window kivy.core.window.Window
+
+<MobileGeometryRoot>:
+    orientation: "vertical"
+
+    # ── Safe-area visual overlay ─────────────────────────────────────────────
+    Widget:
+        id: sa_overlay
+        size_hint_y: None
+        height: "100dp"
+        canvas:
+            Color:
+                rgba: 0.8, 0.2, 0.2, 0.4
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            Color:
+                rgba: 0.2, 0.8, 0.2, 0.5
+            Rectangle:
+                pos: self.x + app.safe_area["left"], self.y + app.safe_area["bottom"]
+                size: max(0, self.width - app.safe_area["left"] - app.safe_area["right"]), max(0, self.height - app.safe_area["top"] - app.safe_area["bottom"])
+        Label:
+            pos: sa_overlay.pos
+            size: sa_overlay.size
+            text: "Safe area overlay  (red = inset, green = safe)"
+            font_size: "11sp"
+            halign: "center"
+            valign: "middle"
+            text_size: self.size
+            color: 1, 1, 1, 1
+
+    # ── Scrollable data rows — shrink when keyboard appears ──────────────────
+    ScrollView:
+        size_hint_y: 1
+        do_scroll_x: False
+
+        GridLayout:
+            cols: 2
+            size_hint_y: None
+            height: self.minimum_height
+            padding: "12dp", "4dp"
+            spacing: "4dp"
+            row_default_height: "32dp"
+            row_force_default: True
+
+            Label:
+                text: "DPI"
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: lbl_dpi
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
+
+            Label:
+                text: "Scale"
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: lbl_scale
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
+
+            Label:
+                text: "Density"
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: lbl_density
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
+
+            Label:
+                text: "Safe top"
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: lbl_sa_top
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
+
+            Label:
+                text: "Safe bottom"
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: lbl_sa_bottom
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
+
+            Label:
+                text: "Safe left"
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: lbl_sa_left
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
+
+            Label:
+                text: "Safe right"
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: lbl_sa_right
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
+
+            # Keyboard height row — bold, updates live
+            Label:
+                text: "KB height"
+                bold: True
+                halign: "right"
+                text_size: self.size
+                valign: "middle"
+            Label:
+                id: lbl_kb
+                bold: True
+                halign: "left"
+                text_size: self.size
+                valign: "middle"
+
+            # KB bar spanning both columns
+            Widget:
+                size_hint_x: None
+                width: 0
+            Widget:
+                id: kb_bar_widget
+                canvas:
+                    Color:
+                        rgba: 0.2, 0.6, 1.0, 0.7
+                    Rectangle:
+                        pos: self.pos
+                        size: app.kb_bar_width * self.width, self.height
+                Label:
+                    pos: kb_bar_widget.pos
+                    size: kb_bar_widget.size
+                    text: str(int(app.keyboard_height)) + " pt"
+                    font_size: "11sp"
+                    halign: "center"
+                    valign: "middle"
+                    text_size: self.size
+
+    # ── TextInput pinned above keyboard ──────────────────────────────────────
+    BoxLayout:
+        size_hint_y: None
+        height: "56dp"
+        padding: "8dp", "6dp"
+        canvas.before:
+            Color:
+                rgba: 0.15, 0.15, 0.15, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: "Tap:"
+            size_hint_x: None
+            width: "42dp"
+            font_size: "13sp"
+        TextInput:
+            id: text_input
+            hint_text: "Tap to trigger keyboard"
+            multiline: False
+            font_size: "15sp"
+
+    # ── Spacer that grows with the keyboard — pushes content up ──────────────
+    Widget:
+        size_hint_y: None
+        height: app.keyboard_height

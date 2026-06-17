@@ -1,0 +1,104 @@
+lock-version = "1.0"
+created-by = "kivy-ios"
+requires-python = ">=3.15.0b2"
+extras = []
+dependency-groups = []
+default-groups = []
+
+[[packages]]
+name = "certifi"
+version = "2026.5.20"
+requires-python = ">=3.7"
+
+[[packages.wheels]]
+name = "certifi-2026.5.20-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/59/8c/57e832b7af6d7c5abe66eb3fbe3a3a32f4d11ea23a1aa7131371035be991/certifi-2026.5.20-py3-none-any.whl"
+hashes = { sha256 = "3c52e209ba0a4ad7aebe60436a4ab349c39e1e602e8c134221e546902ad25897" }
+
+[[packages]]
+name = "charset-normalizer"
+version = "3.4.7"
+requires-python = ">=3.7"
+
+[[packages.wheels]]
+name = "charset_normalizer-3.4.7-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/db/8f/61959034484a4a7c527811f4721e75d02d653a35afb0b6054474d8185d4c/charset_normalizer-3.4.7-py3-none-any.whl"
+hashes = { sha256 = "3dce51d0f5e7951f8bb4900c257dad282f49190fdbebecd4ba99bcc41fef404d" }
+
+[[packages]]
+name = "filetype"
+version = "1.2.0"
+
+[[packages.wheels]]
+name = "filetype-1.2.0-py2.py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/18/79/1b8fa1bb3568781e84c9200f951c735f3f157429f44be0495da55894d620/filetype-1.2.0-py2.py3-none-any.whl"
+hashes = { sha256 = "7ce71b6880181241cf7ac8697a2f1eb6a8bd9b429f7ad6d27b8db9ba5f1c2d25" }
+
+[[packages]]
+name = "idna"
+version = "3.18"
+requires-python = ">=3.9"
+dependencies = [{ name = "ruff" }, { name = "mypy" }, { name = "pytest" }]
+
+[[packages.wheels]]
+name = "idna-3.18-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl"
+hashes = { sha256 = "7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2" }
+
+[[packages]]
+name = "Kivy"
+version = "3.0.0.dev0"
+requires-python = ">=3.11"
+dependencies = [{ name = "Kivy-Garden" }, { name = "docutils" }, { name = "pygments" }, { name = "requests" }, { name = "filetype" }, { name = "kivy_deps.angle" }, { name = "kivy_deps.sdl3" }, { name = "kivy_deps.glew" }, { name = "pypiwin32" }, { name = "oscpy" }, { name = "pytest" }, { name = "pytest-cov" }, { name = "pytest_asyncio" }, { name = "pytest-timeout" }, { name = "pytest-benchmark" }, { name = "pytest-httpserver" }, { name = "trustme" }, { name = "pyinstaller" }, { name = "sphinx" }, { name = "sphinxcontrib-jquery" }, { name = "kivy_deps.gstreamer_dev" }, { name = "kivy_deps.sdl3_dev" }, { name = "kivy_deps.glew_dev" }, { name = "pre-commit" }, { name = "responses" }, { name = "ruff" }, { name = "pillow" }, { name = "kivy_deps.gstreamer" }, { name = "ffpyplayer" }, { name = "pillow" }, { name = "kivy_deps.gstreamer" }, { name = "ffpyplayer" }, { name = "kivy_deps.gstreamer" }, { name = "kivy_deps.angle" }, { name = "kivy_deps.glew" }]
+
+[packages.tool.kivy_ios]
+direct_requirement = true
+
+[[packages.wheels]]
+name = "kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphoneos.whl"
+path = "../wheels/kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphoneos.whl"
+hashes = { sha256 = "0fb471d6d7b5c0f0ca986b10aee31e404874449a0272e94c3a8ce8dd7c8a97e6" }
+
+[[packages.wheels]]
+name = "kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphonesimulator.whl"
+path = "../wheels/kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphonesimulator.whl"
+hashes = { sha256 = "899f0fd81700d01e414a8329484752f941afb39227f6d0fda8b7111f6314e7b9" }
+
+[[packages.wheels]]
+name = "kivy-3.0.0.dev0-cp315-cp315-ios_13_0_x86_64_iphonesimulator.whl"
+path = "../wheels/kivy-3.0.0.dev0-cp315-cp315-ios_13_0_x86_64_iphonesimulator.whl"
+hashes = { sha256 = "c9785eddb85afc3dd19d5a07391d6c4904e4637d2a53be2571d6556fdb4162f3" }
+
+[[packages]]
+name = "requests"
+version = "2.34.2"
+requires-python = ">=3.10"
+dependencies = [{ name = "charset_normalizer" }, { name = "idna" }, { name = "urllib3" }, { name = "certifi" }, { name = "PySocks" }, { name = "chardet" }]
+
+[[packages.wheels]]
+name = "requests-2.34.2-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/a0/f4/c67b0b3f1b9245e8d266f0f112c500d50e5b4e83cb6f3b71b6528104182a/requests-2.34.2-py3-none-any.whl"
+hashes = { sha256 = "2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0" }
+
+[[packages]]
+name = "urllib3"
+version = "2.7.0"
+requires-python = ">=3.10"
+dependencies = [{ name = "brotli" }, { name = "brotlicffi" }, { name = "h2" }, { name = "pysocks" }, { name = "backports-zstd" }]
+
+[[packages.wheels]]
+name = "urllib3-2.7.0-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/7f/3e/5db95bcf282c52709639744ca2a8b149baccf648e39c8cc87553df9eae0c/urllib3-2.7.0-py3-none-any.whl"
+hashes = { sha256 = "9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897" }
+
+[tool.kivy_ios]
+schema_version = 1
+toolchain_version = "3.0.0.dev0"
+generated_at = "2026-06-11T02:17:46Z"
+pyproject_sha256 = "b0573f01e2d6439f9207eee72f218e24a4dc28efd0dc396207841a4db0d8ddc3"
+tool_kivy_ios_schema_version = 1
+
+[tool.kivy_ios.python_xcframework]
+version = "3.15.0b2"
+url = "https://www.python.org/ftp/python/3.15.0/python-3.15.0b2-iOS-XCframework.tar.gz"
+sha256 = "fd6b6fb8f82cf44622d28ea53b8197c89fb06505557d29d4d7a47f9386c1c896"
