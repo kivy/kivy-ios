@@ -1,0 +1,55 @@
+lock-version = "1.0"
+created-by = "kivy-ios"
+requires-python = ">=3.15"
+extras = []
+dependency-groups = []
+default-groups = []
+
+[[packages]]
+name = "kivy"
+version = "3.0.0"
+requires-python = ">=3.10"
+dependencies = [{ name = "more-itertools" }]
+
+[packages.tool.kivy_ios]
+direct_requirement = true
+
+[[packages.wheels]]
+name = "kivy-3.0.0-cp315-cp315-ios_13_0_arm64_iphoneos.whl"
+url = "https://files.pythonhosted.org/packages/aa/kivy-3.0.0-cp315-cp315-ios_13_0_arm64_iphoneos.whl"
+hashes = { sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+
+[[packages.wheels]]
+name = "kivy-3.0.0-cp315-cp315-ios_13_0_arm64_iphonesimulator.whl"
+url = "https://files.pythonhosted.org/packages/aa/kivy-3.0.0-cp315-cp315-ios_13_0_arm64_iphonesimulator.whl"
+hashes = { sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+
+[[packages.wheels]]
+name = "kivy-3.0.0-cp315-cp315-ios_13_0_x86_64_iphonesimulator.whl"
+url = "https://files.pythonhosted.org/packages/aa/kivy-3.0.0-cp315-cp315-ios_13_0_x86_64_iphonesimulator.whl"
+hashes = { sha256 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+
+[[packages]]
+name = "more-itertools"
+version = "10.5.0"
+requires-python = ">=3.8"
+
+[packages.tool.kivy_ios]
+direct_requirement = true
+
+[[packages.wheels]]
+name = "more_itertools-10.5.0-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/bb/more_itertools-10.5.0-py3-none-any.whl"
+hashes = { sha256 = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }
+
+[tool.kivy_ios]
+schema_version = 1
+toolchain_version = "3.0.0"
+generated_at = "2026-05-27T00:00:00Z"
+pyproject_sha256 = "c92ea98cd71bdc1f60cd4294a499294ad715877fbbbdfc887765327b9538204b"
+tool_kivy_ios_schema_version = 1
+
+[tool.kivy_ios.python_xcframework]
+version = "3.15.0"
+url = "https://www.python.org/ftp/python/3.15.0/python-3.15.0-iOS-XCframework.tar.gz"
+sha256 = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
