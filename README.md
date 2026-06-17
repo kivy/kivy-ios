@@ -10,246 +10,199 @@
 
 [![kivy-ios](https://github.com/kivy/kivy-ios/actions/workflows/kivy_ios.yml/badge.svg)](https://github.com/kivy/kivy-ios/actions/workflows/kivy_ios.yml)
 
-Kivy for iOS (kivy-ios) is a toolchain to compile the necessary libraries for 
-[iOS](https://www.apple.com/ios/) to run [Kivy](https://kivy.org) applications,
-and manage the creation of [Xcode](https://developer.apple.com/xcode/) projects.
+Kivy for iOS (kivy-ios) is a declarative toolchain that bundles
+[Kivy](https://kivy.org) (and other Python) applications into an
+[Xcode](https://developer.apple.com/xcode/) project ready to run on
+[iOS](https://www.apple.com/ios/). You describe your app in `pyproject.toml`;
+the toolchain resolves your dependencies into a lockfile, downloads the official
+[`Python.xcframework`](https://www.python.org/downloads/) plus prebuilt iOS
+wheels, and generates the `.xcodeproj` for you.
+
+> **kivy-ios 3.0 (in development).** This branch replaces the legacy
+> recipe/compilation system with a declarative, wheel-based workflow. If you need
+> the recipe-based toolchain, use a 2.x release.
 
 The toolchain supports:
 
-- iPhone / iOS (arm64)
-- iPhone Simulator (x86_64, arm64)
+- iPhone / iPad — iOS device (arm64)
+- iOS Simulator (arm64, x86_64)
 
-We do not provide any binary distributions of this toolchain.
-You do need to compile it at least once before creating your Xcode project.
+Because Xcode only runs on macOS, Kivy for iOS is only useful on this platform.
 
-Because Xcode only runs on macOS, Kivy for iOS is only useful on this
-platform.
+Kivy for iOS is managed by the [Kivy Team](https://kivy.org/about.html).
 
-Kivy for iOS is managed by the [Kivy Team](https://kivy.org/about.html) and can be
-used with [Buildozer](https://github.com/kivy/buildozer).
+## Requirements
 
-## Installation & requirements
-
-Before we start, we strongly advise using a Python virtual environment to install Python packages.
-
-      python3 -m venv venv
-      . venv/bin/activate
-
-Install [Kivy for iOS from PyPI](https://pypi.org/project/kivy-ios) with pip like any Python package.
-
-      pip3 install kivy-ios
-
-Additionally, you would need a few system dependencies and configuration.
-
-- Xcode 13 or above, with an iOS SDK and command line tools installed:
+- macOS with [Xcode](https://developer.apple.com/xcode/) installed, either from
+  the [Mac App Store](https://apps.apple.com/app/xcode/id497799835) or from the
+  command line:
 
       xcode-select --install
 
-- Using brew, you can install the following dependencies:
+- Accept the Xcode license once:
 
-      brew install autoconf automake libtool pkg-config
-      brew link libtool
+      sudo xcodebuild -license
 
-## Using the toolchain
+## Installation
 
-Any Python extensions or C/C++ library must be compiled: you need to have what
-we call a `recipe` to compile it. For example, Python, libffi, SDL2, SDL_image,
-freetype... all the dependencies, compilation, and packaging instructions are
-contained in a `recipe`.
+Use a Python virtual environment (host Python 3.13+). This is required: it
+isolates the toolchain and keeps its lockfile resolution from being polluted by
+packages in your system Python.
 
-You can list the available recipes and their versions with:
+      python3 -m venv .venv
+      . .venv/bin/activate
 
-    $ toolchain recipes
-    audiostream  master
-    click        7.1.2
-    cymunk       master
-    ffmpeg       n4.3.1
-    ffpyplayer   v3.2
-    flask        1.1.2
-    freetype     2.5.5
-    hostlibffi   3.2.1
-    hostopenssl  1.1.1g
-    hostpython3  3.7.1
-    ios          master
-    itsdangerous 1.1.0
-    jinja2       2.11.2
-    kivy         1.10.1
-    libffi       3.2.1
-    libjpeg      v9a
-    libpng       1.6.26
-    markupsafe   1.1.1
-    moodstocks   4.1.5
-    numpy        1.16.4
-    openssl      1.1.1g
-    photolibrary master
-    pillow       6.1.0
-    plyer        master
-    pycrypto     2.6.1
-    pykka        1.2.1
-    pyobjus      master
-    python3      3.7.1
-    pyyaml       3.11
-    sdl2         2.0.8
-    sdl2_image   2.0.0
-    sdl2_mixer   2.0.0
-    sdl2_ttf     2.0.12
-    werkzeug     1.0.1
+Install kivy-ios 3.0 from this repository (3.0 is not yet published to PyPI):
 
-Note: These recipes are not ported to the new toolchain yet:
+      pip install -e ".[dev]"
 
-- lxml
+> **Detailed documentation.** For the full design and reference docs — the
+> `pyproject.toml` / `pylock.ios.toml` schemas, artifact distribution, the CLI
+> shape, and Xcode project generation — see the
+> [kivy-ios 3.0 docs](docs/proposals/00-overview.md).
 
-Then, start the compilation with:
+## Quick start
 
-    $ toolchain build python3 kivy
+Run every command from the directory that contains your app's `pyproject.toml`.
 
-You can build recipes at the same time by adding them as parameters:
+      # 1. Seed [tool.kivy] / [tool.kivy.ios] config into pyproject.toml
+      toolchain init
 
-    $ toolchain build python3 openssl kivy
+      # 2. Resolve dependencies into pylock.ios.toml
+      toolchain lock
 
-Recipe builds can be removed via the clean command e.g.:
+      # 3. Download artifacts and generate <app>-ios/<app>.xcodeproj
+      toolchain build
 
-    $ toolchain clean openssl
+      # 4a. Open the project in Xcode and press Run...
+      toolchain open
 
-You can install package that don't require compilation with pip::
+      # 4b. ...or build, install, and launch on the simulator from the CLI
+      toolchain build --simulator
+      toolchain run --simulator
 
-    $ toolchain pip install plyer
+See the runnable examples for complete, copy-pasteable walk-throughs:
 
-The Kivy recipe depends on several others, like the sdl\* and python recipes.
-These may, in turn, depend on others e.g. sdl2_ttf depends on freetype, etc.
-You can think of it as follows: the kivy recipe will compile everything
-necessary for a minimal working version of Kivy.
+- [`examples/hello-world`](examples/hello-world/) — pure-Python smoke test using
+  the official python.org `Python.xcframework` (no Kivy, no wheels).
+- [`examples/hello-kivy`](examples/hello-kivy/) — minimal Kivy UI that uses
+  locally built `cp315` iOS wheels from the shared [`examples/wheels/`](examples/wheels/) directory.
+- [`examples/svg-explorer`](examples/svg-explorer/) — interactive SVG viewer
+  (multitouch pan/zoom/rotate) using the same shared wheels.
 
-Don't just grab a coffee; do dinner. Compiling all the libraries for the first
-time, twice over (Remember: two platforms - iOS, iPhoneSimulator) will take time.
+## Configuring your app
 
-For a complete list of available commands, type:
+Your app is described declaratively in `pyproject.toml`. Standard
+[PEP 621](https://peps.python.org/pep-0621/) `[project]` metadata supplies the
+name, version, and runtime `dependencies`; iOS-specific settings live under
+`[tool.kivy]` and `[tool.kivy.ios]`:
 
-    $ toolchain
+```toml
+[project]
+name = "hello-world"
+version = "0.1.0"
+requires-python = ">=3.15.0b2"
+dependencies = []                       # PyPI/local deps resolved into the lockfile
 
-## Create the Xcode project
+[tool.kivy]
+display_name = "Hello World"            # name shown under the icon
+app_dir = "src"                         # folder containing your Python source
+entry_point = "main"                    # module imported at launch (main.py)
+orientation = ["portrait"]
 
-The `toolchain.py` can create the initial Xcode project for you::
+[tool.kivy.ios]
+bundle_id = "org.example.hello-world"   # reverse-DNS; UTI characters only (no underscores)
+build = 1
+deployment_target = "13.0"
+# find_links = ["../wheels"]            # repo-relative wheel directory for lock
+# exclude = ["docutils", "pygments"]    # drop transitive deps you don't use at runtime
 
-    $ toolchain create <title> <app_directory>
-    $ toolchain create Touchtracer ~/code/kivy/examples/demo/touchtracer
+[tool.kivy.ios.python]
+version = "3.15.0b2"                     # python.org Python.xcframework version
 
-Your app directory must contain a main.py. A directory named `<title>-ios`
-will be created, with an Xcode project in it.
-You can open the Xcode project using::
-
-    $ open touchtracer-ios/touchtracer.xcodeproj
-
-Then click on `Play`, and enjoy.
-
-> *Did you know?*
->
-> Every time you press `Play`, your application directory will be synced to
-> the `<title>-ios/YourApp` directory. Don't make changes in the -ios
-> directory directly.
-
-
-## Configuring your App
-
-You can configure and customize your app in various ways:
-
-- Set the icon and launch images in XCode. Note that XCode requires that you
-   specify these assets per device or/and iOS version.
-
-- When you first build your XCode project, a 'main.m' file is created in your
-   XCode project folder. This file configures your environment variables and
-   controls your application startup. You can edit this file to customize your
-   launch environment.
-
-- Kivy uses SDL, and as soon as the application starts the SDL main, the launch
-   image will disappear. To prevent that, you need to have 2 files named
-   `Default.png` and `Default-Landscape.png` and put them
-   in the `Resources` folder in Xcode (not in your application folder)
-
-> *Did you know?*
->
-> If you wish to restrict your app's orientation, you should do this via
-> the 'export_orientation' function in 'main.m'. The XCode orientation
-> settings should be set to support all.
-
-
-## Using recipes
-
-Recipes are used to install and compile any libraries you may need to use. These
-recipes follow the same format as those used by the
-[Python-for-Android](https://github.com/kivy/python-for-android) sister project.
-Please refer to the
-[recipe documentation](https://python-for-android.readthedocs.io/en/latest/recipes/)
-there for more detail.
-
-
-## Reducing the application size
-
-If you would like to reduce the size of your distributed app, there are a few
-things you can do to achieve this:
-
-- Minimize the `build/pythonX/lib/pythonXX.zip`: this contains all the python
-   modules. You can edit the zip file and remove all the files you'll not use
-   (reduce encodings, remove xml, email...)
-
-- Go to the settings `panel` > `build`, search for `"strip"` options, and
-   triple-check that they are all set to `NO`. Stripping does not work with
-   Python dynamic modules and will remove needed symbols.
-
-- By default, the iOS package compiles binaries for all processor
-   architectures, namely x86_64 and arm64 as per the guidelines from
-   Apple. You can reduce the size of your ipa significantly by removing the
-   x86_64 architecture as they are used only for the emulator.
-
-   The procedure is to first compile/build all the host recipes as is:
-
-      toolchain build hostpython3
-
-   Then build all the rest of the recipes using --arch=arm64
-   arguments as follows:
-
-      toolchain build python3 kivy --arch=arm64
-
-   Note that these packages will not run in the iOS emulators, so use them
-   only for deployment.
-
-## Usage
-
+[tool.kivy.ios.signing]
+team_id = ""                            # Apple Developer Team ID (device / release builds)
+identity = "Apple Development"
+auto_signing = true
 ```
-toolchain <command> [<args>]
 
-Available commands:
-    build         Build a recipe (compile a library for the required target
-                    architecture)
-    clean         Clean the build of the specified recipe
-    distclean     Clean the build and the result
-    recipes       List all the available recipes
-    status        List all the recipes and their build status
+`toolchain build` syncs your `app_dir` into the generated `<app>-ios/` tree on
+every run, so make changes in your source folder (e.g. `src/`), never in the
+generated project.
 
-Xcode:
-    create        Create a new xcode project
-    update        Update an existing xcode project (frameworks, libraries..)
-    launchimage   Create Launch images for your xcode project
-    icon          Create Icons for your xcode project
-    pip           Install a pip dependency into the distribution
-    pip3          Install a pip dependency into the python 3 distribution
+Kivy's wheel declares dependencies that are not all needed at runtime on iOS.
+The `exclude` list trims them; the
+[hello-kivy example](examples/hello-kivy/pyproject.toml) documents what each one
+is for, so you can re-enable only the few that map to widgets you actually use
+(e.g. `docutils` for `RSTDocument`, `pygments` for `CodeInput`, or `requests`
+for `UrlRequest`).
+
+## Commands
+
+      toolchain init       Seed [tool.kivy] / [tool.kivy.ios] into pyproject.toml
+      toolchain lock       Generate pylock.ios.toml from pyproject.toml
+      toolchain build      Download artifacts, generate the Xcode project, build
+      toolchain run        Build (unless --no-build), install, and launch the app
+      toolchain open       Open <app>-ios/<app>.xcodeproj in Xcode
+      toolchain status     Show app identity, Python version, lock sync, build state
+      toolchain clean      Remove generated artifacts in the project folder
+      toolchain upgrade    Re-fetch pinned Python.xcframework / xcframework artifacts
+      toolchain doctor     Run environment and project health checks
+
+Run `toolchain <command> -h` for the full set of options on any verb. A few
+common ones:
+
+- `toolchain lock --check` — CI pre-flight; exits non-zero if the lock is stale.
+- `toolchain build --simulator | --device | --release` — pick the build flavor.
+- `toolchain run --list-devices` — list available simulators and devices.
+- `toolchain clean --cache` — also flush the artifact download cache.
+
+Downloaded artifacts (`Python.xcframework` and other xcframeworks) are cached
+under `~/Library/Caches/kivy-ios/artifacts/` and shared across projects.
+
+## Typical workflow
+
+A normal session is a one-time setup followed by a tight edit → run loop.
+The generated project **links** your source directory (`app/` is a symlink to
+`app_dir`), so editing Python source needs no rebuild — just relaunch. You only
+re-run `toolchain lock` when dependencies change, and `toolchain build` when you
+change app config (or need to regenerate the Xcode project).
+
+```mermaid
+flowchart TD
+    A["toolchain init<br/>seed pyproject.toml"] --> B["Edit pyproject.toml<br/>dependencies + app config"]
+    B --> C["Write your app<br/>src/main.py"]
+    C --> D["toolchain lock<br/>→ pylock.ios.toml"]
+    D --> E["toolchain build<br/>fetch artifacts + generate .xcodeproj"]
+    E --> F{"Launch it"}
+    F -->|from the CLI| G["toolchain run --simulator"]
+    F -->|from Xcode| H["toolchain open → ⌘R"]
+    G --> I(["Iterate"])
+    H --> I
+    I -->|changed Python source| F
+    I -->|changed app config| E
+    I -->|changed dependencies| D
 ```
+
+Supporting commands fit around this loop: `toolchain status` shows whether your
+lock and build are current, `toolchain doctor` diagnoses environment problems,
+`toolchain upgrade` re-fetches the pinned runtime, and `toolchain clean` resets
+the generated project when you want a fresh build.
 
 ## Development
 
-Alternatively, it's also possible to clone the repository and use all the
-described commands in the above sections.
-Clone and install it to your local virtual environment:
+Clone the repository and install it into a virtual environment:
 
-    git clone https://github.com/kivy/kivy-ios.git
-    cd kivy-ios/
-    python3 -m venv venv
-    . venv/bin/activate
-    pip install -e .
+      git clone https://github.com/kivy/kivy-ios.git
+      cd kivy-ios/
+      python3 -m venv .venv
+      . .venv/bin/activate
+      pip install -e ".[dev]"
 
-Then use the `toolchain.py` script:
+Run the test suite and the linter:
 
-    python toolchain.py --help
+      pytest
+      ruff check .
 
 ## FAQ
 
