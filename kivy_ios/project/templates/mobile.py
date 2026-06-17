@@ -29,6 +29,7 @@ from __future__ import annotations
 
 try:
     from kivy.utils import platform as _platform
+
     _is_ios = _platform == "ios"
 except ImportError:
     # Running inside an iOS app bundle before Kivy's environment is fully
