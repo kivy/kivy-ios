@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import io
+import plistlib
+import tarfile
+
 from kivy_ios.artifacts.cache import ArtifactCache
 from kivy_ios.lock.python_meta import (
     PythonOrgProvider,
     PythonXcframeworkError,
     archive_filename,
     python_org_ios_url,
+    read_ios_floor,
 )
 
 
@@ -39,6 +44,8 @@ def test_lock_hashes_python_xcframework_from_artifact_cache(tmp_path):
 
     assert info.sha256 == sha
     assert info.url == python_org_ios_url(version)
+    # Fake bytes are not a valid tarball — floor falls back to the safe default.
+    assert info.ios_floor == "13.0"
 
 
 def test_lock_offline_requires_cached_python_xcframework(tmp_path):
@@ -51,3 +58,40 @@ def test_lock_offline_requires_cached_python_xcframework(tmp_path):
         assert "not in the artifact cache" in str(exc)
     else:
         raise AssertionError("expected PythonXcframeworkError")
+
+
+def _make_xcframework_archive(tmp_path, *, min_os: str) -> object:
+    """Build a minimal .tar.gz containing Python.xcframework/Info.plist."""
+    plist_data = plistlib.dumps(
+        {
+            "AvailableLibraries": [
+                {
+                    "LibraryIdentifier": "ios-arm64",
+                    "MinimumOSVersion": min_os,
+                },
+                {
+                    "LibraryIdentifier": "ios-arm64-simulator",
+                    "MinimumOSVersion": min_os,
+                },
+            ]
+        }
+    )
+    buf = io.BytesIO()
+    with tarfile.open(fileobj=buf, mode="w:gz") as tf:
+        info = tarfile.TarInfo("Python.xcframework/Info.plist")
+        info.size = len(plist_data)
+        tf.addfile(info, io.BytesIO(plist_data))
+    archive = tmp_path / "python-3.15.0-iOS-XCframework.tar.gz"
+    archive.write_bytes(buf.getvalue())
+    return archive
+
+
+def test_read_ios_floor_from_xcframework_plist(tmp_path):
+    archive = _make_xcframework_archive(tmp_path, min_os="14.0")
+    assert read_ios_floor(archive) == "14.0"
+
+
+def test_read_ios_floor_fallback_on_invalid_archive(tmp_path):
+    archive = tmp_path / "bad.tar.gz"
+    archive.write_bytes(b"not a tarball")
+    assert read_ios_floor(archive) == "13.0"
