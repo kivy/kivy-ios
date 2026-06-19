@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import plistlib
 import tarfile
+from pathlib import Path
 
 from kivy_ios.artifacts.cache import ArtifactCache
 from kivy_ios.lock.python_meta import (
@@ -60,7 +61,7 @@ def test_lock_offline_requires_cached_python_xcframework(tmp_path):
         raise AssertionError("expected PythonXcframeworkError")
 
 
-def _make_xcframework_archive(tmp_path, *, min_os: str) -> object:
+def _make_xcframework_archive(tmp_path, *, min_os: str) -> Path:
     """Build a minimal .tar.gz containing Python.xcframework/Info.plist."""
     plist_data = plistlib.dumps(
         {

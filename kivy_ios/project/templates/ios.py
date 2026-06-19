@@ -230,7 +230,7 @@ def get_safe_area() -> dict[str, float]:
 # ---------------------------------------------------------------------------
 
 _keyboard_height: float = 0.0
-_kb_subscribers: list = []
+_kb_subscribers: list[Any] = []
 
 # Strong Python references — must not be GC'd while the app is live.
 _kb_imp_ref = None

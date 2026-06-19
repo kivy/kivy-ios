@@ -28,8 +28,7 @@ Tier 2 — platform extras (iOS always returns None, Android fills these in):
 from __future__ import annotations
 
 try:
-    from kivy.utils import platform as _platform
-
+    from kivy.utils import platform as _platform  # type: ignore[import-not-found]
     _is_ios = _platform == "ios"
 except ImportError:
     # Running inside an iOS app bundle before Kivy's environment is fully
@@ -38,7 +37,7 @@ except ImportError:
     _is_ios = True
 
 if _is_ios:
-    from ios import (  # noqa: F401
+    from ios import (  # type: ignore[import-not-found]  # noqa: F401
         get_density,
         get_display_cutout,
         get_dpi,
