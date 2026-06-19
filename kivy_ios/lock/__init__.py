@@ -17,7 +17,6 @@ from .resolver import (
     ResolvedWheel,
     Resolver,
     ResolverError,
-    UvResolver,
     get_resolver,
     slice_tags,
 )
@@ -40,7 +39,6 @@ __all__ = [
     "loads",
     "dumps",
     "PipResolver",
-    "UvResolver",
     "Resolver",
     "ResolvedPackage",
     "ResolvedWheel",

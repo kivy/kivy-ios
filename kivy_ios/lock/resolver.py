@@ -1,14 +1,13 @@
-"""Dependency resolver backends (spec 02 §"Resolution semantics").
+"""Dependency resolver (spec 02 §"Resolution semantics").
 
 The resolver turns ``[project].dependencies`` into a fully-pinned set of
 per-slice iOS wheels, **host-independent** — every compiled package is pinned
 for all three iOS slices (device arm64, simulator arm64, simulator x86_64)
 regardless of the architecture of the host running ``lock``.
 
-``pip`` is the default backend (validated by the Phase 0 spike); ``uv`` is a
-fallback behind the same ``Resolver`` protocol. The backend is abstracted so
-the rest of the lock pipeline is backend-agnostic, and so unit tests can inject
-a fake resolver and stay hermetic.
+``pip`` is the backend (validated by the Phase 0 spike: see
+docs/dev/resolver-findings.md). The backend is abstracted behind the
+``Resolver`` protocol so unit tests can inject a fake resolver and stay hermetic.
 """
 
 from __future__ import annotations
@@ -231,27 +230,10 @@ class PipResolver:
                 raise ResolverError(f"could not read pip report: {exc}") from exc
 
 
-class UvResolver:
-    """Fallback backend stub (spec 02 / Phase 0 findings).
-
-    uv is kept as a documented fallback behind the same protocol. The full
-    implementation lands only if a pip regression or perf need warrants it; for
-    now it raises a clear error so the abstraction point exists and is testable.
-    """
-
-    def resolve(self, requirements, **kwargs) -> list[ResolvedPackage]:
-        raise ResolverError(
-            "the uv resolver backend is not implemented yet; pip is the default. "
-            "See docs/dev/resolver-findings.md."
-        )
-
-
 def get_resolver(backend: str = "pip", **kwargs) -> Resolver:
     if backend == "pip":
         return PipResolver(**kwargs)
-    if backend == "uv":
-        return UvResolver()
-    raise ResolverError(f"unknown resolver backend {backend!r} (expected pip|uv)")
+    raise ResolverError(f"unknown resolver backend {backend!r} (expected pip)")
 
 
 def _dep_names(requires_dist: list[str]) -> list[str]:

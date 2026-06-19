@@ -30,20 +30,17 @@ PyPI directly; the supplemental index is only consulted via `extra_index_urls`.
 
 ## Conclusions / decisions
 
-1. **Default resolver backend = pip.** It supports the exact platform-tagged,
+1. **Resolver backend = pip.** It supports the exact platform-tagged,
    binary-only, host-independent resolution the lock needs (`--platform`,
    `--abi`, `--python-version`, `--implementation`, `--only-binary`). This is
-   the `PipResolver` backend (Phase 3).
-2. **uv stays a documented fallback**, not a hard dependency. The resolver is
-   abstracted behind an interface so a `UvResolver` can be slotted in if a
-   future pip regression or a perf need arises. We do **not** depend on pip's
+   the `PipResolver` backend (Phase 3). We do **not** depend on pip's
    experimental `-r pylock.toml` reader (it ignores platform-selection flags);
    `toolchain build` installs the pinned wheels itself, exactly as specced.
-3. **Do not over-constrain `--abi`.** Some packages ship `abi3`/limited-API or
+2. **Do not over-constrain `--abi`.** Some packages ship `abi3`/limited-API or
    a different `cp` tag than the host. The lock resolver should pass the abi
    set pip accepts for the target (e.g. `cp313`, `abi3`, `none`) rather than a
    single hardcoded value, so abi3 wheels are not missed.
-4. **Per-package, per-slice availability varies.** `toolchain lock` must fail
+3. **Per-package, per-slice availability varies.** `toolchain lock` must fail
    fast and name the specific package+slice that could not be resolved
    (host-independent error), rather than failing later at build time on one
    runner — consistent with the spec 02 "pin all three slices" rule.
