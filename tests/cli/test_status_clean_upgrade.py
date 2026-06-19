@@ -12,7 +12,7 @@ from kivy_ios.cli import doctor as doctor_mod
 from kivy_ios.cli import upgrade as upgrade_mod
 from kivy_ios.cli.clean import clean
 from kivy_ios.cli.doctor import doctor
-from kivy_ios.cli.status import status
+from kivy_ios.cli.status import _humanize, status
 from kivy_ios.cli.upgrade import upgrade
 from kivy_ios.lock import (
     LockedXcframework,
@@ -77,6 +77,26 @@ def runner():
     return CliRunner()
 
 
+class TestHumanize:
+    def test_just_now(self):
+        assert _humanize(0) == "just now"
+        assert _humanize(59) == "just now"
+
+    def test_minutes(self):
+        assert _humanize(60) == "1 minute ago"
+        assert _humanize(120) == "2 minutes ago"
+        assert _humanize(3599) == "59 minutes ago"
+
+    def test_hours(self):
+        assert _humanize(3600) == "1 hour ago"
+        assert _humanize(7200) == "2 hours ago"
+        assert _humanize(86399) == "23 hours ago"
+
+    def test_days(self):
+        assert _humanize(86400) == "1 day ago"
+        assert _humanize(172800) == "2 days ago"
+
+
 class TestStatus:
     def test_snapshot(self, runner, tmp_path):
         with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
@@ -95,10 +115,48 @@ class TestStatus:
             assert result.exit_code == 0
             assert "missing" in result.output
 
+    def test_lock_unreadable(self, runner, tmp_path):
+        with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
+            _write(fs, lock=False)
+            # Valid TOML but missing [tool.kivy_ios] → LockError from reader
+            (Path(fs) / "pylock.ios.toml").write_text("lock-version = '1.0'\n")
+            result = runner.invoke(status, [])
+            assert result.exit_code == 0
+            assert "unreadable" in result.output
+
+    def test_config_error_exits_nonzero(self, runner, tmp_path):
+        with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
+            # Write a pyproject.toml missing required ios fields
+            (Path(fs) / "pyproject.toml").write_text(
+                "[project]\nname='x'\nversion='1'\n"
+            )
+            (Path(fs) / "src").mkdir()
+            result = runner.invoke(status, [])
+            assert result.exit_code != 0
+
     def test_no_pyproject_exits_nonzero(self, runner, tmp_path):
         with runner.isolated_filesystem(temp_dir=tmp_path):
             result = runner.invoke(status, [])
             assert result.exit_code != 0
+
+    def test_built_app_shows_age(self, runner, tmp_path, monkeypatch):
+        import time
+
+        fixed_time = 1_000_000.0
+        monkeypatch.setattr(time, "time", lambda: fixed_time)
+        with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
+            _write(fs)
+            # Create a fake built app directory
+            app_path = (
+                Path(fs) / "myapp-ios" / "build" / "DerivedData" /
+                "Build" / "Products" / "Debug-iphonesimulator" / "myapp.app"
+            )
+            app_path.mkdir(parents=True)
+            import os
+            os.utime(app_path, (fixed_time - 120, fixed_time - 120))
+            result = runner.invoke(status, [])
+            assert result.exit_code == 0, result.output
+            assert "minute" in result.output
 
 
 class TestClean:
