@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 from pathlib import Path
@@ -18,11 +19,44 @@ from ..lock.model import LockedWheel, Lockfile
 from .cache import ArtifactCache
 from .download import Downloader, fetch_artifact
 from .frameworks import copy_wheel_frameworks, extract_xcframework_archive
-from .wheels import BuildSlice, pip_install_command, select_wheel
+from .wheels import BuildSlice, select_wheel
 
 
 class CollectError(Exception):
     pass
+
+
+def pip_install_command(
+    wheel_files: list[str],
+    *,
+    target_dir: str,
+    platform_tag: str,
+    python_version: str,
+    abi: str,
+    python_executable: str | None = None,
+) -> list[str]:
+    """Build the pip cross-install command (spec 05 step 4); no re-resolution."""
+    py = python_executable or sys.executable
+    cmd = [
+        py,
+        "-m",
+        "pip",
+        "install",
+        "--no-deps",
+        "--only-binary=:all:",
+        "--platform",
+        platform_tag,
+        "--python-version",
+        python_version,
+        "--abi",
+        abi,
+        "--implementation",
+        "cp",
+        "--target",
+        target_dir,
+    ]
+    cmd += wheel_files
+    return cmd
 
 
 def collect_artifacts(

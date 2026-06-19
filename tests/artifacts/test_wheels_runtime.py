@@ -5,14 +5,13 @@ from __future__ import annotations
 import pytest
 
 from kivy_ios.artifacts.runtime import (
-    BeewareRuntime,
     PythonOrgRuntime,
     get_runtime,
 )
+from kivy_ios.artifacts.collect import pip_install_command
 from kivy_ios.artifacts.wheels import (
     BuildSlice,
     WheelSelectionError,
-    pip_install_command,
     select_wheel,
 )
 from kivy_ios.lock.model import LockedPackage, LockedWheel
@@ -164,16 +163,8 @@ class TestRuntimes:
             )
             == "install_python Python.xcframework app pip-deps"
         )
-        assert rt.ios_floor("3.15.0") == "13.0"
-
-    def test_beeware_url(self):
-        rt = BeewareRuntime(build="b5")
-        art = rt.xcframework_artifact("3.13.2")
-        assert "Python-3.13-iOS-support.b5.tar.gz" in art.url
-        assert "github.com/beeware/Python-Apple-support" in art.url
 
     def test_get_runtime_factory(self):
         assert get_runtime("python.org").name == "python.org"
-        assert get_runtime("beeware").name == "beeware"
         with pytest.raises(ValueError):
             get_runtime("nonsense")

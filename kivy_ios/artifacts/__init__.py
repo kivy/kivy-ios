@@ -10,14 +10,13 @@ from .frameworks import (
     extract_xcframework_archive,
 )
 from .runtime import (
-    BeewareRuntime,
     PythonOrgRuntime,
     PythonRuntime,
     RuntimeArtifact,
     get_runtime,
 )
 from .verify import HashMismatch, sha256_bytes, sha256_file, verify_file
-from .wheels import BuildSlice, WheelSelectionError, pip_install_command, select_wheel
+from .wheels import BuildSlice, WheelSelectionError, select_wheel
 
 __all__ = [
     "ArtifactCache",
@@ -28,7 +27,6 @@ __all__ = [
     "FrameworkConflict",
     "copy_wheel_frameworks",
     "extract_xcframework_archive",
-    "BeewareRuntime",
     "PythonOrgRuntime",
     "PythonRuntime",
     "RuntimeArtifact",
@@ -39,6 +37,5 @@ __all__ = [
     "verify_file",
     "BuildSlice",
     "WheelSelectionError",
-    "pip_install_command",
     "select_wheel",
 ]

@@ -1,13 +1,11 @@
-"""Select and install pinned iOS wheels into ``pip-deps/`` (spec 03 / spec 05 step 4).
+"""Select pinned iOS wheels for a build slice (spec 03 / spec 05 step 4).
 
-``toolchain build`` already has the exact per-slice wheels pinned in the lock,
-so installation uses ``--no-deps`` (pip does not re-resolve) with the iOS
-cross-install flags. Slice selection is driven by the build target + ``--arch``.
+Slice selection is driven by the build target + ``--arch``.  The pip
+cross-install command lives in ``collect.py`` next to where it is invoked.
 """
 
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass
 
 from ..lock.model import LockedPackage, LockedWheel
@@ -89,36 +87,3 @@ def select_wheel(package: LockedPackage, slice_: BuildSlice) -> LockedWheel:
 
 class WheelSelectionError(Exception):
     pass
-
-
-def pip_install_command(
-    wheel_files: list[str],
-    *,
-    target_dir: str,
-    platform_tag: str,
-    python_version: str,
-    abi: str,
-    python_executable: str | None = None,
-) -> list[str]:
-    """Build the pip cross-install command (spec 05 step 4); no re-resolution."""
-    py = python_executable or sys.executable
-    cmd = [
-        py,
-        "-m",
-        "pip",
-        "install",
-        "--no-deps",
-        "--only-binary=:all:",
-        "--platform",
-        platform_tag,
-        "--python-version",
-        python_version,
-        "--abi",
-        abi,
-        "--implementation",
-        "cp",
-        "--target",
-        target_dir,
-    ]
-    cmd += wheel_files
-    return cmd
