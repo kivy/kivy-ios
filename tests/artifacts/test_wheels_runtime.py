@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import pytest
 
+from kivy_ios.artifacts.collect import pip_install_command
 from kivy_ios.artifacts.runtime import (
     PythonOrgRuntime,
     get_runtime,
 )
-from kivy_ios.artifacts.collect import pip_install_command
 from kivy_ios.artifacts.wheels import (
     BuildSlice,
     WheelSelectionError,
