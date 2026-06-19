@@ -65,7 +65,27 @@ include = ["kivy_ios*"]
 # ---------------------------------------------------------------------------
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--tb=short -q"
+addopts = "--tb=short -q --cov=kivy_ios --cov-report=term-missing --cov-fail-under=80"
+
+# ---------------------------------------------------------------------------
+# coverage
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["kivy_ios"]
+# Templates are app-runtime files placed in the built bundle, not library
+# code exercised by the test suite.
+omit = [
+    "kivy_ios/project/templates/*",
+]
+
+[tool.coverage.report]
+# Lines pragma-excluded from coverage counts.
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "\\.\\.\\.",          # Protocol stubs
+    "raise NotImplementedError",
+]
 
 # ---------------------------------------------------------------------------
 # ruff (replaces flake8 + isort)
