@@ -148,11 +148,18 @@ class TestStatus:
             _write(fs)
             # Create a fake built app directory
             app_path = (
-                Path(fs) / "myapp-ios" / "build" / "DerivedData" /
-                "Build" / "Products" / "Debug-iphonesimulator" / "myapp.app"
+                Path(fs)
+                / "myapp-ios"
+                / "build"
+                / "DerivedData"
+                / "Build"
+                / "Products"
+                / "Debug-iphonesimulator"
+                / "myapp.app"
             )
             app_path.mkdir(parents=True)
             import os
+
             os.utime(app_path, (fixed_time - 120, fixed_time - 120))
             result = runner.invoke(status, [])
             assert result.exit_code == 0, result.output
