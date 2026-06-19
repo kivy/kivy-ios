@@ -176,11 +176,11 @@ def check_find_links(config: Config, project_root: Path) -> CheckResult:
 
     if problems:
         detail = "; ".join(d for d, _ in problems)
-        hint = next((h for _, h in problems if h), None)
+        hint = next((h for _, h in problems if h), "")
         return CheckResult("find_links directories", Status.FAIL, detail, hint=hint)
     if warnings:
         detail = "; ".join(d for d, _ in warnings)
-        hint = next((h for _, h in warnings if h), None)
+        hint = next((h for _, h in warnings if h), "")
         return CheckResult("find_links directories", Status.WARN, detail, hint=hint)
     return CheckResult("find_links directories", Status.PASS, "; ".join(ok))
 
