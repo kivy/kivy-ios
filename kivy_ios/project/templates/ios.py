@@ -33,6 +33,8 @@ on iOS (nativeScale applies only to rasterization, not layout).
 from __future__ import annotations
 
 import ctypes
+from dataclasses import dataclass
+from typing import Any
 
 __version__ = (1, 1, 0)
 
@@ -232,6 +234,7 @@ def _objc_runtime():
     reg_cls.argtypes = [ctypes.c_void_p]
 
     addr = ctypes.cast(lib.objc_msgSend, ctypes.c_void_p).value
+    assert addr is not None, "objc_msgSend not found in libobjc"
     send_id = ctypes.CFUNCTYPE(ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)(addr)
     send_id2 = ctypes.CFUNCTYPE(
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
@@ -241,21 +244,31 @@ def _objc_runtime():
         addr
     )
 
+    @dataclass
     class _ObjC:
-        pass
+        lib: Any
+        get_class: Any
+        sel: Any
+        alloc_cls: Any
+        add_method: Any
+        reg_cls: Any
+        send_id: Any
+        send_id2: Any
+        send_f64: Any
+        send_insets: Any
 
-    rt = _ObjC()
-    rt.lib = lib
-    rt.get_class = get_class
-    rt.sel = sel
-    rt.alloc_cls = alloc_cls
-    rt.add_method = add_method
-    rt.reg_cls = reg_cls
-    rt.send_id = send_id
-    rt.send_id2 = send_id2
-    rt.send_f64 = send_f64
-    rt.send_insets = send_insets
-    return rt
+    return _ObjC(
+        lib=lib,
+        get_class=get_class,
+        sel=sel,
+        alloc_cls=alloc_cls,
+        add_method=add_method,
+        reg_cls=reg_cls,
+        send_id=send_id,
+        send_id2=send_id2,
+        send_f64=send_f64,
+        send_insets=send_insets,
+    )
 
 
 def _ns_string(rt, text: bytes) -> ctypes.c_void_p:
@@ -383,11 +396,13 @@ def _install_keyboard_observer() -> None:
 
                 if ns_value:
                     # CGRect is a 4-double HFA; returned in d0-d3 on ARM64.
+                    _rect_addr = ctypes.cast(rt.lib.objc_msgSend, ctypes.c_void_p).value
+                    assert _rect_addr is not None, "objc_msgSend not found in libobjc"
                     rect_fn = ctypes.CFUNCTYPE(
                         _CGRect,
                         ctypes.c_void_p,
                         ctypes.c_void_p,
-                    )(ctypes.cast(rt.lib.objc_msgSend, ctypes.c_void_p).value)
+                    )(_rect_addr)
                     rect = rect_fn(ns_value, rt.sel(b"CGRectValue"))
                     height = float(rect.size.height)
                 else:
@@ -431,6 +446,8 @@ def _install_keyboard_observer() -> None:
             rt.get_class(b"NSNotificationCenter"),
             rt.sel(b"defaultCenter"),
         )
+        _add_obs_addr = ctypes.cast(rt.lib.objc_msgSend, ctypes.c_void_p).value
+        assert _add_obs_addr is not None, "objc_msgSend not found in libobjc"
         _add_obs = ctypes.CFUNCTYPE(
             None,
             ctypes.c_void_p,  # nc
@@ -439,7 +456,7 @@ def _install_keyboard_observer() -> None:
             ctypes.c_void_p,  # SEL keyboardEvent:
             ctypes.c_void_p,  # name NSString*
             ctypes.c_void_p,  # object (nil)
-        )(ctypes.cast(rt.lib.objc_msgSend, ctypes.c_void_p).value)
+        )(_add_obs_addr)
 
         for notif_name_bytes in (
             b"UIKeyboardWillChangeFrameNotification",
