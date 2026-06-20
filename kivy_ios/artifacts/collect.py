@@ -129,7 +129,9 @@ def _install_python_xcframework(lock, layout, *, cache, downloader, no_cache) ->
     with tempfile.TemporaryDirectory(prefix="kivy-pyxc-") as tmp:
         tmp_dir = Path(tmp)
         with tarfile.open(archive, "r:gz") as tf:
-            _safe_extract(tf, tmp_dir)
+            # filter="data" rejects path traversal, absolute paths, and
+            # unsafe special files (Python 3.12+ / PEP 706).
+            tf.extractall(tmp_dir, filter="data")
         found = next(
             (p for p in tmp_dir.rglob("Python.xcframework") if p.is_dir()), None
         )
@@ -254,7 +256,3 @@ def _native_platform_tag(selected: list[LockedWheel], slice_: BuildSlice) -> str
     return slice_.platform_tag
 
 
-def _safe_extract(tf: tarfile.TarFile, dest: Path) -> None:
-    # filter="data" rejects path traversal, absolute paths, and unsafe
-    # special files (Python 3.12+ / PEP 706).
-    tf.extractall(dest, filter="data")
