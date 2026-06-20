@@ -88,11 +88,8 @@ def _unpack(archive: Path, dest: Path, archive_format: str) -> None:
 
 
 def _safe_extract_tar(tf: tarfile.TarFile, dest: Path) -> None:
-    dest = dest.resolve()
-    for member in tf.getmembers():
-        target = (dest / member.name).resolve()
-        if not str(target).startswith(str(dest)):
-            raise ValueError(f"unsafe path in archive: {member.name}")
+    # filter="data" rejects path traversal, absolute paths, and unsafe
+    # special files (Python 3.12+ / PEP 706).
     tf.extractall(dest, filter="data")
 
 
