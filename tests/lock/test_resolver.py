@@ -265,6 +265,39 @@ class TestPipResolverAbsorb:
         pr._absorb(item2, merged, seen)
         assert len(merged["kivy"].wheels) == 2
 
+    def test_version_mismatch_across_slices_raises(self):
+        pr = PipResolver()
+        merged: dict = {}
+        seen: dict = {}
+        device = _wheel_item(
+            version="3.0.0",
+            filename="kivy-3.0.0-cp315-cp315-ios_13_0_arm64_iphoneos.whl",
+        )
+        sim = _wheel_item(
+            version="3.0.1",
+            filename="kivy-3.0.1-cp315-cp315-ios_13_0_arm64_iphonesimulator.whl",
+        )
+        pr._absorb(device, merged, seen)
+        with pytest.raises(ResolverError, match="inconsistent versions"):
+            pr._absorb(sim, merged, seen)
+
+    def test_matching_version_across_slices_ok(self):
+        pr = PipResolver()
+        merged: dict = {}
+        seen: dict = {}
+        device = _wheel_item(
+            version="3.0.0",
+            filename="kivy-3.0.0-cp315-cp315-ios_13_0_arm64_iphoneos.whl",
+        )
+        sim = _wheel_item(
+            version="3.0.0",
+            filename="kivy-3.0.0-cp315-cp315-ios_13_0_arm64_iphonesimulator.whl",
+        )
+        pr._absorb(device, merged, seen)
+        pr._absorb(sim, merged, seen)
+        assert merged["kivy"].version == "3.0.0"
+        assert len(merged["kivy"].wheels) == 2
+
     def test_requires_python_captured(self):
         merged, _ = self._absorb(_wheel_item())
         assert merged["kivy"].requires_python == ">=3.10"
@@ -548,3 +581,46 @@ class TestPipResolverResolve:
         names = {p.name for p in packages}
         assert "kivy" in names
         assert "more-itertools" in names
+
+    def test_resolve_raises_on_version_mismatch_between_slices(self, monkeypatch):
+        # Device slice resolves kivy 3.0.0; a later simulator slice resolves
+        # 3.0.1 for the same requirement (e.g. one slice was not published for
+        # 3.0.1 upstream). The merge must fail loudly, not silently mix wheels.
+        slice_items = [
+            [
+                _wheel_item(
+                    version="3.0.0",
+                    filename="kivy-3.0.0-cp315-cp315-ios_13_0_arm64_iphoneos.whl",
+                )
+            ],
+            [
+                _wheel_item(
+                    version="3.0.1",
+                    filename="kivy-3.0.1-cp315-cp315-ios_13_0_arm64_iphonesimulator.whl",
+                )
+            ],
+        ]
+        call_iter = iter(slice_items)
+
+        def fake_run_report(
+            self_inner,
+            requirements,
+            *,
+            python_version,
+            platform_tag,
+            abis,
+            extra_index_urls,
+            find_links,
+            offline,
+        ):
+            return {"install": next(call_iter, [])}
+
+        monkeypatch.setattr(PipResolver, "_run_report", fake_run_report)
+        pr = PipResolver()
+        with pytest.raises(ResolverError, match="inconsistent versions"):
+            pr.resolve(
+                ["kivy>=3.0"],
+                python_version="3.15.0",
+                deployment_target="13.0",
+                extra_index_urls=[],
+            )

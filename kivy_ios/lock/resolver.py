@@ -171,6 +171,18 @@ class PipResolver:
             )
             merged[key] = pkg
             seen_filenames[key] = set()
+        elif version != pkg.version:
+            # pip resolves each iOS slice independently; if upstream only
+            # published some slices for a release, a later slice can resolve to
+            # a different version. Merging those would silently produce a
+            # lockfile that looks pinned but installs mismatched binaries across
+            # device and simulator. Fail fast, like the missing-slice case.
+            raise ResolverError(
+                f"{name} resolved to inconsistent versions across iOS slices: "
+                f"{pkg.version!r} and {version!r}. This usually means the slices "
+                "were published at different times upstream; kivy-ios requires "
+                "every slice of a package to pin the same version."
+            )
         if filename not in seen_filenames[key]:
             seen_filenames[key].add(filename)
             pkg.wheels.append(ResolvedWheel(filename=filename, url=url, sha256=sha256))
