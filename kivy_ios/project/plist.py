@@ -28,6 +28,15 @@ def build_info_plist(config: Config) -> dict:
     assert ios is not None
     orientations = [ORIENTATION_TO_UIKEY[o] for o in config.kivy.orientation]
 
+    # Apple requires all four iPad orientations (Xcode 16+ / iOS 18+ policy).
+    # UIRequiresFullScreen is deprecated and will be ignored by the OS.
+    all_ipad_orientations = [
+        "UIInterfaceOrientationPortrait",
+        "UIInterfaceOrientationPortraitUpsideDown",
+        "UIInterfaceOrientationLandscapeLeft",
+        "UIInterfaceOrientationLandscapeRight",
+    ]
+
     plist: dict[str, object] = {
         "CFBundleName": config.project.name,
         "CFBundleDisplayName": config.display_name,
@@ -40,12 +49,9 @@ def build_info_plist(config: Config) -> dict:
         "MinimumOSVersion": ios.deployment_target,
         "LSRequiresIPhoneOS": True,
         "UISupportedInterfaceOrientations": orientations,
-        # iPad gets the same managed set (spec 01: ~ipad is a managed key).
-        "UISupportedInterfaceOrientations~ipad": orientations,
-        # Kivy apps are full-screen by design; SDL3 cannot participate in iPad
-        # Split View or Slide Over. This key suppresses the Xcode validation
-        # warning that fires when not all 4 iPad orientations are declared.
-        "UIRequiresFullScreen": True,
+        # iPad must declare all four orientations (Apple App Store requirement
+        # as of Xcode 16; UIRequiresFullScreen is deprecated and ignored).
+        "UISupportedInterfaceOrientations~ipad": all_ipad_orientations,
         # SDL3 on iOS 13.4+ expects this for indirect input / mouse events.
         "UIApplicationSupportsIndirectInputEvents": True,
         # SDL3 on iOS 13+ uses UIScene lifecycle.  Without this entry iOS

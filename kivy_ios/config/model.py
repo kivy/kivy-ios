@@ -33,7 +33,6 @@ MANAGED_INFO_PLIST_KEYS = frozenset(
         "MinimumOSVersion",
         "UISupportedInterfaceOrientations",
         "UISupportedInterfaceOrientations~ipad",
-        "UIRequiresFullScreen",
         "LSRequiresIPhoneOS",
         "CFBundlePackageType",
         "CFBundleInfoDictionaryVersion",

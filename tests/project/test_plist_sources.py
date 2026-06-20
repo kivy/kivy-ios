@@ -17,13 +17,13 @@ class TestInfoPlist:
     def test_managed_keys(self, config):
         plist = build_info_plist(config)
         assert "UILaunchStoryboardName" not in plist
+        assert "UIRequiresFullScreen" not in plist
         assert plist["CFBundleName"] == "touchtracer"
         assert plist["CFBundleDisplayName"] == "Touch Tracer"
         assert plist["CFBundleIdentifier"] == "org.kivy.touchtracer"
         assert plist["CFBundleShortVersionString"] == "1.2.3"
         assert plist["CFBundleVersion"] == "7"
         assert plist["MinimumOSVersion"] == "13.0"
-        assert plist["UIRequiresFullScreen"] is True
 
     def test_sdl3_scene_manifest_always_present(self, config):
         plist = build_info_plist(config)
@@ -39,7 +39,6 @@ class TestInfoPlist:
     @pytest.mark.parametrize(
         "key,value",
         [
-            ("UIRequiresFullScreen", "false"),
             ("LSRequiresIPhoneOS", "false"),
             ("CFBundlePackageType", '"BNDL"'),
             ("CFBundleInfoDictionaryVersion", '"7.0"'),
@@ -72,14 +71,21 @@ class TestInfoPlist:
         plist = build_info_plist(cfg)
         assert plist["UILaunchStoryboardName"] == "Custom"
 
-    def test_orientation_includes_ipad(self, config):
+    def test_orientation_iphone_respects_config(self, config):
         plist = build_info_plist(config)
-        expected = [
+        assert plist["UISupportedInterfaceOrientations"] == [
             "UIInterfaceOrientationPortrait",
             "UIInterfaceOrientationLandscapeLeft",
         ]
-        assert plist["UISupportedInterfaceOrientations"] == expected
-        assert plist["UISupportedInterfaceOrientations~ipad"] == expected
+
+    def test_orientation_ipad_always_all_four(self, config):
+        plist = build_info_plist(config)
+        assert plist["UISupportedInterfaceOrientations~ipad"] == [
+            "UIInterfaceOrientationPortrait",
+            "UIInterfaceOrientationPortraitUpsideDown",
+            "UIInterfaceOrientationLandscapeLeft",
+            "UIInterfaceOrientationLandscapeRight",
+        ]
 
     def test_launch_storyboard_when_splash_configured(self, make_config):
         cfg = make_config('\n[tool.kivy.ios.splash]\nbackground = "#ffffff"')
