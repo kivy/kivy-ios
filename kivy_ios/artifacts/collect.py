@@ -254,5 +254,3 @@ def _native_platform_tag(selected: list[LockedWheel], slice_: BuildSlice) -> str
         if not wheel.is_pure_python:
             return wheel.platform_tag
     return slice_.platform_tag
-
-
