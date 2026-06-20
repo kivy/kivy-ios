@@ -82,15 +82,11 @@ def _unpack(archive: Path, dest: Path, archive_format: str) -> None:
             zf.extractall(dest)
     elif archive_format in ("tar.gz", "tgz", "targz"):
         with tarfile.open(archive, "r:gz") as tf:
-            _safe_extract_tar(tf, dest)
+            # filter="data" rejects path traversal, absolute paths, and
+            # unsafe special files (Python 3.12+ / PEP 706).
+            tf.extractall(dest, filter="data")
     else:
         raise ValueError(f"unsupported archive_format {archive_format!r} (zip|tar.gz)")
-
-
-def _safe_extract_tar(tf: tarfile.TarFile, dest: Path) -> None:
-    # filter="data" rejects path traversal, absolute paths, and unsafe
-    # special files (Python 3.12+ / PEP 706).
-    tf.extractall(dest, filter="data")
 
 
 def _locate_xcframework(root: Path, archive_member: str | None, *, name: str) -> Path:
