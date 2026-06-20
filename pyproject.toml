@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "kivy-ios"
 version = "3.0.0.dev0"
 description = "iOS bundler for Kivy apps — declarative, PEP 621-aligned, Python.xcframework-based"
-license = { text = "MIT" }
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.13"
 authors = [
