@@ -93,7 +93,7 @@ def _safe_extract_tar(tf: tarfile.TarFile, dest: Path) -> None:
         target = (dest / member.name).resolve()
         if not str(target).startswith(str(dest)):
             raise ValueError(f"unsafe path in archive: {member.name}")
-    tf.extractall(dest)
+    tf.extractall(dest, filter="data")
 
 
 def _locate_xcframework(root: Path, archive_member: str | None, *, name: str) -> Path:
