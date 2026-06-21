@@ -106,6 +106,10 @@ def render_kivy_tables(
     *,
     python_version: str | None = None,
     has_kivy: bool = False,
+    simulator_archs: list[str] | tuple[str, ...] | None = None,
+    icon_source: str | None = None,
+    splash_source: str | None = None,
+    splash_background: str | None = None,
 ) -> str:
     """Render the ``[tool.kivy]`` + ``[tool.kivy.ios]`` block.
 
@@ -114,8 +118,23 @@ def render_kivy_tables(
     in ``team_id``. ``python_version`` overrides the default xcframework pin.
     When ``has_kivy`` is True a documented ``exclude`` block is included so
     users know which transitive Kivy deps are safe to drop for their app.
+
+    ``simulator_archs`` / ``icon_source`` / ``splash_source`` /
+    ``splash_background`` are the user's existing values on the ``--force``
+    preserve path: when set, they are emitted as active TOML; when ``None`` (the
+    initial-add path, or a value the user never set) a commented TODO stub is
+    emitted instead so the build-time default stays in effect.
     """
     display = app_slug.replace("_", " ").title()
+    if simulator_archs is not None:
+        archs_toml = ", ".join(f'"{a}"' for a in simulator_archs)
+        sim_line = f"simulator_archs = [{archs_toml}]"
+    else:
+        sim_line = (
+            '# simulator_archs = ["arm64"]  '
+            '# drop "x86_64" once you no longer run the simulator on Intel Macs '
+            "(default pins both)"
+        )
     lines = [
         "[tool.kivy]",
         f'display_name = "{display}"',
@@ -129,13 +148,38 @@ def render_kivy_tables(
         "# TODO: change to your reverse-DNS bundle identifier",
         "build = 1",
         f'deployment_target = "{DEFAULT_DEPLOYMENT_TARGET}"',
+        sim_line,
     ]
     if has_kivy:
         lines += [""] + _KIVY_EXCLUDE_LINES
+    if icon_source is not None:
+        icon_lines = [f'source = "{icon_source}"']
+    else:
+        icon_lines = [
+            '# source = "assets/icon.png"  '
+            "# TODO: 1024x1024 PNG app icon — required for App Store submission"
+        ]
+    if splash_source is not None:
+        splash_lines = [f'source = "{splash_source}"']
+    else:
+        splash_lines = ['# source = "assets/splash.png"  # TODO: optional launch image']
+    if splash_background is not None:
+        splash_lines.append(f'background = "{splash_background}"')
+    else:
+        splash_lines.append(
+            '# background = "#000000"        '
+            "# TODO: optional launch-screen background color"
+        )
     lines += [
         "",
         "[tool.kivy.ios.python]",
         f'version = "{python_version or DEFAULT_PYTHON_VERSION}"',
+        "",
+        "[tool.kivy.ios.icons]",
+        *icon_lines,
+        "",
+        "[tool.kivy.ios.splash]",
+        *splash_lines,
         "",
         "[tool.kivy.ios.signing]",
     ]
@@ -203,10 +247,21 @@ def append_kivy_tables(
     *,
     python_version: str | None = None,
     has_kivy: bool = False,
+    simulator_archs: list[str] | tuple[str, ...] | None = None,
+    icon_source: str | None = None,
+    splash_source: str | None = None,
+    splash_background: str | None = None,
 ) -> str:
     """Append freshly rendered kivy tables to existing pyproject text."""
     base = text.rstrip("\n")
     block = render_kivy_tables(
-        app_slug, signing, python_version=python_version, has_kivy=has_kivy
+        app_slug,
+        signing,
+        python_version=python_version,
+        has_kivy=has_kivy,
+        simulator_archs=simulator_archs,
+        icon_source=icon_source,
+        splash_source=splash_source,
+        splash_background=splash_background,
     )
     return f"{base}\n\n{block}"

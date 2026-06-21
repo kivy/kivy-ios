@@ -98,6 +98,9 @@ def _run_update_path(pyproject: Path, *, force: bool) -> None:
     if existing_ios and force:
         signing = _read_signing(raw)
         python_version = _read_python_version(raw)
+        simulator_archs = _read_simulator_archs(raw)
+        icon_source = _read_icon_source(raw)
+        splash_source, splash_background = _read_splash(raw)
         stripped = strip_kivy_tables(text)
         new_text = append_kivy_tables(
             stripped,
@@ -105,9 +108,16 @@ def _run_update_path(pyproject: Path, *, force: bool) -> None:
             signing=signing,
             python_version=python_version,
             has_kivy=kivy,
+            simulator_archs=simulator_archs,
+            icon_source=icon_source,
+            splash_source=splash_source,
+            splash_background=splash_background,
         )
         pyproject.write_text(new_text, encoding="utf-8")
-        click.echo("Regenerated [tool.kivy*] (signing + python version preserved).")
+        click.echo(
+            "Regenerated [tool.kivy*] (signing, python version, simulator_archs, "
+            "icon, and splash preserved)."
+        )
     else:
         new_text = append_kivy_tables(text, app_slug, signing=None, has_kivy=kivy)
         pyproject.write_text(new_text, encoding="utf-8")
@@ -159,6 +169,46 @@ def _read_python_version(raw: dict) -> str | None:
     except (KeyError, TypeError):
         return None
     return version if isinstance(version, str) and version else None
+
+
+def _ios_table(raw: dict) -> dict:
+    try:
+        ios = raw["tool"]["kivy"]["ios"]
+    except (KeyError, TypeError):
+        return {}
+    return ios if isinstance(ios, dict) else {}
+
+
+def _read_simulator_archs(raw: dict) -> list[str] | None:
+    """Return a user-set simulator_archs list, or None when absent/invalid.
+
+    None preserves the commented stub on ``--force`` so the default still holds.
+    """
+    archs = _ios_table(raw).get("simulator_archs")
+    if isinstance(archs, list) and all(isinstance(a, str) for a in archs) and archs:
+        return archs
+    return None
+
+
+def _read_icon_source(raw: dict) -> str | None:
+    icons = _ios_table(raw).get("icons")
+    if isinstance(icons, dict):
+        source = icons.get("source")
+        if isinstance(source, str) and source:
+            return source
+    return None
+
+
+def _read_splash(raw: dict) -> tuple[str | None, str | None]:
+    splash = _ios_table(raw).get("splash")
+    if not isinstance(splash, dict):
+        return None, None
+    source = splash.get("source")
+    background = splash.get("background")
+    return (
+        source if isinstance(source, str) and source else None,
+        background if isinstance(background, str) and background else None,
+    )
 
 
 def _read_signing(raw: dict) -> SigningConfig | None:

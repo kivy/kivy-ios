@@ -66,6 +66,39 @@ class TestWriterUnits:
         # without has_kivy there must be no exclude block
         assert "exclude" not in block
 
+    def test_render_kivy_tables_seeds_icons_and_splash(self):
+        block = render_kivy_tables("myapp")
+        assert "[tool.kivy.ios.icons]" in block
+        assert "[tool.kivy.ios.splash]" in block
+        # icon is required for App Store submission; surface it as a TODO
+        assert '# source = "assets/icon.png"' in block
+        assert "App Store" in block
+        assert '# source = "assets/splash.png"' in block
+        assert "# background = " in block
+
+    def test_render_kivy_tables_seeds_commented_simulator_archs(self):
+        block = render_kivy_tables("myapp")
+        # commented so the default (both arches) stays in effect until edited
+        assert '# simulator_archs = ["arm64"]' in block
+
+    @pytest.mark.parametrize("has_kivy", [False, True])
+    def test_render_kivy_tables_roundtrips_through_loader(self, has_kivy):
+        from kivy_ios.config import load_config_from_text
+
+        project = (
+            "[project]\n"
+            'name = "myapp"\n'
+            'version = "1.0.0"\n'
+            'dependencies = ["kivy>=3.0"]\n\n'
+        )
+        block = render_kivy_tables("myapp", has_kivy=has_kivy)
+        cfg = load_config_from_text(project + block)
+        ios = cfg.ios_required
+        # commented entries leave defaults in place
+        assert ios.simulator_archs == ("arm64", "x86_64")
+        assert ios.icons.source is None
+        assert ios.splash.source is None
+
     def test_render_kivy_tables_with_kivy_exclude(self):
         block = render_kivy_tables("myapp", has_kivy=True)
         assert "exclude = [" in block
@@ -222,6 +255,59 @@ class TestUpdatePath:
             assert result.exit_code == 0, result.output
             data = tomllib.loads(pp.read_text())
         assert data["tool"]["kivy"]["ios"]["python"]["version"] == "3.15.0b1"
+
+    def test_force_preserves_icon_splash_and_simulator_archs(self, runner, tmp_path):
+        with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
+            pp = init_mod.Path(fs) / "pyproject.toml"
+            pp.write_text(self.PYPROJECT + "\n")
+            runner.invoke(init, [])
+            # User fills in the commented stubs with real values.
+            text = pp.read_text()
+            text = text.replace(
+                '# simulator_archs = ["arm64"]  '
+                '# drop "x86_64" once you no longer run the simulator on Intel Macs '
+                "(default pins both)",
+                'simulator_archs = ["arm64"]',
+            )
+            text = text.replace(
+                '# source = "assets/icon.png"  '
+                "# TODO: 1024x1024 PNG app icon — required for App Store submission",
+                'source = "assets/icon.png"',
+            )
+            text = text.replace(
+                '# source = "assets/splash.png"  # TODO: optional launch image',
+                'source = "assets/splash.png"',
+            )
+            text = text.replace(
+                '# background = "#000000"        '
+                "# TODO: optional launch-screen background color",
+                'background = "#112233"',
+            )
+            pp.write_text(text)
+            result = runner.invoke(init, ["--force"])
+            assert result.exit_code == 0, result.output
+            data = tomllib.loads(pp.read_text())
+        ios = data["tool"]["kivy"]["ios"]
+        assert ios["simulator_archs"] == ["arm64"]
+        assert ios["icons"]["source"] == "assets/icon.png"
+        assert ios["splash"]["source"] == "assets/splash.png"
+        assert ios["splash"]["background"] == "#112233"
+
+    def test_force_keeps_stubs_when_user_set_nothing(self, runner, tmp_path):
+        with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
+            pp = init_mod.Path(fs) / "pyproject.toml"
+            pp.write_text(self.PYPROJECT + "\n")
+            runner.invoke(init, [])
+            result = runner.invoke(init, ["--force"])
+            assert result.exit_code == 0, result.output
+            data = tomllib.loads(pp.read_text())
+            text = pp.read_text()
+        ios = data["tool"]["kivy"]["ios"]
+        # Untouched stubs stay commented → defaults remain in effect.
+        assert "simulator_archs" not in ios
+        assert ios.get("icons", {}).get("source") is None
+        assert ios.get("splash", {}).get("source") is None
+        assert '# simulator_archs = ["arm64"]' in text
 
     def test_update_refuses_without_project(self, runner, tmp_path):
         with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
