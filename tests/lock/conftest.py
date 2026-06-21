@@ -26,6 +26,7 @@ class FakeResolver:
         extra_index_urls,
         find_links=None,
         offline=False,
+        simulator_archs=None,
     ):
         self.calls.append(
             {
@@ -35,11 +36,12 @@ class FakeResolver:
                 "extra_index_urls": list(extra_index_urls),
                 "find_links": list(find_links or []),
                 "offline": offline,
+                "simulator_archs": simulator_archs,
             }
         )
         if not requirements:
             return []
-        tags = slice_tags(deployment_target)
+        tags = slice_tags(deployment_target, simulator_archs)
         abi = "cp" + "".join(python_version.split(".")[:2])
         kivy_wheels = []
         for tag in tags:

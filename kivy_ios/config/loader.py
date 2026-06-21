@@ -18,10 +18,12 @@ from packaging.version import InvalidVersion, Version
 
 from .errors import ConfigError
 from .model import (
+    DEFAULT_SIMULATOR_ARCHS,
     MANAGED_INFO_PLIST_KEYS,
     RESERVED_BUILD_SETTINGS,
     SUPPORTED_IOS_SCHEMA_VERSION,
     VALID_ORIENTATIONS,
+    VALID_SIMULATOR_ARCHS,
     Author,
     Config,
     IconConfig,
@@ -311,6 +313,8 @@ def _parse_ios(
             line=finder.line("deployment_target"),
         )
 
+    simulator_archs = _parse_simulator_archs(ios, finder)
+
     extra_index_urls = ios.get("extra_index_urls", [])
     if not isinstance(extra_index_urls, list) or not all(
         isinstance(u, str) for u in extra_index_urls
@@ -341,6 +345,7 @@ def _parse_ios(
         bundle_id=bundle_id,
         build=build,
         deployment_target=deployment_target,
+        simulator_archs=simulator_archs,
         extra_index_urls=tuple(extra_index_urls),
         find_links=tuple(find_links),
         exclude=tuple(exclude),
@@ -354,6 +359,48 @@ def _parse_ios(
         info_plist=info_plist,
         build_settings=build_settings,
     )
+
+
+def _parse_simulator_archs(ios: dict, finder: _LineFinder) -> tuple[str, ...]:
+    """``[tool.kivy.ios].simulator_archs`` — which simulator slices to pin.
+
+    Defaults to device-arm64-plus both simulator arches; a project that no longer
+    targets Intel simulator hosts may set ``["arm64"]`` to stop pinning x86_64.
+    """
+    raw = ios.get("simulator_archs")
+    if raw is None:
+        return DEFAULT_SIMULATOR_ARCHS
+    line = finder.line("simulator_archs")
+    if not isinstance(raw, list) or not all(isinstance(a, str) for a in raw):
+        raise ConfigError(
+            "[tool.kivy.ios].simulator_archs must be a list of strings",
+            key_path="tool.kivy.ios.simulator_archs",
+            line=line,
+        )
+    if not raw:
+        raise ConfigError(
+            "[tool.kivy.ios].simulator_archs must not be empty",
+            key_path="tool.kivy.ios.simulator_archs",
+            line=line,
+            hint='at least one of "arm64", "x86_64" is required.',
+        )
+    unknown = [a for a in raw if a not in VALID_SIMULATOR_ARCHS]
+    if unknown:
+        valid = ", ".join(sorted(VALID_SIMULATOR_ARCHS))
+        raise ConfigError(
+            f"unknown simulator arch(es) {unknown} in [tool.kivy.ios].simulator_archs",
+            key_path="tool.kivy.ios.simulator_archs",
+            line=line,
+            hint=f"valid values are: {valid}.",
+        )
+    # De-dupe while preserving declared order (stable, deterministic slices).
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for arch in raw:
+        if arch not in seen:
+            seen.add(arch)
+            ordered.append(arch)
+    return tuple(ordered)
 
 
 def _parse_python_version(ios: dict) -> str | None:

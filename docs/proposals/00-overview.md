@@ -16,7 +16,7 @@ kivy-ios 3.0 becomes a **declarative iOS bundler** with three responsibilities:
 It is **no longer** responsible for:
 
 - Building Python or OpenSSL or libffi (use Python.xcframework).
-- Compiling C/C++ libraries from source on the user's mac (use pre-built artifacts produced by a separate Kivy-owned central builder).
+- Compiling C/C++ libraries from source through a kivy-ios build pipeline (use pre-built artifacts produced by a separate Kivy-owned central builder). The lone exception is Swift Package Manager *source* dependencies, which **Xcode's** own package manager compiles — kivy-ios writes no build logic for them; see [spec 07](07-swift-packages.md).
 - Compiling Python extension modules from source on the user's mac (use iOS wheels).
 - Maintaining ~50 recipes (those that survive relocate to per-library Kivy-owned sibling builder repos following the `kivy/<library>-builder` pattern; pure-Python and Python-with-C-extension wheels publish to PyPI).
 
@@ -43,6 +43,7 @@ It is **no longer** responsible for:
 | 04 | [Recipe triage](04-recipe-triage.md) | Per-recipe disposition table for the ~50 existing recipes |
 | 05 | [CLI shape](05-cli-shape.md) | New verbs, legacy-verb disposition |
 | 06 | [Xcode project generation](06-xcode-project-generation.md) | Project layout, pbxproj wiring, Build Python phase |
+| 07 | [Swift Package Manager dependencies](07-swift-packages.md) | SPM (binary + source) as a third native-dependency channel, with Xcode owning the SPM lifecycle |
 
 
 ## Out of scope for kivy-ios 3.0

@@ -300,6 +300,45 @@ class TestFindLinks:
             load_config(app / "pyproject.toml")
 
 
+class TestSimulatorArchs:
+    _BASE = (
+        "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='src'\n"
+        "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+    )
+
+    def test_default_is_both_archs(self):
+        cfg = load(self._BASE)
+        assert cfg.ios_required.simulator_archs == ("arm64", "x86_64")
+
+    def test_arm64_only(self):
+        cfg = load(self._BASE + "simulator_archs=['arm64']\n")
+        assert cfg.ios_required.simulator_archs == ("arm64",)
+
+    def test_explicit_both(self):
+        cfg = load(self._BASE + "simulator_archs=['arm64','x86_64']\n")
+        assert cfg.ios_required.simulator_archs == ("arm64", "x86_64")
+
+    def test_dedupes_preserving_order(self):
+        cfg = load(self._BASE + "simulator_archs=['x86_64','arm64','x86_64']\n")
+        assert cfg.ios_required.simulator_archs == ("x86_64", "arm64")
+
+    def test_unknown_arch_rejected(self):
+        with pytest.raises(ConfigError, match="unknown simulator arch"):
+            load(self._BASE + "simulator_archs=['arm64','ppc']\n")
+
+    def test_empty_rejected(self):
+        with pytest.raises(ConfigError, match="must not be empty"):
+            load(self._BASE + "simulator_archs=[]\n")
+
+    def test_non_list_rejected(self):
+        with pytest.raises(ConfigError, match="must be a list of strings"):
+            load(self._BASE + "simulator_archs='arm64'\n")
+
+    def test_non_string_items_rejected(self):
+        with pytest.raises(ConfigError, match="must be a list of strings"):
+            load(self._BASE + "simulator_archs=[1,2]\n")
+
+
 class TestSyntaxError:
     def test_bad_toml_reports_line(self):
         with pytest.raises(ConfigError, match="invalid TOML"):

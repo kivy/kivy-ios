@@ -21,6 +21,13 @@ DEFAULT_DEPLOYMENT_TARGET = "13.0"
 DEFAULT_ENTRY_POINT = "main"
 DEFAULT_ORIENTATION = ("portrait",)
 
+# Simulator architectures pinned by ``toolchain lock`` (spec 01/02). The device
+# slice is always arm64; these are the *simulator* slices. ``x86_64`` exists only
+# to run the simulator on an Intel Mac, so a project that no longer targets Intel
+# hosts may set ``simulator_archs = ["arm64"]`` and stop pinning the dying slice.
+VALID_SIMULATOR_ARCHS = frozenset({"arm64", "x86_64"})
+DEFAULT_SIMULATOR_ARCHS = ("arm64", "x86_64")
+
 # Info.plist keys kivy-ios writes from the schema; users may not set these via
 # [tool.kivy.ios.info_plist] (spec 01).
 MANAGED_INFO_PLIST_KEYS = frozenset(
@@ -120,6 +127,7 @@ class IosConfig:
     bundle_id: str
     build: int = 1
     deployment_target: str = DEFAULT_DEPLOYMENT_TARGET
+    simulator_archs: tuple[str, ...] = DEFAULT_SIMULATOR_ARCHS
     extra_index_urls: tuple[str, ...] = ()
     find_links: tuple[str, ...] = ()
     exclude: tuple[str, ...] = ()

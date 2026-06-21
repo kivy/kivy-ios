@@ -22,6 +22,7 @@ from kivy_ios.lock.resolver import (
     abi_tags,
     get_resolver,
     pip_python_version,
+    slice_suffixes,
     slice_tags,
 )
 
@@ -43,6 +44,46 @@ class TestSliceTags:
         assert "ios_16_0_arm64_iphoneos" in tags
         assert "ios_16_0_arm64_iphonesimulator" in tags
         assert "ios_16_0_x86_64_iphonesimulator" in tags
+
+    def test_default_matches_explicit_both_archs(self):
+        assert slice_tags("13.0") == slice_tags("13.0", ("arm64", "x86_64"))
+
+    def test_arm64_only_drops_x86_64_slice(self):
+        tags = slice_tags("13.0", ("arm64",))
+        assert tags == (
+            "ios_13_0_arm64_iphoneos",
+            "ios_13_0_arm64_iphonesimulator",
+        )
+        assert not any("x86_64" in t for t in tags)
+
+    def test_device_slice_always_present(self):
+        # Even an x86_64-only simulator set still pins the arm64 device slice.
+        tags = slice_tags("13.0", ("x86_64",))
+        assert "ios_13_0_arm64_iphoneos" in tags
+        assert "ios_13_0_x86_64_iphonesimulator" in tags
+        assert "ios_13_0_arm64_iphonesimulator" not in tags
+
+    def test_order_is_device_then_declared_simulator_archs(self):
+        assert slice_tags("13.0", ("x86_64", "arm64")) == (
+            "ios_13_0_arm64_iphoneos",
+            "ios_13_0_x86_64_iphonesimulator",
+            "ios_13_0_arm64_iphonesimulator",
+        )
+
+
+class TestSliceSuffixes:
+    def test_default_is_device_plus_both_simulator_archs(self):
+        assert slice_suffixes() == (
+            "arm64_iphoneos",
+            "arm64_iphonesimulator",
+            "x86_64_iphonesimulator",
+        )
+
+    def test_arm64_only(self):
+        assert slice_suffixes(("arm64",)) == (
+            "arm64_iphoneos",
+            "arm64_iphonesimulator",
+        )
 
 
 # ---------------------------------------------------------------------------

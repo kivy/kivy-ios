@@ -71,6 +71,43 @@ class TestBuild:
         assert lock.pyproject_sha256 == compute_pyproject_sha256(minimal_pyproject)
 
 
+class TestSimulatorArchs:
+    _ARM64_ONLY = (
+        "[project]\nname='a'\nversion='1'\ndependencies=['kivy']\n"
+        "[tool.kivy]\napp_dir='src'\n[tool.kivy.ios]\nschema_version=1\n"
+        "bundle_id='o.x.a'\nsimulator_archs=['arm64']\n"
+        "[tool.kivy.ios.python]\nversion='3.15.0'"
+    )
+
+    def test_arm64_only_passes_resolver_archs(
+        self, fake_resolver, fake_python_provider
+    ):
+        _build(self._ARM64_ONLY, fake_resolver, fake_python_provider)
+        assert fake_resolver.calls[0]["simulator_archs"] == ("arm64",)
+
+    def test_arm64_only_pins_two_slices(self, fake_resolver, fake_python_provider):
+        lock = _build(self._ARM64_ONLY, fake_resolver, fake_python_provider)
+        kivy = next(p for p in lock.packages if p.name == "kivy")
+        tags = {w.platform_tag for w in kivy.wheels}
+        assert tags == {
+            "ios_13_0_arm64_iphoneos",
+            "ios_13_0_arm64_iphonesimulator",
+        }
+
+    def test_arm64_only_does_not_require_x86_64(self, fake_python_provider):
+        # A resolver that has no x86_64 slice at all must still satisfy an
+        # arm64-only project (the dropped slice isn't a targeted one).
+        from tests.lock.conftest import FakeResolver
+
+        resolver = FakeResolver(drop_slice="ios_13_0_x86_64_iphonesimulator")
+        lock = _build(self._ARM64_ONLY, resolver, fake_python_provider)
+        kivy = next(p for p in lock.packages if p.name == "kivy")
+        assert {w.platform_tag for w in kivy.wheels} == {
+            "ios_13_0_arm64_iphoneos",
+            "ios_13_0_arm64_iphonesimulator",
+        }
+
+
 class TestFailFast:
     def test_missing_slice_fails(self, minimal_pyproject, fake_python_provider):
         from tests.lock.conftest import FakeResolver

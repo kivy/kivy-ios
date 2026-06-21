@@ -2,8 +2,11 @@
 
 The resolver turns ``[project].dependencies`` into a fully-pinned set of
 per-slice iOS wheels, **host-independent** — every compiled package is pinned
-for all three iOS slices (device arm64, simulator arm64, simulator x86_64)
-regardless of the architecture of the host running ``lock``.
+for the device slice (arm64) plus one slice per configured simulator
+architecture, regardless of the architecture of the host running ``lock``. The
+simulator architectures default to ``arm64`` + ``x86_64`` and are configurable
+via ``[tool.kivy.ios].simulator_archs`` (a project that no longer needs the
+Intel-host simulator can drop ``x86_64``).
 
 ``pip`` is the backend (validated by the Phase 0 spike: see
 docs/dev/resolver-findings.md). The backend is abstracted behind the
@@ -22,14 +25,14 @@ from typing import Protocol
 
 from .model import canonical_name
 
-# The three iOS slices every build can target (spec 02). Device + the two
-# simulator architectures. Tag templates are formatted with the deployment
-# target (dots -> underscores).
-SLICE_SUFFIXES = (
-    "arm64_iphoneos",
-    "arm64_iphonesimulator",
-    "x86_64_iphonesimulator",
-)
+# iOS build slices (spec 02). The device slice is always arm64 — there is no
+# 32-bit iOS — while the simulator slices are driven by the project's configured
+# simulator architectures. ``DEFAULT_SIMULATOR_ARCHS`` mirrors
+# ``config.model.DEFAULT_SIMULATOR_ARCHS``; the builder always passes the
+# validated config value, so this default only serves direct/test callers. Tag
+# templates are formatted with the deployment target (dots -> underscores).
+DEVICE_SLICE_SUFFIX = "arm64_iphoneos"
+DEFAULT_SIMULATOR_ARCHS = ("arm64", "x86_64")
 
 
 class ResolverError(Exception):
@@ -55,9 +58,25 @@ class ResolvedPackage:
     source_index: str | None = None
 
 
-def slice_tags(deployment_target: str) -> tuple[str, ...]:
+def slice_suffixes(
+    simulator_archs: tuple[str, ...] | None = None,
+) -> tuple[str, ...]:
+    """The arch+sdk suffixes for the slices a build targets.
+
+    Always the device slice (arm64) plus one simulator slice per configured
+    simulator architecture. Single source of truth for both ``slice_tags`` (lock
+    resolution) and the builder's slice-coverage check.
+    """
+    archs = simulator_archs if simulator_archs is not None else DEFAULT_SIMULATOR_ARCHS
+    return (DEVICE_SLICE_SUFFIX, *(f"{arch}_iphonesimulator" for arch in archs))
+
+
+def slice_tags(
+    deployment_target: str,
+    simulator_archs: tuple[str, ...] | None = None,
+) -> tuple[str, ...]:
     dt = deployment_target.replace(".", "_")
-    return tuple(f"ios_{dt}_{suffix}" for suffix in SLICE_SUFFIXES)
+    return tuple(f"ios_{dt}_{suffix}" for suffix in slice_suffixes(simulator_archs))
 
 
 def pip_python_version(python_version: str) -> str:
@@ -93,6 +112,7 @@ class Resolver(Protocol):
         extra_index_urls: list[str],
         find_links: list[str] | None = None,
         offline: bool = False,
+        simulator_archs: tuple[str, ...] | None = None,
     ) -> list[ResolvedPackage]:
         """Resolve requirements to per-slice iOS wheels (all slices pinned)."""
         ...
@@ -120,10 +140,11 @@ class PipResolver:
         extra_index_urls: list[str],
         find_links: list[str] | None = None,
         offline: bool = False,
+        simulator_archs: tuple[str, ...] | None = None,
     ) -> list[ResolvedPackage]:
         if not requirements:
             return []
-        tags = slice_tags(deployment_target)
+        tags = slice_tags(deployment_target, simulator_archs)
         abis = abi_tags(python_version)
         # name -> ResolvedPackage (merged across slices)
         merged: dict[str, ResolvedPackage] = {}

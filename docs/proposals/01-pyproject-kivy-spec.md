@@ -151,7 +151,7 @@ orientation = ["portrait", "portrait-upside-down"]
 | `display_name` | string         | no       | `[project].name` titled | App display name on home screen. Both iOS (CFBundleDisplayName) and Android (`android:label`) consume it.                                                                                                                                                                                                                                                                                                             |
 | `app_dir`      | string         | yes      | —                       | Folder containing your `.py` source files, relative to `pyproject.toml`. **Must be a subdirectory** (e.g. `"src"`); the project root (`"."`), an empty value, an absolute path, or a path escaping the project are all rejected — see the note under "`app_dir` + `entry_point` interaction" for why. `toolchain build` creates `<app>-ios/app/` as a symlink to this folder (not a copy), and Xcode walks it as a folder reference on every build — so source edits flow to the next Xcode build without re-running `toolchain build`. See [spec 06 "Developer iteration workflow"](06-xcode-project-generation.md#developer-iteration-workflow). |
 | `entry_point`  | string         | no       | `"main"`                | Python module reference (dotted name). The generated `main.m` does the equivalent of `PyImport_ImportModule(entry_point)` after putting `app_dir` on `sys.path`.                                                                                                                                                                                                                                                      |
-| `orientation`  | list of string | no       | `["portrait"]`          | Allowed orientations. Valid: `portrait`, `portrait-upside-down`, `landscape-left`, `landscape-right`. iOS writes the list to **both** `UISupportedInterfaceOrientations` (iPhone) and `UISupportedInterfaceOrientations~ipad` (iPad) with identical values — necessary because `TARGETED_DEVICE_FAMILY` is `1,2`, and without the `~ipad` key iPad would silently fall back to all four orientations. Android tooling consumes the same list.                                                                                                                                                                                                      |
+| `orientation`  | list of string | no       | `["portrait"]`          | Allowed orientations. Valid: `portrait`, `portrait-upside-down`, `landscape-left`, `landscape-right`. iOS writes the declared list to `UISupportedInterfaceOrientations` (iPhone). For `UISupportedInterfaceOrientations~ipad` (iPad) iOS writes **all four** orientations regardless of the declared list — Apple's App Store validation (Xcode 16+ / iOS 18+) requires every iPad-capable app (`TARGETED_DEVICE_FAMILY = 1,2`) to support all four iPad orientations, and the legacy `UIRequiresFullScreen` opt-out is deprecated and ignored. The declared list therefore constrains iPhone only. Android tooling consumes the same list.                                                                                                                                                                                                      |
 
 
 ### `app_dir` + `entry_point` interaction
@@ -162,7 +162,7 @@ These two fields together specify *what* code runs and *where it lives*. `entry_
 > - **Bundle bloat / dev-file leakage.** `app/` is a symlink that Xcode copies wholesale into the `.app`. Pointed at the project root, it sweeps in `.git/`, `.venv/`, `tests/`, `__pycache__/`, `pyproject.toml`, and everything else at the root.
 > - **Symlink recursion.** The `<app>-ios/` build output lives at the project root, so `app_dir = "."` would point the copy at a folder that *contains its own build product* — recursively copying `Python.xcframework/`, `pip-deps/`, etc. into the bundle.
 >
-> Putting your code under a subdirectory like `src/` (with `app_dir = "src"`) avoids both: the symlink points only at your source, and the build output stays outside it. This also means kivy-ios v3.0 needs no per-file `exclude` mechanism. A single-file app simply lives at `src/main.py`.
+> Putting your code under a subdirectory like `src/` (with `app_dir = "src"`) avoids both: the symlink points only at your source, and the build output stays outside it. This also means kivy-ios v3.0 needs no per-*file* exclusion mechanism for bundle contents. A single-file app simply lives at `src/main.py`. (The separate `[tool.kivy.ios].exclude` key prunes unused *packages* from the resolved dependency graph — a different concern; see "Excluding unused transitive dependencies" below.)
 
 Example layouts:
 
@@ -228,9 +228,89 @@ deployment_target = "13.0"
 | `bundle_id`         | string  | yes      | —        | iOS bundle identifier. Init suggests `org.example.<slug>` with a comment to change it.                                                                                                                                                               |
 | `build`             | integer | no       | `1`      | Build number (`CFBundleVersion`). Increment per submission. Android's version-code lives under `[tool.kivy.android]`.                                                                                                                                |
 | `deployment_target` | string  | no       | `"13.0"` | Minimum iOS version. Must be >= the floor of the selected `Python.xcframework`.                                                                                                                                                                      |
+| `simulator_archs`   | list of string | no | `["arm64", "x86_64"]` | Which **simulator** CPU architectures `toolchain lock` pins (and `toolchain build` can target). The device slice is always `arm64` and is not configurable. Valid values: `"arm64"` (Apple-Silicon simulator hosts), `"x86_64"` (Intel simulator hosts). Must be non-empty; unknown values are rejected; duplicates are de-duped preserving order. Drop `"x86_64"` once you no longer build the simulator on Intel Macs — that slice stops being required *and* stops being pinned. See "Simulator architectures (`simulator_archs`)" below and [spec 02 §"Resolution semantics"](02-pylock-ios-spec.md). |
 | `extra_index_urls`  | list of string | no | `[]`     | Supplemental pip index URLs consulted *in addition to* PyPI when resolving iOS wheels. `toolchain lock` passes each as `--extra-index-url` to pip. Plural-by-design, channel-agnostic, and **empty by default**; PyPI is always the primary source. Each resolved wheel's source URL is pinned in `pylock.ios.toml`'s `[[packages.wheels]]` (and its index recorded under `[packages.tool.kivy_ios].source_index`) regardless of which index supplied it, keeping builds reproducible. As packages publish iOS wheels to PyPI proper, configured entries go quiet on their own. See [spec 03 §"Source registry: PyPI direct"](03-artifact-distribution.md) and [spec 00](00-overview.md). |
 | `find_links`        | list of string | no | `[]`     | Repo-relative directories of pre-built wheels consulted during `toolchain lock` only. Each entry is passed to pip as `--find-links` (pip's name for flat wheel directories or direct wheel URLs). Use when a dependency's iOS wheels are vendored in the repo but not published to PyPI or a supplemental index yet — e.g. locally cross-built `kivy` cp315 wheels under `wheels/`. Entries must be repo-relative (not absolute, must not escape the project directory). **Not** used at `toolchain build` time; the lockfile's per-wheel `path` or `url` pins are authoritative after lock. See "Local wheel directories (`find_links`)" below and [spec 02 §"Locally built wheels"](02-pylock-ios-spec.md). |
+| `exclude`           | list of string | no | `[]`     | Canonical package names to drop from the **resolved** dependency graph when writing `pylock.ios.toml`. Use it to prune transitive dependencies a package declares but that your app never exercises at runtime on iOS — most commonly the non-runtime tail of Kivy's own wheel (`kivy-garden`, `requests` + its transitive deps, `docutils`, `pygments`). A name listed here that is *also* a direct `[project].dependencies` entry is silently ignored (you cannot exclude what you explicitly depend on). Matching is by canonical name (PEP 503). See "Excluding unused transitive dependencies (`exclude`)" below. |
 
+
+### Excluding unused transitive dependencies (`exclude`)
+
+`[project].dependencies` lists what your app needs; `exclude` lets you prune the
+transitive tail that a dependency pulls in but your app never uses on iOS. The
+canonical case is Kivy itself: the `kivy` wheel declares dependencies that are
+useful on the desktop but dead weight in an App Store bundle (`kivy-garden`'s
+download CLI cannot run on iOS at all, since the App Store prohibits dynamic
+package installation; `requests`/`docutils`/`pygments` back optional widgets many
+apps don't touch).
+
+```toml
+[tool.kivy.ios]
+exclude = [
+    "kivy-garden",   # extension registry / download CLI — never runs on iOS
+    "requests",      # kivy.network.urlrequest + kivy-garden; drop if unused
+    "certifi", "charset-normalizer", "idna", "urllib3",  # requests' chain
+    "docutils",      # RSTDocument widget only
+    "pygments",      # CodeInput widget only
+]
+```
+
+Semantics:
+
+- **Resolution-graph pruning, not bundle-file exclusion.** `exclude` removes
+  whole packages from the resolved set *before* `pylock.ios.toml` is written, so
+  the pruned wheels are never downloaded or installed. It is unrelated to the
+  per-file bundle question discussed under `app_dir` above.
+- **Direct deps win.** Any name in `exclude` that also appears in
+  `[project].dependencies` is dropped from the exclusion set — an explicit
+  dependency is never silently removed.
+- **Canonical-name matching.** Names are compared after PEP 503 normalization, so
+  `Kivy_Garden`, `kivy-garden`, and `kivy.garden` all match.
+- **`toolchain init` seeds a documented block** when `kivy` is a direct
+  dependency, with one comment per entry naming the Kivy feature that needs it, so
+  you know which lines are safe to delete for your specific app.
+
+### Simulator architectures (`simulator_archs`)
+
+A compiled iOS package ships a separate wheel per *slice*. There are three in
+play: the device slice (`arm64` / `iphoneos`) and two simulator slices —
+`arm64` (run the simulator on an Apple-Silicon Mac) and `x86_64` (run it on an
+Intel Mac). `simulator_archs` controls which **simulator** slices `toolchain
+lock` resolves and pins; the device slice is always `arm64` and is not
+configurable (there is no 32-bit iOS).
+
+The default, `["arm64", "x86_64"]`, pins all three slices so the committed
+`pylock.ios.toml` is reproducible on *any* lock/CI host — Apple Silicon and
+Intel alike — independent of the architecture of the machine that ran `lock`.
+
+```toml
+[tool.kivy.ios]
+# Apple-Silicon-only shop: stop requiring/pinning the Intel-simulator slice.
+simulator_archs = ["arm64"]
+```
+
+Why you'd narrow it:
+
+- **Avoid false rejections.** The "missing slice" fail-fast (spec 02) rejects a
+  compiled dependency that lacks *any* required slice. `x86_64_iphonesimulator`
+  is the slice most likely to be absent upstream as the ecosystem moves to Apple
+  Silicon, so a package that ships only `arm64` wheels would otherwise be
+  rejected even though it's perfectly usable on an Apple-Silicon simulator.
+  Dropping `"x86_64"` removes that slice from the required set.
+- **Smaller, faster locks.** One fewer pip resolution per compiled package and
+  no dead `x86_64` wheel pins.
+
+Why the default keeps `"x86_64"` for now: Intel Macs (and Intel CI runners) can
+still build and run the simulator, and the all-three default keeps a single
+committed lock working everywhere. Apple's transition to Apple Silicon is
+effectively complete and macOS support for Intel is winding down, so the
+expectation is that `"x86_64"` becomes opt-in (and eventually the default drops
+it) once Xcode stops shipping the Intel simulator — at which point existing
+`simulator_archs = ["arm64"]` projects need no change.
+
+Changing `simulator_archs` changes `pyproject.toml`, so drift detection (spec
+02) requires a re-`lock` before the next `build`, exactly like any other schema
+change.
 
 ### Local wheel directories (`find_links`)
 
@@ -321,6 +401,22 @@ Init never auto-populates this table: the canonical Kivy dependency set needs no
 
 **`source` as a URL vs. a path.** A URL is right for published SDKs and frameworks shared across projects. A repo-relative path is right for a framework the author built and versions alongside the app — because both the artifact and the path live in the repo, it resolves identically on every clone and in CI. `toolchain build` rejects an absolute path (or one escaping the project directory) with a diagnostic. This mirrors the local-wheel mechanism in [spec 02](02-pylock-ios-spec.md) and follows PEP 751's path conventions, so users learn one rule for both wheels and xcframeworks.
 
+### `[tool.kivy.ios.native.swift_packages]`
+
+A sibling of `[tool.kivy.ios.native.xcframeworks]` for native dependencies that
+are distributed **only** as Swift Package Manager packages. kivy-ios supports
+**binary-target** SPM packages (those whose product is a pre-built
+`.xcframework`); *source* SPM packages are out of scope because they would
+compile on the user's mac, violating the no-on-mac-compile invariant. Empty by
+default. The full schema (per-entry fields, version-requirement rules, lockfile
+shape, pbxproj wiring, and validation) is specified in
+[spec 07](07-swift-packages.md).
+
+```toml
+[tool.kivy.ios.native.swift_packages]
+# Sentry = { url = "https://github.com/getsentry/sentry-cocoa", requirement = { exact = "8.49.0" }, products = ["Sentry"] }
+```
+
 ### System frameworks are not declared — they link transitively
 
 There is **no `system_frameworks` key**, and the app does not enumerate Apple SDK frameworks (`Metal`, `AVFoundation`, `CoreBluetooth`, …) anywhere. This is a direct consequence of the all-dynamic distribution model:
@@ -404,9 +500,9 @@ UIFileSharingEnabled = true
 | `CFBundleVersion` | `[tool.kivy.ios].build` |
 | `MinimumOSVersion` | `[tool.kivy.ios].deployment_target` |
 | `UISupportedInterfaceOrientations` | `[tool.kivy].orientation` |
-| `UISupportedInterfaceOrientations~ipad` | `[tool.kivy].orientation` (same values; written so iPad honors the declared orientations) |
-| `UIRequiresFullScreen` | toolchain (always `true` — Kivy/SDL apps are full-screen and cannot join iPad Split View; also required by Xcode validation when not all four iPad orientations are declared) |
+| `UISupportedInterfaceOrientations~ipad` | toolchain (always all four orientations — Apple App Store requirement as of Xcode 16 / iOS 18; the declared `[tool.kivy].orientation` constrains iPhone only) |
 | `LSRequiresIPhoneOS` | toolchain (always `true`) |
+| `UIApplicationSceneManifest` | toolchain (always written — SDL3 on iOS 13+ uses the UIScene lifecycle; without it iOS never foregrounds the scene and Metal rejects all GPU work) |
 | `CFBundlePackageType` | toolchain (always `APPL`) |
 | `CFBundleInfoDictionaryVersion` | toolchain (plist format version boilerplate) |
 | `CFBundleExecutable` | set by Xcode |
@@ -552,6 +648,7 @@ auto_signing = true
 10. Declares `[project].requires-python` incompatible with `[tool.kivy.ios.python].version`.
 11. Sets `[tool.kivy.ios].deployment_target` lower than the minimum iOS version supported by the selected `Python.xcframework` (verified at lock time; the xcframework metadata declares its floor; e.g. Python 3.15 requires iOS 13.0+).
 12. Sets `[tool.kivy.ios].find_links` entries that are absolute paths, empty, or paths that escape the project directory.
+13. Sets `[tool.kivy.ios].simulator_archs` to a non-list, a list containing non-strings, an empty list, or a list containing any value other than `"arm64"` / `"x86_64"`.
 
 Validation errors are printed with the offending line number (TOML parsers expose this) and a remediation hint.
 

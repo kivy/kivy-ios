@@ -87,6 +87,7 @@ def build_lockfile(
             extra_index_urls=list(config.ios.extra_index_urls),
             find_links=find_links,
             offline=offline,
+            simulator_archs=tuple(config.ios.simulator_archs),
         )
     except ResolverError as exc:
         hint = find_links_resolution_hint(
@@ -105,7 +106,12 @@ def build_lockfile(
         wheels = tuple(
             _locked_wheel_from_resolved(w, project_root=root) for w in rp.wheels
         )
-        _check_slices_complete(rp.name, wheels, config.ios.deployment_target)
+        _check_slices_complete(
+            rp.name,
+            wheels,
+            config.ios.deployment_target,
+            config.ios.simulator_archs,
+        )
         packages.append(
             LockedPackage(
                 name=rp.name,
@@ -175,8 +181,14 @@ def _normalize_wheel_source(
     return None, rel
 
 
-def _check_slices_complete(name, wheels, deployment_target) -> None:
+def _check_slices_complete(
+    name, wheels, deployment_target, simulator_archs=None
+) -> None:
     """Fail fast if a compiled package is missing an iOS slice (spec 02).
+
+    The required slices are the device slice plus one per configured simulator
+    architecture (``[tool.kivy.ios].simulator_archs``), so a project that drops
+    ``x86_64`` is not held to a slice it no longer targets.
 
     Compatibility rule: a wheel tagged ios_<M>_<N>_<arch>_<sdk> satisfies a
     required slice when M.N <= deployment_target AND the arch+sdk suffix
@@ -187,8 +199,9 @@ def _check_slices_complete(name, wheels, deployment_target) -> None:
     if any(w.is_pure_python for w in wheels):
         return  # pure-Python: single py3-none-any entry is complete
 
-    from .resolver import SLICE_SUFFIXES
+    from .resolver import slice_suffixes
 
+    required = slice_suffixes(simulator_archs)
     dt_parts = _version_tuple(deployment_target)
     covered: set[str] = set()
     for wheel in wheels:
@@ -197,7 +210,7 @@ def _check_slices_complete(name, wheels, deployment_target) -> None:
         if parts[0] != "ios" or len(parts) < 3:
             continue
         # Find where the arch+sdk suffix starts (last two underscore-joined segments).
-        for suffix in SLICE_SUFFIXES:
+        for suffix in required:
             if tag.endswith(f"_{suffix}"):
                 prefix_parts = tag[: -(len(suffix) + 1)].split("_")  # ["ios","13","0"]
                 try:
@@ -208,14 +221,14 @@ def _check_slices_complete(name, wheels, deployment_target) -> None:
                     covered.add(suffix)
                 break
 
-    missing_suffixes = set(SLICE_SUFFIXES) - covered
+    missing_suffixes = set(required) - covered
     if missing_suffixes:
         dt = deployment_target.replace(".", "_")
         missing_tags = sorted(f"ios_{dt}_{s}" for s in missing_suffixes)
         raise BuildError(
             f"{name} is missing iOS wheel slice(s): {', '.join(missing_tags)}.\n"
-            f"  A compiled package must publish all three iOS slices "
-            f"(device + both simulator archs) to be locked reproducibly."
+            f"  A compiled package must publish every targeted iOS slice "
+            f"(device + each configured simulator arch) to be locked reproducibly."
         )
 
 

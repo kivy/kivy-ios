@@ -6,20 +6,21 @@
 
 This spec defines **where artifacts live**, **how they're signed and verified**, **how kivy-ios consumes them**, and **how lockfile entries map to project folders**.
 
-## Two distribution channels, deliberately
+## Three distribution channels, deliberately
 
-kivy-ios 3.0 deliberately uses two artifact types and two channels:
+kivy-ios 3.0 sources native dependencies through three deliberate channels, each matched to the shape the artifact naturally takes:
 
-1. **iOS wheels** for Python packages with C extensions (Kivy itself, pyobjus, the iOS support package, pillow, numpy, etc.) — distributed via pip-compatible indexes.
-2. **`.xcframework` archives** for pure-native libraries that aren't bundled inside any Python wheel — distributed as zip or tarball archives. In the canonical Kivy app this channel goes unused: the kivy iOS wheel bundles every xcframework it links against (ANGLE, SDL3 family) inside the wheel under `.frameworks/`. The channel exists for apps that need *additional* third-party native libraries.
+1. **iOS wheels** — for Python packages with C extensions (Kivy itself, pyobjus, the iOS support package, pillow, numpy, etc.), distributed via pip-compatible indexes. The natural shape for things Python imports.
+2. **`.xcframework` archives** — for pure-native libraries that aren't bundled inside any Python wheel, distributed as zip or tarball archives. The natural shape for things Xcode links and embeds. In the canonical Kivy app this channel goes unused: the kivy iOS wheel bundles every xcframework it links against (ANGLE, SDL3 family) inside the wheel under `.frameworks/`. The channel exists for apps that need *additional* third-party native libraries.
+3. **Swift Package Manager packages** — for third-party iOS libraries that ship *only* as SPM packages (binary, source, or hybrid), with no standalone `.xcframework` release asset. Declared by Git URL (or local path) and resolved by Xcode. The natural shape for the growing set of SDKs distributed solely through SPM. Full design in [spec 07](07-swift-packages.md).
 
-This split is principled: wheels are the natural shape for things Python imports; xcframeworks are the natural shape for things Xcode links and embeds.
+The first two channels share one consumption model: **kivy-ios downloads the artifact, verifies its SHA-256, and stages it into `<app>-ios/`.** The third is deliberately different — **Xcode owns the full SPM lifecycle** (resolve, fetch, compile, embed); kivy-ios only emits the package references and pins the resolved Git revision (plus a generated `Package.resolved`) in the lock. That is a documented deviation from the content-hash rule, scoped to SPM, and it does not reopen the recipe wound: the invariant that matters is *kivy-ios runs no from-source build pipeline of its own*, and Xcode's first-class package manager is categorically different from a bespoke kivy-ios recipe system (see [spec 07 §"How this reconciles with the 'no on-mac compilation' principle"](07-swift-packages.md)).
 
 ## App-specific native extensions (Cython / C)
 
 A natural question: what if the *app author* writes their own native code — a Cython module, a hand-written C extension, or any package with a compiled component — that isn't published anywhere? It's neither a third-party dependency nor a Kivy artifact, so which channel does it use?
 
-The answer follows directly from the architecture's core rule: **the user's mac never compiles native code during a kivy-ios build; it only consumes artifacts.** A user-authored extension is just an artifact that doesn't exist yet, so it must be **built into an iOS wheel out-of-band and then consumed exactly like any other dependency** (channel 1 above). There is no on-device or on-mac compile step in `toolchain build`, by design.
+The answer follows directly from the architecture's core rule: **kivy-ios runs no from-source build pipeline of its own — it does not cross-compile Python C extensions; it consumes pre-built wheels.** A user-authored extension is just an artifact that doesn't exist yet, so it must be **built into an iOS wheel out-of-band and then consumed exactly like any other dependency** (channel 1 above). kivy-ios has no recipe/compile step for Python extensions in `toolchain build`, by design. (The one exception to "kivy-ios compiles nothing" is SPM source packages, which **Xcode** — not kivy-ios — compiles via its own first-class package manager; see channel 3 above and [spec 07](07-swift-packages.md). That does not apply to Python C extensions, which always arrive as wheels.)
 
 Concretely, an author with a custom extension:
 
@@ -110,6 +111,12 @@ The runtime supports two archive formats for `.xcframework` artifacts:
 
 **Locating the xcframework inside the archive.** When the archive contains exactly one top-level `.xcframework` directory (the common case), the runtime auto-detects it — no extra configuration. When an archive instead bundles **multiple** xcframeworks or sibling files alongside the one you want, the lockfile's `[[tool.kivy_ios.xcframeworks]].archive_member` (see [spec 02 §`[[tool.kivy_ios.xcframeworks]]`](02-pylock-ios-spec.md)) names the exact directory to extract, and `toolchain build` honors it rather than guessing. `archive_member` is omitted whenever auto-detection suffices. See spec 02 for the full lockfile schema.
 
+## Distribution channel 3: Swift Package Manager packages
+
+Unlike channels 1 and 2, this channel is **not** an artifact kivy-ios downloads, verifies, and stages. The user declares an SPM package in `[tool.kivy.ios.native.swift_packages]` (Git URL or local path + version requirement + products); `toolchain lock` resolves it to a concrete Git **revision** and records the pin in `pylock.ios.toml`; `toolchain build` emits the package references into the generated `.xcodeproj` and writes a `Package.resolved`. From there **Xcode** resolves, fetches, compiles (for source/hybrid packages), and embeds — kivy-ios writes no build logic and computes no output hash.
+
+Consequently this channel's registry, archive-format, and SHA-256 verification concerns (channels 1–2 above) do not apply: integrity comes from the pinned revision (and, for binary targets, SPM's own `.binaryTarget` checksum that Xcode verifies on fetch). The complete schema, resolution semantics, pbxproj wiring, and reproducibility rationale live in [spec 07](07-swift-packages.md); this section exists only to give SPM a home alongside the channel 1 and channel 2 sections.
+
 ## Lockfile-entry to project-folder mapping
 
 `toolchain build` materializes the lockfile into the generated `<app>-ios/` per these rules:
@@ -121,6 +128,7 @@ The runtime supports two archive formats for `.xcframework` artifacts:
 | `[[packages.wheels]]` with `name` containing `ios_..._iphonesimulator` | `pip-deps/` (when building for simulator) | Same. |
 | `[[tool.kivy_ios.xcframeworks]]` | `Frameworks/` | Xcode handles linking and embedding. |
 | `[tool.kivy_ios.python_xcframework]` | `Python.xcframework/` at the project root | Foundational; `install_python` reads from here. |
+| `[[tool.kivy_ios.swift_packages]]` | *(no folder)* — pbxproj package references + `Package.resolved` | Xcode resolves, fetches, compiles, and embeds; kivy-ios stages nothing (see channel 3 and [spec 07](07-swift-packages.md)). |
 
 `toolchain build` does not commingle wheels and xcframeworks; the two folders have disjoint contents and disjoint Xcode phase semantics:
 

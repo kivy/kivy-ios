@@ -106,7 +106,7 @@ The symlink approach also has a nice property for source control: the user commi
 
 ### Practical notes
 
-1. **`app_dir` must be a subdirectory; the project root (`"."`) is rejected.** Because the bundle copy of `app/` mirrors the symlinked source folder verbatim, pointing it at the project root would sweep *everything* into `MyApp.app/app/` (`pyproject.toml`, `.git/`, `.venv/`, `tests/`, `__pycache__/`) **and** recurse the `<app>-ios/` build output into itself. The toolchain therefore refuses `"."` (and empty/absolute/escaping paths) at validation time and directs the user to a subdirectory such as `src/`. A single-file app lives at `src/main.py`. This is why kivy-ios v3.0 needs no per-file `exclude` mechanism — keeping app code in its own subfolder keeps the bundle clean by construction.
+1. **`app_dir` must be a subdirectory; the project root (`"."`) is rejected.** Because the bundle copy of `app/` mirrors the symlinked source folder verbatim, pointing it at the project root would sweep *everything* into `MyApp.app/app/` (`pyproject.toml`, `.git/`, `.venv/`, `tests/`, `__pycache__/`) **and** recurse the `<app>-ios/` build output into itself. The toolchain therefore refuses `"."` (and empty/absolute/escaping paths) at validation time and directs the user to a subdirectory such as `src/`. A single-file app lives at `src/main.py`. This is why kivy-ios v3.0 needs no per-*file* exclusion mechanism for bundle contents — keeping app code in its own subfolder keeps the bundle clean by construction. (The separate `[tool.kivy.ios].exclude` key prunes unused *packages* from the resolved dependency graph; see [spec 01 §"Excluding unused transitive dependencies"](01-pyproject-kivy-spec.md).)
 2. **Adding a new `.py` file**: Xcode folder references usually pick it up on the next build. If Xcode caches stale folder contents (occasional), in the Xcode IDE select Product → Clean Build Folder.
 3. **`.gitignore`**: `<app>-ios/` (all of it) is safe to ignore. `pylock.ios.toml` should be committed.
 4. **Tests in `tests/`**: if `tests/` lives inside `app_dir`, it will be bundled into the `.app`. To keep tests out of the shipped app, put `tests/` outside `app_dir` (e.g. `tests/` at project root with `app_dir = "src"`).
@@ -126,15 +126,39 @@ In order:
 
 ## The "Build Python" Run Script
 
-The phase's script body (verbatim, matching the [Python 3.15 iOS docs](https://docs.python.org/3.15/using/ios.html#adding-python-to-an-ios-project) §7.2.2 step 7):
+The phase's script body wraps the python.org [Python 3.15 iOS docs](https://docs.python.org/3.15/using/ios.html#adding-python-to-an-ios-project) §7.2.2 step 7 call with the slice-selection and slice-copy logic kivy-ios needs (because `pip-deps` is platform-sliced — see "Project layout" and the Copy Bundle Resources note). The generated script (`kivy_ios/project/buildsettings.py` `BUILD_PYTHON_SCRIPT`):
 
 ```bash
 set -e
-source "$PROJECT_DIR/Python.xcframework/build/build_utils.sh"
+# build_utils.sh was renamed to utils.sh in some Python.xcframework builds; try both.
+UTILS="$PROJECT_DIR/Python.xcframework/build/build_utils.sh"
+if [ ! -f "$UTILS" ]; then UTILS="$PROJECT_DIR/Python.xcframework/build/utils.sh"; fi
+source "$UTILS"
+
+# Copy the platform-appropriate pip-deps slice into the app bundle so that
+# device and simulator builds never share compiled extension modules.
+if [ "$EFFECTIVE_PLATFORM_NAME" = "-iphonesimulator" ]; then
+    PIP_DEPS_SRC="$PROJECT_DIR/pip-deps-simulator"
+    COLLECT_HINT="toolchain build --simulator"
+else
+    PIP_DEPS_SRC="$PROJECT_DIR/pip-deps-device"
+    COLLECT_HINT="toolchain build --device"
+fi
+
+# Fail loudly if this platform's slice was never collected. Xcode picks the
+# slice from its own destination, so switching to an uncollected target would
+# otherwise ship an app with no dependencies (crash at launch).
+if [ ! -d "$PIP_DEPS_SRC" ] || [ -z "$(ls -A "$PIP_DEPS_SRC" 2>/dev/null)" ]; then
+    echo "error: $PIP_DEPS_SRC has no collected pip-deps for this platform. Run '$COLLECT_HINT' (or 'toolchain run') first, then rebuild."
+    exit 1
+fi
+mkdir -p "$CODESIGNING_FOLDER_PATH/pip-deps"
+rsync -a --delete "$PIP_DEPS_SRC/" "$CODESIGNING_FOLDER_PATH/pip-deps/"
+
 install_python Python.xcframework app pip-deps
 ```
 
-**One** call to `install_python`, with **multiple trailing folder arguments**. The python.org docs are explicit: "If you're using a separate folder for third-party packages, ensure that folder is **added to the end of the call** to `install_python` in step 7" (emphasis ours). A single call processes both folders in one pass and ensures the stdlib layout step (see below) runs exactly once.
+The final line is **one** call to `install_python`, with **multiple trailing folder arguments**. The python.org docs are explicit: "If you're using a separate folder for third-party packages, ensure that folder is **added to the end of the call** to `install_python` in step 7" (emphasis ours). A single call processes both folders in one pass and ensures the stdlib layout step (see below) runs exactly once. Everything above that line is kivy-ios's slice plumbing: it resolves the active destination's slice, fails fast if it was never collected, and `rsync`s it into the bundle at `pip-deps/` before `install_python` walks it.
 
 What `install_python` does, per the python.org iOS docs (§7.1.4 "Binary extension modules" and §7.2.2 step 7):
 
