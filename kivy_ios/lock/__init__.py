@@ -5,6 +5,7 @@ from __future__ import annotations
 from .builder import BuildError, build_lockfile, diff_summary, semantic_equal
 from .model import (
     LockedPackage,
+    LockedSwiftPackage,
     LockedWheel,
     LockedXcframework,
     Lockfile,
@@ -20,6 +21,13 @@ from .resolver import (
     get_resolver,
     slice_tags,
 )
+from .spm import (
+    ResolvedSwiftPackage,
+    SpmResolver,
+    SpmResolverError,
+    XcodeSpmResolver,
+    get_spm_resolver,
+)
 from .writer import dumps
 
 __all__ = [
@@ -29,6 +37,7 @@ __all__ = [
     "semantic_equal",
     "Lockfile",
     "LockedPackage",
+    "LockedSwiftPackage",
     "LockedWheel",
     "LockedXcframework",
     "PythonXcframework",
@@ -45,4 +54,9 @@ __all__ = [
     "ResolverError",
     "get_resolver",
     "slice_tags",
+    "ResolvedSwiftPackage",
+    "SpmResolver",
+    "SpmResolverError",
+    "XcodeSpmResolver",
+    "get_spm_resolver",
 ]

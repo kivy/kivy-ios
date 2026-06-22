@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .model import (
     LockedPackage,
+    LockedSwiftPackage,
     LockedWheel,
     LockedXcframework,
     Lockfile,
@@ -51,6 +52,9 @@ def _from_raw(raw: dict) -> Lockfile:
 
     packages = tuple(_parse_package(p) for p in raw.get("packages", []))
     xcframeworks = tuple(_parse_xcframework(x) for x in tool.get("xcframeworks", []))
+    swift_packages = tuple(
+        _parse_swift_package(s) for s in tool.get("swift_packages", [])
+    )
 
     return Lockfile(
         requires_python=raw.get("requires-python", ">=3.15"),
@@ -61,6 +65,7 @@ def _from_raw(raw: dict) -> Lockfile:
         pyproject_sha256=tool.get("pyproject_sha256", ""),
         tool_kivy_ios_schema_version=tool.get("tool_kivy_ios_schema_version", 1),
         xcframeworks=xcframeworks,
+        swift_packages=swift_packages,
         schema_version=tool.get("schema_version", 1),
         lock_version=lock_version,
         created_by=raw.get("created-by", "kivy-ios"),
@@ -114,6 +119,21 @@ def _parse_xcframework(x: dict) -> LockedXcframework:
         link=bool(x.get("link", True)),
         embed=bool(x.get("embed", True)),
         source=x.get("source"),
+    )
+
+
+def _parse_swift_package(s: dict) -> LockedSwiftPackage:
+    requirement = s.get("requirement")
+    return LockedSwiftPackage(
+        name=s["name"],
+        products=tuple(s.get("products", [])),
+        url=s.get("url"),
+        path=s.get("path"),
+        requirement=dict(requirement) if requirement else None,
+        revision=s.get("revision"),
+        version=s.get("version"),
+        link=bool(s.get("link", True)),
+        embed=bool(s.get("embed", True)),
     )
 
 

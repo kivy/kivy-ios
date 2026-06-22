@@ -97,6 +97,33 @@ class LockedXcframework:
 
 
 @dataclass(frozen=True)
+class LockedSwiftPackage:
+    """One ``[[tool.kivy_ios.swift_packages]]`` entry (spec 07).
+
+    Unlike xcframeworks, kivy-ios computes no output hash here: Xcode owns the
+    SPM lifecycle, so reproducibility is the pinned ``revision`` (+ the generated
+    ``Package.resolved``). Exactly one of ``url`` (remote) or ``path`` (local) is
+    set; ``requirement``/``revision``/``version`` are remote-only.
+    """
+
+    name: str
+    products: tuple[str, ...]
+    url: str | None = None
+    path: str | None = None
+    requirement: dict[str, object] | None = None
+    revision: str | None = None
+    version: str | None = None
+    link: bool = True
+    embed: bool = True
+
+    def __post_init__(self) -> None:
+        if bool(self.url) == bool(self.path):
+            raise ValueError(
+                f"swift package {self.name!r} must have exactly one of url/path"
+            )
+
+
+@dataclass(frozen=True)
 class Lockfile:
     requires_python: str
     packages: tuple[LockedPackage, ...]
@@ -106,6 +133,7 @@ class Lockfile:
     pyproject_sha256: str
     tool_kivy_ios_schema_version: int
     xcframeworks: tuple[LockedXcframework, ...] = ()
+    swift_packages: tuple[LockedSwiftPackage, ...] = ()
     schema_version: int = TOOL_SCHEMA_VERSION
     lock_version: str = LOCK_VERSION
     created_by: str = CREATED_BY

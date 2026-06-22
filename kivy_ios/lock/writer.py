@@ -8,7 +8,13 @@ wheels by filename) so diffs across runs show only real changes.
 
 from __future__ import annotations
 
-from .model import LockedPackage, LockedWheel, LockedXcframework, Lockfile
+from .model import (
+    LockedPackage,
+    LockedSwiftPackage,
+    LockedWheel,
+    LockedXcframework,
+    Lockfile,
+)
 
 
 def dumps(lock: Lockfile) -> str:
@@ -44,6 +50,11 @@ def dumps(lock: Lockfile) -> str:
     for xc in sorted(lock.xcframeworks, key=lambda x: (x.name.lower(), x.version)):
         lines.append("")
         _emit_xcframework(lines, xc)
+
+    # --- [[tool.kivy_ios.swift_packages]] (deterministic order) ---
+    for sp in sorted(lock.swift_packages, key=lambda s: s.name):
+        lines.append("")
+        _emit_swift_package(lines, sp)
 
     return "\n".join(lines) + "\n"
 
@@ -111,6 +122,33 @@ def _emit_xcframework(lines: list[str], xc: LockedXcframework) -> None:
     lines.append(f"embed = {_b(xc.embed)}")
     if xc.source:
         lines.append(f"source = {_s(xc.source)}")
+
+
+def _emit_swift_package(lines: list[str], sp: LockedSwiftPackage) -> None:
+    lines.append("[[tool.kivy_ios.swift_packages]]")
+    lines.append(f"name = {_s(sp.name)}")
+    if sp.url:
+        lines.append(f"url = {_s(sp.url)}")
+    else:
+        path = sp.path
+        assert path is not None
+        lines.append(f"path = {_s(path)}")
+    if sp.requirement:
+        lines.append(f"requirement = {_requirement_inline(sp.requirement)}")
+    if sp.revision:
+        lines.append(f"revision = {_s(sp.revision)}")
+    if sp.version:
+        lines.append(f"version = {_s(sp.version)}")
+    lines.append(f"products = {_arr(sp.products)}")
+    lines.append(f"link = {_b(sp.link)}")
+    lines.append(f"embed = {_b(sp.embed)}")
+
+
+def _requirement_inline(requirement: dict[str, object]) -> str:
+    ((kind, value),) = requirement.items()
+    if isinstance(value, list):
+        return f"{{ {kind} = {_arr([str(v) for v in value])} }}"
+    return f"{{ {kind} = {_s(str(value))} }}"
 
 
 def _dep_inline(dep) -> str:

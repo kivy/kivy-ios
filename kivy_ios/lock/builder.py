@@ -9,7 +9,7 @@ from urllib.parse import unquote, urlparse
 
 from .. import __version__
 from ..artifacts.verify import sha256_file
-from ..config.model import Config
+from ..config.model import Config, SwiftPackageDep
 from .find_links import (
     FindLinksError,
     find_links_resolution_hint,
@@ -19,6 +19,7 @@ from .find_links import (
 )
 from .model import (
     LockedPackage,
+    LockedSwiftPackage,
     LockedWheel,
     Lockfile,
     PackageDep,
@@ -28,6 +29,12 @@ from .model import (
 from .python_meta import PythonOrgProvider, PythonXcframeworkProvider
 from .reader import compute_pyproject_sha256
 from .resolver import Resolver, ResolverError, get_resolver
+from .spm import (
+    ResolvedSwiftPackage,
+    SpmResolver,
+    SpmResolverError,
+    get_spm_resolver,
+)
 
 
 class BuildError(Exception):
@@ -41,6 +48,7 @@ def build_lockfile(
     project_root: Path | None = None,
     resolver: Resolver | None = None,
     python_provider: PythonXcframeworkProvider | None = None,
+    spm_resolver: SpmResolver | None = None,
     offline: bool = False,
     now: datetime | None = None,
 ) -> Lockfile:
@@ -124,6 +132,10 @@ def build_lockfile(
             )
         )
 
+    swift_packages = _resolve_swift_packages(
+        config.ios.swift_packages, spm_resolver, root, offline
+    )
+
     return Lockfile(
         requires_python=config.project.requires_python or ">=3.15",
         packages=tuple(packages),
@@ -135,7 +147,59 @@ def build_lockfile(
         pyproject_sha256=compute_pyproject_sha256(pyproject_text),
         tool_kivy_ios_schema_version=config.ios.schema_version,
         xcframeworks=(),  # native xcframework resolution lands in Phase 4
+        swift_packages=tuple(swift_packages),
     )
+
+
+def _resolve_swift_packages(
+    declared: tuple[SwiftPackageDep, ...],
+    spm_resolver: SpmResolver | None,
+    project_root: Path,
+    offline: bool,
+) -> list[LockedSwiftPackage]:
+    """Resolve remote SPM packages to pins; assemble lock entries (sorted by name).
+
+    Local (``path``) packages need no resolution. The resolver is only built and
+    invoked when at least one remote package is declared, so a pure-wheel (or
+    local-only) project never requires the Swift toolchain.
+    """
+    if not declared:
+        return []
+    remote = [p for p in declared if p.url]
+    resolved: dict[str, ResolvedSwiftPackage] = {}
+    if remote:
+        resolver = spm_resolver or get_spm_resolver()
+        try:
+            for r in resolver.resolve(
+                remote, project_root=project_root, offline=offline
+            ):
+                resolved[r.name] = r
+        except SpmResolverError as exc:
+            raise BuildError(str(exc)) from exc
+
+    out: list[LockedSwiftPackage] = []
+    for pkg in declared:
+        pin = resolved.get(pkg.name)
+        if pkg.url and pin is None:
+            raise BuildError(
+                f"swift package {pkg.name!r} resolved to no revision; re-run lock "
+                f"with network access."
+            )
+        out.append(
+            LockedSwiftPackage(
+                name=pkg.name,
+                products=pkg.products,
+                url=pkg.url,
+                path=pkg.path,
+                requirement=pkg.requirement if pkg.url else None,
+                revision=pin.revision if pin else None,
+                version=pin.version if pin else None,
+                link=pkg.link,
+                embed=pkg.embed,
+            )
+        )
+    out.sort(key=lambda s: s.name)
+    return out
 
 
 def _locked_wheel_from_resolved(w, *, project_root: Path) -> LockedWheel:

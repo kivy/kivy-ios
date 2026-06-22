@@ -8,6 +8,7 @@ import pytest
 
 from kivy_ios.lock.python_meta import PythonXcframeworkInfo
 from kivy_ios.lock.resolver import ResolvedPackage, ResolvedWheel, slice_tags
+from kivy_ios.lock.spm import ResolvedSwiftPackage
 
 
 class FakeResolver:
@@ -90,9 +91,41 @@ class FakePythonProvider:
         )
 
 
+class FakeSpmResolver:
+    """Deterministic SPM resolver: pins each remote package to a fake revision."""
+
+    def __init__(self) -> None:
+        self.calls: list[dict] = []
+
+    def resolve(self, packages, *, project_root, offline=False):
+        self.calls.append(
+            {
+                "names": [p.name for p in packages],
+                "project_root": project_root,
+                "offline": offline,
+            }
+        )
+        out = []
+        for i, pkg in enumerate(packages):
+            # Only remote packages reach the resolver.
+            out.append(
+                ResolvedSwiftPackage(
+                    name=pkg.name,
+                    revision=f"{i:x}" * 40,
+                    version="9.9.9",
+                )
+            )
+        return out
+
+
 @pytest.fixture
 def fake_resolver():
     return FakeResolver()
+
+
+@pytest.fixture
+def fake_spm_resolver():
+    return FakeSpmResolver()
 
 
 @pytest.fixture

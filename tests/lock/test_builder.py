@@ -9,6 +9,7 @@ import pytest
 from kivy_ios.config import load_config_from_text
 from kivy_ios.lock import BuildError, build_lockfile, dumps, loads, semantic_equal
 from kivy_ios.lock.reader import compute_pyproject_sha256, is_in_sync
+from tests.lock.conftest import FakeResolver
 
 
 def _build(toml, resolver, provider, **kw):
@@ -154,6 +155,121 @@ class TestDriftAndCheck:
         )
         assert a.generated_at != b.generated_at
         assert semantic_equal(a, b)
+
+
+_SWIFT_BASE = (
+    "[project]\nname='a'\nversion='1'\ndependencies=[]\n"
+    "[tool.kivy]\napp_dir='src'\n[tool.kivy.ios]\nschema_version=1\n"
+    "bundle_id='o.x.a'\n[tool.kivy.ios.python]\nversion='3.15.0'\n"
+)
+
+
+class TestSwiftPackages:
+    _REMOTE_AND_LOCAL = _SWIFT_BASE + (
+        "[tool.kivy.ios.native.swift_packages]\n"
+        'Sentry = { url = "https://github.com/getsentry/sentry-cocoa", '
+        'requirement = { from = "8.49.0" }, products = ["Sentry"] }\n'
+        'MyKit = { path = "vendor/MyKit", products = ["MyKit"], embed = false }\n'
+    )
+
+    def test_remote_pinned_and_local_passthrough(
+        self, fake_spm_resolver, fake_python_provider
+    ):
+        lock = _build(
+            self._REMOTE_AND_LOCAL,
+            FakeResolver(),
+            fake_python_provider,
+            spm_resolver=fake_spm_resolver,
+        )
+        by_name = {s.name: s for s in lock.swift_packages}
+        sentry = by_name["Sentry"]
+        assert sentry.url == "https://github.com/getsentry/sentry-cocoa"
+        assert sentry.requirement == {"from": "8.49.0"}
+        assert sentry.revision and sentry.version == "9.9.9"
+        assert sentry.products == ("Sentry",)
+
+        mykit = by_name["MyKit"]
+        assert mykit.path == "vendor/MyKit"
+        assert mykit.requirement is None
+        assert mykit.revision is None and mykit.version is None
+        assert mykit.embed is False
+
+    def test_only_remote_packages_reach_resolver(
+        self, fake_spm_resolver, fake_python_provider
+    ):
+        _build(
+            self._REMOTE_AND_LOCAL,
+            FakeResolver(),
+            fake_python_provider,
+            spm_resolver=fake_spm_resolver,
+        )
+        assert fake_spm_resolver.calls[0]["names"] == ["Sentry"]
+
+    def test_sorted_by_name(self, fake_spm_resolver, fake_python_provider):
+        toml = _SWIFT_BASE + (
+            "[tool.kivy.ios.native.swift_packages]\n"
+            'Zeta = { path = "vendor/Zeta", products = ["Zeta"] }\n'
+            'Alpha = { path = "vendor/Alpha", products = ["Alpha"] }\n'
+        )
+        lock = _build(
+            toml, FakeResolver(), fake_python_provider, spm_resolver=fake_spm_resolver
+        )
+        assert [s.name for s in lock.swift_packages] == ["Alpha", "Zeta"]
+
+    def test_local_only_never_builds_resolver(self, fake_python_provider):
+        # No spm_resolver passed and no remote packages: must not need a toolchain.
+        toml = _SWIFT_BASE + (
+            "[tool.kivy.ios.native.swift_packages]\n"
+            'MyKit = { path = "vendor/MyKit", products = ["MyKit"] }\n'
+        )
+        lock = _build(toml, FakeResolver(), fake_python_provider)
+        assert len(lock.swift_packages) == 1
+        assert lock.swift_packages[0].revision is None
+
+    def test_resolver_error_becomes_build_error(self, fake_python_provider):
+        from kivy_ios.lock.spm import SpmResolverError
+
+        class Boom:
+            def resolve(self, packages, *, project_root, offline=False):
+                raise SpmResolverError("swift exploded")
+
+        with pytest.raises(BuildError, match="swift exploded"):
+            _build(
+                self._REMOTE_AND_LOCAL,
+                FakeResolver(),
+                fake_python_provider,
+                spm_resolver=Boom(),
+            )
+
+    def test_round_trip_preserves_swift_packages(
+        self, fake_spm_resolver, fake_python_provider
+    ):
+        lock = _build(
+            self._REMOTE_AND_LOCAL,
+            FakeResolver(),
+            fake_python_provider,
+            spm_resolver=fake_spm_resolver,
+        )
+        text = dumps(lock)
+        reloaded = loads(text)
+        assert semantic_equal(lock, reloaded)
+        assert dumps(reloaded) == text
+        assert {s.name for s in reloaded.swift_packages} == {"Sentry", "MyKit"}
+
+    def test_range_requirement_round_trips(
+        self, fake_spm_resolver, fake_python_provider
+    ):
+        toml = _SWIFT_BASE + (
+            "[tool.kivy.ios.native.swift_packages]\n"
+            'Foo = { url = "https://example.com/foo.git", '
+            'requirement = { range = ["1.0.0", "2.0.0"] }, products = ["Foo"] }\n'
+        )
+        lock = _build(
+            toml, FakeResolver(), fake_python_provider, spm_resolver=fake_spm_resolver
+        )
+        reloaded = loads(dumps(lock))
+        (foo,) = reloaded.swift_packages
+        assert foo.requirement == {"range": ["1.0.0", "2.0.0"]}
 
 
 class TestRoundTrip:
