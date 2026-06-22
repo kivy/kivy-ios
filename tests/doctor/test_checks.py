@@ -6,12 +6,24 @@ import struct
 
 import pytest
 
+from kivy_ios.config import load_config_from_text
 from kivy_ios.doctor import checks as C
 from kivy_ios.doctor.result import Status, worst_status
 from kivy_ios.doctor.runner import run_checks
-from kivy_ios.lock import Lockfile, PythonXcframework
+from kivy_ios.lock import LockedSwiftPackage, Lockfile, PythonXcframework
 
 from .conftest import FakeProbe
+
+
+def _config_with_swift_package():
+    return load_config_from_text(
+        "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='src'\n"
+        "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+        "[tool.kivy.ios.python]\nversion='3.15.0'\n"
+        "[tool.kivy.ios.native.swift_packages]\n"
+        'Sentry = { url = "https://github.com/getsentry/sentry-cocoa", '
+        'requirement = { from = "8.49.0" }, products = ["Sentry"] }'
+    )
 
 
 class TestEnvironmentChecks:
@@ -119,6 +131,34 @@ class TestProjectChecks:
         assert r.status is Status.FAIL
         assert "www.python.org" in r.detail
 
+    def test_swift_toolchain_skipped_without_packages(self, config, fake_probe):
+        r = C.check_swift_toolchain(fake_probe, config)
+        assert r.status is Status.SKIP
+
+    def test_swift_toolchain_fail_when_missing(self):
+        cfg = _config_with_swift_package()
+        probe = FakeProbe(swift=False)
+        r = C.check_swift_toolchain(probe, cfg)
+        assert r.status is Status.FAIL
+        assert "swift not found" in r.detail
+
+    def test_swift_toolchain_pass(self):
+        cfg = _config_with_swift_package()
+        r = C.check_swift_toolchain(FakeProbe(swift=True), cfg)
+        assert r.status is Status.PASS
+        assert "1 swift package" in r.detail
+
+    def test_hosts_include_swift_package_git_host(self, fake_probe):
+        lock = _lock_with_swift_url("https://github.com/getsentry/sentry-cocoa")
+        r = C.check_hosts_reachable(fake_probe, lock)
+        assert r.status is Status.PASS
+        assert "github.com" in r.detail
+
+    def test_hosts_swift_scp_url_host(self, fake_probe):
+        lock = _lock_with_swift_url("git@github.com:getsentry/sentry-cocoa.git")
+        r = C.check_hosts_reachable(fake_probe, lock)
+        assert "github.com" in r.detail
+
     def test_native_binary_macos_fails(self, config, tmp_path, fake_probe_factory):
         (tmp_path / "src").mkdir()
         so = tmp_path / "src" / "ext.so"
@@ -156,7 +196,7 @@ class TestRunModes:
     def test_environment_mode_skips_project(self, fake_probe):
         results = run_checks(fake_probe, toolchain_version="3.0.0", config=None)
         skipped = [r for r in results if r.status is Status.SKIP]
-        assert len(skipped) == 8
+        assert len(skipped) == 9
 
     def test_project_mode_runs_all(self, fake_probe, config, tmp_path):
         results = run_checks(
@@ -256,6 +296,28 @@ def _lock_with_python_url(url: str) -> Lockfile:
         generated_at="t",
         pyproject_sha256="d" * 64,
         tool_kivy_ios_schema_version=1,
+    )
+
+
+def _lock_with_swift_url(url: str) -> Lockfile:
+    return Lockfile(
+        requires_python=">=3.15",
+        packages=(),
+        python_xcframework=PythonXcframework(version="3.15.0", url="", sha256="c" * 64),
+        toolchain_version="3.0.0",
+        generated_at="t",
+        pyproject_sha256="d" * 64,
+        tool_kivy_ios_schema_version=1,
+        swift_packages=(
+            LockedSwiftPackage(
+                name="Sentry",
+                products=("Sentry",),
+                url=url,
+                requirement={"from": "8.49.0"},
+                revision="a" * 40,
+                version="8.49.0",
+            ),
+        ),
     )
 
 

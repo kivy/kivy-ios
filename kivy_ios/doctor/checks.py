@@ -121,6 +121,32 @@ def check_signing_identity(probe: Probe, config: Config) -> CheckResult:
     return CheckResult("Signing identity", Status.PASS, signing.identity)
 
 
+def check_swift_toolchain(probe: Probe, config: Config) -> CheckResult:
+    """SPM resolution (lock) and compilation (build) need Xcode's Swift toolchain.
+
+    Skipped for pure-wheel projects — only relevant when ``swift_packages`` is
+    declared (spec 07).
+    """
+    packages = config.ios_required.swift_packages
+    if not packages:
+        return CheckResult(
+            "Swift package toolchain", Status.SKIP, "no swift_packages declared"
+        )
+    if not probe.has_swift_toolchain():
+        return CheckResult(
+            "Swift package toolchain",
+            Status.FAIL,
+            "swift not found",
+            hint="install Xcode's Swift toolchain (`xcode-select --switch "
+            "/Applications/Xcode.app`) — required to resolve/build Swift packages.",
+        )
+    return CheckResult(
+        "Swift package toolchain",
+        Status.PASS,
+        f"{len(packages)} swift package(s) declared",
+    )
+
+
 def check_app_icon(config: Config, project_root: Path) -> CheckResult:
     source = config.ios_required.icons.source
     if not source:
@@ -277,6 +303,11 @@ def _lock_hosts(lock: Lockfile) -> set[str]:
     for xc in lock.xcframeworks:
         if xc.url:
             _add_host(hosts, xc.url)
+    for sp in lock.swift_packages:
+        if sp.url:
+            host = _git_host(sp.url)
+            if host:
+                hosts.add(host)
     if lock.python_xcframework.url:
         _add_host(hosts, lock.python_xcframework.url)
     return hosts
@@ -286,3 +317,12 @@ def _add_host(hosts: set[str], url: str) -> None:
     netloc = urlparse(url).hostname
     if netloc:
         hosts.add(netloc)
+
+
+def _git_host(url: str) -> str | None:
+    """Host of a Git URL, handling both ``https://`` and scp-like ``git@host:``."""
+    if "://" in url:
+        return urlparse(url).hostname
+    if "@" in url and ":" in url:
+        return url.split("@", 1)[1].split(":", 1)[0] or None
+    return urlparse(url).hostname

@@ -197,7 +197,20 @@ def render_kivy_tables(
             "# TODO: set your Apple Developer Team ID for device/release builds",
             "auto_signing = true",
         ]
+    lines += _SWIFT_PACKAGES_STUB
     return "\n".join(lines) + "\n"
+
+
+# Commented native-dependency stub. Left inert so a vanilla app needs no Swift
+# toolchain; uncomment to pull in an SPM package (resolved + embedded by Xcode).
+_SWIFT_PACKAGES_STUB = [
+    "",
+    "# Optional: native Swift Package Manager dependencies (spec 07). Xcode resolves,",
+    "# builds, and embeds these; `toolchain lock` pins each to a commit.",
+    "# [tool.kivy.ios.native.swift_packages]",
+    '# Sentry = { url = "https://github.com/getsentry/sentry-cocoa", '
+    'requirement = { from = "8.49.0" }, products = ["Sentry"] }',
+]
 
 
 def has_kivy_ios_table(text: str) -> bool:

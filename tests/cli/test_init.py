@@ -81,6 +81,19 @@ class TestWriterUnits:
         # commented so the default (both arches) stays in effect until edited
         assert '# simulator_archs = ["arm64"]' in block
 
+    def test_render_kivy_tables_seeds_commented_swift_packages(self):
+        block = render_kivy_tables("myapp")
+        # commented so a vanilla app needs no Swift toolchain until edited
+        assert "# [tool.kivy.ios.native.swift_packages]" in block
+        assert "sentry-cocoa" in block
+        # the stub must stay inert: no active swift_packages table parsed
+        from kivy_ios.config import load_config_from_text
+
+        cfg = load_config_from_text(
+            '[project]\nname = "myapp"\nversion = "1.0.0"\n\n' + block
+        )
+        assert cfg.ios_required.swift_packages == ()
+
     @pytest.mark.parametrize("has_kivy", [False, True])
     def test_render_kivy_tables_roundtrips_through_loader(self, has_kivy):
         from kivy_ios.config import load_config_from_text

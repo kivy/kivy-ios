@@ -231,6 +231,117 @@ surfaces as an Xcode duplicate-output error. `toolchain doctor` may warn when a
 declared SPM product name matches a known wheel-embedded framework, but v3.0 does
 not attempt to reconcile the two providers automatically.
 
+## Calling a Swift package from Python
+
+Everything above gets an SPM product **built, embedded, and loaded** — the
+framework is in the app's process at launch. *Calling* it from Python is a
+separate concern with a clean boundary: **kivy-ios's responsibility ends once the
+framework is loadable; reaching its API from Python is the app author's.** This
+section documents that boundary, because it is the first thing a user hits after
+declaring a package.
+
+### pyobjus reaches Swift only through the Objective-C runtime
+
+The Kivy bridge for native calls is `pyobjus`, which works purely at runtime
+through the Objective-C runtime (`objc_getClass`, `sel_registerName`,
+`objc_msgSend`) and reads method signatures from the runtime's own type
+encodings. It never parses a header. Consequently **pyobjus can call a Swift
+symbol if and only if that symbol is exposed to the Objective-C runtime** — i.e.
+the Swift author annotated it `@objc`. Pure-Swift API (Swift-only types,
+`struct`/payload-`enum`, generics, SwiftUI surfaces) is invisible to the runtime
+and unreachable by pyobjus, regardless of any project wiring kivy-ios does.
+
+### No bridging file is generated, because none can help
+
+"Swift bridging" names two compile-time artifacts pointing in opposite
+directions; **neither is relevant to a runtime pyobjus call**:
+
+| Artifact | Direction | Purpose |
+|---|---|---|
+| `<App>-Bridging-Header.h` | Objective-C → Swift | lets a target's Swift code see its Objective-C code |
+| `<Module>-Swift.h` (compiler-generated) | Swift → Objective-C | lets Objective-C *source* call `@objc` Swift at compile time |
+
+pyobjus compiles against nothing and calls at runtime, so it uses no header. What
+an `@objc` annotation actually produces — and all that matters here — is
+Objective-C **runtime metadata baked into the framework binary**, present whether
+or not a header is generated. kivy-ios therefore emits **no** bridging file for
+this channel: a generated header would be unused (pyobjus needs none) or
+impossible (nothing can retroactively expose a non-`@objc` API). This matches the
+spike finding ([docs/dev/swift-spm-findings.md](../dev/swift-spm-findings.md))
+that the app target needs no Swift-specific build settings or `.swift` stub.
+
+### Requirements for a Python-callable Swift symbol
+
+For `autoclass("Foo")` followed by a method call to succeed:
+
+1. `Foo` is declared `@objc(Foo)` and inherits `NSObject`. The explicit
+   `@objc(Foo)` gives a stable runtime name; a bare `@objc` leaves Swift's
+   mangled name (`_TtC…`), which pyobjus cannot look up cleanly.
+2. The called method is `@objc` with Objective-C-representable parameter and
+   return types (`String`↔`NSString`, `Int`↔`NSInteger`, Objective-C objects —
+   *not* Swift structs, payload enums, tuples, or generics).
+3. The framework is loaded — guaranteed by the link+embed wiring above; no
+   `dlopen` / `load_framework` call is needed for a linked product.
+
+Items 1–2 are properties of the **package's own source**. If a package ships no
+`@objc` surface, kivy-ios cannot expose it — that is not a wiring gap but an
+absence of runtime symbols.
+
+### Reaching a non-`@objc` package: a local Swift shim
+
+The supported pattern for a pure-Swift dependency is an app-authored **`@objc`
+shim** — a small Swift package wrapping the upstream API in
+Objective-C-representable signatures — declared through the **`path`** form of
+`swift_packages` (specified above). kivy-ios wires the local shim like any other
+SPM dependency; the shim depends on the upstream package and re-exports it behind
+`@objc`:
+
+```swift
+// swift-shims/Sources/AppBridge/AppBridge.swift
+import Foundation
+import SomePureSwiftSDK
+
+@objc(AppBridge)
+public final class AppBridge: NSObject {
+    @objc public func start(_ token: String) {
+        SomePureSwiftSDK.configure(token: token)   // Swift-only API, hidden here
+    }
+}
+```
+
+```toml
+[tool.kivy.ios.native.swift_packages]
+AppBridge = { path = "swift-shims", products = ["AppBridge"] }
+```
+
+```python
+from pyobjus import autoclass
+AppBridge = autoclass("AppBridge")
+AppBridge.alloc().init().start_(token)
+```
+
+The shim is irreducibly app-specific — it depends on which API and call surface
+the app wants — so it belongs to the app, in the same category as `main.py`.
+kivy-ios provides the **mechanism** (the local-package channel), not the shim.
+
+### Alternative: `@_cdecl` + ctypes
+
+A package or shim may instead export plain C entry points with `@_cdecl` and be
+called from Python via the standard-library `ctypes` — the same mechanism the
+vendored `ios` module uses for `objc_msgSend` ([spec 05](05-cli-shape.md)). This
+bypasses pyobjus and the Objective-C runtime entirely, sidesteps the
+`@objc`-representability constraints (the author marshals C types directly), and
+adds no pyobjus dependency. It suits a narrow, performance-insensitive call
+surface; a broad object-oriented API is better served by the `@objc` shim above.
+
+### Why there is no `doctor` check for this
+
+Whether a product exposes an `@objc` surface can only be read from the built
+framework's runtime metadata, which does not exist until Xcode has compiled the
+package — there is no reliable static, pre-build check. kivy-ios documents the
+requirement rather than verifying it; a call into a non-exposed symbol surfaces at
+runtime as a pyobjus `objc_getClass` / selector failure.
+
 ## Validation (extends spec 01 §"Validation rules")
 
 `toolchain lock` / `toolchain build` reject a `pyproject.toml` that:
@@ -272,7 +383,7 @@ supporting source SPM. Users who require kivy-ios-side hash verification of a
 native dependency should prefer the `[tool.kivy.ios.native.xcframeworks]` channel
 (build the library into an `.xcframework`, pin it by URL + SHA-256).
 
-## Open questions (to settle before implementation)
+## Open questions (resolved)
 
 1. **Embedding nuance — resolved (Phase 0 spike, see
    [docs/dev/swift-spm-findings.md](../dev/swift-spm-findings.md)).** For a
@@ -287,11 +398,16 @@ native dependency should prefer the `[tool.kivy.ios.native.xcframeworks]` channe
    Swift runtime is referenced by absolute `/usr/lib/swift` install names); the
    only app-target requirement is `@executable_path/Frameworks` on the runpath,
    which kivy-ios already needs for its other embedded frameworks.
-2. **`Package.resolved` format version.** Xcode has emitted multiple
-   `Package.resolved` schema versions (v1/v2/v3). Pin the version kivy-ios writes
-   to the minimum supported Xcode's expectation, and confirm forward Xcode
-   versions accept it.
-3. **Schema version.** Adding `swift_packages` is additive to `[tool.kivy.ios]`
-   (new optional subtable) and to `[tool.kivy_ios]` in the lock, so by spec 01's
-   evolution policy it does **not** bump `[tool.kivy.ios].schema_version` nor the
-   lock's `[tool.kivy_ios].schema_version`. Confirm this reading before release.
+2. **`Package.resolved` format version — resolved.** kivy-ios writes schema
+   **version 2** (`{ "pins": [ … ], "version": 2 }`, the flattened layout with
+   top-level `pins` and per-pin `identity`/`kind`/`location`/`state`). v2 is
+   emitted by Xcode 13–15 and is read by every currently-supported Xcode; v3
+   only adds an `originHash` that Xcode recomputes on open, so writing v2 is
+   forward-compatible. Implemented in
+   [`kivy_ios/project/swift_packages.py`](../../kivy_ios/project/swift_packages.py)
+   (`PACKAGE_RESOLVED_VERSION = 2`).
+3. **Schema version — resolved.** Adding `swift_packages` is additive to
+   `[tool.kivy.ios]` (new optional subtable) and to `[tool.kivy_ios]` in the
+   lock, so by spec 01's evolution policy it does **not** bump
+   `[tool.kivy.ios].schema_version` nor the lock's
+   `[tool.kivy_ios].schema_version`. Both remain at `1`.

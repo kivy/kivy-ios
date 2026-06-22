@@ -16,6 +16,7 @@ class FakeProbe:
         self._xcode = overrides.get("xcode", "16.0")
         self._select = overrides.get("select", "/Applications/Xcode.app")
         self._clang = overrides.get("clang", True)
+        self._swift = overrides.get("swift", True)
         self._runtimes = overrides.get("runtimes", ["18.0"])
         self._latest = overrides.get("latest", None)
         self._identities = overrides.get("identities", [])
@@ -30,6 +31,9 @@ class FakeProbe:
 
     def has_xcrun_clang(self):
         return self._clang
+
+    def has_swift_toolchain(self):
+        return self._swift
 
     def simulator_runtimes(self):
         return list(self._runtimes)
