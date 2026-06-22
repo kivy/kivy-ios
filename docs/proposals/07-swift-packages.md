@@ -251,25 +251,6 @@ the Swift author annotated it `@objc`. Pure-Swift API (Swift-only types,
 `struct`/payload-`enum`, generics, SwiftUI surfaces) is invisible to the runtime
 and unreachable by pyobjus, regardless of any project wiring kivy-ios does.
 
-### No bridging file is generated, because none can help
-
-"Swift bridging" names two compile-time artifacts pointing in opposite
-directions; **neither is relevant to a runtime pyobjus call**:
-
-| Artifact | Direction | Purpose |
-|---|---|---|
-| `<App>-Bridging-Header.h` | Objective-C → Swift | lets a target's Swift code see its Objective-C code |
-| `<Module>-Swift.h` (compiler-generated) | Swift → Objective-C | lets Objective-C *source* call `@objc` Swift at compile time |
-
-pyobjus compiles against nothing and calls at runtime, so it uses no header. What
-an `@objc` annotation actually produces — and all that matters here — is
-Objective-C **runtime metadata baked into the framework binary**, present whether
-or not a header is generated. kivy-ios therefore emits **no** bridging file for
-this channel: a generated header would be unused (pyobjus needs none) or
-impossible (nothing can retroactively expose a non-`@objc` API). This matches the
-spike finding ([docs/dev/swift-spm-findings.md](../dev/swift-spm-findings.md))
-that the app target needs no Swift-specific build settings or `.swift` stub.
-
 ### Requirements for a Python-callable Swift symbol
 
 For `autoclass("Foo")` followed by a method call to succeed:
