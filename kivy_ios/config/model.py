@@ -110,6 +110,38 @@ class XcframeworkDep:
     embed: bool = True
 
 
+# SPM version-rule kinds (spec 07), mapping 1:1 to Swift Package Manager's own
+# requirement rules. Each ``requirement`` inline table sets exactly one of these.
+VALID_SWIFT_REQUIREMENT_KINDS = frozenset(
+    {"exact", "from", "up_to_next_minor", "range", "branch", "revision"}
+)
+
+
+@dataclass(frozen=True)
+class SwiftPackageDep:
+    """One ``[tool.kivy.ios.native.swift_packages]`` entry (spec 07).
+
+    Exactly one of ``url`` (remote, with a ``requirement`` rule) or ``path``
+    (local, repo-relative) is set. ``requirement`` is a single-key inline table
+    (one of ``VALID_SWIFT_REQUIREMENT_KINDS``); it is ``None`` for local
+    packages.
+    """
+
+    name: str
+    products: tuple[str, ...]
+    url: str | None = None
+    path: str | None = None
+    requirement: dict[str, object] | None = None
+    link: bool = True
+    embed: bool = True
+
+    def __post_init__(self) -> None:
+        if bool(self.url) == bool(self.path):
+            raise ValueError(
+                f"swift package {self.name!r} must have exactly one of url/path"
+            )
+
+
 @dataclass(frozen=True)
 class SigningConfig:
     team_id: str = ""
@@ -135,6 +167,7 @@ class IosConfig:
     icons: IconConfig = field(default_factory=IconConfig)
     splash: SplashConfig = field(default_factory=SplashConfig)
     xcframeworks: tuple[XcframeworkDep, ...] = ()
+    swift_packages: tuple[SwiftPackageDep, ...] = ()
     entitlements: dict[str, object] = field(default_factory=dict)
     signing: SigningConfig = field(default_factory=SigningConfig)
     privacy_manifest_source: str | None = None

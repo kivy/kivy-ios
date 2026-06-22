@@ -7,7 +7,7 @@ import textwrap
 import pytest
 
 from kivy_ios.config import ConfigError, load_config, load_config_from_text
-from kivy_ios.config.model import XcframeworkDep
+from kivy_ios.config.model import SwiftPackageDep, XcframeworkDep
 
 
 def load(toml: str, **kw):
@@ -80,6 +80,162 @@ class TestHappyPath:
         local = next(x for x in ios.xcframeworks if x.name == "Local")
         assert local.embed is False
         assert local.link is True
+
+
+def load_swift(body: str):
+    """Load a minimal valid pyproject with ``body`` appended to it.
+
+    Header and body are dedented independently so callers can pass either
+    indented blocks or flat ``"\\n"``-joined strings.
+    """
+    header = textwrap.dedent(
+        """
+        [project]
+        name = "app"
+        version = "0.1.0"
+        [tool.kivy]
+        app_dir = "src"
+        [tool.kivy.ios]
+        schema_version = 1
+        bundle_id = "org.example.app"
+        """
+    )
+    return load_config_from_text((header + textwrap.dedent(body)).strip())
+
+
+class TestSwiftPackages:
+    def test_none_by_default(self):
+        cfg = load_swift("")
+        assert cfg.ios_required.swift_packages == ()
+
+    def test_remote_and_local(self):
+        cfg = load_swift(
+            """
+            [tool.kivy.ios.native.swift_packages]
+            Lottie = { url = "https://github.com/airbnb/lottie-ios.git", requirement = { from = "4.4.0" }, products = ["Lottie"] }
+            MyKit = { path = "vendor/MyKit", products = ["MyKit", "MyKitUI"], embed = false }
+            """
+        )
+        pkgs = {p.name: p for p in cfg.ios_required.swift_packages}
+        lottie = pkgs["Lottie"]
+        assert lottie.url == "https://github.com/airbnb/lottie-ios.git"
+        assert lottie.path is None
+        assert lottie.requirement == {"from": "4.4.0"}
+        assert lottie.products == ("Lottie",)
+        assert lottie.link is True and lottie.embed is True
+
+        mykit = pkgs["MyKit"]
+        assert mykit.path == "vendor/MyKit"
+        assert mykit.url is None
+        assert mykit.requirement is None
+        assert mykit.products == ("MyKit", "MyKitUI")
+        assert mykit.embed is False
+
+    def test_range_requirement(self):
+        cfg = load_swift(
+            """
+            [tool.kivy.ios.native.swift_packages]
+            Foo = { url = "https://example.com/foo.git", requirement = { range = ["1.0.0", "2.0.0"] }, products = ["Foo"] }
+            """
+        )
+        (foo,) = cfg.ios_required.swift_packages
+        assert foo == SwiftPackageDep(
+            name="Foo",
+            products=("Foo",),
+            url="https://example.com/foo.git",
+            requirement={"range": ["1.0.0", "2.0.0"]},
+        )
+
+    def test_table_must_be_table(self):
+        with pytest.raises(ConfigError, match="must be a table"):
+            load_swift("[tool.kivy.ios.native]\nswift_packages = 'nope'\n")
+
+    def test_entry_must_be_inline_table(self):
+        with pytest.raises(ConfigError, match="inline table"):
+            load_swift("[tool.kivy.ios.native.swift_packages]\nFoo = 'nope'\n")
+
+    def test_requires_url_or_path(self):
+        with pytest.raises(ConfigError, match="exactly one of 'url' or 'path'"):
+            load_swift(
+                '[tool.kivy.ios.native.swift_packages]\nFoo = { products = ["Foo"] }\n'
+            )
+
+    def test_rejects_both_url_and_path(self):
+        with pytest.raises(ConfigError, match="exactly one of 'url' or 'path'"):
+            load_swift(
+                "[tool.kivy.ios.native.swift_packages]\n"
+                'Foo = { url = "https://x/foo.git", path = "vendor/Foo", '
+                'requirement = { from = "1.0.0" }, products = ["Foo"] }\n'
+            )
+
+    def test_remote_requires_requirement(self):
+        with pytest.raises(ConfigError, match="requirement"):
+            load_swift(
+                "[tool.kivy.ios.native.swift_packages]\n"
+                'Foo = { url = "https://x/foo.git", products = ["Foo"] }\n'
+            )
+
+    def test_unknown_requirement_rule(self):
+        with pytest.raises(ConfigError, match="unknown requirement rule"):
+            load_swift(
+                "[tool.kivy.ios.native.swift_packages]\n"
+                'Foo = { url = "https://x/foo.git", '
+                'requirement = { latest = "yes" }, products = ["Foo"] }\n'
+            )
+
+    def test_requirement_must_have_one_rule(self):
+        with pytest.raises(ConfigError, match="exactly one"):
+            load_swift(
+                "[tool.kivy.ios.native.swift_packages]\n"
+                'Foo = { url = "https://x/foo.git", '
+                'requirement = { from = "1.0.0", exact = "1.0.0" }, '
+                'products = ["Foo"] }\n'
+            )
+
+    def test_range_must_be_two_strings(self):
+        with pytest.raises(ConfigError, match="two version strings"):
+            load_swift(
+                "[tool.kivy.ios.native.swift_packages]\n"
+                'Foo = { url = "https://x/foo.git", '
+                'requirement = { range = ["1.0.0"] }, products = ["Foo"] }\n'
+            )
+
+    def test_string_requirement_must_be_nonempty(self):
+        with pytest.raises(ConfigError, match="must be a non-empty string"):
+            load_swift(
+                "[tool.kivy.ios.native.swift_packages]\n"
+                'Foo = { url = "https://x/foo.git", '
+                'requirement = { from = "" }, products = ["Foo"] }\n'
+            )
+
+    def test_local_path_must_be_relative(self):
+        with pytest.raises(ConfigError, match="must be relative"):
+            load_swift(
+                "[tool.kivy.ios.native.swift_packages]\n"
+                'Foo = { path = "/abs/MyKit", products = ["Foo"] }\n'
+            )
+
+    def test_local_path_must_not_escape(self):
+        with pytest.raises(ConfigError, match="must not escape"):
+            load_swift(
+                "[tool.kivy.ios.native.swift_packages]\n"
+                'Foo = { path = "../MyKit", products = ["Foo"] }\n'
+            )
+
+    def test_products_required(self):
+        with pytest.raises(ConfigError, match="products"):
+            load_swift(
+                "[tool.kivy.ios.native.swift_packages]\n"
+                'Foo = { url = "https://x/foo.git", '
+                'requirement = { from = "1.0.0" } }\n'
+            )
+
+    def test_products_must_be_nonempty(self):
+        with pytest.raises(ConfigError, match="products"):
+            load_swift(
+                "[tool.kivy.ios.native.swift_packages]\n"
+                'Foo = { path = "vendor/Foo", products = [] }\n'
+            )
 
 
 class TestRule1Project:

@@ -13,6 +13,7 @@ from .model import (
     ProjectMeta,
     SigningConfig,
     SplashConfig,
+    SwiftPackageDep,
     XcframeworkDep,
 )
 
@@ -28,5 +29,6 @@ __all__ = [
     "ProjectMeta",
     "SigningConfig",
     "SplashConfig",
+    "SwiftPackageDep",
     "XcframeworkDep",
 ]

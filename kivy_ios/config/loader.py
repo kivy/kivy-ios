@@ -24,6 +24,7 @@ from .model import (
     SUPPORTED_IOS_SCHEMA_VERSION,
     VALID_ORIENTATIONS,
     VALID_SIMULATOR_ARCHS,
+    VALID_SWIFT_REQUIREMENT_KINDS,
     Author,
     Config,
     IconConfig,
@@ -32,6 +33,7 @@ from .model import (
     ProjectMeta,
     SigningConfig,
     SplashConfig,
+    SwiftPackageDep,
     XcframeworkDep,
 )
 
@@ -334,6 +336,7 @@ def _parse_ios(
     icons = _parse_icons(ios)
     splash = _parse_splash(ios)
     xcframeworks = _parse_xcframeworks(ios)
+    swift_packages = _parse_swift_packages(ios)
     signing = _parse_signing(ios)
     info_plist = _parse_info_plist(ios, finder)
     build_settings = _parse_build_settings(ios, finder)
@@ -353,6 +356,7 @@ def _parse_ios(
         icons=icons,
         splash=splash,
         xcframeworks=tuple(xcframeworks),
+        swift_packages=tuple(swift_packages),
         entitlements=entitlements,
         signing=signing,
         privacy_manifest_source=privacy_source,
@@ -595,6 +599,130 @@ def _parse_xcframeworks(ios: dict) -> list[XcframeworkDep]:
             )
         )
     return out
+
+
+def _parse_swift_packages(ios: dict) -> list[SwiftPackageDep]:
+    native = ios.get("native")
+    if not isinstance(native, dict):
+        return []
+    table = native.get("swift_packages")
+    if table is None:
+        return []
+    if not isinstance(table, dict):
+        raise ConfigError(
+            "[tool.kivy.ios.native.swift_packages] must be a table",
+            key_path="tool.kivy.ios.native.swift_packages",
+        )
+    out: list[SwiftPackageDep] = []
+    for name, entry in table.items():
+        key_path = f"tool.kivy.ios.native.swift_packages.{name}"
+        if not isinstance(entry, dict):
+            raise ConfigError(
+                f"swift package {name!r} must be an inline table",
+                key_path=key_path,
+            )
+        url = entry.get("url")
+        path = entry.get("path")
+        if url is not None and (not isinstance(url, str) or not url):
+            raise ConfigError(
+                f"swift package {name!r} 'url' must be a non-empty string",
+                key_path=key_path,
+            )
+        # Rule: exactly one of url / path identifies the package source.
+        if bool(url) == bool(path):
+            raise ConfigError(
+                f"swift package {name!r} must set exactly one of 'url' or 'path'",
+                key_path=key_path,
+                hint="a remote package needs 'url' + 'requirement'; a local one "
+                "needs a repo-relative 'path'.",
+            )
+        requirement: dict[str, object] | None = None
+        if url:
+            requirement = _parse_swift_requirement(
+                name, entry.get("requirement"), key_path
+            )
+        else:
+            path = _validate_swift_path(name, path, key_path)
+        products = entry.get("products")
+        if (
+            not isinstance(products, list)
+            or not products
+            or not all(isinstance(p, str) and p for p in products)
+        ):
+            raise ConfigError(
+                f"swift package {name!r} requires a non-empty 'products' list of "
+                f"strings (the SPM library product(s) to link)",
+                key_path=key_path,
+            )
+        out.append(
+            SwiftPackageDep(
+                name=name,
+                products=tuple(products),
+                url=url or None,
+                path=path or None,
+                requirement=requirement,
+                link=bool(entry.get("link", True)),
+                embed=bool(entry.get("embed", True)),
+            )
+        )
+    return out
+
+
+def _parse_swift_requirement(
+    name: str, requirement: object, key_path: str
+) -> dict[str, object]:
+    valid = ", ".join(sorted(VALID_SWIFT_REQUIREMENT_KINDS))
+    if not isinstance(requirement, dict) or len(requirement) != 1:
+        raise ConfigError(
+            f"remote swift package {name!r} needs a 'requirement' with exactly one "
+            f"version rule",
+            key_path=key_path,
+            hint=f"valid rules: {valid}.",
+        )
+    ((kind, value),) = requirement.items()
+    if kind not in VALID_SWIFT_REQUIREMENT_KINDS:
+        raise ConfigError(
+            f"swift package {name!r} has unknown requirement rule {kind!r}",
+            key_path=key_path,
+            hint=f"valid rules: {valid}.",
+        )
+    if kind == "range":
+        if (
+            not isinstance(value, list)
+            or len(value) != 2
+            or not all(isinstance(v, str) and v for v in value)
+        ):
+            raise ConfigError(
+                f"swift package {name!r} 'range' must be two version strings "
+                f"[lower, upper)",
+                key_path=key_path,
+            )
+    elif not isinstance(value, str) or not value:
+        raise ConfigError(
+            f"swift package {name!r} requirement {kind!r} must be a non-empty string",
+            key_path=key_path,
+        )
+    return dict(requirement)
+
+
+def _validate_swift_path(name: str, path: object, key_path: str) -> str:
+    if not isinstance(path, str) or not path:
+        raise ConfigError(
+            f"swift package {name!r} 'path' must be a non-empty string",
+            key_path=key_path,
+        )
+    if isabs(path):
+        raise ConfigError(
+            f"swift package {name!r} 'path' must be relative, not an absolute path",
+            key_path=key_path,
+        )
+    parts = PurePosixPath(normpath(path)).parts
+    if parts and parts[0] == "..":
+        raise ConfigError(
+            f"swift package {name!r} 'path' must not escape the project directory",
+            key_path=key_path,
+        )
+    return path
 
 
 def _parse_signing(ios: dict) -> SigningConfig:
