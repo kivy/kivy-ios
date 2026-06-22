@@ -274,10 +274,19 @@ native dependency should prefer the `[tool.kivy.ios.native.xcframeworks]` channe
 
 ## Open questions (to settle before implementation)
 
-1. **Embedding nuance.** Confirm which SPM product shapes need an explicit Embed
-   Frameworks / Copy Files phase versus Xcode's automatic embedding, and how the
-   `embed` field maps in each case. The `link` path is handled by
-   `add_package_dependency`; embedding may need an extra phase for some products.
+1. **Embedding nuance — resolved (Phase 0 spike, see
+   [docs/dev/swift-spm-findings.md](../dev/swift-spm-findings.md)).** For a
+   dynamic SPM product, kivy-ios must add an **explicit** Embed Frameworks /
+   Copy Files phase (with `CodeSignOnCopy`): `pbxproj`'s `add_package_dependency`
+   only wires the *link* step, and Xcode does **not** auto-embed it for our
+   generated (non-GUI) project — without the explicit phase the framework is
+   absent from `.app/Frameworks` and the app fails on device. The `embed = true`
+   field maps to adding this phase; `embed = false` omits it. Separately, the
+   spike showed a pure-ObjC app target needs **no** Swift-specific settings and
+   **no** empty `.swift` stub to consume a Swift package at the iOS 13 floor (the
+   Swift runtime is referenced by absolute `/usr/lib/swift` install names); the
+   only app-target requirement is `@executable_path/Frameworks` on the runpath,
+   which kivy-ios already needs for its other embedded frameworks.
 2. **`Package.resolved` format version.** Xcode has emitted multiple
    `Package.resolved` schema versions (v1/v2/v3). Pin the version kivy-ios writes
    to the minimum supported Xcode's expectation, and confirm forward Xcode
