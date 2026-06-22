@@ -15,6 +15,7 @@ from pbxproj import XcodeProject
 from pbxproj.pbxextensions.ProjectFiles import FileOptions, ProjectFiles, TreeType
 
 from ..config.model import Config
+from ..lock.model import LockedSwiftPackage
 from .buildsettings import (
     BUILD_PYTHON_SCRIPT,
     managed_settings,
@@ -23,6 +24,7 @@ from .buildsettings import (
 )
 from .skeleton import skeleton_pbxproj
 from .staging import StagingLayout
+from .swift_packages import sync_swift_packages, write_package_resolved
 
 CONFIGURATIONS = ("Debug", "Release")
 
@@ -46,11 +48,13 @@ class XcodeProjectGenerator:
         layout: StagingLayout,
         *,
         last_upgrade_check: str | None = None,
+        swift_packages: tuple[LockedSwiftPackage, ...] = (),
     ) -> None:
         self.config = config
         self.layout = layout
         self.app_name = config.app_slug
         self.last_upgrade_check = last_upgrade_check or RECOMMENDED_LAST_UPGRADE_CHECK
+        self.swift_packages = swift_packages
 
     @property
     def pbxproj_path(self) -> Path:
@@ -66,8 +70,24 @@ class XcodeProjectGenerator:
         self._sync_pip_deps_browse_reference(project)
         self._sync_resources(project)
         self._sync_embedded_frameworks(project)
+        self._sync_swift_packages(project)
         project.save()
+        self._write_package_resolved()
         return self.pbxproj_path
+
+    # -- swift packages (spec 07) ------------------------------------------ #
+    def _sync_swift_packages(self, project: XcodeProject) -> None:
+        sync_swift_packages(project, self.app_name, self.swift_packages)
+
+    def _write_package_resolved(self) -> None:
+        resolved = (
+            self.layout.xcodeproj
+            / "project.xcworkspace"
+            / "xcshareddata"
+            / "swiftpm"
+            / "Package.resolved"
+        )
+        write_package_resolved(resolved, self.swift_packages)
 
     # -- bootstrap ---------------------------------------------------------- #
     def _load_or_bootstrap(self) -> XcodeProject:
