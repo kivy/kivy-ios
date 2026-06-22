@@ -10,6 +10,7 @@ platform/ folder references, and signing/user settings.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 
 from pbxproj import XcodeProject
 from pbxproj.pbxextensions.ProjectFiles import FileOptions, ProjectFiles, TreeType
@@ -111,7 +112,7 @@ class XcodeProjectGenerator:
         """Keep LastUpgradeCheck current so Xcode doesn't prompt to "Update to
         recommended settings" (self-heals projects bootstrapped by older runs).
         """
-        for proj in project.objects.get_objects_in_section("PBXProject"):
+        for proj in cast(Any, project).objects.get_objects_in_section("PBXProject"):
             attributes = proj["attributes"]
             attributes["LastUpgradeCheck"] = self.last_upgrade_check
 
@@ -322,7 +323,7 @@ class XcodeProjectGenerator:
         """Move an existing file reference under ``group`` (idempotent)."""
         if group.has_child(file_ref):
             return
-        for grp in project.objects.get_objects_in_section("PBXGroup"):
+        for grp in cast(Any, project).objects.get_objects_in_section("PBXGroup"):
             if grp.has_child(file_ref):
                 grp.remove_child(file_ref)
         group.add_child(file_ref)
