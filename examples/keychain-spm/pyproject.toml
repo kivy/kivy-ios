@@ -1,0 +1,72 @@
+[project]
+name = "keychain-spm"
+version = "0.1.0"
+requires-python = ">=3.15.0b2"
+dependencies = [
+    "kivy>=3.0.0.dev0,<4",
+    # pyobjus is an iOS-only package; it is silently skipped on other
+    # platforms at runtime (the app falls back to an in-memory store).
+    # iOS wheels must be available via find_links or PyPI before running
+    # `toolchain lock`.
+    "pyobjus",
+]
+
+[tool.kivy]
+display_name = "Keychain SPM"
+app_dir = "src"
+entry_point = "main"
+orientation = ["portrait"]
+
+[tool.kivy.ios]
+schema_version = 1
+bundle_id = "org.kivy.keychain-spm"
+build = 1
+deployment_target = "16.0"
+find_links = ["../wheels"]
+# Kivy's wheel declares deps that are not needed at runtime on iOS.
+# Remove an entry only if your app actually uses that feature.
+exclude = [
+    "kivy-garden",
+    "requests",
+    "certifi",
+    "charset-normalizer",
+    "idna",
+    "urllib3",
+    "docutils",
+    "pygments",
+]
+
+[tool.kivy.ios.python]
+version = "3.15.0b2"
+
+# --- Swift Package Manager dependencies (spec 07) -------------------------
+#
+# This example shows the full SPM surface in one place:
+#
+#   * KeychainAccess  — a *remote* package. `toolchain lock` resolves it with
+#     Xcode's Swift toolchain and pins the exact commit into pylock.ios.toml
+#     and the project's Package.resolved.  It's pure Swift (throwing API +
+#     subscripts), so Python cannot call it directly.
+#
+#     It is declared with link = false, embed = false: the app never touches
+#     KeychainAccess directly, and the shim below (KeychainBridge) already
+#     depends on it. Embedding the shim copies its whole dynamic dependency
+#     closure — including KeychainAccess — into the bundle, so embedding it a
+#     second time here would produce duplicate CodeSign tasks. Declaring it is
+#     still what pins it in the lock / Package.resolved.
+#
+#   * KeychainBridge  — a *local* `path` package (the shim).  It depends on
+#     KeychainAccess and re-exports the two calls we need behind a tiny
+#     `@objc` class that pyobjus can reach (see swift-shims/). The app links +
+#     embeds this one (the defaults); pyobjus looks the class up by name at
+#     runtime, and its load command pulls KeychainAccess in with it.
+[tool.kivy.ios.native.swift_packages]
+KeychainAccess = { url = "https://github.com/kishikawakatsumi/KeychainAccess", requirement = { from = "4.2.2" }, products = ["KeychainAccess"], link = false, embed = false }
+KeychainBridge = { path = "swift-shims", products = ["KeychainBridge"] }
+
+[tool.kivy.ios.signing]
+team_id = ""
+identity = "Apple Development"
+provisioning_profile = ""
+auto_signing = true
+upload_symbols = true

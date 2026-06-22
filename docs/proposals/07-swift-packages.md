@@ -107,7 +107,7 @@ Per-entry fields:
 | `requirement` | inline table | yes (remote) | Version requirement, exactly one of the SPM rule kinds — see below. Ignored for `path` packages. |
 | `products` | list of string | yes | The package product names to depend on (one `XCSwiftPackageProductDependency` each). Non-empty. |
 | `link` | bool | no (default `true`) | Add the product to the target's link step. |
-| `embed` | bool | no (default `true`) | Embed the product's framework(s) into `.app/Frameworks/` and code-sign. For most dynamic SPM products Xcode embeds automatically; this field forces/suppresses it where relevant. |
+| `embed` | bool | no (default `true`) | Embed the product's framework(s) into `.app/Frameworks/` and code-sign via an explicit Copy Files phase (Xcode does **not** auto-embed in the generated project — see Phase 0 findings). Set `false` for a package pulled in transitively by another embedded product (e.g. an upstream reached only through a local shim) so it is not embedded — and code-signed — twice. See [§"Pinning the upstream package reached through a shim"](#pinning-the-upstream-package-reached-through-a-shim). |
 
 ### `requirement` rule kinds (remote packages)
 
@@ -199,9 +199,15 @@ rest of the lockfile.
    - **Local**: `XCLocalSwiftPackageReference` with `relativePath` pointing at the
      repo-relative package directory.
 2. For each product, ensure an `XCSwiftPackageProductDependency` on the app
-   target, wired into Link Binary With Libraries (and Embed Frameworks when
-   `embed = true`). `pbxproj`'s `add_package_dependency` adds the link build file
-   automatically; embedding of dynamic products is otherwise Xcode-automatic.
+   target, wired into Link Binary With Libraries (and an explicit Embed
+   Frameworks / Copy Files phase when `embed = true`). `pbxproj`'s
+   `add_package_dependency` adds the link build file automatically; kivy-ios adds
+   the embed phase itself because Xcode does **not** auto-embed dynamic SPM
+   products in the generated (non-GUI) project (Phase 0 findings). A product
+   reached only transitively — e.g. an upstream package behind a local shim —
+   should set `embed = false`, because embedding the product that depends on it
+   already copies its whole dynamic closure into the bundle (see
+   [§"Pinning the upstream package reached through a shim"](#pinning-the-upstream-package-reached-through-a-shim)).
 3. Write `<app>.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`
    from the locked revisions, so Xcode resolves to the pinned commits without
    network drift. Regenerated every build (idempotent).
@@ -304,6 +310,43 @@ AppBridge.alloc().init().start_(token)
 The shim is irreducibly app-specific — it depends on which API and call surface
 the app wants — so it belongs to the app, in the same category as `main.py`.
 kivy-ios provides the **mechanism** (the local-package channel), not the shim.
+
+A complete, runnable instance of this pattern lives in
+[`examples/keychain-spm`](../../examples/keychain-spm/) (a pure-Swift
+`KeychainAccess` dependency reached through a `KeychainBridge` `@objc` shim).
+
+#### Pinning the upstream package reached through a shim
+
+A shim's own `Package.swift` declares the upstream dependency, so Xcode resolves
+and embeds it **transitively** whether or not kivy-ios knows about it. There are
+two ways to handle the upstream package, and the choice has a sharp embedding
+consequence:
+
+- **Shim only** (simplest). Declare just the local shim. Xcode resolves the
+  upstream from the shim's `Package.swift` and pins it in the project's
+  `Package.resolved` at resolve time. kivy-ios does **not** record the upstream
+  in `pylock.ios.toml`, so the pin is Xcode-managed, not `toolchain lock`-managed.
+
+- **Pin it in the lock too** (reproducible via `toolchain lock`). Also declare
+  the upstream remote package — but with **`link = false, embed = false`**:
+
+```toml
+[tool.kivy.ios.native.swift_packages]
+# Upstream: declared only so `toolchain lock` pins its commit. The shim links
+# and embeds it; the app never touches it directly.
+SomePureSwiftSDK = { url = "https://…", requirement = { from = "X.Y.Z" }, products = ["SomePureSwiftSDK"], link = false, embed = false }
+# The shim the app actually calls (link + embed default to true).
+AppBridge = { path = "swift-shims", products = ["AppBridge"] }
+```
+
+  The `link = false, embed = false` is **required**, not cosmetic: embedding a
+  dynamic SPM product copies its whole dynamic dependency closure into the
+  bundle. The shim already depends on the upstream, so embedding the shim brings
+  the upstream in; embedding the upstream *again* (the `embed = true` default)
+  makes Xcode copy and code-sign the same framework twice — an
+  `Unexpected duplicate tasks … CodeSign … <Pkg>_…_PackageProduct.framework`
+  build failure. Keep the `link`/`embed` defaults only for a remote package the
+  app links against **directly** (no intervening shim).
 
 ### Alternative: `@_cdecl` + ctypes
 

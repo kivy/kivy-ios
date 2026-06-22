@@ -21,6 +21,8 @@ src/ios/iosbuild/
 src/ios/ios.c
 *.DS_Store*
 *-ios/
+# Per-user Xcode state inside local Swift packages (e.g. example swift-shims/).
+.swiftpm/
 __pycache__
 .tox
 venv

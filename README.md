@@ -89,6 +89,11 @@ See the runnable examples for complete, copy-pasteable walk-throughs:
   locally built `cp315` iOS wheels from the shared [`examples/wheels/`](examples/wheels/) directory.
 - [`examples/svg-explorer`](examples/svg-explorer/) — interactive SVG viewer
   (multitouch pan/zoom/rotate) using the same shared wheels.
+- [`examples/pyobjus-ball`](examples/pyobjus-ball/) — calls native iOS APIs
+  (CoreMotion, UIScreen) from Python via the Objective-C runtime.
+- [`examples/keychain-spm`](examples/keychain-spm/) — declares a remote Swift
+  Package (`KeychainAccess`), pins it with `toolchain lock`, and calls it from
+  Python through a local `@objc` shim package.
 
 ## Configuring your app
 

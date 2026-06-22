@@ -10,7 +10,9 @@ from pbxproj import XcodeProject
 from kivy_ios.lock.model import LockedSwiftPackage
 from kivy_ios.project.materialize import materialize_project
 from kivy_ios.project.swift_packages import (
+    local_relative_path,
     package_resolved_json,
+    sync_swift_packages,
     xcode_requirement,
 )
 
@@ -107,12 +109,46 @@ class TestLocalPackage:
         _, project = _materialize(config, project_root, [LOCAL])
         refs = _section(project, "XCLocalSwiftPackageReference")
         assert len(refs) == 1
-        assert refs[0]["relativePath"] == "vendor/MyKit"
+        # Stored relative to the project root in the lock, but Xcode resolves
+        # relativePath from the .xcodeproj's <app>-ios/ dir, one level deeper.
+        assert refs[0]["relativePath"] == "../vendor/MyKit"
         assert _dep_id(project, "MyKit") is not None
 
     def test_no_package_resolved_for_local_only(self, config, project_root):
         layout, _ = _materialize(config, project_root, [LOCAL])
         assert not _resolved_path(layout).exists()
+
+
+class TestLocalPathTranslation:
+    """The lock stores a local ``path`` relative to the project root, but Xcode
+    resolves ``XCLocalSwiftPackageReference.relativePath`` from the ``.xcodeproj``
+    directory (``<app>-ios/``), one level deeper. A bad path fails the whole
+    package-graph resolution ("Missing package product")."""
+
+    def test_steps_out_of_staging_dir(self, tmp_path):
+        staging = tmp_path / "app-ios"
+        assert local_relative_path("swift-shims", staging) == "../swift-shims"
+        assert local_relative_path("vendor/MyKit", staging) == "../vendor/MyKit"
+
+    def test_none_staging_root_returns_path_unchanged(self):
+        assert local_relative_path("swift-shims", None) == "swift-shims"
+
+    def test_stale_relative_path_self_heals(self, config, project_root):
+        layout, project = _materialize(config, project_root, [LOCAL])
+        # Simulate a project written by the buggy toolchain: relativePath stored
+        # relative to the project root rather than the .xcodeproj directory.
+        (ref,) = _section(project, "XCLocalSwiftPackageReference")
+        ref["relativePath"] = "vendor/MyKit"
+        sync_swift_packages(
+            project, config.app_slug, (LOCAL,), staging_root=layout.root
+        )
+        refs = _section(project, "XCLocalSwiftPackageReference")
+        assert len(refs) == 1
+        assert refs[0]["relativePath"] == "../vendor/MyKit"
+        # The product dependency must point at the surviving (corrected) ref,
+        # not the pruned stale one.
+        dep = project.objects[_dep_id(project, "MyKit")]
+        assert dep["package"] == refs[0].get_id()
 
 
 class TestEmbedAndLinkFlags:

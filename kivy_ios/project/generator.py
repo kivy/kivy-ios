@@ -77,7 +77,12 @@ class XcodeProjectGenerator:
 
     # -- swift packages (spec 07) ------------------------------------------ #
     def _sync_swift_packages(self, project: XcodeProject) -> None:
-        sync_swift_packages(project, self.app_name, self.swift_packages)
+        sync_swift_packages(
+            project,
+            self.app_name,
+            self.swift_packages,
+            staging_root=self.layout.root,
+        )
 
     def _write_package_resolved(self) -> None:
         resolved = (

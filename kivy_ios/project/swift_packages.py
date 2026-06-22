@@ -22,6 +22,7 @@ the locked commits without network drift.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -45,16 +46,31 @@ def sync_swift_packages(
     project: Any,
     target_name: str,
     packages: tuple[LockedSwiftPackage, ...],
+    *,
+    staging_root: Path | None = None,
 ) -> None:
-    """Idempotently reconcile the project's SPM graph with ``packages``."""
+    """Idempotently reconcile the project's SPM graph with ``packages``.
+
+    ``staging_root`` is the ``<app>-ios/`` directory that holds the generated
+    ``.xcodeproj``. Local package ``path`` entries are stored in the lock
+    relative to the *project root* (where ``pyproject.toml`` lives), but Xcode
+    resolves ``XCLocalSwiftPackageReference.relativePath`` relative to the
+    project file's own directory — one level deeper. We translate the path
+    accordingly (e.g. ``swift-shims`` -> ``../swift-shims``).
+    """
     for sp in packages:
-        ref = _ensure_reference(project, sp)
+        ref = _ensure_reference(project, sp, staging_root)
         for product in sp.products:
             dep: Any = project.get_or_create_package_dependency(
                 product, target_name, (ref, product)
             )
             if dep is None:
                 continue
+            # Repoint at the ensured reference: an existing dependency is reused
+            # by product name, so if the reference id changed (e.g. a local
+            # path was corrected and the old reference pruned) the stale pointer
+            # would otherwise dangle.
+            dep["package"] = ref.get_id()
             if sp.link:
                 _ensure_link(project, target_name, dep)
             else:
@@ -63,20 +79,38 @@ def sync_swift_packages(
                 _ensure_embed(project, target_name, dep)
             else:
                 _remove_build_files(project, dep.get_id(), "PBXCopyFilesBuildPhase")
-    _prune(project, target_name, packages)
+    _prune(project, target_name, packages, staging_root)
 
 
 # -- references ---------------------------------------------------------------- #
 
 
-def _ensure_reference(project: Any, sp: LockedSwiftPackage) -> Any:
+def local_relative_path(path: str, staging_root: Path | None) -> str:
+    """Translate a project-root-relative local package ``path`` into one
+    relative to the ``<app>-ios/`` staging root (where the ``.xcodeproj`` lives),
+    which is how Xcode interprets ``XCLocalSwiftPackageReference.relativePath``.
+
+    With ``staging_root`` unset the path is returned unchanged (used by callers
+    that already provide a project-relative path).
+    """
+    if staging_root is None:
+        return path
+    target = (staging_root.parent / path).resolve()
+    return os.path.relpath(target, staging_root.resolve())
+
+
+def _ensure_reference(
+    project: Any, sp: LockedSwiftPackage, staging_root: Path | None
+) -> Any:
     if sp.url:
         requirement = xcode_requirement(sp.requirement or {})
         ref = project.get_or_create_package_reference(sp.url, (sp.url, requirement))
         # Reflect a changed requirement rule on re-lock (get_or_create won't).
         ref["requirement"] = PBXGenericObject().parse(requirement)
         return ref
-    return _get_or_create_local_reference(project, sp.path or "")
+    return _get_or_create_local_reference(
+        project, local_relative_path(sp.path or "", staging_root)
+    )
 
 
 def _get_or_create_local_reference(project: Any, relative_path: str) -> Any:
@@ -180,10 +214,13 @@ def _prune(
     project: Any,
     target_name: str,
     packages: tuple[LockedSwiftPackage, ...],
+    staging_root: Path | None,
 ) -> None:
     desired_products = {p for sp in packages for p in sp.products}
     desired_remote = {_normalize_url(sp.url) for sp in packages if sp.url}
-    desired_local = {sp.path for sp in packages if sp.path}
+    desired_local = {
+        local_relative_path(sp.path, staging_root) for sp in packages if sp.path
+    }
 
     for dep in list(
         project.objects.get_objects_in_section("XCSwiftPackageProductDependency")
