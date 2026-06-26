@@ -90,9 +90,12 @@ KV = """
 
     Label:
         size_hint_y: None
-        height: "40dp"
+        height: "56dp"
         font_size: "15sp"
         color: 0.5, 0.85, 1.0, 1
+        halign: "center"
+        valign: "middle"
+        text_size: self.width, None
         text: root.backend_text
 
     Label:
@@ -147,9 +150,9 @@ class KeychainRoot(BoxLayout):
         super().__init__(**kwargs)
         self._store = KeychainStore()
         self.backend_text = (
-            "Backend: iOS Keychain (KeychainAccess via @objc shim)"
+            "Backend: iOS Keychain\n(KeychainAccess via @objc shim)"
             if self._store.native
-            else "Backend: in-memory fallback (not on iOS)"
+            else "Backend: in-memory fallback\n(not on iOS)"
         )
 
     def save(self) -> None:
