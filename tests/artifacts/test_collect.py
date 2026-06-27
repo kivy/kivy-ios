@@ -156,6 +156,54 @@ def test_collect_installs_python_wheels_and_frameworks(tmp_path, layout, cache):
     assert not (layout.pip_deps_device / "kivy.frameworks").exists()
 
 
+def test_collect_zero_dep_app_stamps_empty_slice(tmp_path, layout, cache):
+    # An app with no third-party deps installs nothing, but collection must still
+    # stamp the slice as collected so the Build Python guard accepts the (empty)
+    # slice instead of failing the build.
+    art = tmp_path / "art"
+    art.mkdir()
+    py_tar = _make_python_tarball(art)
+
+    lock = Lockfile(
+        requires_python=">=3.15",
+        packages=(),
+        python_xcframework=PythonXcframework(
+            version="3.15.0",
+            url="https://example/python.tar.gz",
+            sha256=sha256_file(py_tar),
+        ),
+        toolchain_version="3.0.0.dev0",
+        generated_at="2026-01-01T00:00:00Z",
+        pyproject_sha256="d" * 64,
+        tool_kivy_ios_schema_version=1,
+        xcframeworks=(),
+    )
+
+    class FakeDownloader:
+        def fetch_to(self, url, dest):
+            import shutil
+
+            shutil.copyfile(py_tar, dest)
+
+    def fake_runner(cmd, capture_output=True, text=True):
+        raise AssertionError("pip must not run when there are no wheels")
+
+    collect_artifacts(
+        lock,
+        layout,
+        build_slices=[BuildSlice("simulator", "arm64", "13.0")],
+        project_root=tmp_path,
+        cache=cache,
+        downloader=FakeDownloader(),
+        runner=fake_runner,
+    )
+
+    marker = layout.root / "pip-deps-simulator.collected"
+    assert marker.is_file()
+    assert layout.pip_deps_simulator.is_dir()
+    assert not any(layout.pip_deps_simulator.iterdir())  # empty, but collected
+
+
 def test_collect_both_slices_installs_each_pip_deps(tmp_path, layout, cache):
     # A bare `toolchain build` collects device + simulator: Python.xcframework is
     # fetched once, but pip-deps is installed into BOTH slice directories so

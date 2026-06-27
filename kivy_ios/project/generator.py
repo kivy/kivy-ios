@@ -3,8 +3,8 @@
 Bootstraps from the internal skeleton on first run, then performs the spec's
 idempotent "every build" sync: managed build settings (per-config), the Build
 Python run script (ordered between Copy Bundle Resources and Frameworks),
-``main.m`` in Sources, Python.xcframework + Frameworks/* embed & sign, app/ +
-platform/ folder references, and signing/user settings.
+``main.m`` in Sources, Python.xcframework + Frameworks/* embed & sign, the app/
+folder reference, and signing/user settings.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ from .buildsettings import (
     user_build_settings,
 )
 from .skeleton import skeleton_pbxproj
-from .staging import StagingLayout
+from .staging import StagingError, StagingLayout
 from .swift_packages import sync_swift_packages, write_package_resolved
 
 CONFIGURATIONS = ("Debug", "Release")
@@ -197,35 +197,36 @@ class XcodeProjectGenerator:
 
     # -- bundle resources --------------------------------------------------- #
     def _sync_bundle_folders(self, project: XcodeProject) -> None:
-        """Add ``app/`` and ``platform/`` as folder references (spec 06).
+        """Add ``app/`` as a folder reference (spec 06).
+
+        ``app/`` is mandatory — it is the symlink to the user's ``app_dir`` and
+        carries the app's Python source into the bundle. If it does not resolve
+        to an existing directory, fail loudly rather than silently shipping an
+        app with no code.
 
         ``pip-deps/`` is intentionally *not* a Copy Bundle Resources folder
         reference. It is platform-sliced (``pip-deps-simulator`` /
         ``pip-deps-device``) and the Build Python run script rsyncs the correct
         slice into the bundle on every build; a folder reference here would
         stage one fixed slice — the wrong one for half of all builds — ahead of
-        that rsync. Remove any reference left by older toolchains so existing
-        projects self-heal.
+        that rsync.
         """
-        project.remove_files_by_path("pip-deps", tree=TreeType.SOURCE_ROOT)
-        opts = FileOptions(embed_framework=False)
-        folders = (
-            ("app", self.layout.app),
-            ("platform", self.layout.platform),
-        )
-        for name, folder in folders:
-            if not folder.exists():
-                continue
-            if project.get_files_by_name(name):
-                continue
+        if not self.layout.app.exists():
+            raise StagingError(
+                f"app source directory is missing: {self.layout.app} does not "
+                f"resolve to an existing directory (app_dir = "
+                f"{self.config.kivy.app_dir!r}). Fix [tool.kivy].app_dir in "
+                f"pyproject.toml."
+            )
+        if not project.get_files_by_name("app"):
             project.add_file(
-                name,
+                "app",
                 target_name=self.app_name,
                 tree="SOURCE_ROOT",
-                file_options=opts,
+                file_options=FileOptions(embed_framework=False),
             )
             # pbxproj type detection uses CWD; force folder refs for bundle copy.
-            for ref in project.get_files_by_name(name):
+            for ref in project.get_files_by_name("app"):
                 ref.set_last_known_file_type("folder")
 
     def _sync_pip_deps_browse_reference(self, project: XcodeProject) -> None:
@@ -236,9 +237,8 @@ class XcodeProjectGenerator:
         project navigator. Add the simulator slice as a folder reference for
         browsing only: ``create_build_files=False`` keeps it out of every build
         phase, so it has no effect on the build (the package set is identical
-        across slices). Its on-disk path is ``pip-deps-simulator`` so the
-        self-heal in ``_sync_bundle_folders`` -- which removes the legacy
-        ``pip-deps`` build reference by exact path -- never touches it.
+        across slices). Its on-disk path is ``pip-deps-simulator``; only its
+        display name is ``pip-deps``.
         """
         if not self.layout.pip_deps_simulator.is_dir():
             return

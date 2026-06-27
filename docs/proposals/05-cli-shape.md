@@ -234,6 +234,7 @@ Substantive checks (not a placeholder), inspired by `flutter doctor`:
 | Command-line tools | environment | `xcode-select -p` resolves; `xcrun clang` present |
 | Simulator runtimes | environment | At least one iOS simulator runtime installed; in project mode, matched against `[tool.kivy.ios].deployment_target` |
 | Toolchain version | environment | Self-version + warn if a newer one is on PyPI (best-effort, suppressed by `--offline`) |
+| App source directory | project | `[tool.kivy].app_dir` resolves to an existing directory. Config validation only checks the *string*; FAIL here if the directory is missing, since the build would otherwise ship an app with no Python source. |
 | Signing identity | project | If `[tool.kivy.ios.signing].auto_signing = false`, the named identity is present in keychain |
 | Provisioning profile | project | If `[tool.kivy.ios.signing].provisioning_profile` is set, it exists |
 | App icon | project | If `[tool.kivy.ios.icons].source` is set, FAIL unless it is a valid 1024×1024 PNG (the hint names the exact problem — missing, not PNG, or wrong dimensions). SKIP if no icon is configured. |
@@ -245,30 +246,25 @@ Substantive checks (not a placeholder), inspired by `flutter doctor`:
 
 `doctor` reports each check as PASS / WARN / FAIL with a remediation hint. Exit code is non-zero only on FAIL.
 
-## The vendored `ios` platform module
+## Mobile window/display geometry: `kivy.mobile`
 
-Kivy's iOS backend expects a top-level `ios` module on the Python path at runtime. Kivy defines the interface; kivy-ios owns the implementation and vendors it as a pure-Python module at:
+Kivy apps need runtime geometry the platform owns — display DPI, scale, safe-area insets, and live software-keyboard height. Earlier previews of the 3.0 toolchain vendored this as a pure-Python `ios.py` (plus a `mobile.py` preview) into every generated project at `<app>-ios/platform/`. That was always a placeholder: the implementation belongs in Kivy, not the build tool.
 
-```
-<app>-ios/platform/ios.py
-```
+As of [kivy/kivy#9331](https://github.com/kivy/kivy/pull/9331) it lives in **Kivy core** as `kivy.mobile`, shipped inside the Kivy iOS wheel. `kivy.mobile._platform.ios` provides the same geometry via the ObjC runtime (`ctypes`, no extra dependency); Kivy's own `metrics.py` and `core/window` import from `kivy.mobile` instead of a bare `import ios`. **kivy-ios no longer vendors any platform shim** — `toolchain build` writes no `platform/` directory.
 
-`toolchain build` (re)generates this file from the template at `kivy_ios/project/templates/ios.py`. App code may import it directly — `import ios` works on iOS because `platform/` is on `sys.path`.
+### Public API (provided by Kivy)
 
-### Public API
-
-| Function | Return type | Units | Called by |
-|----------|-------------|-------|-----------|
-| `get_scale()` | `float` | pixels per point (e.g. `3.0` on iPhone 15 Pro) | Kivy — `Metrics.density` |
-| `get_dpi()` | `float` | physical dots per inch | Kivy — `dp()` / `sp()` |
-| `get_kheight()` | `float` | pixels | Kivy — keyboard height adjustment (stub; returns `0.0`) |
-| `get_safe_area()` | `dict[str, float]` | UIKit points — `{"top", "left", "bottom", "right"}` | App code only |
-
-`get_scale()`, `get_dpi()`, and `get_safe_area()` use the ObjC runtime directly via `ctypes` — no additional dependencies. All three fall back silently on error (`2.0`, a model-table estimate, and all-zeros respectively).
+| Function | Return type | Units |
+|----------|-------------|-------|
+| `get_scale()` | `float` | pixels per point (e.g. `3.0` on iPhone 15 Pro) |
+| `get_dpi()` | `float` | physical dots per inch (`nativeScale × base ppi`) |
+| `get_safe_area()` | `dict[str, float]` | UIKit points — `{"top", "left", "bottom", "right"}` |
+| `get_keyboard_height()` | `float` | UIKit points (0 when hidden) |
+| `subscribe_keyboard_height(cb)` | — | register a height-change callback |
 
 ### Safe-area insets
 
-Kivy has no cross-platform safe-area API (the same gap exists on Android, where window insets require `pyjnius`). Safe-area padding is entirely the **app's responsibility**:
+`kivy.mobile` is **mobile-only** — it raises `ImportError` on desktop — so app code guards on platform:
 
 ```python
 from kivy.utils import platform
@@ -279,12 +275,9 @@ from kivy.core.window import Window
 def safe_area_insets():
     if platform != "ios":
         return [0, 0, 0, 0]
-    try:
-        import ios
-    except ImportError:
-        return [0, 0, 0, 0]
-    insets = ios.get_safe_area()   # UIKit points
-    scale  = ios.get_scale()       # points → pixels
+    from kivy.mobile import get_safe_area, get_scale
+    insets = get_safe_area()   # UIKit points
+    scale  = get_scale()       # points → pixels
     return [insets["left"] * scale, insets["top"] * scale,
             insets["right"] * scale, insets["bottom"] * scale]
 
@@ -298,15 +291,7 @@ def _refresh_safe_area(self, *_):
     self.padding = [base + left, base + top, base + right, base + bottom]
 ```
 
-`get_safe_area()` reads the key window's `safeAreaInsets` property directly. `UIEdgeInsets` is a four-`CGFloat` homogeneous aggregate, returned in floating-point registers on ARM64 and decoded by the same `ctypes`/`objc_msgSend` mechanism as every other call in the module.
-
-### Ownership
-
-`ios.py` **ultimately belongs in the kivy repository**, not in kivy-ios. Kivy defines the interface (`get_scale()`, `get_dpi()`, `get_kheight()`); the natural long-term home for the implementation is alongside Kivy's own iOS backend code, so that Kivy can import it without depending on kivy-ios being involved at runtime.
-
-It is **currently kept in kivy-ios** (`kivy_ios/project/templates/ios.py`) because that is the most effective place for active development: kivy-ios already owns the build pipeline, controls which file lands in `<app>-ios/platform/`, and is where the device DPI table and ObjC-runtime wrappers are most easily tested and updated. Keeping it here avoids a cross-repo release coupling before the interface is stable.
-
-Once the API stabilises and the kivy side is ready to absorb it, `ios.py` should be moved to the kivy repository and kivy-ios updated to vendor kivy's copy (or removed from the vendoring step entirely if kivy ships it as part of its iOS wheel). Until then, `kivy_ios/project/templates/ios.py` is the authoritative source.
+Kivy 3.0 also exposes `Window.safe_area` (a `DictProperty` refreshed on startup and `on_rotate`), so most apps can bind to that directly rather than calling `kivy.mobile` themselves.
 
 See [spec 04 §"Deleted recipes — `ios` recipe"](04-recipe-triage.md).
 

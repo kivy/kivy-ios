@@ -22,8 +22,9 @@ see the [migration guide](docs/proposals/00-overview.md) and the updated README.
   `.xcodeproj` via `pbxproj`; `toolchain open` launches Xcode.
 - **SDL3** — Kivy 3.0 moves to SDL3; the generated project and Info.plist
   are configured for the SDL3 UIScene lifecycle out of the box.
-- **`platform/ios.py` shim** — a vendored iOS platform module (DPI, safe area,
-  keyboard height, `kivy.mobile` bridge) is materialized into every project.
+- **Mobile window/display geometry via `kivy.mobile`** — DPI, scale, safe-area
+  insets, and keyboard height are provided by Kivy core's `kivy.mobile` module
+  (kivy/kivy#9331), shipped in the Kivy iOS wheel. 
 - **Slim CLI** — `toolchain` now dispatches to `init`, `lock`, `build`, `run`,
   `open`, `upgrade`, `clean`, `status`, and `doctor`; legacy 2.x verbs print
   a migration pointer.

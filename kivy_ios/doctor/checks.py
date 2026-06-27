@@ -106,6 +106,26 @@ def check_toolchain_version(
 # ---- project checks -----------------------------------------------------
 
 
+def check_app_dir(config: Config, project_root: Path) -> CheckResult:
+    """``app_dir`` must resolve to an existing directory — it carries the app's
+    Python source into the bundle. Config validation only checks the *string*
+    (relative, non-empty, etc.), not that it exists on disk; a missing one would
+    otherwise build an app with no code (caught at build time, but reported here
+    first).
+    """
+    app_dir = config.kivy.app_dir
+    path = project_root / app_dir
+    if not path.is_dir():
+        return CheckResult(
+            "App source directory",
+            Status.FAIL,
+            f"app_dir {app_dir!r} not found",
+            hint="create the directory or fix [tool.kivy].app_dir; it must "
+            "point at your app's Python source.",
+        )
+    return CheckResult("App source directory", Status.PASS, app_dir)
+
+
 def check_signing_identity(probe: Probe, config: Config) -> CheckResult:
     signing = config.ios_required.signing
     if signing.auto_signing:

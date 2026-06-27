@@ -18,7 +18,7 @@ hashes = { sha256 = "7ce71b6880181241cf7ac8697a2f1eb6a8bd9b429f7ad6d27b8db9ba5f1
 name = "Kivy"
 version = "3.0.0.dev0"
 requires-python = ">=3.11"
-dependencies = [{ name = "Kivy-Garden" }, { name = "docutils" }, { name = "pygments" }, { name = "requests" }, { name = "filetype" }, { name = "kivy_deps.angle" }, { name = "kivy_deps.sdl3" }, { name = "kivy_deps.glew" }, { name = "pypiwin32" }, { name = "oscpy" }, { name = "pytest" }, { name = "pytest-cov" }, { name = "pytest_asyncio" }, { name = "pytest-timeout" }, { name = "pytest-benchmark" }, { name = "pytest-httpserver" }, { name = "trustme" }, { name = "pyinstaller" }, { name = "sphinx" }, { name = "sphinxcontrib-jquery" }, { name = "kivy_deps.gstreamer_dev" }, { name = "kivy_deps.sdl3_dev" }, { name = "kivy_deps.glew_dev" }, { name = "pre-commit" }, { name = "responses" }, { name = "ruff" }, { name = "pillow" }, { name = "kivy_deps.gstreamer" }, { name = "ffpyplayer" }, { name = "pillow" }, { name = "kivy_deps.gstreamer" }, { name = "ffpyplayer" }, { name = "kivy_deps.gstreamer" }, { name = "kivy_deps.angle" }, { name = "kivy_deps.glew" }]
+dependencies = [{ name = "Kivy-Garden" }, { name = "docutils" }, { name = "pygments" }, { name = "requests" }, { name = "filetype" }, { name = "kivy_deps.angle" }, { name = "kivy_deps.sdl3" }, { name = "kivy_deps.glew" }, { name = "pypiwin32" }, { name = "oscpy" }, { name = "pytest" }, { name = "pytest-cov" }, { name = "pytest_asyncio" }, { name = "pytest-timeout" }, { name = "pytest-benchmark" }, { name = "pytest-httpserver" }, { name = "trustme" }, { name = "pyinstaller" }, { name = "sphinx" }, { name = "sphinxcontrib-jquery" }, { name = "kivy_deps.gstreamer_dev" }, { name = "kivy_deps.sdl3_dev" }, { name = "kivy_deps.glew_dev" }, { name = "pre-commit" }, { name = "responses" }, { name = "ruff" }, { name = "tomli" }, { name = "pillow" }, { name = "kivy_deps.gstreamer" }, { name = "ffpyplayer" }, { name = "pillow" }, { name = "kivy_deps.gstreamer" }, { name = "ffpyplayer" }, { name = "kivy_deps.gstreamer" }, { name = "kivy_deps.angle" }, { name = "kivy_deps.glew" }]
 
 [packages.tool.kivy_ios]
 direct_requirement = true
@@ -26,22 +26,22 @@ direct_requirement = true
 [[packages.wheels]]
 name = "kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphoneos.whl"
 path = "../wheels/kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphoneos.whl"
-hashes = { sha256 = "0fb471d6d7b5c0f0ca986b10aee31e404874449a0272e94c3a8ce8dd7c8a97e6" }
+hashes = { sha256 = "44114aaaea7e2c8f7c7a68092f6989e3a7a533cb9a294bf5e2aa07d59a179f8e" }
 
 [[packages.wheels]]
 name = "kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphonesimulator.whl"
 path = "../wheels/kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphonesimulator.whl"
-hashes = { sha256 = "899f0fd81700d01e414a8329484752f941afb39227f6d0fda8b7111f6314e7b9" }
+hashes = { sha256 = "ea27cf5af9af6b4a98fc94e302b5c93ceeac5647449e1e783c0a16d95fa772c4" }
 
 [[packages.wheels]]
 name = "kivy-3.0.0.dev0-cp315-cp315-ios_13_0_x86_64_iphonesimulator.whl"
 path = "../wheels/kivy-3.0.0.dev0-cp315-cp315-ios_13_0_x86_64_iphonesimulator.whl"
-hashes = { sha256 = "c9785eddb85afc3dd19d5a07391d6c4904e4637d2a53be2571d6556fdb4162f3" }
+hashes = { sha256 = "b9a6522cd60e74ca049810f8ec5f7aaafa1f3a4651a52ae0446c90752b4b091b" }
 
 [tool.kivy_ios]
 schema_version = 1
 toolchain_version = "3.0.0.dev0"
-generated_at = "2026-06-12T01:09:43Z"
+generated_at = "2026-06-27T20:29:12Z"
 pyproject_sha256 = "6f318bf864480fd1ded0fbfcd3bccba4f93e8790d2b598db057a048e49e4627a"
 tool_kivy_ios_schema_version = 1
 

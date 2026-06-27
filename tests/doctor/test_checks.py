@@ -69,6 +69,14 @@ class TestEnvironmentChecks:
 
 
 class TestProjectChecks:
+    def test_app_dir_missing_fails(self, config, tmp_path):
+        # tmp_path has no src/ directory
+        assert C.check_app_dir(config, tmp_path).status is Status.FAIL
+
+    def test_app_dir_present_passes(self, config, tmp_path):
+        (tmp_path / "src").mkdir()
+        assert C.check_app_dir(config, tmp_path).status is Status.PASS
+
     def test_signing_auto_pass(self, config, fake_probe):
         assert C.check_signing_identity(fake_probe, config).status is Status.PASS
 
@@ -196,7 +204,7 @@ class TestRunModes:
     def test_environment_mode_skips_project(self, fake_probe):
         results = run_checks(fake_probe, toolchain_version="3.0.0", config=None)
         skipped = [r for r in results if r.status is Status.SKIP]
-        assert len(skipped) == 9
+        assert len(skipped) == 10
 
     def test_project_mode_runs_all(self, fake_probe, config, tmp_path):
         results = run_checks(
@@ -206,6 +214,7 @@ class TestRunModes:
             project_root=tmp_path,
         )
         names = {r.name for r in results}
+        assert "App source directory" in names
         assert "Signing identity" in names
         assert "find_links directories" in names
         assert "App icon" in names

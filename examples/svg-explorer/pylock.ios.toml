@@ -7,13 +7,13 @@ default-groups = []
 
 [[packages]]
 name = "certifi"
-version = "2026.5.20"
+version = "2026.6.17"
 requires-python = ">=3.7"
 
 [[packages.wheels]]
-name = "certifi-2026.5.20-py3-none-any.whl"
-url = "https://files.pythonhosted.org/packages/59/8c/57e832b7af6d7c5abe66eb3fbe3a3a32f4d11ea23a1aa7131371035be991/certifi-2026.5.20-py3-none-any.whl"
-hashes = { sha256 = "3c52e209ba0a4ad7aebe60436a4ab349c39e1e602e8c134221e546902ad25897" }
+name = "certifi-2026.6.17-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/ef/2f/c5464532e965badff2f4c4c1a3a83f5697f0d7c407ed0cda44aaa99bb451/certifi-2026.6.17-py3-none-any.whl"
+hashes = { sha256 = "2227dcbaafe0d2f59279d1762ddddc37783ed4354594f194ffc31d20f41fc3db" }
 
 [[packages]]
 name = "charset-normalizer"
@@ -49,7 +49,7 @@ hashes = { sha256 = "7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de
 name = "Kivy"
 version = "3.0.0.dev0"
 requires-python = ">=3.11"
-dependencies = [{ name = "Kivy-Garden" }, { name = "docutils" }, { name = "pygments" }, { name = "requests" }, { name = "filetype" }, { name = "kivy_deps.angle" }, { name = "kivy_deps.sdl3" }, { name = "kivy_deps.glew" }, { name = "pypiwin32" }, { name = "oscpy" }, { name = "pytest" }, { name = "pytest-cov" }, { name = "pytest_asyncio" }, { name = "pytest-timeout" }, { name = "pytest-benchmark" }, { name = "pytest-httpserver" }, { name = "trustme" }, { name = "pyinstaller" }, { name = "sphinx" }, { name = "sphinxcontrib-jquery" }, { name = "kivy_deps.gstreamer_dev" }, { name = "kivy_deps.sdl3_dev" }, { name = "kivy_deps.glew_dev" }, { name = "pre-commit" }, { name = "responses" }, { name = "ruff" }, { name = "pillow" }, { name = "kivy_deps.gstreamer" }, { name = "ffpyplayer" }, { name = "pillow" }, { name = "kivy_deps.gstreamer" }, { name = "ffpyplayer" }, { name = "kivy_deps.gstreamer" }, { name = "kivy_deps.angle" }, { name = "kivy_deps.glew" }]
+dependencies = [{ name = "Kivy-Garden" }, { name = "docutils" }, { name = "pygments" }, { name = "requests" }, { name = "filetype" }, { name = "kivy_deps.angle" }, { name = "kivy_deps.sdl3" }, { name = "kivy_deps.glew" }, { name = "pypiwin32" }, { name = "oscpy" }, { name = "pytest" }, { name = "pytest-cov" }, { name = "pytest_asyncio" }, { name = "pytest-timeout" }, { name = "pytest-benchmark" }, { name = "pytest-httpserver" }, { name = "trustme" }, { name = "pyinstaller" }, { name = "sphinx" }, { name = "sphinxcontrib-jquery" }, { name = "kivy_deps.gstreamer_dev" }, { name = "kivy_deps.sdl3_dev" }, { name = "kivy_deps.glew_dev" }, { name = "pre-commit" }, { name = "responses" }, { name = "ruff" }, { name = "tomli" }, { name = "pillow" }, { name = "kivy_deps.gstreamer" }, { name = "ffpyplayer" }, { name = "pillow" }, { name = "kivy_deps.gstreamer" }, { name = "ffpyplayer" }, { name = "kivy_deps.gstreamer" }, { name = "kivy_deps.angle" }, { name = "kivy_deps.glew" }]
 
 [packages.tool.kivy_ios]
 direct_requirement = true
@@ -57,17 +57,17 @@ direct_requirement = true
 [[packages.wheels]]
 name = "kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphoneos.whl"
 path = "../wheels/kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphoneos.whl"
-hashes = { sha256 = "0fb471d6d7b5c0f0ca986b10aee31e404874449a0272e94c3a8ce8dd7c8a97e6" }
+hashes = { sha256 = "44114aaaea7e2c8f7c7a68092f6989e3a7a533cb9a294bf5e2aa07d59a179f8e" }
 
 [[packages.wheels]]
 name = "kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphonesimulator.whl"
 path = "../wheels/kivy-3.0.0.dev0-cp315-cp315-ios_13_0_arm64_iphonesimulator.whl"
-hashes = { sha256 = "899f0fd81700d01e414a8329484752f941afb39227f6d0fda8b7111f6314e7b9" }
+hashes = { sha256 = "ea27cf5af9af6b4a98fc94e302b5c93ceeac5647449e1e783c0a16d95fa772c4" }
 
 [[packages.wheels]]
 name = "kivy-3.0.0.dev0-cp315-cp315-ios_13_0_x86_64_iphonesimulator.whl"
 path = "../wheels/kivy-3.0.0.dev0-cp315-cp315-ios_13_0_x86_64_iphonesimulator.whl"
-hashes = { sha256 = "c9785eddb85afc3dd19d5a07391d6c4904e4637d2a53be2571d6556fdb4162f3" }
+hashes = { sha256 = "b9a6522cd60e74ca049810f8ec5f7aaafa1f3a4651a52ae0446c90752b4b091b" }
 
 [[packages]]
 name = "requests"
@@ -94,7 +94,7 @@ hashes = { sha256 = "9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef72
 [tool.kivy_ios]
 schema_version = 1
 toolchain_version = "3.0.0.dev0"
-generated_at = "2026-06-11T02:17:46Z"
+generated_at = "2026-06-27T20:22:42Z"
 pyproject_sha256 = "b0573f01e2d6439f9207eee72f218e24a4dc28efd0dc396207841a4db0d8ddc3"
 tool_kivy_ios_schema_version = 1
 

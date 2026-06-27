@@ -5,8 +5,9 @@ Generated source layout in <app>-ios/:
   kivy_ios_bootstrap.h    — bootstrap public header
   kivy_ios_bootstrap.m    — dual-mode bootstrap (SDL3 for Kivy, UIKit for pure-Python)
   main_config.h           — per-project defines (entry point, py version)
-  platform/ios.py         — Kivy iOS platform shim (DPI, scale, safe area, keyboard)
-  platform/mobile.py      — kivy.mobile API preview / cross-platform bridge
+
+Mobile window/display geometry (DPI, scale, safe area, keyboard height) is no
+longer vendored here — it ships in Kivy core as ``kivy.mobile`` (kivy/kivy#9331).
 """
 
 from __future__ import annotations
@@ -45,32 +46,6 @@ def render_main_config_h(config: Config, *, python_version: str | None = None) -
     )
 
 
-def ios_shim_source() -> str:
-    return (_TEMPLATES / "ios.py").read_text(encoding="utf-8")
-
-
-def mobile_shim_source() -> str:
-    return (_TEMPLATES / "mobile.py").read_text(encoding="utf-8")
-
-
-def write_platform_shim(project_dir: str | Path) -> Path:
-    """Materialize ``platform/ios.py`` for Kivy metrics on iOS."""
-    platform_dir = Path(project_dir) / "platform"
-    platform_dir.mkdir(parents=True, exist_ok=True)
-    shim = platform_dir / "ios.py"
-    shim.write_text(ios_shim_source(), encoding="utf-8")
-    return shim
-
-
-def write_mobile_shim(project_dir: str | Path) -> Path:
-    """Materialize ``platform/mobile.py`` — the kivy.mobile API preview."""
-    platform_dir = Path(project_dir) / "platform"
-    platform_dir.mkdir(parents=True, exist_ok=True)
-    shim = platform_dir / "mobile.py"
-    shim.write_text(mobile_shim_source(), encoding="utf-8")
-    return shim
-
-
 def write_sources(
     config: Config, project_dir: str | Path, *, python_version: str | None = None
 ) -> tuple[Path, Path]:
@@ -85,6 +60,4 @@ def write_sources(
         (project_dir / fname).write_text(
             (_TEMPLATES / fname).read_text(encoding="utf-8"), encoding="utf-8"
         )
-    write_platform_shim(project_dir)
-    write_mobile_shim(project_dir)
     return main_m, main_h

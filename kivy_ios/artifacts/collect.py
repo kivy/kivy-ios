@@ -98,6 +98,7 @@ def collect_artifacts(
             runner=runner,
             python_executable=python_executable,
         )
+        _stamp_collected(slice_pip_deps)
         for name in copy_wheel_frameworks(slice_pip_deps, layout.frameworks):
             copied[name] = layout.frameworks / name
     _install_native_xcframeworks(
@@ -109,6 +110,18 @@ def collect_artifacts(
         downloader=downloader,
         no_cache=no_cache,
     )
+
+
+def _stamp_collected(slice_pip_deps: Path) -> None:
+    """Mark a pip-deps slice as collected.
+
+    The Build Python run script uses this marker — not directory emptiness — to
+    tell "collected, no third-party deps" (valid: an app with an empty pip-deps
+    slice) from "never collected" (error: wrong/uncollected Xcode destination).
+    It lives beside the slice dir so it is never rsync'd into the app bundle.
+    """
+    marker = slice_pip_deps.parent / f"{slice_pip_deps.name}.collected"
+    marker.write_text("", encoding="utf-8")
 
 
 def _install_python_xcframework(lock, layout, *, cache, downloader, no_cache) -> None:

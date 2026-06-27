@@ -9,6 +9,10 @@ from pathlib import Path
 from ..config.model import Config
 
 
+class StagingError(Exception):
+    """Staging tree cannot be created (e.g. ``app_dir`` does not exist)."""
+
+
 @dataclass(frozen=True)
 class StagingLayout:
     root: Path  # <app>-ios/
@@ -44,10 +48,6 @@ class StagingLayout:
         )
 
     @property
-    def platform(self) -> Path:
-        return self.root / "platform"
-
-    @property
     def resources(self) -> Path:
         return self.root / "Resources"
 
@@ -75,14 +75,6 @@ def create_staging(config: Config, project_root: str | Path) -> StagingLayout:
     ):
         d.mkdir(parents=True, exist_ok=True)
 
-    # pip-deps is owned entirely by the Build Python run script, which rsyncs
-    # the platform-correct slice (pip-deps-simulator / pip-deps-device) into the
-    # app bundle every build. It is not a Copy Bundle Resources folder
-    # reference, so drop any obsolete symlink left by older toolchains.
-    stale_pip_deps = root / "pip-deps"
-    if stale_pip_deps.is_symlink():
-        stale_pip_deps.unlink()
-
     _refresh_app_symlink(layout, project_root, config.kivy.app_dir)
     return layout
 
@@ -90,8 +82,15 @@ def create_staging(config: Config, project_root: str | Path) -> StagingLayout:
 def _refresh_app_symlink(
     layout: StagingLayout, project_root: Path, app_dir: str
 ) -> None:
+    source = project_root / app_dir
+    if not source.is_dir():
+        raise StagingError(
+            f"app_dir '{app_dir}' is not an existing directory "
+            f"(looked for {source}). Create it or fix [tool.kivy].app_dir in "
+            f"pyproject.toml — it must point at your app's Python source."
+        )
     # The symlink target is relative to <app>-ios/ (e.g. ../src).
-    target = os.path.relpath((project_root / app_dir).resolve(), layout.root)
+    target = os.path.relpath(source.resolve(), layout.root)
     link = layout.app
     if link.is_symlink():
         if os.readlink(link) == target:

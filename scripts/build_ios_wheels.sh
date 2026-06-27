@@ -59,8 +59,16 @@ if [[ ! -d "$KIVY_SRC/.git" ]]; then
   echo "Cloning kivy/kivy (${KIVY_REF}) into $KIVY_SRC ..."
   git clone --depth 1 --branch "$KIVY_REF" https://github.com/kivy/kivy.git "$KIVY_SRC"
 else
-  echo "Using existing Kivy checkout at $KIVY_SRC"
+  # Refresh the existing checkout to the tip of $KIVY_REF. Without this, a stale
+  # cached clone silently rebuilds an old commit (e.g. missing a freshly merged
+  # PR) and produces wheels that don't match upstream. reset --hard only touches
+  # tracked files, so the untracked ios-kivy-dependencies/ native-deps cache
+  # (SDL3/ANGLE/ThorVG) is preserved and the slow native build is skipped.
+  echo "Refreshing existing Kivy checkout at $KIVY_SRC to origin/${KIVY_REF} ..."
+  git -C "$KIVY_SRC" fetch --depth 1 origin "$KIVY_REF"
+  git -C "$KIVY_SRC" reset --hard FETCH_HEAD
 fi
+echo "Kivy checkout at: $(git -C "$KIVY_SRC" log -1 --oneline)"
 
 echo "Installing cibuildwheel build deps ..."
 python3 -m pip install -q -r "$KIVY_SRC/.ci/cicd-requirements.txt"

@@ -31,6 +31,7 @@ def run_checks(
 
     if config is None:
         for name in (
+            "App source directory",
             "Signing identity",
             "Provisioning profile",
             "App icon",
@@ -45,6 +46,7 @@ def run_checks(
         return results
 
     results += [
+        C.check_app_dir(config, project_root),
         C.check_signing_identity(probe, config),
         C.check_provisioning_profile(config, project_root),
         C.check_app_icon(config, project_root),

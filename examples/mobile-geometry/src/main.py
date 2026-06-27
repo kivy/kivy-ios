@@ -1,10 +1,14 @@
-"""Mobile Geometry — kivy.mobile API prototype validation app.
+"""Mobile Geometry — a showcase for the ``kivy.mobile`` runtime-geometry API.
 
-Displays live values for every function in mobile_bridge.py:
+Displays live values for every Tier-1 function in ``kivy.mobile``:
 
   * DPI, scale, density
   * Safe area insets (top / bottom / left / right) with a visual overlay
   * Keyboard height — updates in real time as the keyboard appears / hides
+
+``kivy.mobile`` ships in Kivy core and provides safe desktop fallbacks, so
+this app runs unchanged on the desktop (for a quick smoke-test) and on iOS
+(where the values come from UIKit).
 
 How to run
 ----------
@@ -24,30 +28,23 @@ the "Keyboard height" row and bar update.
 """
 
 import os
-import sys
-
-# Allow running directly from the repo without installing kivy-ios.
-_src_dir = os.path.dirname(os.path.abspath(__file__))
-if _src_dir not in sys.path:
-    sys.path.insert(0, _src_dir)
-
-from mobile_bridge import (
-    get_dpi,
-    get_density,
-    get_scale,
-    get_safe_area,
-    get_keyboard_height,
-    subscribe_keyboard_height,
-)
 
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.lang import Builder
+from kivy.mobile import (
+    get_density,
+    get_dpi,
+    get_keyboard_height,
+    get_safe_area,
+    get_scale,
+    subscribe_keyboard_height,
+)
 from kivy.properties import DictProperty, NumericProperty
 from kivy.uix.boxlayout import BoxLayout
 
-
+_SRC_DIR = os.path.dirname(os.path.abspath(__file__))
 _SAFE_AREA_ZERO = {"top": 0.0, "left": 0.0, "bottom": 0.0, "right": 0.0}
 
 
@@ -62,7 +59,7 @@ class MobileGeometryApp(App):
     kb_bar_width = NumericProperty(0)
 
     def build(self):
-        kv_path = os.path.join(_src_dir, "main.kv")
+        kv_path = os.path.join(_SRC_DIR, "main.kv")
         Builder.load_file(kv_path)
         return MobileGeometryRoot()
 
@@ -101,20 +98,20 @@ class MobileGeometryApp(App):
 
     def _refresh_labels(self) -> None:
         ids = self.root.ids
-        ids.lbl_dpi.text     = f"{get_dpi():.1f}"
-        ids.lbl_scale.text   = f"{get_scale():.2f}x"
+        ids.lbl_dpi.text = f"{get_dpi():.1f}"
+        ids.lbl_scale.text = f"{get_scale():.2f}x"
         ids.lbl_density.text = f"{get_density():.2f}"
         self._refresh_safe_area()
-        ids.lbl_kb.text      = f"{get_keyboard_height():.1f} pt"
+        ids.lbl_kb.text = f"{get_keyboard_height():.1f} pt"
 
     def _refresh_safe_area(self) -> None:
         sa = get_safe_area()
         self.safe_area = sa
         ids = self.root.ids
-        ids.lbl_sa_top.text    = f"{sa['top']:.1f} pt"
+        ids.lbl_sa_top.text = f"{sa['top']:.1f} pt"
         ids.lbl_sa_bottom.text = f"{sa['bottom']:.1f} pt"
-        ids.lbl_sa_left.text   = f"{sa['left']:.1f} pt"
-        ids.lbl_sa_right.text  = f"{sa['right']:.1f} pt"
+        ids.lbl_sa_left.text = f"{sa['left']:.1f} pt"
+        ids.lbl_sa_right.text = f"{sa['right']:.1f} pt"
 
 
 MobileGeometryApp().run()

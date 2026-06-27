@@ -41,7 +41,6 @@ static void _run_python(void) {
     NSString *pythonHome   = [resourcePath stringByAppendingPathComponent:@"python"];
     NSString *appPath      = [resourcePath stringByAppendingPathComponent:
                                   [NSString stringWithUTF8String:_g_args.app_dir]];
-    NSString *platformPath = [resourcePath stringByAppendingPathComponent:@"platform"];
     NSString *pipDeps      = [resourcePath stringByAppendingPathComponent:@"pip-deps"];
     NSString *pyVer        = [NSString stringWithUTF8String:_g_args.python_ver];
 
@@ -52,7 +51,7 @@ static void _run_python(void) {
     NSString *stdlib   = [pythonHome stringByAppendingPathComponent:
                               [@"lib/python" stringByAppendingString:pyVer]];
     NSString *dynload  = [stdlib stringByAppendingPathComponent:@"lib-dynload"];
-    NSString *pythonPath = [@[stdlib, dynload, appPath, platformPath]
+    NSString *pythonPath = [@[stdlib, dynload, appPath]
                                 componentsJoinedByString:@":"];
     setenv("PYTHONPATH", [pythonPath UTF8String], 1);
 

@@ -23,8 +23,11 @@ BUILD_PYTHON_SCRIPT = (
     "# is populated per `toolchain build/run <target>`, but Xcode picks the slice\n"
     "# from its own destination -- switching the destination to an uncollected\n"
     "# target would otherwise ship an app with no dependencies (crash at launch).\n"
-    'if [ ! -d "$PIP_DEPS_SRC" ] || [ -z "$(ls -A "$PIP_DEPS_SRC" 2>/dev/null)" ]; then\n'
-    '    echo "error: $PIP_DEPS_SRC has no collected pip-deps for this '
+    "# The `.collected` marker is written by collect (toolchain build/run); it,\n"
+    "# not directory emptiness, is the signal -- an empty slice WITH the marker is\n"
+    "# valid (an app with no third-party dependencies).\n"
+    'if [ ! -f "${PIP_DEPS_SRC}.collected" ]; then\n'
+    '    echo "error: ${PIP_DEPS_SRC} was never collected for this '
     "platform. Run '$COLLECT_HINT' (or 'toolchain run') first, then rebuild.\"\n"
     "    exit 1\n"
     "fi\n"

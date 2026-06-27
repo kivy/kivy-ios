@@ -24,7 +24,7 @@ from ..config import ConfigError, load_config
 from ..lock import LockError, is_in_sync, load
 from ..project.icon import IconSourceError
 from ..project.materialize import materialize_project
-from ..project.staging import create_staging
+from ..project.staging import StagingError, create_staging
 from ..xcode import (
     CommandError,
     SigningError,
@@ -171,10 +171,10 @@ def prepare_build(
         )
 
     build_slices = _resolve_slices(target, arch, config.ios.deployment_target)
-    layout = create_staging(config, project_root)
     tags = ", ".join(s.platform_tag for s in build_slices)
-    click.echo(f"Collecting artifacts for {tags} ...")
     try:
+        layout = create_staging(config, project_root)
+        click.echo(f"Collecting artifacts for {tags} ...")
         collect_artifacts(
             lock,
             layout,
@@ -193,6 +193,8 @@ def prepare_build(
     except CollectError as exc:
         raise ToolchainError(str(exc)) from exc
     except IconSourceError as exc:
+        raise ToolchainError(str(exc)) from exc
+    except StagingError as exc:
         raise ToolchainError(str(exc)) from exc
 
     staging = project_root / f"{config.app_slug}-ios"
