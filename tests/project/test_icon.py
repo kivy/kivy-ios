@@ -43,7 +43,7 @@ class TestValidateIconSource:
     def test_rejects_wrong_dimensions(self, tmp_path):
         icon = tmp_path / "icon.png"
         _write_minimal_png(icon, 512, 512)
-        with pytest.raises(IconSourceError, match="512×512"):
+        with pytest.raises(IconSourceError, match="512x512"):
             validate_icon_source(icon)
 
     def test_rejects_non_png(self, tmp_path):

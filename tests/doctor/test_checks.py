@@ -112,7 +112,7 @@ class TestProjectChecks:
         )
         result = C.check_app_icon(cfg, tmp_path)
         assert result.status is Status.FAIL
-        assert "100×100" in (result.hint or "")
+        assert "100x100" in (result.hint or "")
 
     def test_app_icon_pass(self, tmp_path):
         from kivy_ios.config import load_config_from_text

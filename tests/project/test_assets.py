@@ -22,7 +22,7 @@ class TestAppIcon:
         (tmp_path / "assets").mkdir()
         _write_minimal_png(tmp_path / "assets" / "icon.png", 256, 256)
         cfg = make_config('\n[tool.kivy.ios.icons]\nsource = "assets/icon.png"')
-        with pytest.raises(IconSourceError, match="256×256"):
+        with pytest.raises(IconSourceError, match="256x256"):
             generate_asset_catalog(cfg, tmp_path / "Resources", project_root=tmp_path)
 
     def test_single_size_catalog(self, make_config, tmp_path):
