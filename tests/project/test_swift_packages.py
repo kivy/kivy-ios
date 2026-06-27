@@ -41,6 +41,10 @@ def _section(project, name):
     return list(project.objects.get_objects_in_section(name))
 
 
+def _object(project, object_id):
+    return project.objects[object_id]
+
+
 def _dep_id(project, product_name):
     for dep in _section(project, "XCSwiftPackageProductDependency"):
         if dep["productName"] == product_name:
@@ -100,6 +104,7 @@ class TestRemotePackage:
     def test_target_lists_product_dependency(self, config, project_root):
         _, project = _materialize(config, project_root, [REMOTE])
         target = project.get_target_by_name("touchtracer")
+        assert target is not None
         dep_id = _dep_id(project, "Sentry")
         assert dep_id in target["packageProductDependencies"]
 
@@ -147,7 +152,7 @@ class TestLocalPathTranslation:
         assert refs[0]["relativePath"] == "../vendor/MyKit"
         # The product dependency must point at the surviving (corrected) ref,
         # not the pruned stale one.
-        dep = project.objects[_dep_id(project, "MyKit")]
+        dep = _object(project, _dep_id(project, "MyKit"))
         assert dep["package"] == refs[0].get_id()
 
 

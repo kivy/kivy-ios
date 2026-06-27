@@ -2,6 +2,7 @@
   "venvPath": ".",
   "venv": ".venv",
   "pythonVersion": "3.13",
+  "typeCheckingMode": "standard",
   "include": ["kivy_ios", "tests"],
   "exclude": ["kivy_ios/project/templates"]
 }

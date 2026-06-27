@@ -10,6 +10,11 @@ from kivy_ios.project.materialize import materialize_project
 from kivy_ios.project.staging import StagingError, create_staging
 
 
+def _objects(project):
+    """pbxproj's dynamic object store is untyped; reach it via an Any-typed param."""
+    return project.objects
+
+
 def _settings_for(project, target_name, configuration):
     target = project.get_target_by_name(target_name)
     clist = project.get_object(target.buildConfigurationList)
@@ -125,7 +130,7 @@ class TestPbxprojGeneration:
         ref_id = refs[0].get_id()
         build_files = [
             bf
-            for bf in project.objects.get_objects_in_section("PBXBuildFile")
+            for bf in _objects(project).get_objects_in_section("PBXBuildFile")
             if getattr(bf, "fileRef", None) == ref_id
         ]
         assert build_files == []  # browse-only: in no build phase
@@ -182,7 +187,7 @@ class TestPbxprojGeneration:
 
         layout = materialize_project(config, project_root)
         project = XcodeProject.load(str(layout.xcodeproj / "project.pbxproj"))
-        proj = next(iter(project.objects.get_objects_in_section("PBXProject")))
+        proj = next(iter(_objects(project).get_objects_in_section("PBXProject")))
         assert proj["attributes"]["LastUpgradeCheck"] == RECOMMENDED_LAST_UPGRADE_CHECK
 
     def test_last_upgrade_check_uses_provided_value(self, config, project_root):
@@ -191,7 +196,7 @@ class TestPbxprojGeneration:
         # value overrides the fallback constant.
         layout = materialize_project(config, project_root, last_upgrade_check="2699")
         project = XcodeProject.load(str(layout.xcodeproj / "project.pbxproj"))
-        proj = next(iter(project.objects.get_objects_in_section("PBXProject")))
+        proj = next(iter(_objects(project).get_objects_in_section("PBXProject")))
         assert proj["attributes"]["LastUpgradeCheck"] == "2699"
 
     def test_idempotent_regeneration(self, config, project_root):
@@ -281,7 +286,7 @@ class TestPbxprojGeneration:
             if project.get_object(cid) is not None
         ]
         assert "SDL3.xcframework" in child_names
-        main = project.objects[project.objects[project["rootObject"]].mainGroup]
+        main = _objects(project)[_objects(project)[project["rootObject"]].mainGroup]
         main_child_names = [
             project.get_object(cid).get_name()
             for cid in main.children
