@@ -1,7 +1,7 @@
 """Validate ``[tool.kivy.ios.icons].source`` (spec 01).
 
-Apple's single-size ``AppIcon`` catalog entry must be exactly 1024×1024 PNG.
-kivy-ios does not resize — the source file must already match.
+Apple's single-size ``AppIcon`` catalog entry must be exactly 1024x1024 PNG.
+kivy-ios does not resize - the source file must already match.
 """
 
 from __future__ import annotations
@@ -22,17 +22,17 @@ def png_dimensions(path: Path) -> tuple[int, int]:
     with path.open("rb") as fh:
         header = fh.read(24)
     if len(header) < 24 or header[:8] != _PNG_SIG:
-        raise IconSourceError(f"{path}: not a PNG file (expected 1024×1024 PNG)")
+        raise IconSourceError(f"{path}: not a PNG file (expected 1024x1024 PNG)")
     return struct.unpack(">II", header[16:24])
 
 
 def validate_icon_source(path: Path) -> None:
-    """Fail fast when the icon path is missing, not PNG, or not 1024×1024."""
+    """Fail fast when the icon path is missing, not PNG, or not 1024x1024."""
     if not path.is_file():
         raise IconSourceError(
             f"app icon not found: {path}\n"
             "  [tool.kivy.ios.icons].source must point to an existing "
-            f"{APP_ICON_SIZE}×{APP_ICON_SIZE} PNG."
+            f"{APP_ICON_SIZE}x{APP_ICON_SIZE} PNG."
         )
     try:
         width, height = png_dimensions(path)
@@ -42,9 +42,9 @@ def validate_icon_source(path: Path) -> None:
         raise IconSourceError(f"cannot read app icon {path}: {exc}") from exc
     if (width, height) != (APP_ICON_SIZE, APP_ICON_SIZE):
         raise IconSourceError(
-            f"app icon {path} is {width}×{height}; "
-            f"expected {APP_ICON_SIZE}×{APP_ICON_SIZE} PNG.\n"
-            f"  Resize the source image to {APP_ICON_SIZE}×{APP_ICON_SIZE} "
+            f"app icon {path} is {width}x{height}; "
+            f"expected {APP_ICON_SIZE}x{APP_ICON_SIZE} PNG.\n"
+            f"  Resize the source image to {APP_ICON_SIZE}x{APP_ICON_SIZE} "
             "before building."
         )
 
