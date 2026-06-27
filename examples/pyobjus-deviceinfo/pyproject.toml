@@ -1,0 +1,60 @@
+[project]
+name = "pyobjus-deviceinfo"
+version = "0.1.0"
+requires-python = ">=3.15.0b2"
+dependencies = [
+    "kivy>=3.0.0.dev0,<4",
+    # pyobjus is an iOS-only package; it is silently skipped on other
+    # platforms at runtime (the app shows a desktop fallback).
+    # iOS wheels must be available via find_links or PyPI before running
+    # `toolchain lock`.
+    "pyobjus",
+]
+
+[tool.kivy]
+display_name = "pyobjus Device Info"
+app_dir = "src"
+entry_point = "main"
+orientation = ["portrait"]
+
+[tool.kivy.ios]
+schema_version = 1
+bundle_id = "org.kivy.pyobjus-deviceinfo"
+build = 1
+deployment_target = "16.0"
+find_links = ["../wheels"]
+# Kivy's wheel declares deps that are not needed at runtime on iOS.
+# Remove an entry only if your app actually uses that feature.
+exclude = [
+    # kivy-garden: the extension registry / download CLI.  Never needed at
+    # runtime on iOS (the App Store prohibits dynamic package installation).
+    # Individual garden widgets (e.g. kivy-garden.mapview) are separate
+    # packages — add them to [project].dependencies instead.
+    "kivy-garden",
+    # requests and its transitive deps (below) are used by
+    # kivy.network.urlrequest.UrlRequest.
+    # Remove these lines only if your app uses UrlRequest for HTTP calls.
+    "requests",
+    "certifi",
+    "charset-normalizer",
+    "idna",
+    "urllib3",
+    # docutils: required by the RSTDocument widget (kivy.uix.rst).
+    # Remove this line if your app uses RSTDocument.
+    "docutils",
+    # pygments: required by the CodeInput widget (kivy.uix.codeinput).
+    # Remove this line if your app uses CodeInput.
+    "pygments",
+    # NOTE: filetype is imported unconditionally by kivy/core/image/__init__.py
+    # and cannot be excluded regardless of which widgets you use.
+]
+
+[tool.kivy.ios.python]
+version = "3.15.0b2"
+
+[tool.kivy.ios.signing]
+team_id = ""
+identity = "Apple Development"
+provisioning_profile = ""
+auto_signing = true
+upload_symbols = true
