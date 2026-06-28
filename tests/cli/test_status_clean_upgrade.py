@@ -295,3 +295,30 @@ class TestDoctor:
             result = runner.invoke(doctor, ["--offline"])
             assert "project mode" in result.output
             assert result.exit_code != 0
+
+    def test_malformed_pyproject_fails_nonzero(self, runner, tmp_path, monkeypatch):
+        from tests.doctor.conftest import FakeProbe
+
+        # Healthy environment so the only failure is the unparseable config;
+        # doctor must still exit non-zero (was: printed FAIL but exited 0).
+        monkeypatch.setattr(doctor_mod, "RealProbe", lambda: FakeProbe())
+        with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
+            # Valid TOML, invalid config: bundle_id is required.
+            (Path(fs) / "pyproject.toml").write_text(
+                "[project]\nname='a'\nversion='1'\n[tool.kivy.ios]\nschema_version=1\n"
+            )
+            result = runner.invoke(doctor, ["--offline"])
+            assert "[FAIL] pyproject.toml" in result.output
+            assert result.exit_code != 0
+
+    def test_malformed_lock_reported_as_fail(self, runner, tmp_path, monkeypatch):
+        from tests.doctor.conftest import FakeProbe
+
+        monkeypatch.setattr(doctor_mod, "RealProbe", lambda: FakeProbe())
+        with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
+            _write(fs, lock=False)
+            # Valid TOML but missing [tool.kivy_ios] → LockError from the reader.
+            (Path(fs) / "pylock.ios.toml").write_text("lock-version = '1.0'\n")
+            result = runner.invoke(doctor, ["--offline"])
+            assert "[FAIL] pylock.ios.toml" in result.output
+            assert result.exit_code != 0

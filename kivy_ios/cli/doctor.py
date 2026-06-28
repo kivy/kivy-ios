@@ -8,7 +8,7 @@ import click
 
 from .. import __version__
 from ..config import ConfigError, load_config
-from ..doctor import RealProbe, Status, run_checks, worst_status
+from ..doctor import CheckResult, RealProbe, Status, run_checks, worst_status
 from ..lock import LockError, load
 from ._common import LOCKFILE_NAME, PYPROJECT_NAME
 
@@ -21,22 +21,35 @@ def doctor(offline: bool) -> None:
     pyproject = cwd / PYPROJECT_NAME
     config = None
     lock = None
+    # Parse failures are recorded as FAIL checks (not just printed) so they
+    # count toward the exit code, and a malformed lock is reported as a FAIL
+    # rather than being silently indistinguishable from "no lock".
+    parse_results: list[CheckResult] = []
     if pyproject.is_file():
         try:
             config = load_config(pyproject)
         except ConfigError as exc:
-            click.echo(f"[FAIL] pyproject.toml: {exc.format()}")
+            parse_results.append(
+                CheckResult(PYPROJECT_NAME, Status.FAIL, exc.format())
+            )
         lockfile = cwd / LOCKFILE_NAME
         if lockfile.is_file():
             try:
                 lock = load(lockfile)
-            except LockError:
-                lock = None
+            except LockError as exc:
+                parse_results.append(
+                    CheckResult(
+                        LOCKFILE_NAME,
+                        Status.FAIL,
+                        f"failed to parse: {exc}",
+                        hint="Regenerate it with `toolchain lock`.",
+                    )
+                )
 
     mode = "project" if config is not None else "environment"
     click.echo(f"toolchain doctor ({mode} mode)\n")
 
-    results = run_checks(
+    results = parse_results + run_checks(
         RealProbe(),
         toolchain_version=__version__,
         config=config,
