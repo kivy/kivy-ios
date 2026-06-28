@@ -537,6 +537,7 @@ GCC_OPTIMIZATION_LEVEL = "s"
 | `ENABLE_TESTABILITY` | toolchain |
 | `FRAMEWORK_SEARCH_PATHS` | toolchain |
 | `HEADER_SEARCH_PATHS` | toolchain |
+| `LD_RUNPATH_SEARCH_PATHS` | toolchain (`@executable_path/Frameworks` for embedded frameworks) |
 | `GCC_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER` | toolchain |
 
 See also [spec 06 §"Toolchain-managed build settings"](06-xcode-project-generation.md) for the rationale behind each toolchain-managed entry.

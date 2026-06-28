@@ -172,6 +172,11 @@ class TestPbxprojGeneration:
         # Pre-signed embedded frameworks must not be stripped on copy.
         assert debug["COPY_PHASE_STRIP"] == "NO"
         assert release["COPY_PHASE_STRIP"] == "NO"
+        # Embedded dynamic frameworks load via @rpath; the runpath must include
+        # @executable_path/Frameworks regardless of pbxproj embedding side effects.
+        for cfg in (debug, release):
+            assert "@executable_path/Frameworks" in cfg["LD_RUNPATH_SEARCH_PATHS"]
+            assert "$(inherited)" in cfg["LD_RUNPATH_SEARCH_PATHS"]
 
     def test_signing_settings(self, config, project_root):
         layout = materialize_project(config, project_root)

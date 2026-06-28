@@ -61,6 +61,11 @@ def managed_settings(
         "DEBUG_INFORMATION_FORMAT": "dwarf-with-dsym" if is_release else "dwarf",
         "FRAMEWORK_SEARCH_PATHS": "$(PROJECT_DIR)",
         "HEADER_SEARCH_PATHS": _header_search_paths(layout),
+        # Embedded dynamic frameworks (Python.xcframework, the SDL3/ANGLE family,
+        # wheel-embedded and SPM frameworks) are loaded via @rpath at runtime.
+        # Manage the runpath explicitly rather than relying on pbxproj embedding
+        # side effects, so any embed path resolves under .app/Frameworks/.
+        "LD_RUNPATH_SEARCH_PATHS": "$(inherited) @executable_path/Frameworks",
         # UIKit is always required: SDL apps use it transitively through
         # SDL3.framework; pure-Python apps call UIApplicationMain directly.
         "OTHER_LDFLAGS": "-framework UIKit",
