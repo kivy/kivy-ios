@@ -196,6 +196,18 @@ class TestProjectChecks:
             C.check_app_native_binaries(probe, config, tmp_path).status is Status.PASS
         )
 
+    def test_native_binary_unrecognized_warns(
+        self, config, tmp_path, fake_probe_factory
+    ):
+        # A truncated/unrecognized .so yields an empty platform set; it must not
+        # silently pass as iOS-safe.
+        (tmp_path / "src").mkdir()
+        (tmp_path / "src" / "ext.so").write_bytes(b"\x00")
+        probe = fake_probe_factory(platforms={})  # empty -> unknown
+        r = C.check_app_native_binaries(probe, config, tmp_path)
+        assert r.status is Status.WARN
+        assert "ext.so" in r.detail
+
     def test_privacy_manifest_absent_warns(self, config, tmp_path):
         assert C.check_app_privacy_manifest(config, tmp_path).status is Status.WARN
 

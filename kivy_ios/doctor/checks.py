@@ -285,13 +285,17 @@ def check_app_native_binaries(
         return CheckResult(
             "App-local native binaries", Status.SKIP, f"{config.kivy.app_dir} missing"
         )
-    offenders = []
+    offenders: list[str] = []
+    unknown: list[str] = []
     for pattern in ("*.so", "*.dylib"):
         for binary in app_dir.rglob(pattern):
+            rel = binary.relative_to(project_root)
             platforms = probe.binary_platforms(binary)
-            ios_ok = platforms & {"ios", "ios-simulator"}
-            if platforms and not ios_ok:
-                rel = binary.relative_to(project_root)
+            if not platforms:
+                # No platform could be read: truncated, corrupt, not a Mach-O,
+                # or lacking an LC_BUILD_VERSION. Can't confirm it's iOS-safe.
+                unknown.append(str(rel))
+            elif not platforms & {"ios", "ios-simulator"}:
                 offenders.append(f"{rel} ({', '.join(sorted(platforms))})")
     if offenders:
         return CheckResult(
@@ -299,6 +303,15 @@ def check_app_native_binaries(
             Status.FAIL,
             "; ".join(offenders),
             hint="non-iOS native code won't load on device; ship it as an iOS wheel.",
+        )
+    if unknown:
+        return CheckResult(
+            "App-local native binaries",
+            Status.WARN,
+            "unrecognized binary: " + "; ".join(unknown),
+            hint="could not read an iOS Mach-O platform from these files "
+            "(truncated, corrupt, or not a Mach-O); confirm they are iOS dylibs "
+            "or ship them as an iOS wheel.",
         )
     return CheckResult("App-local native binaries", Status.PASS, "none non-iOS")
 
