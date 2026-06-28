@@ -335,9 +335,9 @@ def _parse_ios(
 
     icons = _parse_icons(ios)
     splash = _parse_splash(ios)
-    xcframeworks = _parse_xcframeworks(ios)
-    swift_packages = _parse_swift_packages(ios)
-    signing = _parse_signing(ios)
+    xcframeworks = _parse_xcframeworks(ios, finder)
+    swift_packages = _parse_swift_packages(ios, finder)
+    signing = _parse_signing(ios, finder)
     info_plist = _parse_info_plist(ios, finder)
     build_settings = _parse_build_settings(ios, finder)
     privacy_source = _parse_privacy(ios)
@@ -407,10 +407,18 @@ def _parse_simulator_archs(ios: dict, finder: _LineFinder) -> tuple[str, ...]:
     return tuple(ordered)
 
 
-def _parse_python_version(ios: dict) -> str | None:
+def _parse_python_version(ios: dict) -> str:
+    # Rule: [tool.kivy.ios.python].version is required (spec 01). Without it,
+    # `toolchain lock` would silently fall back to a hidden default Python
+    # version rather than building against the version the project declares.
     python = ios.get("python")
     if python is None:
-        return None
+        raise ConfigError(
+            "missing required [tool.kivy.ios.python] table with a 'version'",
+            key_path="tool.kivy.ios.python.version",
+            hint='add:\n    [tool.kivy.ios.python]\n    version = "3.15.0"\n'
+            "  (the Python.xcframework version to build against).",
+        )
     if not isinstance(python, dict):
         raise ConfigError(
             "[tool.kivy.ios.python] must be a table", key_path="tool.kivy.ios.python"
@@ -421,9 +429,9 @@ def _parse_python_version(ios: dict) -> str | None:
             "missing required [tool.kivy.ios.python].version",
             key_path="tool.kivy.ios.python.version",
         )
-    if not isinstance(version, str):
+    if not isinstance(version, str) or not version.strip():
         raise ConfigError(
-            "[tool.kivy.ios.python].version must be a string",
+            "[tool.kivy.ios.python].version must be a non-empty string",
             key_path="tool.kivy.ios.python.version",
         )
     return version
@@ -552,7 +560,7 @@ def _parse_splash(ios: dict) -> SplashConfig:
     )
 
 
-def _parse_xcframeworks(ios: dict) -> list[XcframeworkDep]:
+def _parse_xcframeworks(ios: dict, finder: _LineFinder) -> list[XcframeworkDep]:
     native = ios.get("native")
     if not isinstance(native, dict):
         return []
@@ -566,42 +574,69 @@ def _parse_xcframeworks(ios: dict) -> list[XcframeworkDep]:
         )
     out: list[XcframeworkDep] = []
     for name, entry in table.items():
+        key_path = f"tool.kivy.ios.native.xcframeworks.{name}"
         if not isinstance(entry, dict):
             raise ConfigError(
                 f"xcframework {name!r} must be an inline table with version + source",
-                key_path=f"tool.kivy.ios.native.xcframeworks.{name}",
+                key_path=key_path,
             )
         version = entry.get("version")
         source = entry.get("source")
         if not isinstance(version, str) or not version:
             raise ConfigError(
                 f"xcframework {name!r} requires a string 'version'",
-                key_path=f"tool.kivy.ios.native.xcframeworks.{name}",
+                key_path=key_path,
             )
         if not isinstance(source, str) or not source:
             raise ConfigError(
                 f"xcframework {name!r} requires an explicit 'source' (URL or "
                 f"repo-relative path)",
-                key_path=f"tool.kivy.ios.native.xcframeworks.{name}",
+                key_path=key_path,
             )
-        if isabs(source):
-            raise ConfigError(
-                f"xcframework {name!r} source must not be an absolute path",
-                key_path=f"tool.kivy.ios.native.xcframeworks.{name}",
-            )
+        _validate_xcframework_source(name, source, key_path)
         out.append(
             XcframeworkDep(
                 name=name,
                 version=version,
                 source=source,
-                link=bool(entry.get("link", True)),
-                embed=bool(entry.get("embed", True)),
+                link=_require_bool(
+                    entry.get("link", True),
+                    key_path=f"{key_path}.link",
+                    field="link",
+                    finder=finder,
+                ),
+                embed=_require_bool(
+                    entry.get("embed", True),
+                    key_path=f"{key_path}.embed",
+                    field="embed",
+                    finder=finder,
+                ),
             )
         )
     return out
 
 
-def _parse_swift_packages(ios: dict) -> list[SwiftPackageDep]:
+def _validate_xcframework_source(name: str, source: str, key_path: str) -> None:
+    # A URL is fetched as-is; anything else is a repo-relative path that must
+    # stay inside the project (mirrors find_links / swift path rules, spec 01).
+    if source.startswith(("http://", "https://")):
+        return
+    if isabs(source):
+        raise ConfigError(
+            f"xcframework {name!r} source must not be an absolute path",
+            key_path=key_path,
+        )
+    parts = PurePosixPath(normpath(source)).parts
+    if parts and parts[0] == "..":
+        raise ConfigError(
+            f"xcframework {name!r} source must not escape the project directory",
+            key_path=key_path,
+            hint="vendor the archive under the project (or a sibling dir) and use "
+            "a repo-relative path, or give a direct https:// URL.",
+        )
+
+
+def _parse_swift_packages(ios: dict, finder: _LineFinder) -> list[SwiftPackageDep]:
     native = ios.get("native")
     if not isinstance(native, dict):
         return []
@@ -661,8 +696,18 @@ def _parse_swift_packages(ios: dict) -> list[SwiftPackageDep]:
                 url=url or None,
                 path=path or None,
                 requirement=requirement,
-                link=bool(entry.get("link", True)),
-                embed=bool(entry.get("embed", True)),
+                link=_require_bool(
+                    entry.get("link", True),
+                    key_path=f"{key_path}.link",
+                    field="link",
+                    finder=finder,
+                ),
+                embed=_require_bool(
+                    entry.get("embed", True),
+                    key_path=f"{key_path}.embed",
+                    field="embed",
+                    finder=finder,
+                ),
             )
         )
     return out
@@ -725,7 +770,22 @@ def _validate_swift_path(name: str, path: object, key_path: str) -> str:
     return path
 
 
-def _parse_signing(ios: dict) -> SigningConfig:
+def _require_bool(
+    value: object, *, key_path: str, field: str, finder: _LineFinder
+) -> bool:
+    """Reject non-boolean TOML values. ``bool("false")`` is ``True``, so coercing
+    with ``bool()`` would silently turn a stray string/int into the wrong flag.
+    """
+    if not isinstance(value, bool):
+        raise ConfigError(
+            f"[{key_path}] must be a boolean (true/false), not {type(value).__name__}",
+            key_path=key_path,
+            line=finder.line(field),
+        )
+    return value
+
+
+def _parse_signing(ios: dict, finder: _LineFinder) -> SigningConfig:
     signing = ios.get("signing")
     if signing is None:
         return SigningConfig()
@@ -738,8 +798,18 @@ def _parse_signing(ios: dict) -> SigningConfig:
         team_id=signing.get("team_id", ""),
         identity=signing.get("identity", "Apple Development"),
         provisioning_profile=signing.get("provisioning_profile", ""),
-        auto_signing=bool(signing.get("auto_signing", True)),
-        upload_symbols=bool(signing.get("upload_symbols", True)),
+        auto_signing=_require_bool(
+            signing.get("auto_signing", True),
+            key_path="tool.kivy.ios.signing.auto_signing",
+            field="auto_signing",
+            finder=finder,
+        ),
+        upload_symbols=_require_bool(
+            signing.get("upload_symbols", True),
+            key_path="tool.kivy.ios.signing.upload_symbols",
+            field="upload_symbols",
+            finder=finder,
+        ),
     )
 
 
@@ -786,7 +856,20 @@ def _parse_build_settings(ios: dict, finder: _LineFinder) -> dict[str, str]:
             line=finder.line("build_settings"),
             hint="these are managed by the toolchain and cannot be overridden.",
         )
-    return {str(k): str(v) for k, v in settings.items()}
+    # Xcode build settings are strings (spec 01); reject non-strings rather than
+    # silently str()-coercing a TOML int/bool/list into a surprising value.
+    result: dict[str, str] = {}
+    for key, value in settings.items():
+        if not isinstance(value, str):
+            raise ConfigError(
+                f"[tool.kivy.ios.xcode.build_settings].{key} must be a string, not "
+                f"{type(value).__name__} (Xcode build settings are strings; quote "
+                f'the value, e.g. {key} = "NO")',
+                key_path=f"tool.kivy.ios.xcode.build_settings.{key}",
+                line=finder.line(key),
+            )
+        result[key] = value
+    return result
 
 
 def _parse_privacy(ios: dict) -> str | None:

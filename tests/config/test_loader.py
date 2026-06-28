@@ -44,6 +44,7 @@ class TestHappyPath:
             [tool.kivy.ios]
             schema_version = 1
             bundle_id = "org.example.app"
+            python = { version = "3.15.0" }
             """
         )
         assert cfg.kivy.entry_point == "main"
@@ -67,6 +68,7 @@ class TestHappyPath:
             [tool.kivy.ios]
             schema_version = 1
             bundle_id = "org.example.app"
+            python = { version = "3.15.0" }
             [tool.kivy.ios.native.xcframeworks]
             Sentry = { version = "8.49.0", source = "https://example.com/Sentry.zip" }
             Local = { version = "0.3.0", source = "frameworks/Local.xcframework.zip", embed = false }
@@ -98,6 +100,7 @@ def load_swift(body: str):
         [tool.kivy.ios]
         schema_version = 1
         bundle_id = "org.example.app"
+        python = { version = "3.15.0" }
         """
     )
     return load_config_from_text((header + textwrap.dedent(body)).strip())
@@ -317,7 +320,8 @@ class TestRule5EntryPoint:
     def test_dotted_ok(self):
         cfg = load(
             "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='src'\n"
-            "entry_point='pkg.start'\n[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'"
+            "entry_point='pkg.start'\n[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+            "python = { version = '3.15.0' }"
         )
         assert cfg.kivy.entry_point == "pkg.start"
 
@@ -341,7 +345,8 @@ class TestRule6AppDir:
     def test_nested_ok(self):
         cfg = load(
             "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='app/src'\n"
-            "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'"
+            "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+            "python = { version = '3.15.0' }"
         )
         assert cfg.kivy.app_dir == "app/src"
 
@@ -361,6 +366,7 @@ class TestRule8ReservedBuildSettings:
             load(
                 "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='src'\n"
                 "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+                "python = { version = '3.15.0' }\n"
                 "[tool.kivy.ios.xcode.build_settings]\nPRODUCT_BUNDLE_IDENTIFIER='x'"
             )
 
@@ -368,6 +374,7 @@ class TestRule8ReservedBuildSettings:
         cfg = load(
             "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='src'\n"
             "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+            "python = { version = '3.15.0' }\n"
             "[tool.kivy.ios.xcode.build_settings]\nSWIFT_VERSION='5.0'"
         )
         assert cfg.ios_required.build_settings == {"SWIFT_VERSION": "5.0"}
@@ -414,6 +421,7 @@ class TestInfoPlistManagedKeys:
             load(
                 "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='src'\n"
                 "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+                "python = { version = '3.15.0' }\n"
                 "[tool.kivy.ios.info_plist]\nCFBundleIdentifier='x'"
             )
 
@@ -421,6 +429,7 @@ class TestInfoPlistManagedKeys:
         cfg = load(
             "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='src'\n"
             "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+            "python = { version = '3.15.0' }\n"
             "[tool.kivy.ios.info_plist]\nNSCameraUsageDescription='QR'"
         )
         assert cfg.ios_required.info_plist == {"NSCameraUsageDescription": "QR"}
@@ -460,6 +469,7 @@ class TestSimulatorArchs:
     _BASE = (
         "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='src'\n"
         "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+        "python = { version = '3.15.0' }\n"
     )
 
     def test_default_is_both_archs(self):
@@ -493,6 +503,118 @@ class TestSimulatorArchs:
     def test_non_string_items_rejected(self):
         with pytest.raises(ConfigError, match="must be a list of strings"):
             load(self._BASE + "simulator_archs=[1,2]\n")
+
+
+# A minimal valid project whose [tool.kivy.ios] body can be extended by tests.
+# python is inline so appended bare keys still bind to [tool.kivy.ios].
+_VALID_IOS = (
+    "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='src'\n"
+    "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+    "python = { version = '3.15.0' }\n"
+)
+
+
+class TestPythonVersionRequired:
+    """[tool.kivy.ios.python].version is required (spec 01) — no hidden default."""
+
+    def test_missing_python_table_rejected(self):
+        with pytest.raises(ConfigError, match=r"required \[tool.kivy.ios.python\]"):
+            load(
+                "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='src'\n"
+                "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+            )
+
+    def test_missing_version_rejected(self):
+        with pytest.raises(ConfigError, match="required .*version"):
+            load(
+                "[project]\nname='a'\nversion='1'\n[tool.kivy]\napp_dir='src'\n"
+                "[tool.kivy.ios]\nschema_version=1\nbundle_id='o.x.a'\n"
+                "[tool.kivy.ios.python]\nother='x'"
+            )
+
+    def test_empty_version_rejected(self):
+        with pytest.raises(ConfigError, match="non-empty string"):
+            load(_VALID_IOS.replace("version = '3.15.0'", "version = ''"))
+
+    def test_non_string_version_rejected(self):
+        with pytest.raises(ConfigError, match="non-empty string"):
+            load(_VALID_IOS.replace("version = '3.15.0'", "version = 315"))
+
+
+class TestXcframeworkSource:
+    def test_relative_path_ok(self):
+        cfg = load(
+            _VALID_IOS + "[tool.kivy.ios.native.xcframeworks]\n"
+            'Local = { version = "1.0", source = "frameworks/Local.xcframework.zip" }'
+        )
+        (xc,) = cfg.ios_required.xcframeworks
+        assert xc.source == "frameworks/Local.xcframework.zip"
+
+    def test_absolute_path_rejected(self):
+        with pytest.raises(ConfigError, match="absolute path"):
+            load(
+                _VALID_IOS + "[tool.kivy.ios.native.xcframeworks]\n"
+                'Local = { version = "1.0", source = "/abs/Local.xcframework.zip" }'
+            )
+
+    def test_escaping_path_rejected(self):
+        with pytest.raises(ConfigError, match="escape"):
+            load(
+                _VALID_IOS + "[tool.kivy.ios.native.xcframeworks]\n"
+                'Local = { version = "1.0", source = "../../Local.xcframework.zip" }'
+            )
+
+    def test_url_source_ok(self):
+        cfg = load(
+            _VALID_IOS + "[tool.kivy.ios.native.xcframeworks]\n"
+            'S = { version = "1.0", source = "https://example.com/S.zip" }'
+        )
+        (xc,) = cfg.ios_required.xcframeworks
+        assert xc.source == "https://example.com/S.zip"
+
+    def test_non_bool_link_rejected(self):
+        with pytest.raises(ConfigError, match="must be a boolean"):
+            load(
+                _VALID_IOS + "[tool.kivy.ios.native.xcframeworks]\n"
+                'S = { version = "1.0", source = "f/S.zip", link = "no" }'
+            )
+
+
+class TestSigningBooleans:
+    def test_string_auto_signing_rejected(self):
+        # bool("false") is True; a stray string must be rejected, not coerced.
+        with pytest.raises(ConfigError, match="must be a boolean"):
+            load(_VALID_IOS + "[tool.kivy.ios.signing]\nauto_signing = 'false'")
+
+    def test_int_upload_symbols_rejected(self):
+        with pytest.raises(ConfigError, match="must be a boolean"):
+            load(_VALID_IOS + "[tool.kivy.ios.signing]\nupload_symbols = 0")
+
+    def test_bool_values_ok(self):
+        cfg = load(
+            _VALID_IOS + "[tool.kivy.ios.signing]\n"
+            "auto_signing = false\nupload_symbols = false"
+        )
+        assert cfg.ios_required.signing.auto_signing is False
+        assert cfg.ios_required.signing.upload_symbols is False
+
+
+class TestBuildSettingTypes:
+    def test_non_string_value_rejected(self):
+        with pytest.raises(ConfigError, match="must be a string"):
+            load(
+                _VALID_IOS + "[tool.kivy.ios.xcode.build_settings]\nENABLE_BITCODE = 0"
+            )
+
+    def test_string_values_ok(self):
+        cfg = load(
+            _VALID_IOS + "[tool.kivy.ios.xcode.build_settings]\n"
+            'ENABLE_BITCODE = "NO"\nSWIFT_VERSION = "5.0"'
+        )
+        assert cfg.ios_required.build_settings == {
+            "ENABLE_BITCODE": "NO",
+            "SWIFT_VERSION": "5.0",
+        }
 
 
 class TestSyntaxError:

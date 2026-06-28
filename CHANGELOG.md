@@ -11,7 +11,12 @@ see the [migration guide](docs/proposals/00-overview.md) and the updated README.
 
 - **Declarative config** — project settings live in `[tool.kivy]` /
   `[tool.kivy.ios]` sections of your app's `pyproject.toml`; no more
-  `toolchain.spec` or `requirements.txt`.
+  `toolchain.spec` or `requirements.txt`. Config validation is strict and
+  fail-fast: `[tool.kivy.ios.python].version` is required (no hidden default at
+  lock time), native xcframework `source` paths may not escape the project,
+  signing flags must be real booleans (a quoted `"false"` is rejected, not
+  coerced to `true`), and `[tool.kivy.ios.xcode.build_settings]` values must be
+  strings.
 - **Dependency locking** — `toolchain lock` resolves pure-Python and iOS wheel
   dependencies and writes `pylock.ios.toml` (PEP 751-inspired).
 - **Python.xcframework** — Python is distributed as a pre-built xcframework;
