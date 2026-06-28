@@ -205,7 +205,7 @@ def check_app_icon(config: Config, project_root: Path) -> CheckResult:
             f"{source} invalid",
             hint=problem,
         )
-    return CheckResult("App icon", Status.PASS, f"{APP_ICON_SIZE}×{APP_ICON_SIZE} PNG")
+    return CheckResult("App icon", Status.PASS, f"{APP_ICON_SIZE}x{APP_ICON_SIZE} PNG")
 
 
 def check_provisioning_profile(config: Config, project_root: Path) -> CheckResult:
