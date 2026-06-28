@@ -18,7 +18,11 @@ from pathlib import Path
 from ..lock.model import LockedWheel, Lockfile
 from .cache import ArtifactCache
 from .download import Downloader, fetch_artifact
-from .frameworks import copy_wheel_frameworks, extract_xcframework_archive
+from .frameworks import (
+    PlacedFramework,
+    copy_wheel_frameworks,
+    extract_xcframework_archive,
+)
 from .wheels import BuildSlice, select_wheel
 
 
@@ -83,7 +87,10 @@ def collect_artifacts(
     )
     # Wheel-embedded frameworks are multi-slice xcframeworks; union them across
     # slices (dedup by name) so user-declared natives below don't clobber them.
-    copied: dict[str, Path] = {}
+    # Shared registry of staged frameworks (name -> provenance + content hash).
+    # Threaded across every pip-deps slice and into native xcframework
+    # extraction so identical duplicates dedupe and conflicting ones fail loudly.
+    staged: dict[str, PlacedFramework] = {}
     for build_slice in build_slices:
         slice_pip_deps = layout.pip_deps_for_slice(build_slice.target)
         _install_wheels(
@@ -99,12 +106,11 @@ def collect_artifacts(
             python_executable=python_executable,
         )
         _stamp_collected(slice_pip_deps)
-        for name in copy_wheel_frameworks(slice_pip_deps, layout.frameworks):
-            copied[name] = layout.frameworks / name
+        copy_wheel_frameworks(slice_pip_deps, layout.frameworks, existing=staged)
     _install_native_xcframeworks(
         lock,
         layout,
-        copied=copied,
+        staged=staged,
         project_root=project_root,
         cache=cache,
         downloader=downloader,
@@ -229,7 +235,7 @@ def _install_wheels(
 
 
 def _install_native_xcframeworks(
-    lock, layout, *, copied, project_root, cache, downloader, no_cache
+    lock, layout, *, staged, project_root, cache, downloader, no_cache
 ) -> None:
     for xc in lock.xcframeworks:
         filename = (xc.url or xc.path or xc.name).rsplit("/", 1)[-1]
@@ -250,7 +256,7 @@ def _install_native_xcframeworks(
             name=xc.name,
             archive_format=xc.archive_format,
             archive_member=xc.archive_member,
-            existing=copied,
+            existing=staged,
         )
 
 

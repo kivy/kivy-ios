@@ -15,11 +15,11 @@ from kivy_ios.artifacts.frameworks import (
 )
 
 
-def _make_xcframework(root: Path, name: str) -> Path:
+def _make_xcframework(root: Path, name: str, content: str = "binary") -> Path:
     xc = root / f"{name}.xcframework"
     (xc / "ios-arm64").mkdir(parents=True)
     (xc / "Info.plist").write_text("<plist/>")
-    (xc / "ios-arm64" / f"{name}").write_text("binary")
+    (xc / "ios-arm64" / f"{name}").write_text(content)
     return xc
 
 
@@ -45,7 +45,24 @@ class TestWheelFrameworks:
         copy_wheel_frameworks(pip_deps, tmp_path / "Frameworks")
         assert not embedded.exists()
 
-    def test_duplicate_framework_conflict(self, tmp_path):
+    def test_conflicting_duplicate_fails_naming_both(self, tmp_path):
+        # Same basename, different content -> hard fail naming both providers.
+        pip_deps = tmp_path / "pip-deps"
+        a = pip_deps / "pkga.frameworks"
+        b = pip_deps / "pkgb.frameworks"
+        a.mkdir(parents=True)
+        b.mkdir(parents=True)
+        _make_xcframework(a, "SDL3", content="v1")
+        _make_xcframework(b, "SDL3", content="v2")
+        with pytest.raises(FrameworkConflict) as exc:
+            copy_wheel_frameworks(pip_deps, tmp_path / "Frameworks")
+        message = str(exc.value)
+        assert "SDL3.xcframework" in message
+        assert "pkga.frameworks" in message
+        assert "pkgb.frameworks" in message
+
+    def test_identical_duplicate_dedupes_silently(self, tmp_path):
+        # Same basename, identical content -> keep one copy, no error.
         pip_deps = tmp_path / "pip-deps"
         a = pip_deps / "pkga.frameworks"
         b = pip_deps / "pkgb.frameworks"
@@ -53,8 +70,23 @@ class TestWheelFrameworks:
         b.mkdir(parents=True)
         _make_xcframework(a, "SDL3")
         _make_xcframework(b, "SDL3")
-        with pytest.raises(FrameworkConflict, match="SDL3"):
-            copy_wheel_frameworks(pip_deps, tmp_path / "Frameworks")
+        frameworks = tmp_path / "Frameworks"
+        copied = copy_wheel_frameworks(pip_deps, frameworks)
+        assert copied == ["SDL3.xcframework"]
+        assert (frameworks / "SDL3.xcframework" / "ios-arm64" / "SDL3").is_file()
+
+    def test_same_framework_across_slices_dedupes(self, tmp_path):
+        # The same wheel-embedded framework is copied once per pip-deps slice;
+        # a shared registry must treat the second slice as a no-op, not a clash.
+        frameworks = tmp_path / "Frameworks"
+        registry = {}
+        for slice_name in ("pip-deps-simulator", "pip-deps-device"):
+            pip_deps = tmp_path / slice_name
+            embedded = pip_deps / "kivy.frameworks"
+            embedded.mkdir(parents=True)
+            _make_xcframework(embedded, "SDL3")
+            copy_wheel_frameworks(pip_deps, frameworks, existing=registry)
+        assert sorted(registry) == ["SDL3.xcframework"]
 
     def test_no_frameworks_is_empty(self, tmp_path):
         pip_deps = tmp_path / "pip-deps"
@@ -108,6 +140,45 @@ class TestArchiveExtraction:
             archive, frameworks, name="Wanted", archive_member="Wanted.xcframework"
         )
         assert dest == frameworks / "Wanted.xcframework"
+
+    def test_cross_source_identical_dedupes(self, tmp_path):
+        # A wheel and a native archive ship the same framework, byte-identical.
+        frameworks = tmp_path / "Frameworks"
+        pip_deps = tmp_path / "pip-deps"
+        embedded = pip_deps / "kivy.frameworks"
+        embedded.mkdir(parents=True)
+        _make_xcframework(embedded, "Shared")
+        registry = {}
+        copy_wheel_frameworks(pip_deps, frameworks, existing=registry)
+
+        staging = tmp_path / "staging"
+        xc = _make_xcframework(staging, "Shared")
+        archive = _zip_archive(tmp_path, xc, "Shared")
+        dest = extract_xcframework_archive(
+            archive, frameworks, name="Shared", existing=registry
+        )
+        assert dest == frameworks / "Shared.xcframework"
+        assert sorted(registry) == ["Shared.xcframework"]
+
+    def test_cross_source_conflict_names_both(self, tmp_path):
+        frameworks = tmp_path / "Frameworks"
+        pip_deps = tmp_path / "pip-deps"
+        embedded = pip_deps / "kivy.frameworks"
+        embedded.mkdir(parents=True)
+        _make_xcframework(embedded, "Shared", content="from-wheel")
+        registry = {}
+        copy_wheel_frameworks(pip_deps, frameworks, existing=registry)
+
+        staging = tmp_path / "staging"
+        xc = _make_xcframework(staging, "Shared", content="from-archive")
+        archive = _zip_archive(tmp_path, xc, "Shared")
+        with pytest.raises(FrameworkConflict) as exc:
+            extract_xcframework_archive(
+                archive, frameworks, name="Shared", existing=registry
+            )
+        message = str(exc.value)
+        assert "kivy.frameworks" in message
+        assert "Shared.zip" in message
 
     def test_multiple_without_member_conflicts(self, tmp_path):
         staging = tmp_path / "staging"
