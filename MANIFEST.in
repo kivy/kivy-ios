@@ -1,6 +1,7 @@
+include CHANGELOG.md
 recursive-include kivy_ios *.py
-recursive-include kivy_ios/recipes *.py *.patch *.diff *.rst ModulesSetup ModulesSetup.mobile *.m *.h *.pyx *.so *.template *.cfg
-recursive-include kivy_ios/tools *.py biglink liblink cpplink
-recursive-include kivy_ios/tools/templates *
+# Objective-C bootstrap templates and the asset-catalog helper ship with the wheel.
+recursive-include kivy_ios/project/templates *
+recursive-include kivy_ios/tools *.py
 
 prune .git

@@ -1,3 +1,0 @@
-title=Pictures
-author=Kivy team
-orientation=landscape

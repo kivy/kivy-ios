@@ -1,0 +1,40 @@
+[project]
+name = "mobile-geometry"
+version = "0.1.0"
+requires-python = ">=3.15.0b2"
+dependencies = [
+    "kivy>=3.0.0.dev0,<4",
+]
+
+[tool.kivy]
+display_name = "Mobile Geometry"
+app_dir = "src"
+entry_point = "main"
+orientation = ["portrait", "landscape-left", "landscape-right"]
+
+[tool.kivy.ios]
+schema_version = 1
+bundle_id = "org.kivy.mobile-geometry"
+build = 1
+deployment_target = "16.0"
+find_links = ["../wheels"]
+exclude = [
+    "kivy-garden",
+    "requests",
+    "certifi",
+    "charset-normalizer",
+    "idna",
+    "urllib3",
+    "docutils",
+    "pygments",
+]
+
+[tool.kivy.ios.python]
+version = "3.15.0b2"
+
+[tool.kivy.ios.signing]
+team_id = ""
+identity = "Apple Development"
+provisioning_profile = ""
+auto_signing = true
+upload_symbols = true

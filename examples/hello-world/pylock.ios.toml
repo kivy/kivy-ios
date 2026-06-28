@@ -1,0 +1,18 @@
+lock-version = "1.0"
+created-by = "kivy-ios"
+requires-python = ">=3.15.0b2"
+extras = []
+dependency-groups = []
+default-groups = []
+
+[tool.kivy_ios]
+schema_version = 1
+toolchain_version = "3.0.0.dev0"
+generated_at = "2026-06-08T00:20:34Z"
+pyproject_sha256 = "b4afb5bbda16aec94c1c1a5634acc6202cd8fcd4e496ac941e10788c9ee2becf"
+tool_kivy_ios_schema_version = 1
+
+[tool.kivy_ios.python_xcframework]
+version = "3.15.0b2"
+url = "https://www.python.org/ftp/python/3.15.0/python-3.15.0b2-iOS-XCframework.tar.gz"
+sha256 = "fd6b6fb8f82cf44622d28ea53b8197c89fb06505557d29d4d7a47f9386c1c896"

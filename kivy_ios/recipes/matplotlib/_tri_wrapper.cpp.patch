@@ -1,9 +1,0 @@
---- matplotlib-3.7.2.orig/src/tri/_tri_wrapper.cpp	2023-07-05 13:43:01
-+++ matplotlib-3.7.2/src/tri/_tri_wrapper.cpp	2023-09-10 21:44:20
-@@ -1,5 +1,6 @@
- #include "_tri.h"
- 
-+using namespace tri;
- PYBIND11_MODULE(_tri, m) {
-     py::class_<Triangulation>(m, "Triangulation")
-         .def(py::init<const Triangulation::CoordinateArray&,
