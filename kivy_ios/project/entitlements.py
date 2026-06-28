@@ -19,10 +19,16 @@ def build_entitlements(config: Config) -> dict:
 
 
 def write_entitlements(config: Config, path: str | Path) -> Path | None:
-    """Write the entitlements plist; returns None when there are none."""
-    if not has_entitlements(config):
-        return None
+    """Write the entitlements plist; returns None when there are none.
+
+    When no entitlements are configured, any previously generated file is
+    removed so a stale ``<app>.entitlements`` (from a since-deleted config
+    table) is not left referenced in the bundle.
+    """
     path = Path(path)
+    if not has_entitlements(config):
+        path.unlink(missing_ok=True)
+        return None
     with open(path, "wb") as f:
         plistlib.dump(build_entitlements(config), f, sort_keys=True)
     return path

@@ -120,6 +120,14 @@ class TestEntitlements:
             data = plistlib.load(f)
         assert data["aps-environment"] == "development"
 
+    def test_stale_file_removed_when_config_dropped(self, config, tmp_path):
+        # A prior build wrote an entitlements file; the config table is now gone,
+        # so the stale file must be deleted (not left referenced in the bundle).
+        path = tmp_path / "x.entitlements"
+        path.write_bytes(b"<plist/>")
+        assert write_entitlements(config, path) is None
+        assert not path.exists()
+
 
 class TestPrivacy:
     def test_stub_written(self, config, tmp_path):
