@@ -36,7 +36,7 @@ from ..xcode import (
     export_options_plist,
     run_command,
 )
-from ..xcode.commands import preflight_signing
+from ..xcode.commands import preflight_signing, resolve_signing_identity
 from ._common import (
     LOCKFILE_NAME,
     MIGRATION_URL,
@@ -139,6 +139,7 @@ def build(
             target=target,
             arch=arch,
             team_id_flag=team_id,
+            signing_identity_flag=signing_identity,
             export_method=export_method,
         )
     except (CommandError, SigningError) as exc:
@@ -211,12 +212,15 @@ def _xcodebuild_step7(
     target: str,
     arch: str | None,
     team_id_flag: str | None,
+    signing_identity_flag: str | None,
     export_method: str,
 ) -> None:
+    # Effective signing identity: --signing-identity → env → pyproject.
+    identity = resolve_signing_identity(config, identity_flag=signing_identity_flag)
     if target in ("simulator", "device"):
         sim_arch = arch if target == "simulator" else None
         click.echo(f"xcodebuild build ({target}) ...")
-        run_command(build_command(xb, target, arch=sim_arch))
+        run_command(build_command(xb, target, arch=sim_arch, signing_identity=identity))
         return
 
     # --release: archive, then export a signed .ipa (spec 05 step 7).
@@ -228,12 +232,13 @@ def _xcodebuild_step7(
         )
     xb.build_dir.mkdir(parents=True, exist_ok=True)
     click.echo("xcodebuild archive ...")
-    run_command(archive_command(xb))
+    run_command(archive_command(xb, signing_identity=identity))
 
     options = export_options_plist(
         method=export_method,
         team_id=resolved_team_id,
         upload_symbols=config.ios.signing.upload_symbols,
+        signing_identity=identity,
     )
     options_path = xb.build_dir / "ExportOptions.plist"
     with open(options_path, "wb") as fh:

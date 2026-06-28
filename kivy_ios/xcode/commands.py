@@ -164,11 +164,14 @@ def build_command(
     *,
     arch: str | None = None,
     derived_data_path: str | Path | None = None,
+    signing_identity: str | None = None,
 ) -> list[str]:
     """`xcodebuild build` argv for --simulator/--device (Debug).
 
     ``derived_data_path`` pins where the ``.app`` is written so ``toolchain run``
-    can locate the product deterministically.
+    can locate the product deterministically. ``signing_identity`` overrides the
+    project's baked ``CODE_SIGN_IDENTITY`` for device builds (simulator builds are
+    unsigned, so it is ignored there).
     """
     cmd = [
         "xcodebuild",
@@ -187,6 +190,8 @@ def build_command(
     # (arm64 x86_64) produces an invalid path. Pin a single arch for CLI builds.
     if target == "simulator":
         cmd += [f"ARCHS={arch or default_simulator_arch()}", "ONLY_ACTIVE_ARCH=NO"]
+    elif signing_identity:
+        cmd.append(f"CODE_SIGN_IDENTITY={signing_identity}")
     cmd.append("build")
     return cmd
 
@@ -204,9 +209,15 @@ def product_app_path(derived_data_path: str | Path, scheme: str, target: str) ->
     )
 
 
-def archive_command(xb: XcodeBuild) -> list[str]:
-    """`xcodebuild archive` argv for --release (step 7.1)."""
-    return [
+def archive_command(
+    xb: XcodeBuild, *, signing_identity: str | None = None
+) -> list[str]:
+    """`xcodebuild archive` argv for --release (step 7.1).
+
+    ``signing_identity`` overrides the project's baked ``CODE_SIGN_IDENTITY`` for
+    the archive's signing step.
+    """
+    cmd = [
         "xcodebuild",
         "archive",
         "-project",
@@ -220,6 +231,9 @@ def archive_command(xb: XcodeBuild) -> list[str]:
         "-archivePath",
         str(xb.archive_path),
     ]
+    if signing_identity:
+        cmd.append(f"CODE_SIGN_IDENTITY={signing_identity}")
+    return cmd
 
 
 def export_command(xb: XcodeBuild, options_plist: Path) -> list[str]:
@@ -241,12 +255,20 @@ def export_options_plist(
     method: str,
     team_id: str,
     upload_symbols: bool = True,
+    signing_identity: str | None = None,
 ) -> dict:
-    """Map --export-method + signing to ExportOptions.plist keys (spec 05)."""
+    """Map --export-method + signing to ExportOptions.plist keys (spec 05).
+
+    ``signing_identity`` pins the certificate used to re-sign during export
+    (``-exportArchive``); omitted, Xcode selects one for the export method.
+    """
     if method not in EXPORT_METHOD:
         raise ValueError(f"unknown export method {method!r}")
-    return {
+    options: dict = {
         "method": EXPORT_METHOD[method],
         "teamID": team_id,
         "uploadSymbols": upload_symbols,
     }
+    if signing_identity:
+        options["signingCertificate"] = signing_identity
+    return options

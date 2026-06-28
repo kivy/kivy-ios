@@ -181,6 +181,80 @@ class TestBuildGuards:
             assert "no pyproject.toml" in result.output
 
 
+class TestSigningIdentityWiring:
+    def test_device_build_passes_signing_identity(
+        self, runner, tmp_path, mock_collect, monkeypatch
+    ):
+        captured: list[list[str]] = []
+        monkeypatch.setattr(
+            build_cli,
+            "run_command",
+            lambda argv, *a, **k: captured.append(argv) or _Proc(),
+        )
+        with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
+            _write_project(fs)
+            result = runner.invoke(
+                build,
+                [
+                    "--device",
+                    "--team-id",
+                    "ABCDE12345",
+                    "--signing-identity",
+                    "Apple Distribution: Me",
+                ],
+            )
+            assert result.exit_code == 0, result.output
+        assert captured, "xcodebuild was not invoked"
+        assert "CODE_SIGN_IDENTITY=Apple Distribution: Me" in captured[-1]
+
+    def test_signing_identity_from_env(
+        self, runner, tmp_path, mock_collect, monkeypatch
+    ):
+        captured: list[list[str]] = []
+        monkeypatch.setattr(
+            build_cli,
+            "run_command",
+            lambda argv, *a, **k: captured.append(argv) or _Proc(),
+        )
+        monkeypatch.setenv("KIVY_IOS_SIGNING_IDENTITY", "Apple Development: Env")
+        with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
+            _write_project(fs)
+            result = runner.invoke(build, ["--device", "--team-id", "ABCDE12345"])
+            assert result.exit_code == 0, result.output
+        assert "CODE_SIGN_IDENTITY=Apple Development: Env" in captured[-1]
+
+    def test_release_export_options_get_signing_certificate(
+        self, runner, tmp_path, mock_collect, monkeypatch
+    ):
+        import plistlib
+
+        captured: list[list[str]] = []
+        monkeypatch.setattr(
+            build_cli,
+            "run_command",
+            lambda argv, *a, **k: captured.append(argv) or _Proc(),
+        )
+        with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
+            _write_project(fs)
+            result = runner.invoke(
+                build,
+                [
+                    "--release",
+                    "--team-id",
+                    "ABCDE12345",
+                    "--signing-identity",
+                    "Apple Distribution: Me",
+                ],
+            )
+            assert result.exit_code == 0, result.output
+            options = plistlib.loads(
+                (Path(fs) / "myapp-ios" / "build" / "ExportOptions.plist").read_bytes()
+            )
+        # archive command carries the override; export options pin the cert.
+        assert any("CODE_SIGN_IDENTITY=Apple Distribution: Me" in c for c in captured)
+        assert options["signingCertificate"] == "Apple Distribution: Me"
+
+
 class TestLastUpgradeCheck:
     def test_encodes_xcode_version(self):
         from kivy_ios.cli.build import _encode_last_upgrade_check

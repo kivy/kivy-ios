@@ -17,6 +17,7 @@ from kivy_ios.xcode.commands import (
     export_options_plist,
     preflight_signing,
     product_app_path,
+    resolve_signing_identity,
     resolve_team_id,
     sdk_for,
 )
@@ -100,6 +101,15 @@ class TestBuildCommand:
         assert "-derivedDataPath" in cmd
         assert str(tmp_path / "dd") in cmd
 
+    def test_device_signing_identity_override(self, xb):
+        cmd = build_command(xb, "device", signing_identity="Apple Distribution: Me")
+        assert "CODE_SIGN_IDENTITY=Apple Distribution: Me" in cmd
+
+    def test_simulator_ignores_signing_identity(self, xb):
+        # Simulator builds are unsigned; the override must not leak in.
+        cmd = build_command(xb, "simulator", signing_identity="Apple Distribution: Me")
+        assert not any(c.startswith("CODE_SIGN_IDENTITY=") for c in cmd)
+
     def test_product_path(self, tmp_path):
         p = product_app_path(tmp_path / "dd", "myapp", "simulator")
         assert p == (
@@ -118,6 +128,11 @@ class TestArchiveExport:
         assert cmd[1] == "archive"
         assert "Release" in cmd
         assert "-archivePath" in cmd
+        assert not any(c.startswith("CODE_SIGN_IDENTITY=") for c in cmd)
+
+    def test_archive_signing_identity_override(self, xb):
+        cmd = archive_command(xb, signing_identity="Apple Distribution: Me")
+        assert "CODE_SIGN_IDENTITY=Apple Distribution: Me" in cmd
 
     def test_export(self, xb, tmp_path):
         cmd = export_command(xb, tmp_path / "ExportOptions.plist")
@@ -142,6 +157,16 @@ class TestArchiveExport:
     def test_export_options_unknown_method(self):
         with pytest.raises(ValueError, match="unknown export method"):
             export_options_plist(method="enterprise", team_id="T")
+
+    def test_export_options_signing_identity(self):
+        plist = export_options_plist(
+            method="app-store", team_id="T", signing_identity="Apple Distribution: Me"
+        )
+        assert plist["signingCertificate"] == "Apple Distribution: Me"
+
+    def test_export_options_no_signing_certificate_by_default(self):
+        plist = export_options_plist(method="app-store", team_id="T")
+        assert "signingCertificate" not in plist
 
 
 class TestSigning:
@@ -175,3 +200,32 @@ class TestSigning:
             cfg, team_id_flag="FLAG", env={"KIVY_IOS_TEAM_ID": "ENVID"}
         )
         assert tid == "FLAG"
+
+
+class TestResolveSigningIdentity:
+    def test_defaults_to_config_identity(self, config):
+        # [tool.kivy.ios.signing].identity defaults to "Apple Development".
+        assert resolve_signing_identity(config, env={}) == "Apple Development"
+
+    def test_pyproject_identity(self):
+        cfg = load_config_from_text(
+            _config('\n[tool.kivy.ios.signing]\nidentity = "Apple Development: P"')
+        )
+        assert resolve_signing_identity(cfg, env={}) == "Apple Development: P"
+
+    def test_env_precedence(self, config):
+        got = resolve_signing_identity(
+            config, env={"KIVY_IOS_SIGNING_IDENTITY": "Apple Development: Env"}
+        )
+        assert got == "Apple Development: Env"
+
+    def test_flag_beats_env_and_project(self):
+        cfg = load_config_from_text(
+            _config('\n[tool.kivy.ios.signing]\nidentity = "Apple Development: P"')
+        )
+        got = resolve_signing_identity(
+            cfg,
+            identity_flag="Apple Distribution: Flag",
+            env={"KIVY_IOS_SIGNING_IDENTITY": "Apple Development: Env"},
+        )
+        assert got == "Apple Distribution: Flag"
