@@ -190,6 +190,7 @@ def prepare_build(
             python_version=lock.python_xcframework.version,
             last_upgrade_check=_xcode_last_upgrade_check(),
             swift_packages=lock.swift_packages,
+            xcframeworks=lock.xcframeworks,
         )
     except CollectError as exc:
         raise ToolchainError(str(exc)) from exc

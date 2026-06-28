@@ -16,7 +16,7 @@ from pbxproj import XcodeProject
 from pbxproj.pbxextensions.ProjectFiles import FileOptions, ProjectFiles, TreeType
 
 from ..config.model import Config
-from ..lock.model import LockedSwiftPackage
+from ..lock.model import LockedSwiftPackage, LockedXcframework
 from .buildsettings import (
     BUILD_PYTHON_SCRIPT,
     managed_settings,
@@ -26,6 +26,7 @@ from .buildsettings import (
 from .skeleton import skeleton_pbxproj
 from .staging import StagingError, StagingLayout
 from .swift_packages import sync_swift_packages, write_package_resolved
+from .xcframeworks import sync_native_frameworks
 
 CONFIGURATIONS = ("Debug", "Release")
 
@@ -50,12 +51,14 @@ class XcodeProjectGenerator:
         *,
         last_upgrade_check: str | None = None,
         swift_packages: tuple[LockedSwiftPackage, ...] = (),
+        xcframeworks: tuple[LockedXcframework, ...] = (),
     ) -> None:
         self.config = config
         self.layout = layout
         self.app_name = config.app_slug
         self.last_upgrade_check = last_upgrade_check or RECOMMENDED_LAST_UPGRADE_CHECK
         self.swift_packages = swift_packages
+        self.xcframeworks = xcframeworks
 
     @property
     def pbxproj_path(self) -> Path:
@@ -301,29 +304,14 @@ class XcodeProjectGenerator:
                 tree="SOURCE_ROOT",
                 file_options=embed,
             )
-        # Frameworks/*.xcframework — nested under a Frameworks group in Xcode.
-        if self.layout.frameworks.is_dir():
-            for xc in sorted(self.layout.frameworks.glob("*.xcframework")):
-                rel = f"Frameworks/{xc.name}"
-                existing = project.get_files_by_path(rel, tree=TreeType.SOURCE_ROOT)
-                if existing:
-                    for ref in existing:
-                        self._ensure_under_group(project, ref, frameworks_group)
-                    continue
-                project.add_file(
-                    rel,
-                    parent=frameworks_group,
-                    target_name=self.app_name,
-                    tree=TreeType.SOURCE_ROOT,
-                    file_options=embed,
-                )
-
-    @staticmethod
-    def _ensure_under_group(project: XcodeProject, file_ref, group) -> None:
-        """Move an existing file reference under ``group`` (idempotent)."""
-        if group.has_child(file_ref):
-            return
-        for grp in cast(Any, project).objects.get_objects_in_section("PBXGroup"):
-            if grp.has_child(file_ref):
-                grp.remove_child(file_ref)
-        group.add_child(file_ref)
+        # Frameworks/*.xcframework — link/embed per the locked native entries
+        # (wheel-embedded SDL3/ANGLE default to Embed & Sign); stale refs for
+        # frameworks no longer on disk are pruned.
+        link_embed = {xc.name: (xc.link, xc.embed) for xc in self.xcframeworks}
+        sync_native_frameworks(
+            project,
+            self.app_name,
+            frameworks_dir=self.layout.frameworks,
+            frameworks_group=frameworks_group,
+            link_embed=link_embed,
+        )

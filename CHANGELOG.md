@@ -29,7 +29,9 @@ see the [migration guide](docs/proposals/00-overview.md) and the updated README.
   native `.xcframework` archives under `[tool.kivy.ios.native]`. `toolchain lock`
   pins SPM packages to a concrete revision and resolves each xcframework archive
   (by URL or repo-relative path) into a SHA-256 + enumerated slice list in
-  `pylock.ios.toml`; `toolchain build` fetches, verifies, and embeds them.
+  `pylock.ios.toml`; `toolchain build` fetches, verifies, and wires them into the
+  Xcode project's Link / Embed phases per each entry's `link`/`embed` intent,
+  pruning references for frameworks no longer present.
 - **Slim CLI** — `toolchain` now dispatches to `init`, `lock`, `build`, `run`,
   `open`, `upgrade`, `clean`, `status`, and `doctor`; legacy 2.x verbs print
   a migration pointer.

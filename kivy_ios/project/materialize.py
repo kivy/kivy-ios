@@ -16,7 +16,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from ..config.model import Config
-from ..lock.model import LockedSwiftPackage
+from ..lock.model import LockedSwiftPackage, LockedXcframework
 from .assets import generate_asset_catalog, write_launch_screen
 from .entitlements import write_entitlements
 from .generator import XcodeProjectGenerator
@@ -34,6 +34,7 @@ def materialize_project(
     python_version: str | None = None,
     last_upgrade_check: str | None = None,
     swift_packages: tuple[LockedSwiftPackage, ...] = (),
+    xcframeworks: tuple[LockedXcframework, ...] = (),
 ) -> StagingLayout:
     project_root = Path(project_root)
     layout = layout or create_staging(config, project_root)
@@ -52,5 +53,6 @@ def materialize_project(
         layout,
         last_upgrade_check=last_upgrade_check,
         swift_packages=swift_packages,
+        xcframeworks=xcframeworks,
     ).generate()
     return layout

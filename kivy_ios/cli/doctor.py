@@ -29,9 +29,7 @@ def doctor(offline: bool) -> None:
         try:
             config = load_config(pyproject)
         except ConfigError as exc:
-            parse_results.append(
-                CheckResult(PYPROJECT_NAME, Status.FAIL, exc.format())
-            )
+            parse_results.append(CheckResult(PYPROJECT_NAME, Status.FAIL, exc.format()))
         lockfile = cwd / LOCKFILE_NAME
         if lockfile.is_file():
             try:
