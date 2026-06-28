@@ -7,6 +7,8 @@ import tomllib
 from pathlib import Path
 
 from .model import (
+    LOCK_VERSION,
+    TOOL_SCHEMA_VERSION,
     LockedPackage,
     LockedSwiftPackage,
     LockedWheel,
@@ -16,14 +18,38 @@ from .model import (
     PythonXcframework,
 )
 
+# Highest major lock-version (PEP 751 top-level) this reader accepts.
+SUPPORTED_LOCK_VERSION_MAJOR = int(LOCK_VERSION.split(".", 1)[0])
+# Highest [tool.kivy_ios].schema_version (the extension's own schema) accepted.
+SUPPORTED_TOOL_SCHEMA_VERSION = TOOL_SCHEMA_VERSION
+
 
 class LockError(Exception):
     """A malformed or unreadable lockfile."""
 
 
 def loads(text: str) -> Lockfile:
-    raw = tomllib.loads(text)
-    return _from_raw(raw)
+    """Parse ``pylock.ios.toml`` text into a ``Lockfile``.
+
+    ``toolchain lock`` is the writer, so the reader's job is to fail *cleanly*
+    when the file is corrupt, hand-edited, or from a future schema — never to
+    leak a raw ``KeyError``/``TypeError``. Every shape failure surfaces as
+    ``LockError``.
+    """
+    try:
+        raw = tomllib.loads(text)
+    except tomllib.TOMLDecodeError as exc:
+        raise LockError(f"pylock.ios.toml is not valid TOML: {exc}") from exc
+    if not isinstance(raw, dict):
+        raise LockError("pylock.ios.toml must be a TOML table.")
+    try:
+        return _from_raw(raw)
+    except LockError:
+        raise
+    except (KeyError, TypeError, AttributeError, ValueError) as exc:
+        # A missing/mistyped field anywhere in the tree — name the trigger but
+        # don't leak the raw exception type to callers.
+        raise LockError(f"pylock.ios.toml is malformed: {exc!r}") from exc
 
 
 def load(path: str | Path) -> Lockfile:
@@ -31,29 +57,22 @@ def load(path: str | Path) -> Lockfile:
 
 
 def _from_raw(raw: dict) -> Lockfile:
-    lock_version = raw.get("lock-version", "1.0")
-    major = lock_version.split(".", 1)[0]
-    if major.isdigit() and int(major) > 1:
-        raise LockError(
-            f"pylock.ios.toml lock-version {lock_version} is newer than this "
-            "kivy-ios understands (max 1.x). Upgrade kivy-ios."
-        )
+    lock_version = _check_lock_version(raw)
 
-    tool = raw.get("tool", {}).get("kivy_ios", {})
-    if not tool:
+    tool_raw = raw.get("tool", {})
+    if not isinstance(tool_raw, dict):
+        raise LockError("pylock.ios.toml [tool] must be a table.")
+    tool = tool_raw.get("kivy_ios", {})
+    if not isinstance(tool, dict) or not tool:
         raise LockError("pylock.ios.toml is missing the [tool.kivy_ios] table.")
 
-    px = tool.get("python_xcframework", {})
-    python_xcframework = PythonXcframework(
-        version=px.get("version", ""),
-        url=px.get("url", ""),
-        sha256=px.get("sha256", ""),
-    )
+    schema_version = _check_tool_schema_version(tool)
+    python_xcframework = _parse_python_xcframework(tool)
 
-    packages = tuple(_parse_package(p) for p in raw.get("packages", []))
-    xcframeworks = tuple(_parse_xcframework(x) for x in tool.get("xcframeworks", []))
+    packages = tuple(_parse_package(p) for p in _as_list(raw, "packages"))
+    xcframeworks = tuple(_parse_xcframework(x) for x in _as_list(tool, "xcframeworks"))
     swift_packages = tuple(
-        _parse_swift_package(s) for s in tool.get("swift_packages", [])
+        _parse_swift_package(s) for s in _as_list(tool, "swift_packages")
     )
 
     return Lockfile(
@@ -66,13 +85,66 @@ def _from_raw(raw: dict) -> Lockfile:
         tool_kivy_ios_schema_version=tool.get("tool_kivy_ios_schema_version", 1),
         xcframeworks=xcframeworks,
         swift_packages=swift_packages,
-        schema_version=tool.get("schema_version", 1),
+        schema_version=schema_version,
         lock_version=lock_version,
         created_by=raw.get("created-by", "kivy-ios"),
         extras=tuple(raw.get("extras", [])),
         dependency_groups=tuple(raw.get("dependency-groups", [])),
         default_groups=tuple(raw.get("default-groups", [])),
     )
+
+
+def _check_lock_version(raw: dict) -> str:
+    lock_version = raw.get("lock-version", LOCK_VERSION)
+    if not isinstance(lock_version, str):
+        raise LockError("pylock.ios.toml lock-version must be a string.")
+    major = lock_version.split(".", 1)[0]
+    if not major.isdigit():
+        raise LockError(
+            f"pylock.ios.toml lock-version {lock_version!r} is not a valid version."
+        )
+    if int(major) > SUPPORTED_LOCK_VERSION_MAJOR:
+        raise LockError(
+            f"pylock.ios.toml lock-version {lock_version} is newer than this "
+            f"kivy-ios understands (max {SUPPORTED_LOCK_VERSION_MAJOR}.x). "
+            "Upgrade kivy-ios."
+        )
+    return lock_version
+
+
+def _check_tool_schema_version(tool: dict) -> int:
+    schema_version = tool.get("schema_version", SUPPORTED_TOOL_SCHEMA_VERSION)
+    if not isinstance(schema_version, int) or isinstance(schema_version, bool):
+        raise LockError("[tool.kivy_ios].schema_version must be an integer.")
+    if schema_version > SUPPORTED_TOOL_SCHEMA_VERSION:
+        raise LockError(
+            f"[tool.kivy_ios].schema_version {schema_version} is newer than this "
+            f"kivy-ios understands (max {SUPPORTED_TOOL_SCHEMA_VERSION}). "
+            "Upgrade kivy-ios."
+        )
+    return schema_version
+
+
+def _parse_python_xcframework(tool: dict) -> PythonXcframework:
+    px = tool.get("python_xcframework")
+    if not isinstance(px, dict) or not px:
+        raise LockError(
+            "pylock.ios.toml is missing [tool.kivy_ios.python_xcframework]."
+        )
+    for field in ("version", "url", "sha256"):
+        value = px.get(field)
+        if not isinstance(value, str) or not value:
+            raise LockError(
+                f"[tool.kivy_ios.python_xcframework].{field} is missing or empty."
+            )
+    return PythonXcframework(version=px["version"], url=px["url"], sha256=px["sha256"])
+
+
+def _as_list(table: dict, key: str) -> list:
+    value = table.get(key, [])
+    if not isinstance(value, list):
+        raise LockError(f"pylock.ios.toml {key!r} must be an array of tables.")
+    return value
 
 
 def _parse_package(p: dict) -> LockedPackage:
