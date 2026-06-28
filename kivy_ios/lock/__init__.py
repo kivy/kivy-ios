@@ -29,6 +29,7 @@ from .spm import (
     get_spm_resolver,
 )
 from .writer import dumps
+from .xcframework import XcframeworkResolverError, resolve_xcframeworks
 
 __all__ = [
     "BuildError",
@@ -59,4 +60,6 @@ __all__ = [
     "SpmResolverError",
     "XcodeSpmResolver",
     "get_spm_resolver",
+    "XcframeworkResolverError",
+    "resolve_xcframeworks",
 ]

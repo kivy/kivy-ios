@@ -16,6 +16,7 @@ A duplicate-framework policy guards against two sources providing the same
 
 from __future__ import annotations
 
+import plistlib
 import shutil
 import tarfile
 import zipfile
@@ -74,6 +75,31 @@ def extract_xcframework_archive(
         _unpack(archive, tmp_dir, archive_format)
         xc_dir = _locate_xcframework(tmp_dir, archive_member, name=name)
         return _place(xc_dir, frameworks_dir, copied, origin=archive.name)
+
+
+def read_xcframework_slices(xcframework: Path) -> tuple[str, ...]:
+    """Return the slice identifiers declared in an ``.xcframework`` root plist.
+
+    These are the ``LibraryIdentifier`` values from ``Info.plist``'s
+    ``AvailableLibraries`` (e.g. ``ios-arm64``, ``ios-arm64_x86_64-simulator``),
+    returned sorted for a deterministic lockfile. ``toolchain lock`` records them
+    so the lock advertises which device/simulator slices an artifact ships.
+    """
+    info = xcframework / "Info.plist"
+    try:
+        with open(info, "rb") as fh:
+            data = plistlib.load(fh)
+    except OSError as exc:
+        raise FileNotFoundError(
+            f"{xcframework.name}: missing or unreadable Info.plist ({exc})."
+        ) from exc
+    libraries = data.get("AvailableLibraries", [])
+    identifiers = [
+        lib["LibraryIdentifier"]
+        for lib in libraries
+        if isinstance(lib, dict) and lib.get("LibraryIdentifier")
+    ]
+    return tuple(sorted(identifiers))
 
 
 def _unpack(archive: Path, dest: Path, archive_format: str) -> None:

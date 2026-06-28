@@ -12,6 +12,7 @@ from kivy_ios.xcode.commands import (
     XcodeBuild,
     archive_command,
     build_command,
+    default_simulator_arch,
     export_command,
     export_options_plist,
     preflight_signing,
@@ -70,9 +71,19 @@ class TestBuildCommand:
         cmd = build_command(xb, "simulator")
         assert "-sdk" in cmd and "iphonesimulator" in cmd
         assert "Debug" in cmd
-        assert "ARCHS=arm64" in cmd
+        # Default simulator arch follows the host (arm64 / x86_64), so assert
+        # against the helper rather than a hard-coded arch.
+        assert f"ARCHS={default_simulator_arch()}" in cmd
         assert "ONLY_ACTIVE_ARCH=NO" in cmd
         assert cmd[-1] == "build"
+
+    def test_simulator_default_arch_matches_host(self, monkeypatch):
+        import kivy_ios.xcode.commands as commands
+
+        monkeypatch.setattr(commands.platform, "machine", lambda: "x86_64")
+        assert commands.default_simulator_arch() == "x86_64"
+        monkeypatch.setattr(commands.platform, "machine", lambda: "arm64")
+        assert commands.default_simulator_arch() == "arm64"
 
     def test_device_debug(self, xb):
         cmd = build_command(xb, "device")

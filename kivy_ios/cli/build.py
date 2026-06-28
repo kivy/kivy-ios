@@ -31,6 +31,7 @@ from ..xcode import (
     XcodeBuild,
     archive_command,
     build_command,
+    default_simulator_arch,
     export_command,
     export_options_plist,
     run_command,
@@ -252,11 +253,18 @@ def _resolve_slices(
     Xcode's default destination is usually a simulator, so collecting only the
     device slice would make the very first in-Xcode build fail. A targeted build
     collects only the slice it is about to build.
+
+    The simulator slice defaults to the host's native arch (``--arch`` overrides):
+    a single ``pip-deps-simulator`` directory holds one arch's compiled ``.so``
+    files, so the right one to stage is the arch the developer's machine actually
+    runs — ``x86_64`` on Intel, ``arm64`` on Apple Silicon. The lock pins both
+    simulator arches; the build picks the host's.
     """
+    sim_arch = arch or default_simulator_arch()
     if target is None:
         return [
             BuildSlice("device", "arm64", deployment_target),
-            BuildSlice("simulator", arch or "arm64", deployment_target),
+            BuildSlice("simulator", sim_arch, deployment_target),
         ]
     return [_resolve_slice(target, arch, deployment_target)]
 
@@ -265,7 +273,9 @@ def _resolve_slice(
     target: str | None, arch: str | None, deployment_target: str
 ) -> BuildSlice:
     if target == "simulator":
-        return BuildSlice("simulator", arch or "arm64", deployment_target)
+        return BuildSlice(
+            "simulator", arch or default_simulator_arch(), deployment_target
+        )
     # device or release builds target device/arm64.
     return BuildSlice("device", "arm64", deployment_target)
 

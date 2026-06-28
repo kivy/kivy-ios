@@ -90,6 +90,54 @@ class TestDownloadVerifyCache:
         )
         assert dl.calls == 2
 
+    def test_corrupt_cache_entry_is_reverified_and_refetched(self, cache):
+        # A hash-named cache file whose bytes don't match (e.g. truncated by an
+        # interrupted copy, or bit-rot) must not be trusted: it's re-verified,
+        # dropped, and the artifact is re-downloaded.
+        content = b"good-bytes"
+        sha = sha256_bytes(content)
+        dl = FakeDownloader(content)
+        # Plant a corrupt entry at the expected hash-named path.
+        corrupt = cache.path_for(sha, "x.whl")
+        corrupt.parent.mkdir(parents=True, exist_ok=True)
+        corrupt.write_bytes(b"truncated")
+
+        path = fetch_artifact(
+            name="x",
+            sha256=sha,
+            filename="x.whl",
+            url="https://e/x.whl",
+            cache=cache,
+            downloader=dl,
+        )
+        assert dl.calls == 1  # corrupt hit forced a re-download
+        assert path.read_bytes() == content
+        assert sha256_file(path) == sha
+
+    def test_intact_cache_hit_is_trusted(self, cache):
+        # The happy path still avoids a re-download once the bytes verify.
+        content = b"intact"
+        sha = sha256_bytes(content)
+        dl = FakeDownloader(content)
+        first = fetch_artifact(
+            name="x",
+            sha256=sha,
+            filename="x.whl",
+            url="https://e/x.whl",
+            cache=cache,
+            downloader=dl,
+        )
+        second = fetch_artifact(
+            name="x",
+            sha256=sha,
+            filename="x.whl",
+            url="https://e/x.whl",
+            cache=cache,
+            downloader=dl,
+        )
+        assert dl.calls == 1
+        assert first == second
+
     def test_hash_mismatch_aborts(self, cache):
         dl = FakeDownloader(b"tampered")
         with pytest.raises(HashMismatch) as exc:

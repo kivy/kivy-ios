@@ -72,7 +72,7 @@ def fetch_artifact(
 
     if not no_cache:
         cached = cache.get(sha256, filename)
-        if cached is not None:
+        if cached is not None and _cache_hit_intact(cached, sha256, name=name):
             return cached
 
     with tempfile.TemporaryDirectory(prefix="kivy-dl-") as tmp:
@@ -80,6 +80,24 @@ def fetch_artifact(
         downloader.fetch_to(url, staged)
         verify_file(staged, sha256, name=name, source=url)
         return cache.put_file(staged, sha256, filename)
+
+
+def _cache_hit_intact(cached: Path, sha256: str, *, name: str) -> bool:
+    """Re-verify a cache hit before trusting it (spec 03 "every byte verified").
+
+    The cache key is only the *filename* (``{sha256}-{name}``); it is not proof
+    that the bytes on disk still match. A non-atomic ``copyfile`` killed mid-write
+    leaves a truncated file at the hash-named path, and the cache dir is
+    user-writable (bit-rot/tampering). On a mismatch we drop the corrupt entry
+    and return False so the caller re-downloads rather than feeding bad bytes
+    into the build.
+    """
+    try:
+        verify_file(cached, sha256, name=name, source=str(cached))
+    except HashMismatch:
+        cached.unlink(missing_ok=True)
+        return False
+    return True
 
 
 def _resolve_local(

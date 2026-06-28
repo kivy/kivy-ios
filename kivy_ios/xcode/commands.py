@@ -9,11 +9,27 @@ unit-testable on any host.
 from __future__ import annotations
 
 import os
+import platform
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
 from ..config.model import Config
+
+
+def default_simulator_arch() -> str:
+    """The iOS-simulator CPU arch matching the host Mac.
+
+    Apple-Silicon Macs run the simulator as ``arm64``; Intel Macs as ``x86_64``.
+    This is the default when ``--arch`` is not given, so a bare or targeted
+    simulator build collects (and ``xcodebuild`` builds) the slice the developer's
+    own machine can actually run — collecting only ``arm64`` would break the very
+    first simulator build on an Intel host even though the lock pinned ``x86_64``.
+    ``platform.machine()`` reports ``x86_64`` under Rosetta too, which is correct:
+    an x86_64 Python process drives an x86_64 simulator.
+    """
+    return "x86_64" if platform.machine() == "x86_64" else "arm64"
+
 
 # build-target -> xcodebuild SDK.
 SDK = {
@@ -170,7 +186,7 @@ def build_command(
     # python.org's install_stdlib uses lib-$ARCHS; a universal simulator build
     # (arm64 x86_64) produces an invalid path. Pin a single arch for CLI builds.
     if target == "simulator":
-        cmd += [f"ARCHS={arch or 'arm64'}", "ONLY_ACTIVE_ARCH=NO"]
+        cmd += [f"ARCHS={arch or default_simulator_arch()}", "ONLY_ACTIVE_ARCH=NO"]
     cmd.append("build")
     return cmd
 

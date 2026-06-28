@@ -5,11 +5,12 @@ from __future__ import annotations
 import dataclasses
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 from urllib.parse import unquote, urlparse
 
 from .. import __version__
 from ..artifacts.verify import sha256_file
-from ..config.model import Config, SwiftPackageDep
+from ..config.model import Config, SwiftPackageDep, XcframeworkDep
 from .find_links import (
     FindLinksError,
     find_links_resolution_hint,
@@ -35,6 +36,10 @@ from .spm import (
     SpmResolverError,
     get_spm_resolver,
 )
+from .xcframework import XcframeworkResolverError, resolve_xcframeworks
+
+if TYPE_CHECKING:
+    from ..artifacts.download import Downloader
 
 
 class BuildError(Exception):
@@ -49,6 +54,7 @@ def build_lockfile(
     resolver: Resolver | None = None,
     python_provider: PythonXcframeworkProvider | None = None,
     spm_resolver: SpmResolver | None = None,
+    xcframework_downloader: Downloader | None = None,
     offline: bool = False,
     now: datetime | None = None,
 ) -> Lockfile:
@@ -132,6 +138,10 @@ def build_lockfile(
             )
         )
 
+    xcframeworks = _resolve_native_xcframeworks(
+        config.ios.xcframeworks, xcframework_downloader, root, offline
+    )
+
     swift_packages = _resolve_swift_packages(
         config.ios.swift_packages, spm_resolver, root, offline
     )
@@ -146,9 +156,32 @@ def build_lockfile(
         generated_at=(now or datetime.now(UTC)).strftime("%Y-%m-%dT%H:%M:%SZ"),
         pyproject_sha256=compute_pyproject_sha256(pyproject_text),
         tool_kivy_ios_schema_version=config.ios.schema_version,
-        xcframeworks=(),  # native xcframework resolution lands in Phase 4
+        xcframeworks=tuple(xcframeworks),
         swift_packages=tuple(swift_packages),
     )
+
+
+def _resolve_native_xcframeworks(
+    declared: tuple[XcframeworkDep, ...],
+    downloader: Downloader | None,
+    project_root: Path,
+    offline: bool,
+):
+    """Resolve declared native xcframeworks; surface failures as ``BuildError``.
+
+    The resolver fetches/reads each archive, pins its SHA-256, and enumerates the
+    slices it ships, so the lock fully captures user-declared native SDKs instead
+    of silently dropping them.
+    """
+    try:
+        return resolve_xcframeworks(
+            declared,
+            project_root=project_root,
+            downloader=downloader,
+            offline=offline,
+        )
+    except XcframeworkResolverError as exc:
+        raise BuildError(str(exc)) from exc
 
 
 def _resolve_swift_packages(

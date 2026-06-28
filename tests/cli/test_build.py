@@ -82,6 +82,9 @@ def mock_collect(monkeypatch):
         calls.append({"slices": build_slices, "layout": layout, "no_cache": no_cache})
 
     monkeypatch.setattr(build_cli, "collect_artifacts", fake_collect)
+    # Pin the host-derived simulator arch so slice assertions are deterministic
+    # regardless of whether the test runs on Apple Silicon or an Intel host.
+    monkeypatch.setattr(build_cli, "default_simulator_arch", lambda: "arm64")
     # Step 7 invokes xcodebuild; stub it so these orchestration tests stay
     # hermetic (they assert on the resolved slice, not on a real build).
     monkeypatch.setattr(build_cli, "run_command", lambda *a, **k: _Proc())
@@ -118,6 +121,21 @@ class TestBuildOrchestration:
             runner.invoke(build, ["--simulator", "--arch", "x86_64"])
             tags = [s.platform_tag for s in mock_collect[0]["slices"]]
             assert tags == ["ios_13_0_x86_64_iphonesimulator"]
+
+    def test_intel_host_collects_x86_64_simulator(
+        self, runner, tmp_path, mock_collect, monkeypatch
+    ):
+        # On an Intel host (no --arch), the bare and targeted simulator builds
+        # must collect the x86_64 slice the machine can actually run, not arm64.
+        monkeypatch.setattr(build_cli, "default_simulator_arch", lambda: "x86_64")
+        with runner.isolated_filesystem(temp_dir=tmp_path) as fs:
+            _write_project(fs)
+            runner.invoke(build, [])
+            tags = [s.platform_tag for s in mock_collect[0]["slices"]]
+            assert tags == [
+                "ios_13_0_arm64_iphoneos",
+                "ios_13_0_x86_64_iphonesimulator",
+            ]
 
     def test_no_cache_forwarded(self, runner, tmp_path, mock_collect):
         with runner.isolated_filesystem(temp_dir=tmp_path) as fs:

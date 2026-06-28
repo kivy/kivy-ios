@@ -9,7 +9,7 @@ import click
 
 from ..config import ConfigError, load_config
 from ..lock import LockError, is_in_sync, load
-from ..xcode.commands import product_app_path
+from ..xcode.commands import default_simulator_arch, product_app_path
 from ._common import LOCKFILE_NAME, ToolchainError, find_pyproject
 
 
@@ -30,7 +30,8 @@ def status() -> None:
 
     click.echo("Build:")
     build_dir = project_root / f"{config.app_slug}-ios" / "build" / "DerivedData"
-    for label, target in (("simulator (arm64)", "simulator"), ("device", "device")):
+    sim_label = f"simulator ({default_simulator_arch()})"
+    for label, target in ((sim_label, "simulator"), ("device", "device")):
         app = product_app_path(build_dir, config.app_slug, target)
         click.echo(f"  {label:<20}{_build_state(app)}")
 

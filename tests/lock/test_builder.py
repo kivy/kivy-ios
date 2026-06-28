@@ -272,6 +272,110 @@ class TestSwiftPackages:
         assert foo.requirement == {"range": ["1.0.0", "2.0.0"]}
 
 
+_XC_BASE = (
+    "[project]\nname='a'\nversion='1'\ndependencies=[]\n"
+    "[tool.kivy]\napp_dir='src'\n[tool.kivy.ios]\nschema_version=1\n"
+    "bundle_id='o.x.a'\n[tool.kivy.ios.python]\nversion='3.15.0'\n"
+)
+
+
+def _make_xcframework_zip(root, name, slices):
+    import plistlib
+    import zipfile
+
+    xc = root / f"{name}.xcframework"
+    libraries = []
+    for ident in slices:
+        (xc / ident).mkdir(parents=True)
+        (xc / ident / name).write_text("binary")
+        libraries.append(
+            {"LibraryIdentifier": ident, "LibraryPath": f"{name}.framework"}
+        )
+    with open(xc / "Info.plist", "wb") as fh:
+        plistlib.dump({"AvailableLibraries": libraries}, fh)
+    archive = root / f"{name}.zip"
+    with zipfile.ZipFile(archive, "w") as zf:
+        for p in xc.rglob("*"):
+            zf.write(p, p.relative_to(xc.parent))
+    return archive
+
+
+class TestNativeXcframeworks:
+    def test_local_archive_resolved_and_round_trips(
+        self, fake_python_provider, tmp_path
+    ):
+        _make_xcframework_zip(
+            tmp_path, "Sentry", ["ios-arm64", "ios-arm64_x86_64-simulator"]
+        )
+        toml = _XC_BASE + (
+            "[tool.kivy.ios.native.xcframeworks]\n"
+            'Sentry = { version = "8.49.0", source = "Sentry.zip", embed = false }\n'
+        )
+        cfg = load_config_from_text(toml)
+        lock = build_lockfile(
+            cfg,
+            toml,
+            resolver=FakeResolver(),
+            python_provider=fake_python_provider,
+            project_root=tmp_path,
+        )
+        (xc,) = lock.xcframeworks
+        assert xc.name == "Sentry"
+        assert xc.path == "Sentry.zip"
+        assert xc.slices == ("ios-arm64", "ios-arm64_x86_64-simulator")
+        assert xc.embed is False
+        assert xc.link is True
+
+        text = dumps(lock)
+        reloaded = loads(text)
+        assert semantic_equal(lock, reloaded)
+        assert dumps(reloaded) == text
+
+    def test_remote_archive_uses_injected_downloader(
+        self, fake_python_provider, tmp_path
+    ):
+        import shutil
+
+        archive = _make_xcframework_zip(tmp_path, "Remote", ["ios-arm64"])
+
+        class FakeDownloader:
+            def fetch_to(self, url, dest):
+                shutil.copy2(archive, dest)
+
+        toml = _XC_BASE + (
+            "[tool.kivy.ios.native.xcframeworks]\n"
+            'Remote = { version = "2.0.0", source = "https://example.com/Remote.zip" }\n'
+        )
+        cfg = load_config_from_text(toml)
+        lock = build_lockfile(
+            cfg,
+            toml,
+            resolver=FakeResolver(),
+            python_provider=fake_python_provider,
+            project_root=tmp_path,
+            xcframework_downloader=FakeDownloader(),
+        )
+        (xc,) = lock.xcframeworks
+        assert xc.url == "https://example.com/Remote.zip"
+        assert xc.path is None
+        assert xc.slices == ("ios-arm64",)
+
+    def test_missing_archive_becomes_build_error(self, fake_python_provider, tmp_path):
+        toml = _XC_BASE + (
+            "[tool.kivy.ios.native.xcframeworks]\n"
+            'Gone = { version = "1.0.0", source = "Gone.zip" }\n'
+        )
+        cfg = load_config_from_text(toml)
+        with pytest.raises(BuildError, match="not found"):
+            build_lockfile(
+                cfg,
+                toml,
+                resolver=FakeResolver(),
+                python_provider=fake_python_provider,
+                project_root=tmp_path,
+            )
+
+
 class TestRoundTrip:
     def test_dumps_then_loads(
         self, minimal_pyproject, fake_resolver, fake_python_provider
