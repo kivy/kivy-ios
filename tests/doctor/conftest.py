@@ -22,9 +22,13 @@ class FakeProbe:
         self._identities = overrides.get("identities", [])
         self._reachable = overrides.get("reachable", True)
         self._platforms = overrides.get("platforms", {})
+        self._pip = overrides.get("pip", "24.3.1")
 
     def xcode_version(self):
         return self._xcode
+
+    def pip_version(self):
+        return self._pip
 
     def xcode_select_path(self):
         return self._select

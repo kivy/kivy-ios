@@ -34,6 +34,13 @@ from .model import canonical_name
 DEVICE_SLICE_SUFFIX = "arm64_iphoneos"
 DEFAULT_SIMULATOR_ARCHS = ("arm64", "x86_64")
 
+# Minimum host pip that understands PEP 730 iOS platform tags (pip 24.3, 2024-10-27).
+# Earlier pip cannot match an ``ios_<dt>_*`` --platform request against a wheel
+# tagged at a lower floor (e.g. ios_13_0_*), so compatible wheels are reported as
+# missing. kivy-ios targets Python that ships iOS support, so requiring a current
+# pip is simpler — and far less surprising — than reimplementing tag expansion.
+MIN_PIP_VERSION = (24, 3)
+
 
 class ResolverError(Exception):
     """A resolution failure (missing slice, no matching wheel, backend error)."""
@@ -77,6 +84,44 @@ def slice_tags(
 ) -> tuple[str, ...]:
     dt = deployment_target.replace(".", "_")
     return tuple(f"ios_{dt}_{suffix}" for suffix in slice_suffixes(simulator_archs))
+
+
+def version_str(version: tuple[int, ...]) -> str:
+    return ".".join(str(part) for part in version)
+
+
+def pip_version(python_executable: str) -> tuple[int, ...] | None:
+    """Best-effort ``(major, minor, ...)`` version of pip for ``python_executable``.
+
+    Returns ``None`` when pip can't be queried — treated as "unknown" (don't
+    block) rather than "too old", since a genuinely broken pip surfaces its own
+    error when resolution runs.
+    """
+    try:
+        proc = subprocess.run(
+            [python_executable, "-m", "pip", "--version"],
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, ValueError):
+        return None
+    if proc.returncode != 0:
+        return None
+    # Format: "pip 24.3.1 from /path/site-packages/pip (python 3.15)".
+    tokens = proc.stdout.split()
+    if len(tokens) < 2 or tokens[0] != "pip":
+        return None
+    return _parse_version(tokens[1])
+
+
+def _parse_version(text: str) -> tuple[int, ...] | None:
+    parts: list[int] = []
+    for chunk in text.split("."):
+        digits = "".join(c for c in chunk if c.isdigit())
+        if not digits:
+            break
+        parts.append(int(digits))
+    return tuple(parts) or None
 
 
 def pip_python_version(python_version: str) -> str:
@@ -144,6 +189,7 @@ class PipResolver:
     ) -> list[ResolvedPackage]:
         if not requirements:
             return []
+        self._require_modern_pip()
         tags = slice_tags(deployment_target, simulator_archs)
         abis = abi_tags(python_version)
         # name -> ResolvedPackage (merged across slices)
@@ -164,6 +210,17 @@ class PipResolver:
                 self._absorb(item, merged, seen_filenames)
 
         return list(merged.values())
+
+    def _require_modern_pip(self) -> None:
+        version = pip_version(self._python)
+        if version is not None and version < MIN_PIP_VERSION:
+            raise ResolverError(
+                f"kivy-ios needs pip >= {version_str(MIN_PIP_VERSION)} to resolve "
+                f"iOS wheels, but {self._python} has pip {version_str(version)}.\n"
+                "  pip < 24.3 predates PEP 730 iOS platform tags, so compatible "
+                "wheels (e.g. ios_13_0_*) are reported as missing.\n"
+                f"  Upgrade it: {self._python} -m pip install --upgrade pip"
+            )
 
     def _absorb(self, item, merged, seen_filenames) -> None:
         meta = item.get("metadata", {})

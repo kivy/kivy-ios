@@ -10,6 +10,7 @@ from __future__ import annotations
 import socket
 import struct
 import subprocess
+import sys
 from pathlib import Path
 from typing import Protocol
 
@@ -29,6 +30,7 @@ _MACHO_MAGICS = {0xFEEDFACE, 0xFEEDFACF, 0xCEFAEDFE, 0xCFFAEDFE}
 
 class Probe(Protocol):
     def xcode_version(self) -> str | None: ...
+    def pip_version(self) -> str | None: ...
     def xcode_select_path(self) -> str | None: ...
     def has_xcrun_clang(self) -> bool: ...
     def has_swift_toolchain(self) -> bool: ...
@@ -46,6 +48,14 @@ class RealProbe:
             return None
         first = out.splitlines()[0]
         return first.replace("Xcode", "").strip() or None
+
+    def pip_version(self) -> str | None:
+        # "pip 24.3.1 from /path/site-packages/pip (python 3.15)".
+        out = _capture([sys.executable, "-m", "pip", "--version"])
+        tokens = out.split()
+        if len(tokens) >= 2 and tokens[0] == "pip":
+            return tokens[1]
+        return None
 
     def xcode_select_path(self) -> str | None:
         return _capture(["xcode-select", "-p"]) or None

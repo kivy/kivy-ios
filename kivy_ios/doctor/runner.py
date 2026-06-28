@@ -25,6 +25,7 @@ def run_checks(
     results = [
         C.check_xcode_version(probe),
         C.check_command_line_tools(probe),
+        C.check_pip_version(probe),
         C.check_simulator_runtimes(probe, config),
         C.check_toolchain_version(probe, toolchain_version, offline=offline),
     ]

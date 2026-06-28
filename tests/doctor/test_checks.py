@@ -39,6 +39,19 @@ class TestEnvironmentChecks:
         r = C.check_xcode_version(FakeProbe(xcode="16.1"))
         assert r.status is Status.PASS
 
+    def test_pip_ok(self):
+        r = C.check_pip_version(FakeProbe(pip="24.3.1"))
+        assert r.status is Status.PASS
+
+    def test_pip_too_old_fails(self):
+        r = C.check_pip_version(FakeProbe(pip="24.2"))
+        assert r.status is Status.FAIL
+        assert "need >= 24.3" in r.detail
+
+    def test_pip_unknown_warns(self):
+        r = C.check_pip_version(FakeProbe(pip=None))
+        assert r.status is Status.WARN
+
     def test_clt_missing_path(self):
         r = C.check_command_line_tools(FakeProbe(select=None))
         assert r.status is Status.FAIL

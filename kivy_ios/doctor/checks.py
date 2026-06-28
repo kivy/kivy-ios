@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 from ..config.model import Config
 from ..lock.find_links import find_links_doctor_detail
 from ..lock.model import Lockfile
+from ..lock.resolver import MIN_PIP_VERSION, version_str
 from ..project.icon import APP_ICON_SIZE, icon_source_problem
 from .probe import Probe
 from .result import CheckResult, Status
@@ -44,6 +45,30 @@ def check_xcode_version(probe: Probe) -> CheckResult:
             hint=f"update Xcode to {MIN_XCODE} or newer.",
         )
     return CheckResult("Xcode version", Status.PASS, version)
+
+
+def check_pip_version(probe: Probe) -> CheckResult:
+    """pip >= 24.3 is required to match PEP 730 iOS platform tags at lock time."""
+    minimum = version_str(MIN_PIP_VERSION)
+    version = probe.pip_version()
+    if version is None:
+        return CheckResult(
+            "pip version",
+            Status.WARN,
+            "could not determine pip version",
+            hint="ensure pip is available: `python -m ensurepip --upgrade`.",
+        )
+    if _ver_tuple(version) < MIN_PIP_VERSION:
+        return CheckResult(
+            "pip version",
+            Status.FAIL,
+            f"{version} (need >= {minimum})",
+            hint=(
+                "pip < 24.3 cannot match iOS platform tags (PEP 730); "
+                "upgrade with `python -m pip install -U pip`."
+            ),
+        )
+    return CheckResult("pip version", Status.PASS, version)
 
 
 def check_command_line_tools(probe: Probe) -> CheckResult:

@@ -271,6 +271,19 @@ class TestRealProbe:
         monkeypatch.setattr("kivy_ios.doctor.probe._capture", lambda _: "")
         assert self._probe().xcode_version() is None
 
+    # --- pip_version ---
+
+    def test_pip_version_parses_output(self, monkeypatch):
+        monkeypatch.setattr(
+            "kivy_ios.doctor.probe._capture",
+            lambda _: "pip 24.3.1 from /x/site-packages/pip (python 3.15)\n",
+        )
+        assert self._probe().pip_version() == "24.3.1"
+
+    def test_pip_version_unavailable_returns_none(self, monkeypatch):
+        monkeypatch.setattr("kivy_ios.doctor.probe._capture", lambda _: "")
+        assert self._probe().pip_version() is None
+
     # --- xcode_select_path ---
 
     def test_xcode_select_path_returns_value(self, monkeypatch):

@@ -35,7 +35,10 @@ see the [migration guide](docs/proposals/00-overview.md) and the updated README.
 - **Slim CLI** — `toolchain` now dispatches to `init`, `lock`, `build`, `run`,
   `open`, `upgrade`, `clean`, `status`, and `doctor`; legacy 2.x verbs print
   a migration pointer.
-- **Requires Python ≥ 3.13** on the developer machine (macOS only).
+- **Requires Python ≥ 3.13 and pip ≥ 24.3** on the developer machine (macOS
+  only). pip 24.3 added PEP 730 iOS platform-tag matching, which `toolchain
+  lock` relies on to resolve iOS wheels; `toolchain doctor` flags older pip and
+  `toolchain lock` fails fast with an upgrade hint.
 
 ---
 

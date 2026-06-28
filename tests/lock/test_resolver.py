@@ -15,6 +15,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from kivy_ios.lock.resolver import (
+    MIN_PIP_VERSION,
     PipResolver,
     ResolverError,
     _dep_names,
@@ -22,9 +23,20 @@ from kivy_ios.lock.resolver import (
     abi_tags,
     get_resolver,
     pip_python_version,
+    pip_version,
     slice_suffixes,
     slice_tags,
+    version_str,
 )
+
+
+@pytest.fixture(autouse=True)
+def _modern_host_pip(monkeypatch):
+    """Default every test to a modern host pip so resolve() isn't gated on the
+    machine running the suite. Guard-specific tests re-patch this as needed.
+    """
+    monkeypatch.setattr("kivy_ios.lock.resolver.pip_version", lambda _exe: (99, 0))
+
 
 # ---------------------------------------------------------------------------
 # slice_tags
@@ -230,6 +242,82 @@ class TestPipResolverEmpty:
             extra_index_urls=[],
         )
         assert result == []
+
+
+# ---------------------------------------------------------------------------
+# pip version guard (PEP 730 iOS tags require pip >= 24.3)
+# ---------------------------------------------------------------------------
+
+
+class TestPipVersionParsing:
+    def test_parses_pip_version_output(self, monkeypatch):
+        monkeypatch.setattr(
+            subprocess,
+            "run",
+            lambda *a, **k: MagicMock(
+                returncode=0, stdout="pip 24.3.1 from /x/pip (python 3.15)\n"
+            ),
+        )
+        assert pip_version("python") == (24, 3, 1)
+
+    def test_nonzero_exit_is_unknown(self, monkeypatch):
+        monkeypatch.setattr(
+            subprocess, "run", lambda *a, **k: MagicMock(returncode=1, stdout="")
+        )
+        assert pip_version("python") is None
+
+    def test_missing_pip_is_unknown(self, monkeypatch):
+        def boom(*a, **k):
+            raise OSError("no python")
+
+        monkeypatch.setattr(subprocess, "run", boom)
+        assert pip_version("python") is None
+
+    def test_version_str_roundtrip(self):
+        assert version_str(MIN_PIP_VERSION) == "24.3"
+
+
+class TestPipVersionGuard:
+    def test_old_pip_is_rejected(self, monkeypatch):
+        monkeypatch.setattr("kivy_ios.lock.resolver.pip_version", lambda _exe: (24, 2))
+        pr = PipResolver()
+        with pytest.raises(ResolverError, match=r"pip >= 24\.3"):
+            pr.resolve(
+                ["kivy"],
+                python_version="3.15.0",
+                deployment_target="13.0",
+                extra_index_urls=[],
+            )
+
+    def test_unknown_pip_does_not_block(self, monkeypatch):
+        # If pip's version can't be determined we proceed; a truly broken pip
+        # surfaces its own error in _run_report.
+        monkeypatch.setattr("kivy_ios.lock.resolver.pip_version", lambda _exe: None)
+        monkeypatch.setattr(PipResolver, "_run_report", lambda *a, **k: {"install": []})
+        pr = PipResolver()
+        assert (
+            pr.resolve(
+                ["kivy"],
+                python_version="3.15.0",
+                deployment_target="13.0",
+                extra_index_urls=[],
+            )
+            == []
+        )
+
+    def test_modern_pip_proceeds(self, monkeypatch):
+        monkeypatch.setattr("kivy_ios.lock.resolver.pip_version", lambda _exe: (24, 3))
+        monkeypatch.setattr(PipResolver, "_run_report", lambda *a, **k: {"install": []})
+        pr = PipResolver()
+        assert (
+            pr.resolve(
+                ["kivy"],
+                python_version="3.15.0",
+                deployment_target="13.0",
+                extra_index_urls=[],
+            )
+            == []
+        )
 
 
 # ---------------------------------------------------------------------------
