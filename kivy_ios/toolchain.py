@@ -1356,6 +1356,9 @@ def update_pbxproj(filename, pbx_frameworks=None):
 
     project = XcodeProject.load(filename)
 
+    project.add_flags("CLANG_ENABLE_OBJC_ARC", "YES")
+    project.add_flags("CLANG_ENABLE_MODULES", "YES")
+
     group = project.get_or_create_group("Frameworks")
     g_classes = project.get_or_create_group("Classes")
     for framework in pbx_frameworks:
