@@ -115,10 +115,4 @@ CMAltimeter *altimeterManager;
     [altimeterManager stopRelativeAltitudeUpdates];
 }
 
-- (void) dealloc {
-    [self.motionManager release];
-    [queue release];
-    [super dealloc];
-}
-
 @end
