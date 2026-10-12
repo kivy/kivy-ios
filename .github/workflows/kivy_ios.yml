@@ -40,7 +40,13 @@ jobs:
         pip install pytest pytest-cov
     - name: Run pytest with coverage
       run: |
-        pytest tests/tools -v --cov=kivy_ios --cov-report=term-missing --cov-report=xml
+        pytest tests/tools -v --cov --cov-report=term-missing --cov-report=xml
+    - name: Upload Python coverage to Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        file: coverage.xml
+        format: cobertura
+        fail-on-error: false
 
   build_python3_kivy:
     runs-on: ${{ matrix.runs_on }}

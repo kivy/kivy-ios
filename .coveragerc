@@ -1,5 +1,5 @@
 [run]
-source = kivy_ios
+source_pkgs = kivy_ios
 branch = True
 
 [report]
