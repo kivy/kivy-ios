@@ -62,8 +62,7 @@ int main(int argc, char *argv[]) {
         putenv((char *)[tmp_path UTF8String]);
         
         NSLog(@"Initializing python");
-        Py_Initialize();
-        
+
         wchar_t** python_argv = PyMem_RawMalloc(sizeof(wchar_t *) *argc);
         for (int i = 0; i < argc; i++)
             python_argv[i] = Py_DecodeLocale(argv[i], NULL);
@@ -73,6 +72,9 @@ int main(int argc, char *argv[]) {
         
         // 1. Initialize the configuration with isolated or default settings
         PyConfig_InitPythonConfig(&config);
+
+        // Don't interpret the app's launch arguments as Python CLI options
+        config.parse_argv = 0;
         
         // 2. Set the command line arguments safely using the new API
         status = PyConfig_SetArgv(&config, argc, python_argv);
