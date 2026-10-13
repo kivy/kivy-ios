@@ -51,7 +51,7 @@ def run_command(args, logfile, timeout=30, allow_failure=False):
     return process.returncode, output
 
 
-def terminate_app(udid, bundle, logfile, timeout=30):
+def terminate_app(udid, bundle, logfile, timeout=60):
     code, output = run_command(["xcrun", "simctl", "terminate", udid, bundle],
                                logfile, timeout, allow_failure=True)
     require(code == 0 or (code == 3 and any(message in output.lower() for message in (
@@ -84,6 +84,26 @@ def atomic_json(filename, value):
     temporary = filename.with_suffix(filename.suffix + ".tmp")
     temporary.write_text(json.dumps(value, indent=2), encoding="utf-8")
     temporary.replace(filename)
+
+
+def collect_simulator_diagnostics(diagnostics):
+    directory = diagnostics / "simulator-failure"
+    directory.mkdir()
+    commands = [
+        ("processes.log", ["ps", "-axo", "pid,ppid,state,etime,command"]),
+        ("coresimulator.log", ["/usr/bin/log", "show", "--last", "10m", "--style", "compact",
+                               "--predicate", 'process == "CoreSimulatorService" OR '
+                               'subsystem BEGINSWITH "com.apple.CoreSimulator"']),
+        ("devices.log", ["xcrun", "simctl", "list", "devices", "--json"]),
+    ]
+    errors = []
+    for name, command in commands:
+        try:
+            # Even inventory queries can hang when CoreSimulator is unresponsive.
+            run_command(command, directory / name, timeout=15)
+        except Exception as error:
+            errors.append("{}: {}".format(name, error))
+    atomic_json(directory / "collection.json", {"errors": errors})
 
 
 def wait_for_result(filename, request, timeout, diagnostics, clock=time.monotonic, sleep=time.sleep):
@@ -167,7 +187,7 @@ def execute(args):
         run_command(["xcrun", "simctl", "bootstatus", udid, "-b"], diagnostics / "bootstatus.log", timeout=180)
         # A partial installation must also be cleaned up.
         installed = True
-        run_command(["xcrun", "simctl", "install", udid, str(product)], diagnostics / "install.log")
+        run_command(["xcrun", "simctl", "install", udid, str(product)], diagnostics / "install.log", timeout=180)
         _, data_path = run_command(["xcrun", "simctl", "get_app_container", udid, bundle, "data"],
                                    diagnostics / "data-container.log")
         result_dir = Path(data_path.strip()) / "Documents/ci-smoke"
@@ -208,13 +228,17 @@ def execute(args):
 
         if selected:
             udid = selected["udid"]
+            if failed:
+                # Capture the failing state before uninstalling or shutting down.
+                # Diagnostic failures must not replace the original smoke error.
+                best_effort(lambda: collect_simulator_diagnostics(diagnostics))
             if installed:
-                best_effort(lambda: terminate_app(udid, bundle, diagnostics / "cleanup-terminate.log", timeout=5))
+                best_effort(lambda: terminate_app(udid, bundle, diagnostics / "cleanup-terminate.log", timeout=30))
                 best_effort(lambda: run_command(["xcrun", "simctl", "uninstall", udid, bundle],
-                                                diagnostics / "uninstall.log", timeout=5))
+                                                diagnostics / "uninstall.log", timeout=30))
             if owns_boot:
                 best_effort(lambda: run_command(["xcrun", "simctl", "shutdown", udid],
-                                                diagnostics / "shutdown.log", timeout=5))
+                                                diagnostics / "shutdown.log", timeout=30))
         best_effort(lambda: atomic_json(diagnostics / "cleanup.json", {"errors": cleanup_errors}))
         if cleanup_errors:
             print("Cleanup/diagnostics errors: " + repr(cleanup_errors), file=sys.stderr)

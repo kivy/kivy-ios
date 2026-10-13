@@ -26,13 +26,18 @@ Look in `build/ci-startup/diagnostics/` for:
 - `build.log`, Xcode/SDK logs, device inventories and `selected.json`.
 - `ordinary/` and `native-option/`: launch logs, stdout/stderr, requests and results.
 - `error.txt` and `cleanup.json`: the main failure and any cleanup errors.
+- `simulator-failure/`: process state, the last ten minutes of CoreSimulator
+  service logs and a fresh device inventory, captured before cleanup on failure.
+  `collection.json` records errors collecting these best-effort diagnostics.
 
 Native startup can fail before writing JSON; check the case's stderr and launch
 log. Release Kivy logs may be suppressed, so result files determine success.
 Xcode diagnostics are also kept in `build/ci-startup/build.xcresult/`.
 
 Each result wait defaults to 60 seconds. Commands have fixed limits: 30 seconds
-normally, 600 for build, 180 for boot readiness and five for each cleanup command.
+normally (including cleanup), 600 for build, 180 for boot readiness and app
+installation, and 60 for pre-launch termination. Failure diagnostic commands
+have a 15-second limit each so an unresponsive simulator cannot block collection.
 Cleanup removes the app and shuts down only a simulator booted by this run.
 Before rerunning, move/remove your generated `startupsmoke-ios` project and use
 a fresh artifacts directory. CI runs this in one non-venv Apple Silicon lane

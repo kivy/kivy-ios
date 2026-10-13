@@ -1,7 +1,9 @@
 """Simulator startup selection and false-pass protection, without Xcode."""
 import fcntl
 import importlib.util
+import json
 from pathlib import Path
+import plistlib
 import subprocess
 import sys
 import time
@@ -219,6 +221,60 @@ def test_terminate_allows_only_documented_not_running_error(tmp_path, monkeypatc
     monkeypatch.setattr(smoke, "run_command", lambda *args, **kwargs: (1, "simulator unavailable"))
     with pytest.raises(smoke.SmokeError, match="Unexpected simctl terminate"):
         smoke.terminate_app("udid", "bundle", tmp_path / "terminate.log")
+
+
+@pytest.mark.parametrize("operation", ["install", "terminate"])
+def test_simulator_timeout_captures_diagnostics_before_cleanup(tmp_path, monkeypatch, operation):
+    source = tmp_path / "source"
+    source.mkdir()
+    monkeypatch.setattr(smoke, "ROOT", source)
+    monkeypatch.setattr(smoke.platform, "system", lambda: "Darwin")
+    monkeypatch.setattr(smoke.platform, "machine", lambda: "arm64")
+    devices, runtimes = inventories()
+    calls = []
+
+    def fake_command(command, logfile, timeout=30, allow_failure=False):
+        calls.append((command, logfile.name, timeout))
+        logfile.write_text("Command: {!r}\nTimeout: {}s\n".format(command, timeout))
+        if command[0] == "xcodebuild" and "build" in command:
+            derived = Path(command[command.index("-derivedDataPath") + 1])
+            product = derived / "Build/Products/Release-iphonesimulator/startupsmoke.app"
+            product.mkdir(parents=True)
+            with (product / "Info.plist").open("wb") as stream:
+                plistlib.dump({"CFBundleIdentifier": "org.kivy.startupsmoke", "MinimumOSVersion": "15.0"}, stream)
+        if logfile.name == operation + ".log":
+            raise subprocess.TimeoutExpired(command, timeout)
+        if command[0] == "ps":
+            raise subprocess.TimeoutExpired(command, timeout)
+        if command[:4] == ["xcrun", "simctl", "list", "devices"]:
+            return 0, json.dumps(devices)
+        if command[:4] == ["xcrun", "simctl", "list", "runtimes"]:
+            return 0, json.dumps(runtimes)
+        if command[:3] == ["xcrun", "simctl", "get_app_container"]:
+            return 0, str(tmp_path / "container")
+        return 0, ""
+
+    monkeypatch.setattr(smoke, "run_command", fake_command)
+    artifacts = tmp_path / "artifacts"
+    with pytest.raises(subprocess.TimeoutExpired) as error:
+        smoke.execute(SimpleNamespace(artifacts=str(artifacts), result_timeout=60))
+    assert error.value.cmd[2] == operation
+    diagnostics = artifacts / "diagnostics"
+    assert operation in (diagnostics / "error.txt").read_text()
+    collection = json.loads((diagnostics / "simulator-failure/collection.json").read_text())
+    assert len(collection["errors"]) == 1
+    assert "processes.log" in collection["errors"][0]
+    names = [name for _, name, _ in calls]
+    assert names.index("coresimulator.log") < names.index("cleanup-terminate.log")
+    assert names.index("cleanup-terminate.log") < names.index("uninstall.log") < names.index("shutdown.log")
+    assert (diagnostics / "simulator-failure/devices.log").exists()
+    assert json.loads((diagnostics / "cleanup.json").read_text()) == {"errors": []}
+    limits = {name: timeout for _, name, timeout in calls}
+    assert limits["install.log"] == 180
+    if operation == "terminate":
+        assert limits["terminate.log"] == 60
+    assert limits["cleanup-terminate.log"] == limits["uninstall.log"] == limits["shutdown.log"] == 30
+    assert limits["coresimulator.log"] == 15
 
 
 def test_unsupported_host_retains_diagnostics_without_commands(tmp_path, monkeypatch):
