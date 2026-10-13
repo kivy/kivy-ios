@@ -528,13 +528,17 @@ class Recipe:
         if not url:
             return
 
+        interactive = stdout.isatty()
+
         def report_hook(index, blksize, size):
+            nonlocal progress_started
             if size <= 0:
                 progression = '{0} bytes'.format(index * blksize)
             else:
                 progression = '{0:.2f}%'.format(
                         index * blksize * 100. / float(size))
             stdout.write('- Download {}\r'.format(progression))
+            progress_started = True
             stdout.flush()
 
         if cwd:
@@ -548,9 +552,17 @@ class Recipe:
         logger.info('Downloading {0}'.format(url))
         attempts = 0
         while True:
+            progress_started = False
             try:
                 url_opener.addheaders = [('User-agent', 'Wget/1.0')]
-                urllib.request.urlretrieve(url, filename, report_hook)
+                try:
+                    urllib.request.urlretrieve(
+                        url, filename, report_hook if interactive else None)
+                finally:
+                    url_opener.addheaders = url_orig_headers
+                    if progress_started:
+                        stdout.write('\n')
+                        stdout.flush()
             except OSError:
                 attempts += 1
                 if attempts >= 5:
@@ -559,10 +571,9 @@ class Recipe:
                 logger.warning('Download failed. Retrying in 1 second...')
                 time.sleep(1)
                 continue
-            finally:
-                url_opener.addheaders = url_orig_headers
             break
 
+        logger.info('Downloaded {0}'.format(filename))
         return filename
 
     def extract_file(self, filename, cwd):
