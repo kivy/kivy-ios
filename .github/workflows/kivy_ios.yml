@@ -91,7 +91,7 @@ jobs:
         python3 .ci/test_simulator_startup.py --result-timeout 60 --artifacts build/ci-startup
     - name: Upload simulator startup diagnostics
       if: always() && matrix.runs_on == 'macos-latest'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: simulator-startup-${{ matrix.runs_on }}
         path: |
