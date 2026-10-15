@@ -84,6 +84,21 @@ jobs:
     - name: Create & Build test project
       run: |
         .ci/test_project.sh
+    - name: Run Release simulator startup smoke
+      if: matrix.runs_on == 'macos-latest'
+      timeout-minutes: 20
+      run: |
+        python3 .ci/test_simulator_startup.py --result-timeout 60 --artifacts build/ci-startup
+    - name: Upload simulator startup diagnostics
+      if: always() && matrix.runs_on == 'macos-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: simulator-startup-${{ matrix.runs_on }}
+        path: |
+          build/ci-startup/diagnostics/
+          build/ci-startup/build.xcresult/
+        if-no-files-found: ignore
+        retention-days: 7
 
   build_python3_kivy_venv:
     runs-on: ${{ matrix.runs_on }}
