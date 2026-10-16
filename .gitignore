@@ -25,3 +25,4 @@ __pycache__
 .tox
 venv
 *.egg-info
+.idea
