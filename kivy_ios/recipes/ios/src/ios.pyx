@@ -22,6 +22,7 @@ cdef extern from "ios_wrapper.h":
     void load_url_webview(char *url, int x, int y, int width, int height)
     float ios_uiscreen_get_scale()
     int ios_uiscreen_get_dpi()
+    void ios_nslog(char *str)
     padding ios_get_safe_area()
 
 cdef void _send_email_done(char *status, void *data):
@@ -216,6 +217,22 @@ def get_safe_area():
     '''Return the safe area bounds
     '''
     return ios_get_safe_area()
+
+def nslog(message):
+    '''Log a message to the console using NSLog
+
+    :Parameters:
+        `message`: str
+            The message to log
+    '''
+    cdef char *j_message = NULL
+
+    if message is not None:
+        if type(message) is unicode:
+            message = message.encode('UTF-8')
+        j_message = <bytes>message
+
+    ios_nslog(j_message)
 
 
 from pyobjus import autoclass, selector, protocol
