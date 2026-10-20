@@ -206,7 +206,7 @@ def execute(args):
                 atomic_json(case_dir / "request.json", request)
                 run_command(["xcrun", "simctl", "launch", "--stdout=" + str(case_dir / "stdout.log"),
                              "--stderr=" + str(case_dir / "stderr.log"), udid, bundle] + trailing_args,
-                            case_dir / "launch.log")
+                            case_dir / "launch.log", timeout=120)
                 wait_for_result(result_dir / "result.json", request, args.result_timeout, case_dir)
             finally:
                 if (result_dir / "result.json").exists():

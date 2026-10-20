@@ -21,6 +21,7 @@ import shutil
 import fnmatch
 import tempfile
 import time
+import re
 from contextlib import suppress
 from datetime import datetime
 from pprint import pformat
@@ -511,7 +512,8 @@ class Recipe:
         "sources": [],
         "pbx_frameworks": [],
         "pbx_libraries": [],
-        "hostpython_prerequisites": []
+        "hostpython_prerequisites": [],
+        "strip_main": False
     }
 
     def __new__(cls):
@@ -686,8 +688,14 @@ class Recipe:
 
     @property
     def name(self):
+        if hasattr(self, "_name") and self._name:
+            return self._name
         modname = self.__class__.__module__
         return modname.split(".")[-1]
+
+    @name.setter
+    def name(self, value):
+        self._name = value
 
     @property
     def archive_fn(self):
@@ -941,6 +949,65 @@ class Recipe:
             all_libraries.extend(self.libraries)
         return all_libraries
 
+    def strip_main_from_library(self, plat, lib_path):
+        if not exists(lib_path):
+            return
+        if getattr(self, "name", "") == "sdl2":
+            return
+        build_env = self.get_recipe_env(plat)
+        plat_sdk = getattr(plat, "sdk", "iphoneos")
+        nm = build_env.get("NM")
+        if not nm:
+            try:
+                nm = sh.xcrun("-find", "-sdk", plat_sdk, "nm").strip()
+            except Exception:
+                nm = shutil.which("nm") or "nm"
+        ar = build_env.get("AR")
+        if not ar:
+            try:
+                ar = sh.xcrun("-find", "-sdk", plat_sdk, "ar").strip()
+            except Exception:
+                ar = shutil.which("ar") or "ar"
+        ranlib = build_env.get("RANLIB")
+        if not ranlib:
+            try:
+                ranlib = sh.xcrun("-find", "-sdk", plat_sdk, "ranlib").strip()
+            except Exception:
+                ranlib = shutil.which("ranlib") or "ranlib"
+
+        try:
+            out = sh.Command(nm)("-A", lib_path, _err_to_out=True)
+            main_objs = set()
+            main_regex = re.compile(r"\s[Tt]\s_?main\b")
+            for line in out.splitlines():
+                if main_regex.search(line):
+                    match = re.search(r"[\[\(]([^\]\)]+\.o)[\]\)]", line)
+                    if match:
+                        obj_name = basename(match.group(1))
+                    else:
+                        parts = line.split(":")
+                        obj_name = None
+                        for p in parts:
+                            p_clean = p.strip()
+                            if p_clean.endswith(".o"):
+                                obj_name = basename(p_clean)
+                                break
+                    if obj_name and not any(k in obj_name.lower() for k in ("sdl_uikit_main.o", "sdl_main.o")):
+                        main_objs.add(obj_name)
+            if main_objs:
+                logger.info(
+                    "Stripping main-defining objects from {}: {}".format(
+                        basename(lib_path), ", ".join(sorted(main_objs))
+                    )
+                )
+                for obj in sorted(main_objs):
+                    shprint(sh.Command(ar), "d", lib_path, obj)
+                shprint(sh.Command(ranlib), lib_path)
+        except Exception as e:
+            logger.warning(
+                "Failed to check/strip main symbols from {}: {}".format(lib_path, e)
+            )
+
     @cache_execution
     def lipoize_libraries(self):
 
@@ -952,11 +1019,14 @@ class Recipe:
             # (iPhoneOS and iPhoneSimulator are 2 different platforms)
             sdks_args = {}
             for plat in self.platforms_to_build:
+                plat_lib = join(self.get_build_dir(plat), library_fp.format(plat=plat))
+                if getattr(self, "strip_main", False):
+                    self.strip_main_from_library(plat, plat_lib)
                 if plat.sdk not in sdks_args:
                     sdks_args[plat.sdk] = []
                 sdks_args[plat.sdk].extend([
                     "-arch", plat.arch,
-                    join(self.get_build_dir(plat), library_fp.format(plat=plat))
+                    plat_lib
                 ])
 
             for sdk, sdk_args in sdks_args.items():
@@ -1216,6 +1286,473 @@ class CythonRecipe(PythonRecipe):
         shprint(hostpython, "setup.py", "build_ext", "-g",
                 _env=build_env)
         self.biglink()
+
+
+class MesonRecipe(Recipe):
+    """
+    Recipe for projects that use the Meson build system.
+    """
+    hostpython_prerequisites = ["meson", "ninja", "certifi"]
+    skip_python = False
+    site_packages_name = None
+    meson_options = []
+    patches = []
+    strip_main = True
+
+    def prebuild_platform(self, plat):
+        super().prebuild_platform(plat)
+        if self.has_marker("patched"):
+            return
+        for patch in self.patches:
+            self.apply_patch(patch)
+        self.set_marker("patched")
+
+    def get_wrapper_dir(self, plat=None):
+        if hasattr(self, "build_dir") and self.build_dir:
+            base_dir = self.build_dir
+        elif plat and hasattr(self, "name") and hasattr(self.ctx, "build_dir"):
+            key = f"{self.name}.archive_root"
+            if hasattr(self.ctx, "state") and key in self.ctx.state:
+                base_dir = self.get_build_dir(plat)
+            else:
+                base_dir = join(self.ctx.build_dir, self.name, getattr(plat, "name", "unknown"))
+        else:
+            base_dir = tempfile.gettempdir()
+        return join(base_dir, "kivy_ios_wrappers")
+
+    def write_wrapper(self, plat, name, content):
+        wrapper_dir = self.get_wrapper_dir(plat)
+        ensure_dir(wrapper_dir)
+        wrapper_path = join(wrapper_dir, name)
+        with open(wrapper_path, "w") as f:
+            f.write(content)
+        sh.chmod("+x", wrapper_path)
+        return wrapper_path
+
+    def get_python_wrapper(self, plat):
+        """
+        Meson Python introspection runs on the host interpreter, but the
+        target Python cannot be executed directly on the build machine.
+
+        We run host Python with overridden sysconfig data to emulate
+        the target Python environment during Meson introspection.
+        """
+        target_prefix = getattr(self.ctx, "python_prefix", join(self.ctx.dist_dir, "root", "python3"))
+        python_file = join(self.ctx.root_dir, "tools", "meson_python.py")
+
+        python_ver = getattr(self.ctx, "python_ver", "3.11")
+        ver_parts = str(python_ver).split(".")
+        py_major = ver_parts[0] if len(ver_parts) > 0 else "3"
+        py_minor = ver_parts[1] if len(ver_parts) > 1 else "11"
+
+        hostpython = getattr(self.ctx, "hostpython", sys.executable)
+        so_suffix = getattr(self.ctx, "so_suffix", f".cpython-{py_major}{py_minor}-darwin.so")
+        if so_suffix:
+            try:
+                if int(py_major) >= 3 and int(py_minor) >= 8:
+                    so_suffix = so_suffix.replace(f"{py_major}{py_minor}m", f"{py_major}{py_minor}")
+            except Exception:
+                pass
+
+        file_data = f"#!{hostpython}\n"
+        file_data += f"TARGET_PYTHON_PREFIX = '{target_prefix}'\n"
+        file_data += f"PYTHON_MAJOR_VERSION = {py_major}\n"
+        file_data += f"PYTHON_MINOR_VERSION = {py_minor}\n"
+        file_data += "PLATFORM_TAG = 'darwin'\n"
+        file_data += f"PYTHON_SUFFIX = '{so_suffix}'\n"
+
+        if exists(python_file):
+            with open(python_file, "r") as f:
+                file_data += "\n" + f.read()
+
+        return self.write_wrapper(plat, "python", file_data)
+
+    def get_config_wrappers(self, plat, w_type: str):
+        wrapper_name = ""
+        version = ""
+        include_path = ""
+
+        if w_type == "pybind11":
+            wrapper_name = "pybind11-config"
+            include_path = join(self.ctx.dist_dir, "include", "common", "pybind11")
+            version = "2.13.4"
+        elif w_type == "numpy":
+            wrapper_name = "numpy-config"
+            recipe = Recipe.get_recipe("numpy", self.ctx)
+            include_path = join(self.ctx.include_dir, "common", "numpy")
+            version = recipe.version
+        else:
+            raise ValueError(f"Unknown wrapper type: {w_type}")
+
+        content = (
+            f"#!/bin/sh\n"
+            f'if [ "$1" = "--version" ]; then\n'
+            f"    echo '{version}'\n"
+            f"else\n"
+            f"    echo '-I{include_path}'\n"
+            f"fi\n"
+        )
+        return self.write_wrapper(plat, wrapper_name, content)
+
+    def get_meson_cross_options(self, plat):
+        cpu_family = "aarch64" if "arm64" in plat.arch else "x86_64"
+        build_env = self.get_recipe_env(plat)
+        cc = build_env.get("CC", "clang")
+        cxx = build_env.get("CXX", "clang++")
+        ar = build_env.get("AR")
+        if not ar:
+            try:
+                ar = sh.xcrun("-find", "-sdk", plat.sdk, "ar").strip()
+            except Exception:
+                ar = "ar"
+
+        strip = build_env.get("STRIP")
+        if not strip:
+            try:
+                strip = sh.xcrun("-find", "-sdk", plat.sdk, "strip").strip()
+            except Exception:
+                strip = "strip"
+
+        options = {
+            "binaries": {
+                "c": cc,
+                "cpp": cxx,
+                "ar": ar,
+                "strip": strip,
+            },
+            "properties": {
+                "needs_exe_wrapper": True,
+            },
+            "host_machine": {
+                "system": "darwin",
+                "cpu_family": cpu_family,
+                "cpu": plat.arch,
+                "endian": "little",
+            }
+        }
+        if not self.skip_python:
+            options["binaries"]["python"] = self.get_python_wrapper(plat)
+        elif hasattr(self.ctx, "hostpython") and self.ctx.hostpython:
+            options["binaries"]["python"] = self.ctx.hostpython
+
+        return options
+
+    def generate_crossfile(self, plat):
+        cross_options = self.get_meson_cross_options(plat)
+        lines = []
+        for section, section_dict in cross_options.items():
+            lines.append(f"[{section}]")
+            for key, val in section_dict.items():
+                if isinstance(val, bool):
+                    val_str = "true" if val else "false"
+                elif isinstance(val, (int, float)):
+                    val_str = str(val)
+                elif isinstance(val, list):
+                    val_str = "[" + ", ".join(f"'{x}'" for x in val) + "]"
+                elif isinstance(val, str):
+                    val_str = f"'{val}'"
+                else:
+                    val_str = repr(val)
+                lines.append(f"{key} = {val_str}")
+            lines.append("")
+        content = "\n".join(lines)
+        cross_file = join(self.build_dir, f"ios-{plat.arch}.cross")
+        with open(cross_file, "w") as f:
+            f.write(content)
+        return cross_file
+
+    def get_ca_bundle_path(self):
+        # 1. Existing environment variable
+        if "SSL_CERT_FILE" in environ and exists(environ["SSL_CERT_FILE"]):
+            return environ["SSL_CERT_FILE"]
+
+        # 2. Check certifi in hostpython if available
+        if hasattr(self.ctx, "hostpython") and self.ctx.hostpython and exists(self.ctx.hostpython):
+            try:
+                res = sh.Command(self.ctx.hostpython)("-c", "import certifi; print(certifi.where())").strip()
+                if exists(res):
+                    return res
+            except Exception:
+                pass
+            try:
+                res = sh.Command(self.ctx.hostpython)("-c", "import pip._vendor.certifi as c; print(c.where())").strip()
+                if exists(res):
+                    return res
+            except Exception:
+                pass
+
+        # 3. Check certifi in current python environment
+        try:
+            import certifi
+            c_path = certifi.where()
+            if exists(c_path):
+                return c_path
+        except Exception:
+            pass
+        try:
+            import pip._vendor.certifi as c
+            c_path = c.where()
+            if exists(c_path):
+                return c_path
+        except Exception:
+            pass
+
+        # 4. Standard system locations
+        candidates = [
+            "/etc/ssl/cert.pem",                          # macOS standard
+            "/opt/homebrew/etc/ca-certificates/cert.pem",  # macOS Homebrew (Apple Silicon)
+            "/usr/local/etc/ca-certificates/cert.pem",     # macOS Homebrew (Intel)
+            "/etc/ssl/certs/ca-certificates.crt",          # Debian / Ubuntu
+            "/etc/pki/tls/certs/ca-bundle.crt",            # Fedora / RHEL
+        ]
+        for candidate in candidates:
+            if exists(candidate):
+                return candidate
+        return None
+
+    def setup_ssl_certificates(self, env):
+        ca_bundle = self.get_ca_bundle_path()
+        if not ca_bundle:
+            return
+
+        env["SSL_CERT_FILE"] = ca_bundle
+        env["SSL_CERT_DIR"] = dirname(ca_bundle)
+
+        if hasattr(self.ctx, "dist_dir") and self.ctx.dist_dir:
+            try:
+                hostopenssl_ssl = join(self.ctx.dist_dir, "hostopenssl", "ssl")
+                ensure_dir(hostopenssl_ssl)
+                cert_target = join(hostopenssl_ssl, "cert.pem")
+                if not exists(cert_target):
+                    shutil.copy2(ca_bundle, cert_target)
+                root_cert = join(self.ctx.dist_dir, "hostopenssl", "cert.pem")
+                if not exists(root_cert):
+                    shutil.copy2(ca_bundle, root_cert)
+            except Exception:
+                pass
+
+    def get_recipe_env(self, plat=None):
+        env = super().get_recipe_env(plat)
+        paths = []
+        if plat:
+            try:
+                paths.append(self.get_wrapper_dir(plat))
+            except Exception:
+                pass
+        if hasattr(self.ctx, "hostpython") and self.ctx.hostpython:
+            paths.append(dirname(self.ctx.hostpython))
+        elif hasattr(self.ctx, "dist_dir") and self.ctx.dist_dir:
+            paths.append(join(self.ctx.dist_dir, "hostpython3", "bin"))
+        if "PATH" in env:
+            paths.append(env["PATH"])
+        elif "PATH" in environ:
+            paths.append(environ["PATH"])
+        env["PATH"] = ":".join(p for p in paths if p)
+
+        self.setup_ssl_certificates(env)
+        return env
+
+    def get_meson_command(self):
+        if hasattr(self.ctx, "hostpython") and self.ctx.hostpython:
+            host_bin = dirname(self.ctx.hostpython)
+            meson_bin = join(host_bin, "meson")
+            if exists(meson_bin):
+                if exists(self.ctx.hostpython):
+                    return [sh.Command(self.ctx.hostpython), meson_bin]
+                return [sh.Command(meson_bin)]
+
+        if hasattr(self.ctx, "dist_dir") and self.ctx.dist_dir:
+            dist_meson = join(self.ctx.dist_dir, "hostpython3", "bin", "meson")
+            if exists(dist_meson):
+                if hasattr(self.ctx, "hostpython") and self.ctx.hostpython and exists(self.ctx.hostpython):
+                    return [sh.Command(self.ctx.hostpython), dist_meson]
+                return [sh.Command(dist_meson)]
+
+        if hasattr(self.ctx, "hostpython") and self.ctx.hostpython and exists(self.ctx.hostpython):
+            try:
+                sh.Command(self.ctx.hostpython)("-c", "import mesonbuild.mesonmain")
+                return [sh.Command(self.ctx.hostpython), "-m", "mesonbuild.mesonmain"]
+            except Exception:
+                pass
+
+        meson_which = shutil.which("meson")
+        if meson_which:
+            return [sh.Command(meson_which)]
+
+        if hasattr(self.ctx, "hostpython") and self.ctx.hostpython and exists(self.ctx.hostpython):
+            return [sh.Command(self.ctx.hostpython), "-m", "mesonbuild.mesonmain"]
+
+        return [sh.meson]
+
+    def get_ninja_command(self):
+        if hasattr(self.ctx, "hostpython") and self.ctx.hostpython:
+            host_bin = dirname(self.ctx.hostpython)
+            ninja_bin = join(host_bin, "ninja")
+            if exists(ninja_bin):
+                return [sh.Command(ninja_bin)]
+
+        if hasattr(self.ctx, "dist_dir") and self.ctx.dist_dir:
+            dist_ninja = join(self.ctx.dist_dir, "hostpython3", "bin", "ninja")
+            if exists(dist_ninja):
+                return [sh.Command(dist_ninja)]
+
+        ninja_which = shutil.which("ninja")
+        if ninja_which:
+            return [sh.Command(ninja_which)]
+
+        if hasattr(self.ctx, "hostpython") and self.ctx.hostpython and exists(self.ctx.hostpython):
+            return [sh.Command(self.ctx.hostpython), "-m", "ninja"]
+
+        return [sh.ninja]
+
+    def get_recipe_meson_options(self, plat):
+        return list(self.meson_options)
+
+    def build_platform(self, plat):
+        build_env = self.get_recipe_env(plat)
+        cross_file = self.generate_crossfile(plat)
+        install_dir = join(self.build_dir, "builddir", "install")
+        meson_options = self.get_recipe_meson_options(plat)
+
+        meson_cmd = self.get_meson_command()
+        ninja_cmd = self.get_ninja_command()
+
+        builddir = join(self.build_dir, "builddir")
+        shutil.rmtree(builddir, ignore_errors=True)
+
+        shprint(
+            *meson_cmd,
+            "setup",
+            "builddir",
+            f"--cross-file={cross_file}",
+            f"--prefix={install_dir}",
+            "--default-library=static",
+            *meson_options,
+            _env=build_env,
+        )
+
+        shprint(*ninja_cmd, "-C", "builddir", _env=build_env)
+
+        # macOS fix: sometimes Ninja creates a dummy 'lib' file instead of a directory.
+        # Remove and recreate the install directory before installing.
+        shprint(sh.rm, "-rf", install_dir)
+        shprint(sh.mkdir, "-p", install_dir)
+        shprint(*ninja_cmd, "-C", "builddir", "install", _env=build_env)
+
+        # If static library specified, ensure it exists.
+        # For Python extensions, pack compiled object files into a static library.
+        if self.library:
+            ignored_dirs = {
+                "test", "tests", "perf", "benchmark", "benchmarks",
+                "demo", "demos", "sample", "samples", "example", "examples",
+            }
+            ignored_file_suffixes = (
+                "-test.o", "-bench.o", "-demo.o", "-sample.o",
+                "-test.c.o", "-bench.c.o", "-demo.c.o",
+            )
+            expected_lib = join(self.build_dir, self.library.format(plat=plat))
+            if not exists(expected_lib):
+                obj_files = []
+                for root, _, files in walk(builddir):
+                    if root.startswith(install_dir):
+                        continue
+                    parts = set(root.replace("\\", "/").lower().split("/"))
+                    if parts & ignored_dirs:
+                        continue
+                    for f in files:
+                        if f.endswith(".o") and not f.endswith(".so.o"):
+                            if any(f.lower().endswith(s) for s in ignored_file_suffixes):
+                                continue
+                            obj_files.append(join(root, f))
+                if obj_files:
+                    ensure_dir(dirname(expected_lib))
+                    ar = build_env.get("AR")
+                    if not ar:
+                        try:
+                            ar = sh.xcrun("-find", "-sdk", plat.sdk, "ar").strip()
+                        except Exception:
+                            ar = "ar"
+                    shprint(sh.Command(ar), "-rcs", expected_lib, *obj_files)
+            else:
+                # If subprojects were built (e.g. pixman wrap), merge their object files into the library
+                sub_objs = []
+                for root, _, files in walk(join(builddir, "subprojects")):
+                    if root.startswith(install_dir):
+                        continue
+                    parts = set(root.replace("\\", "/").lower().split("/"))
+                    if parts & ignored_dirs:
+                        continue
+                    for f in files:
+                        if f.endswith(".o") and not f.endswith(".so.o"):
+                            if any(f.lower().endswith(s) for s in ignored_file_suffixes):
+                                continue
+                            sub_objs.append(join(root, f))
+                if sub_objs:
+                    ar = build_env.get("AR")
+                    if not ar:
+                        try:
+                            ar = sh.xcrun("-find", "-sdk", plat.sdk, "ar").strip()
+                        except Exception:
+                            ar = "ar"
+                    shprint(sh.Command(ar), "-rcs", expected_lib, *sub_objs)
+
+            self.strip_main_from_library(plat, expected_lib)
+
+    @cache_execution
+    def install(self):
+        if self.skip_python:
+            return
+
+        plat = list(self.platforms_to_build)[0]
+        build_dir = self.get_build_dir(plat)
+        install_dir = join(build_dir, "builddir", "install")
+
+        # Find site-packages directory inside install_dir
+        src_site_packages = None
+        for root, dirs, _ in walk(install_dir):
+            if basename(root) == "site-packages":
+                src_site_packages = root
+                break
+
+        if src_site_packages and exists(src_site_packages):
+            logger.info(f"Installing Python packages from {src_site_packages} to {self.ctx.site_packages_dir}")
+            ensure_dir(self.ctx.site_packages_dir)
+            for item in listdir(src_site_packages):
+                s = join(src_site_packages, item)
+                d = join(self.ctx.site_packages_dir, item)
+                if isdir(s):
+                    shutil.rmtree(d, ignore_errors=True)
+                    shutil.copytree(s, d)
+                else:
+                    shutil.copy2(s, d)
+
+            # Ensure extensions do not have the obsolete 'm' suffix (e.g. .cpython-311m-darwin.so -> .cpython-311-darwin.so)
+            python_ver = getattr(self.ctx, "python_ver", "3.11")
+            ver_parts = str(python_ver).split(".")
+            py_maj = ver_parts[0] if len(ver_parts) > 0 else "3"
+            py_min = ver_parts[1] if len(ver_parts) > 1 else "11"
+            try:
+                if int(py_maj) >= 3 and int(py_min) >= 8:
+                    m_suffix = f"{py_maj}{py_min}m-darwin.so"
+                    clean_suffix = f"{py_maj}{py_min}-darwin.so"
+                    for root, _, files in walk(self.ctx.site_packages_dir):
+                        for f in files:
+                            if f.endswith(m_suffix):
+                                old_path = join(root, f)
+                                new_name = f.replace(m_suffix, clean_suffix)
+                                new_path = join(root, new_name)
+                                logger.info(f"Normalizing extension suffix: {f} -> {new_name}")
+                                shutil.move(old_path, new_path)
+            except Exception as e:
+                logger.warning(f"Failed to normalize extension suffixes in site-packages: {e}")
+        else:
+            logger.warning(f"Could not find site-packages in {install_dir}")
+
+        self.reduce_python_package()
+        remove_junk(self.ctx.site_packages_dir)
+
+    def reduce_python_package(self):
+        pass
 
 
 def build_recipes(names, ctx):
@@ -1551,6 +2088,45 @@ pip           Install a pip dependency into the distribution
             if exists(recipe_inst.archive_fn):
                 unlink(recipe_inst.archive_fn)
 
+        def clean_dist(recipe, ctx):
+            """ Remove installed artifacts (lib, xcframework, include) for this recipe. """
+            try:
+                recipe_inst = Recipe.get_recipe(recipe, ctx)
+                recipe_inst.ctx = ctx
+            except Exception:
+                return
+
+            libraries = recipe_inst.libraries or ([recipe_inst.library] if recipe_inst.library else [])
+            for lib_fp in libraries:
+                library_fn = basename(lib_fp)
+                library_name = library_fn.split(".a")[0]
+                for sdk in ("iphoneos", "iphonesimulator"):
+                    static_fn = join(ctx.dist_dir, "lib", sdk, library_fn)
+                    if exists(static_fn):
+                        unlink(static_fn)
+                xcframework_fn = join(ctx.dist_dir, "xcframework", f"{library_name}.xcframework")
+                shutil.rmtree(xcframework_fn, ignore_errors=True)
+
+            include_name = recipe_inst.include_name or recipe_inst.name
+            if exists(ctx.include_dir):
+                for entry in listdir(ctx.include_dir):
+                    inc_dir = join(ctx.include_dir, entry, include_name)
+                    shutil.rmtree(inc_dir, ignore_errors=True)
+
+            sources_dir = join(ctx.dist_dir, "sources", recipe_inst.name)
+            shutil.rmtree(sources_dir, ignore_errors=True)
+
+            if getattr(recipe_inst, "site_packages_name", None):
+                sp_name = recipe_inst.site_packages_name
+                py_ver = getattr(ctx, "python_ver", "3.11")
+                site_packages = join(ctx.dist_dir, "root", "python3", "lib", f"python{py_ver}", "site-packages")
+                sp_target = join(site_packages, sp_name)
+                shutil.rmtree(sp_target, ignore_errors=True)
+                if exists(sp_target + ".py"):
+                    unlink(sp_target + ".py")
+                if exists(sp_target + ".so"):
+                    unlink(sp_target + ".so")
+
         ctx = Context()
         parser = argparse.ArgumentParser(
                 description="Clean the build")
@@ -1568,6 +2144,7 @@ pip           Install a pip dependency into the distribution
                 build_dir = join(ctx.build_dir, recipe)
                 shutil.rmtree(build_dir, ignore_errors=True)
                 clean_cache(recipe, ctx)
+                clean_dist(recipe, ctx)
         else:
             logger.info("Delete build directory")
             shutil.rmtree(ctx.build_dir, ignore_errors=True)
