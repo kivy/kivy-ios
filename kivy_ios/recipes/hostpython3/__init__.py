@@ -20,7 +20,7 @@ class Hostpython3Recipe(HostRecipe):
     def init_with_ctx(self, ctx):
         super().init_with_ctx(ctx)
         self.set_hostpython(self, "3.11")
-        self.ctx.so_suffix = ".cpython-311m-darwin.so"
+        self.ctx.so_suffix = ".cpython-311-darwin.so"
         self.ctx.hostpython = join(self.ctx.dist_dir, "hostpython3", "bin", "python")
         self.ctx.hostpgen = join(self.ctx.dist_dir, "hostpython3", "bin", "pgen")
         logger.info("Global: hostpython located at {}".format(self.ctx.hostpython))

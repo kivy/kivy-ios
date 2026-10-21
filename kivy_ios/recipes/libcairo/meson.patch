@@ -1,0 +1,71 @@
+diff -uNr cairo-1.18.4/boilerplate/cairo-boilerplate.c cairo-1.18.4.mod/boilerplate/cairo-boilerplate.c
+--- cairo-1.18.4/boilerplate/cairo-boilerplate.c	2025-03-08 18:53:25.000000000 +0530
++++ cairo-1.18.4.mod/boilerplate/cairo-boilerplate.c	2026-10-20 15:43:13.646453393 +0530
+@@ -914,8 +914,10 @@
+ 	goto POPEN;
+ 
+     if (! any2ppm_daemon_exists ()) {
++#if !defined(__APPLE__) || !defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE
+ 	if (system (any2ppm) != 0)
+ 	    goto POPEN;
++#endif
+     }
+ 
+     sk = socket (PF_UNIX, SOCK_STREAM, 0);
+diff -uNr cairo-1.18.4/meson.build cairo-1.18.4.mod/meson.build
+--- cairo-1.18.4/meson.build	2025-03-08 18:53:25.000000000 +0530
++++ cairo-1.18.4.mod/meson.build	2026-10-20 15:43:13.646071246 +0530
+@@ -235,10 +235,11 @@
+   conf.set('HAVE_ZLIB', 1)
+ endif
+ 
+-png_dep = dependency('libpng',
+-  required: get_option('png'),
+-  version: libpng_required_version,
+-  fallback: ['libpng', 'libpng_dep']
++png_inc = include_directories(get_option('png_include_dir'))
++png_lib = cc.find_library('png16', dirs: [get_option('png_lib_dir')], required: true)
++png_dep = declare_dependency(
++  include_directories: png_inc,
++  dependencies: [png_lib]
+ )
+ if png_dep.found()
+   feature_conf.set('CAIRO_HAS_SVG_SURFACE', 1)
+@@ -599,7 +600,7 @@
+ endif
+ 
+ if feature_conf.get('CAIRO_HAS_PS_SURFACE', 0) == 1
+-  gs = find_program('gs', required: get_option('tests'))
++  gs = find_program('gs', required: get_option('tests').allowed())
+   libspectre_dep = dependency('libspectre', version: '>= 0.2.0',
+                               required: get_option('spectre'))
+   if gs.found() and libspectre_dep.found()
+@@ -788,7 +789,7 @@
+ 
+ subdir('src')
+ 
+-if feature_conf.get('CAIRO_HAS_PNG_FUNCTIONS', 0) == 1
++if get_option('tests').allowed() and feature_conf.get('CAIRO_HAS_PNG_FUNCTIONS', 0) == 1
+   subdir('boilerplate')
+ else
+   cairoboilerplate_dep = dependency('', required: false)
+@@ -796,7 +797,7 @@
+ 
+ subdir('util')
+ 
+-if not get_option('tests').disabled() and feature_conf.get('CAIRO_HAS_PNG_FUNCTIONS', 0) == 1
++if get_option('tests').allowed() and feature_conf.get('CAIRO_HAS_PNG_FUNCTIONS', 0) == 1
+   subdir('test')
+   subdir('perf')
+ endif
+diff -uNr cairo-1.18.4/meson.options cairo-1.18.4.mod/meson.options
+--- cairo-1.18.4/meson.options	2025-03-08 18:53:25.000000000 +0530
++++ cairo-1.18.4.mod/meson.options	2026-10-20 15:43:13.646071246 +0530
+@@ -28,3 +28,7 @@
+ # Documentation
+ option('gtk_doc', type : 'boolean', value : false,
+        description: 'Build the Cairo API reference (depends on gtk-doc)')
++
++# Deps
++option('png_include_dir', type: 'string', value: '', description: 'Path to PNG headers')
++option('png_lib_dir', type: 'string', value: '', description: 'Path to PNG library')

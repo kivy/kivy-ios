@@ -19,6 +19,7 @@ class Python3Recipe(Recipe):
         super().init_with_ctx(ctx)
         self.set_python(self, "3.11")
         ctx.python_ver_dir = "python3.11"
+        ctx.so_suffix = ".cpython-311-darwin.so"
         ctx.python_prefix = join(ctx.dist_dir, "root", "python3")
         ctx.site_packages_dir = join(
             ctx.python_prefix, "lib", ctx.python_ver_dir, "site-packages")
